@@ -1,38 +1,142 @@
 .App {
-  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 100px 100px 40px 30px 700px;
+  grid-gap: 5px;
+  position: relative;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.alignment_box {
+  position:relative;
+  grid-column-start: 2;
+  grid-column-end: 4;
+  grid-row-start: 5;
+  grid-row-end: 5;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.ace_content{
+cursor: auto;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.position_box {
+  position:relative;
+  grid-column-start: 2;
+  grid-column-end: 4;
+  grid-row-start: 4;
+  grid-row-end: 4;
 }
 
-.App-link {
-  color: #61dafb;
+.conservation_box {
+  position:relative;
+  grid-column-start: 2;
+  grid-column-end: 4;
+  grid-row-start: 1;
+  grid-row-end: 1;
+  border:solid yellow 1px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.logo_box {
+  position:relative;
+  grid-column-start: 2;
+  grid-column-end: 4;
+  grid-row-start: 2;
+  grid-row-end: 2;
+  border:solid blue 1px;
 }
+
+.queryseq_box {
+  position:relative;
+  grid-column-start: 2;
+  grid-column-end: 4;
+  grid-row-start: 3;
+  grid-row-end: 3;
+}
+
+.datatable_box {
+  position:relative;
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 5;
+  grid-row-end: 5;
+  border:solid green 1px;
+  overflow: scroll;
+}
+.alignment_box #ace-alignment{
+  position: absolute;
+  top:0px;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  visibility:hidden;
+  border-color:gray; 
+  border-style: solid;
+  border-width: 1px;
+  z-index:10;
+}
+.queryseq_box #ace-queryseq { 
+  position: absolute;
+  top:0px;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  font-family:Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+    font-size:12px;
+    height:40px;
+    line-height:40px;
+    padding-left:3px;
+    overflow: scroll;
+    overflow-x:hidden;
+}
+
+.position_box #ace-positions { 
+  position: absolute;
+  top:0px;
+  left:0px;
+  right:0px;
+  bottom:0px;
+  font-family:Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+    font-size:12px;
+    height:30px;
+    line-height:30px;
+    padding-left:3px;
+    overflow: scroll;
+    overflow-x:hidden;
+    border-bottom: 1px solid red;
+    border-top: 1px solid red;
+}
+
+#msa_image{
+  position: absolute;
+  width: 100%;
+  left: 0;
+}
+
+#column_mouseover{
+position:absolute;
+display:none;
+pointer-events: none;
+height:1000px;
+z-index:1000;
+border:solid 2px purple;
+}
+
+.ace_Alanine       {color: #33cc00}
+.ace_Arginine      {color: #cc0000}
+.ace_Asparagine    {color: #6600cc}
+.ace_AsparticAcid  {color: #0033ff}
+.ace_Cysteine      {color: #ffff00}
+.ace_Glutamine     {color: #6600cc}
+.ace_GlutamicAcid  {color: #0033ff}
+.ace_Glycine       {color: #33cc00}
+.ace_Histidine     {color: #009900}
+.ace_Isoleucine    {color: #33cc00}
+.ace_Leucine       {color: #33cc00}
+.ace_Lysine        {color: #cc0000}
+.ace_Methionine    {color: #33cc00}
+.ace_Phenylalanine {color: #009900}
+.ace_Proline       {color: #33cc00}
+.ace_Serine        {color: #0099ff}
+.ace_Threonine     {color: #0099ff}
+.ace_Tryptophan    {color: #009900}
+.ace_Tyrosine      {color: #009900}
+.ace_Valine        {color: #33cc00}

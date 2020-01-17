@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "AlignmentViewer2.0",
+  "name": "AlignmentViewer2.0 - a client side multiple sequence alignment viewer",
   "icons": [
     {
       "src": "favicon.ico",
