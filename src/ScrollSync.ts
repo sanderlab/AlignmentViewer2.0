@@ -1,7 +1,7 @@
 import { Ace } from "ace-builds";
 
 /** 
- * AV2ScrollSync.js
+ * ScrollSync.ts
  * This helper is used to synchronize the different ace and div
  * scrolling.
  * 
@@ -50,7 +50,6 @@ export default class ScrollSync {
      */
     _getMaxScrollWidth(scroller: HTMLElement | Ace.Editor): number{
         if ('renderer' in scroller){ //scroller is an ace editor
-            //console.log('size:', scroller.renderer)
             return scroller.renderer.$getLongestLine() + (2 * scroller.renderer.$padding) - scroller.renderer.$size.scrollerWidth;
         }
         return -1;
@@ -59,6 +58,7 @@ export default class ScrollSync {
     /**
      * 
      * @param scroller 
+     * @param groupName 
      * @param newScrollLeft 
      */
     _handleHorizontalScrollEvent(scroller: HTMLElement | Ace.Editor, groupName: string, newScrollLeft: number){
@@ -70,7 +70,7 @@ export default class ScrollSync {
         else{ //the node being scrolled is an HTMLElement
             scrollerFractionScrolled = newScrollLeft / (scroller.scrollWidth - scroller.offsetWidth);
         }
-        console.log('FRACTION SCROLLED:', scrollerFractionScrolled +' (which equals: ' + newScrollLeft + 'px), max=' + this._getMaxScrollWidth(scroller));
+        //console.log('FRACTION SCROLLED:', scrollerFractionScrolled +' (which equals: ' + newScrollLeft + 'px), max=' + this._getMaxScrollWidth(scroller));
 
         //update other nodes in the group
         const group = this._groupScrollpropsHM[groupName];
@@ -123,7 +123,7 @@ export default class ScrollSync {
      * @param groupName 
      */
     registerScroller(scroller: HTMLElement | Ace.Editor, groupName: string){
-        console.log('registerScroller');
+        //console.log('registerScroller');
         const group = this._groupScrollpropsHM[groupName];
         if (!group){
             console.error(`Error: attempt to register scroll sync on unknown group "{groupName}"
@@ -131,7 +131,6 @@ export default class ScrollSync {
             return;
         }
         group.scrollers.push(scroller);
-
 
         if ('renderer' in scroller){ //the scroller is an ace editor
             if (group.scrolltype === ScrollType.both || ScrollType.horizontal){

@@ -35,6 +35,30 @@ cursor: auto;
   grid-row-end: 1;
   /*border:solid yellow 1px;*/
 }
+.conservation_box #sequence_conservation{
+  position: absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  overflow-x: scroll;
+}
+.conservation_box #sequence_conservation .svg_container{
+  position: absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+}
+
+
+svg.conservation .gapCount rect{
+  fill: #B7B7B7;
+}
+svg.conservation .entropy rect{
+  fill: #000000;
+}
+
 
 .logo_box {
   position:relative;
@@ -122,12 +146,12 @@ cursor: auto;
 }
 
 #column_mouseover{
-position:absolute;
-display:none;
-pointer-events: none;
-height:1000px;
-z-index:1000;
-border:solid 2px purple;
+  position:absolute;
+  display:none;
+  pointer-events: none;
+  height:1000px;
+  z-index:1000;
+  border:solid 2px purple;
 }
 
 .ace_Alanine       {color: #33cc00; fill: #33cc00;}

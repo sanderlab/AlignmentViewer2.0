@@ -2,12 +2,12 @@ import React from "react";
 import "./AceAlignmentMode";
 import "./App.css";
 import ace, { Ace } from "ace-builds";
-import { Sequence, AceEditorTypes } from "./App";
+import { AceEditorTypes } from "./App";
+import Alignment from "./Alignment";
 
 export interface IAceEditorComponentProps {
   editorLoaded(editor: Ace.Editor): void;
-  targetSequence: Sequence;
-  alignment: Sequence[];
+  alignment: Alignment;
   readonly id: string;
   readonly type: AceEditorTypes;
 }
@@ -15,7 +15,6 @@ export interface IAceEditorComponentProps {
 export class AceEditorComponent extends React.Component<IAceEditorComponentProps> {
 
   private editor?: Ace.Editor;
-
 
   /**
    * Generate a string axis (positional information) with one character per position
@@ -46,8 +45,7 @@ export class AceEditorComponent extends React.Component<IAceEditorComponentProps
   //
   //setup ace editors
   //
-  prepAceEditor(el: null | HTMLElement) {
-    if (el === null){ return; }
+  prepAceEditor(el: HTMLElement) {
     this.editor = ace.edit(el);
     this.editor.setShowPrintMargin(false);
     this.editor.setReadOnly(true);
@@ -61,8 +59,6 @@ export class AceEditorComponent extends React.Component<IAceEditorComponentProps
       this.editor.session.setMode("ace/mode/alignment");
     }
     this.editor.renderer.$cursorLayer.element.style.display = "none";
-
-
 
     //
     // column highlighter
@@ -90,15 +86,14 @@ export class AceEditorComponent extends React.Component<IAceEditorComponentProps
     // insert data
     //
     if (this.props.type === AceEditorTypes.query) {
-      this.editor.insert(this.props.targetSequence.sequence);
+      this.editor.insert(this.props.alignment.getTargetSequence().sequence);
     } else if (this.props.type === AceEditorTypes.alignment) {
-      this.editor.insert(this.props.alignment.map(x => x.sequence).join("\n"));
+      this.editor.insert(this.props.alignment.getSequences().map(x => x.sequence).join("\n"));
     } else if (this.props.type === AceEditorTypes.position) {
-      const maxSequenceLength = [this.props.targetSequence].concat(this.props.alignment).reduce((acc, current) =>{
-        if (current.sequence.length>acc) { acc = current.sequence.length; }
+      const maxSequenceLength = this.props.alignment.getSequences().reduce((acc, seq) =>{
+        if (seq.sequence.length>acc) { acc = seq.sequence.length; }
         return acc;
       }, -1);
-      
       this.editor.insert(this._generatePositionRuler(maxSequenceLength));
     } else {
       this.editor.insert("invalid type passed to AceEditorComponent");
@@ -108,15 +103,22 @@ export class AceEditorComponent extends React.Component<IAceEditorComponentProps
     this.props.editorLoaded(this.editor);
   }
 
+  divLoaded(e: HTMLDivElement | null){
+    if(e && !this.editor){ //only run if editor not loaded
+      this.prepAceEditor(e);
+    }
+  }
+
+  componentWillUnmount(){
+    //TODO: notify parent of unloading and release editor
+
+  }
+
   render() {
     return (
       <div
         id={this.props.id}
-        ref={el => {
-          if (!this.editor) {
-            this.prepAceEditor(el);
-          }
-        }}
+        ref={e => this.divLoaded(e)}
       ></div>
     );
   }

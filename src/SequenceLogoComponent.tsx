@@ -1,11 +1,10 @@
 import React from "react";
 import "./App.css";
 import { T, RawLogo, loadGlyphComponents } from "logojs-react";
-import { Sequence } from "./App";
+import Alignment from "./Alignment";
 
 export interface ISequenceLogoComponentProps {
-  alignment: Sequence[];
-  targetSequence: Sequence;
+  alignment: Alignment;
   characterWidth: number;
 
   logoLoaded(node: HTMLDivElement): void;
@@ -46,67 +45,35 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoComponen
   }
 
   render() {
-    if (!this.props.targetSequence || !this.props.alignment || !this.props.characterWidth){
+    if (!this.props.alignment || !this.props.characterWidth){
       return null;
     }
 
-    const start = new Date();
-    const allLetters: {[key:string]:number} = {};
-    const positionLetterFrequencies: {[key: number]: {[key:string]: number}} = {};
+    const positionalLetterCounts = this.props.alignment.getPositionalLetterCounts();
+    const lettersSorted = this.props.alignment.getSortedAlphaLetters();
+    console.log('positionalLetterCounts', positionalLetterCounts);
+    console.log('lettersSorted:', lettersSorted);
 
-    for (var i=-1; i < this.props.alignment.length; i++){
-      const seq = i === -1 ? this.props.targetSequence : this.props.alignment[i];
-      for (var j=0; j < seq.sequence.length; j++){
-        const aa = seq.sequence[j].toUpperCase();
-        allLetters[aa] = 1;
-
-        if (j in positionLetterFrequencies === false){
-          positionLetterFrequencies[j] = {};
-        }
-        if (aa in positionLetterFrequencies[j] === false){
-          positionLetterFrequencies[j][aa] = 0;
-        }
-        positionLetterFrequencies[j][aa]+=1;
-      }
-    };
-    console.log('done parsing alignment in '+(new Date().getTime() - start.getTime())+'ms');
-    
-    //for all positions, calculate array of frequencies for each letter
-    var positionsSorted = Object.keys(positionLetterFrequencies)
-                                .map(Number)
-                                .sort((a, b) => { return a-b; });
-
-    const lettersSorted = Object.keys(allLetters)
-                                .sort()
-                                .reduce((arr: string[], value: string) =>{
-                                  if(value.match(/[a-z]/i)){ // only keep letters
-                                    arr.push(value);
-                                  }
-                                  return arr;
-                                }, []);
-
+    //calculate the frequencies of all letters in each column
     const frequencies: (number[])[] = [];
-
-    for (var i=0; i < positionsSorted.length; i++){
-      const position = positionsSorted[i];
-      const letterFrequencies = positionLetterFrequencies[position];
-      const totalCount = Object.keys(letterFrequencies).reduce((total, letter)=>{
-        total += letterFrequencies[letter];
+    positionalLetterCounts.forEach((letterCounts, position) => {
+      const totalCount = Object.keys(letterCounts).reduce((total, letter)=>{
+        total += letterCounts[letter];
         return total;
       }, 0);
 
-      const positionalFrequencies: number[] = [];
-      for (var j=0; j < lettersSorted.length; j++){
-        const letter = lettersSorted[j];
-        var freqToAdd = 0;
-        if (letter in letterFrequencies){
-          freqToAdd = letterFrequencies[letter] / totalCount;
+      const positionalFrequencies: number[] = lettersSorted.map((letter) => {
+        let freq = 0;
+        if (letter in letterCounts){
+          freq = letterCounts[letter] / totalCount;
         }
-        positionalFrequencies.push(freqToAdd);
-      }
+        return freq;
+      });
+
       frequencies.push(positionalFrequencies);
-    }
-    
+    });
+
+
     var alphabet = lettersSorted.map((letter) => {
       return {'regex': letter, 'className': this._getClassName(letter)}
     });
