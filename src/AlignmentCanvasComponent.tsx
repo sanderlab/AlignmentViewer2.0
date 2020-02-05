@@ -1,11 +1,8 @@
 import React from "react";
 import Alignment from "./Alignment";
 import AminoAcid from "./AminoAcid";
-import { Map, GridLayer, GridLayerProps, MapLayer } from 'react-leaflet'
-import L, { LatLngTuple, GridLayerOptions } from "leaflet";
-import { Stage, Text, Container, AppConsumer, Sprite, PixiComponent, Graphics } from '@inlet/react-pixi'
-import { TextStyle } from "pixi.js";
-
+import { Stage, Sprite } from '@inlet/react-pixi'
+import { Viewport } from 'pixi-viewport'
 
 export interface IAlignmentCanvasComponentProps {
   alignment: Alignment;
@@ -92,46 +89,6 @@ export class AlignmentCanvasComponent extends React.Component<IAlignmentCanvasCo
     }
   }
 
-  /*
-  mapLoaded(map: any){
-    const fullWidth = this.props.alignment.getMaxSequenceLength();
-    const fullHeight = this.props.alignment.getSequences().length;
-
-    var CanvasLayer = L.GridLayer.extend({
-      createTile: function(coords: any){
-          // create a <canvas> element for drawing
-          var tile = L.DomUtil.create('canvas', 'leaflet-tile') as HTMLCanvasElement;
-          // setup tile width and height according to the options
-          var size = this.getTileSize();
-          console.log('CREATE TILE', size);
-          console.log('CREATE TILE', coords);
-          tile.width = size.x;
-          tile.height = size.y;
-          // get a canvas context and draw something on it using coords.x, coords.y and coords.z
-          var ctx = tile.getContext('2d');
-          if(ctx){
-            ctx.fillRect(2, 2, size.x-4, size.y-4);
-            ctx.font = "12px Arial";
-            ctx.fillStyle = "#FF0000";
-            ctx.fillText('x:'+coords.x+', y:'+coords.y+', z:'+coords.z, 20, 20)
-          }
-          // return the tile so it can be rendered on screen
-          return tile;
-      }
-    });
-
-    console.log('bounds:', [[0,0], [fullHeight, fullWidth]]);
-
-    //@ts-ignore
-    map.leafletElement.addLayer(new CanvasLayer({
-      tileSize: L.point(fullWidth, fullWidth),
-      minZoom: 0,
-      maxZoom: 5,
-      noWrap:true,
-      bounds: [[0,4000], [200, 0]]
-    }));
-  }*/
-
   render() {
     if (!this.props.alignment || !this.props.characterWidth){
       return null;
@@ -140,31 +97,16 @@ export class AlignmentCanvasComponent extends React.Component<IAlignmentCanvasCo
     const maxSeqLength = this.props.alignment.getMaxSequenceLength();
     const totalWidth = this.props.characterWidth * maxSeqLength;
 
-    /* leaflet
-    const map = (
-      <Map center={[0,0]} zoom={0} style={{height:2000}}
-           ref={map => this.mapLoaded(map)}>
-      </Map>
-    )*/
-
     return (
       <div id={this.props.id}
            ref={e => console.log('TODO: REMOVE!') /*this.divLoaded(e)*/}>
-        {/*map*/}
         {
           <Stage width={maxSeqLength} height={5000}>
-          <PixiAlignment id="some-pixi-id" 
-                        alignment={this.props.alignment} 
-                        characterWidth={this.props.characterWidth}/>
+            <PixiAlignment id="tiled-alignment" 
+                          alignment={this.props.alignment} 
+                          characterWidth={this.props.characterWidth}/>
           </Stage>
         }
-        {/*
-        <Stage width={maxSeqLength} height={this.props.alignment.getSequences().length}>
-          <PixiAlignment id="some-pixi-id" 
-                         alignment={this.props.alignment} 
-                         characterWidth={this.props.characterWidth}/>
-        </Stage>
-        */}
       </div>
     );
   }
@@ -185,45 +127,6 @@ class PixiAlignment extends React.Component<IAlignmentCanvasComponentProps> {
     const fullWidth = this.props.alignment.getMaxSequenceLength();
     const fullHeight = sequences.length;
     
-    //TESTING
-    //const sequences = this.props.alignment.getSequences().slice(0, 1000);
-    //const fullWidth = 100;
-    //const fullHeight = sequences.length;
-
-    /*
-    const fullOffscreenCanvas = document.createElement('canvas') as HTMLCanvasElement;
-    fullOffscreenCanvas.width = fullWidth;
-    fullOffscreenCanvas.height = fullHeight;
-    const context = fullOffscreenCanvas.getContext('2d');
-    context?.fillRect(0, 0, fullWidth, fullHeight); //unclear why necessary
-    
-    this.fullOffscreenImageData = context?.getImageData(
-      0, 0, fullWidth, fullHeight
-    );
-
-
-    //step 1: generate full alignment in memory
-    if(context !== null && this.fullOffscreenImageData !== undefined){
-      let idx = 0;
-      for(let seqIdx = 0; seqIdx < sequences.length; seqIdx++){
-        const seq = sequences[seqIdx];
-        for(let letterIdx = 0; letterIdx < seq.sequence.length; letterIdx++){
-          const letter = seq.sequence[letterIdx];
-          const aa = AminoAcid.fromSingleLetterCode(letter);
-          letterCount+=1;
-
-          this.fullOffscreenImageData.data[idx] = aa.rgba[0];
-          this.fullOffscreenImageData.data[idx+1] = aa.rgba[1];
-          this.fullOffscreenImageData.data[idx+2] = aa.rgba[2];
-          idx += 4;
-        }
-      };
-      context.putImageData(this.fullOffscreenImageData, 0, 0);
-    }
-    console.log('in memory canvas loaded [' + letterCount + ' letters, time=' + (new Date().getMilliseconds()-start)+'ms]');
-    //document.body.appendChild(fullOffscreenCanvas)
-    */
-
     //
     //generate multiple tiled images from the alignment
     //

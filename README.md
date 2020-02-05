@@ -8,8 +8,6 @@ yarn add ace-builds
 yarn add logojs-react
 yarn add typescript
 yarn add pixi.js @inlet/react-pixi
-
-?? yarn add react-leaflet
-??yarn add leaflet
+yarn add pixi-viewport
 yarn start
 ```
