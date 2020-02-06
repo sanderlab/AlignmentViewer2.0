@@ -3,24 +3,24 @@
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 100px 100px 40px 30px 700px;
   grid-gap: 5px;
-  padding:10px;
+  padding: 10px;
   position: relative;
 }
 
 .alignment_box {
-  position:relative;
+  position: relative;
   grid-column-start: 2;
   grid-column-end: 4;
   grid-row-start: 5;
   grid-row-end: 5;
 }
 
-.ace_content{
-cursor: auto;
+.ace_content {
+  cursor: auto;
 }
 
 .position_box {
-  position:relative;
+  position: relative;
   grid-column-start: 2;
   grid-column-end: 4;
   grid-row-start: 4;
@@ -28,58 +28,55 @@ cursor: auto;
 }
 
 .conservation_box {
-  position:relative;
+  position: relative;
   grid-column-start: 2;
   grid-column-end: 4;
   grid-row-start: 1;
   grid-row-end: 1;
   /*border:solid yellow 1px;*/
 }
-.conservation_box #sequence_conservation{
+.conservation_box #sequence_conservation {
   position: absolute;
-  left:0;
-  right:0;
-  top:0;
-  bottom:0;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   overflow-x: scroll;
 }
-.conservation_box #sequence_conservation .svg_container{
+.conservation_box #sequence_conservation .svg_container {
   position: absolute;
-  left:0;
-  right:0;
-  top:0;
-  bottom:0;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
 
-
-svg.conservation .gapCount rect{
-  fill: #B7B7B7;
+svg.conservation .gapCount rect {
+  fill: #b7b7b7;
 }
-svg.conservation .entropy rect{
+svg.conservation .entropy rect {
   fill: #000000;
 }
 
-
 .logo_box {
-  position:relative;
+  position: relative;
   grid-column-start: 2;
   grid-column-end: 4;
   grid-row-start: 2;
   grid-row-end: 2;
   /*border:solid blue 1px;*/
+}
+.logo_box #sequence_logo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   overflow-x: scroll;
 }
-.logo_box #sequence_logo{
-  position: absolute;
-  left:0;
-  right:0;
-  top:0;
-  bottom:0;
-}
-
 
 .queryseq_box {
-  position:relative;
+  position: relative;
   grid-column-start: 2;
   grid-column-end: 4;
   grid-row-start: 3;
@@ -87,7 +84,7 @@ svg.conservation .entropy rect{
 }
 
 .datatable_box {
-  position:relative;
+  position: relative;
   grid-column-start: 1;
   grid-column-end: 2;
   grid-row-start: 5;
@@ -95,82 +92,149 @@ svg.conservation .entropy rect{
   /*border:solid green 1px;*/
   overflow: scroll;
 }
-.alignment_box #ace-alignment{
+.alignment_box #ace-alignment {
   position: absolute;
-  top:0px;
-  left:0px;
-  right:0px;
-  bottom:0px;
-  visibility:hidden;
-  border-color:gray; 
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  visibility: hidden;
+  border-color: gray;
   border-style: solid;
   border-width: 1px;
-  z-index:10;
+  z-index: 10;
 }
-.queryseq_box #ace-queryseq { 
-  position: absolute;
-  top:0px;
-  left:0px;
-  right:0px;
-  bottom:0px;
-  font-family:Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
-    font-size:12px;
-    height:40px;
-    line-height:40px;
-    padding-left:3px;
-    overflow: scroll;
-    overflow-x:hidden;
+.alignment_box #ace-alignment.loaded {
+  visibility: visible;
 }
 
-.position_box #ace-positions { 
+.queryseq_box #ace-queryseq {
   position: absolute;
-  top:0px;
-  left:0px;
-  right:0px;
-  bottom:0px;
-  font-family:Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
-    font-size:12px;
-    height:30px;
-    line-height:30px;
-    padding-left:3px;
-    overflow: scroll;
-    overflow-x:hidden;
-    border-bottom: 1px solid red;
-    border-top: 1px solid red;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
+    monospace;
+  font-size: 12px;
+  height: 40px;
+  line-height: 40px;
+  padding-left: 3px;
+  overflow: scroll;
+  overflow-x: hidden;
 }
 
-#msa_image{
+.position_box #ace-positions {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
+    monospace;
+  font-size: 12px;
+  height: 30px;
+  line-height: 30px;
+  padding-left: 3px;
+  overflow: scroll;
+  overflow-x: hidden;
+  border-bottom: 1px solid red;
+  border-top: 1px solid red;
+}
+
+#msa_image {
   position: absolute;
   width: 100%;
   left: 0;
 }
 
-#column_mouseover{
-  position:absolute;
-  display:none;
+#column_mouseover {
+  position: absolute;
+  display: none;
   pointer-events: none;
-  height:1000px;
-  z-index:1000;
-  border:solid 2px purple;
+  height: 1000px;
+  z-index: 1000;
+  border: solid 2px purple;
 }
 
-.ace_Alanine       {color: #33cc00; fill: #33cc00;}
-.ace_Arginine      {color: #cc0000; fill: #cc0000;}
-.ace_Asparagine    {color: #6600cc; fill: #6600cc;}
-.ace_AsparticAcid  {color: #0033ff; fill: #0033ff;}
-.ace_Cysteine      {color: #ffff00; fill: #ffff00;}
-.ace_Glutamine     {color: #6600cc; fill: #6600cc;}
-.ace_GlutamicAcid  {color: #0033ff; fill: #0033ff;}
-.ace_Glycine       {color: #33cc00; fill: #33cc00;}
-.ace_Histidine     {color: #009900; fill: #009900;}
-.ace_Isoleucine    {color: #33cc00; fill: #33cc00;}
-.ace_Leucine       {color: #33cc00; fill: #33cc00;}
-.ace_Lysine        {color: #cc0000; fill: #cc0000;}
-.ace_Methionine    {color: #33cc00; fill: #33cc00;}
-.ace_Phenylalanine {color: #009900; fill: #009900;}
-.ace_Proline       {color: #33cc00; fill: #33cc00;}
-.ace_Serine        {color: #0099ff; fill: #0099ff; stroke: #0099ff;}
-.ace_Threonine     {color: #0099ff; fill: #0099ff;}
-.ace_Tryptophan    {color: #009900; fill: #009900;}
-.ace_Tyrosine      {color: #009900; fill: #009900;}
-.ace_Valine        {color: #33cc00; fill: #33cc00;}
+.ace_Alanine {
+  color: #33cc00;
+  fill: #33cc00;
+}
+.ace_Arginine {
+  color: #cc0000;
+  fill: #cc0000;
+}
+.ace_Asparagine {
+  color: #6600cc;
+  fill: #6600cc;
+}
+.ace_AsparticAcid {
+  color: #0033ff;
+  fill: #0033ff;
+}
+.ace_Cysteine {
+  color: #ffff00;
+  fill: #ffff00;
+}
+.ace_Glutamine {
+  color: #6600cc;
+  fill: #6600cc;
+}
+.ace_GlutamicAcid {
+  color: #0033ff;
+  fill: #0033ff;
+}
+.ace_Glycine {
+  color: #33cc00;
+  fill: #33cc00;
+}
+.ace_Histidine {
+  color: #009900;
+  fill: #009900;
+}
+.ace_Isoleucine {
+  color: #33cc00;
+  fill: #33cc00;
+}
+.ace_Leucine {
+  color: #33cc00;
+  fill: #33cc00;
+}
+.ace_Lysine {
+  color: #cc0000;
+  fill: #cc0000;
+}
+.ace_Methionine {
+  color: #33cc00;
+  fill: #33cc00;
+}
+.ace_Phenylalanine {
+  color: #009900;
+  fill: #009900;
+}
+.ace_Proline {
+  color: #33cc00;
+  fill: #33cc00;
+}
+.ace_Serine {
+  color: #0099ff;
+  fill: #0099ff;
+  stroke: #0099ff;
+}
+.ace_Threonine {
+  color: #0099ff;
+  fill: #0099ff;
+}
+.ace_Tryptophan {
+  color: #009900;
+  fill: #009900;
+}
+.ace_Tyrosine {
+  color: #009900;
+  fill: #009900;
+}
+.ace_Valine {
+  color: #33cc00;
+  fill: #33cc00;
+}

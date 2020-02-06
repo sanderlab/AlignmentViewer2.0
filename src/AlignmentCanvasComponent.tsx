@@ -10,11 +10,11 @@ import {
   Text
 } from "@inlet/react-pixi";
 import { Viewport } from "pixi-viewport";
-import { TextStyle } from "pixi.js";
+import { TextStyle, Graphics } from "pixi.js";
 
 export interface IAlignmentCanvasComponentProps {
   alignment: Alignment;
-  characterWidth: number;
+  highlightRows?: [number, number]; //[startRowNum, endRowNum]
 
   readonly id: string;
 }
@@ -84,6 +84,17 @@ class SliderComponent extends React.Component<
   }
 }
 
+const AlignmentHighlighter = PixiComponent("AlignmentHighlighter", {
+  create: (props: any) => new Graphics(),
+  applyProps: (instance, _, props) => {
+    const { x, y, width, height, fillColor, fillAlpha } = props;
+    instance.clear();
+    instance.beginFill(fillColor, fillAlpha);
+    instance.drawRect(x, y, width, height);
+    instance.endFill();
+  }
+});
+
 export class AlignmentCanvasComponent extends React.Component<
   IAlignmentCanvasComponentProps
 > {
@@ -100,15 +111,17 @@ export class AlignmentCanvasComponent extends React.Component<
       this.app.stage.children.forEach(sprite => {
         if (xy === "x") {
           sprite.scale.x = newValue;
+          console.log("scalex:" + newValue);
         } else {
           sprite.scale.y = newValue;
+          console.log("scaley:" + newValue);
         }
       });
     }
   }
 
   render() {
-    if (!this.props.alignment || !this.props.characterWidth) {
+    if (!this.props.alignment) {
       return null;
     }
     const numSequences = this.props.alignment.getSequences().length;
@@ -120,6 +133,7 @@ export class AlignmentCanvasComponent extends React.Component<
     //      image
     //PIXI.settings.RESOLUTION = 2;
     //PIXI.settings.ROUND_PIXELS = true; //
+
     return (
       <div id={this.props.id}>
         <Stage width={485} height={650} options={{}}>
@@ -139,8 +153,21 @@ export class AlignmentCanvasComponent extends React.Component<
                 <PixiAlignmentTiled
                   id="tiled-alignment"
                   alignment={this.props.alignment}
-                  characterWidth={this.props.characterWidth}
                 />
+                {this.props.highlightRows ? (
+                  <AlignmentHighlighter
+                    x={0}
+                    y={this.props.highlightRows[0]}
+                    width={maxSeqLength}
+                    height={
+                      this.props.highlightRows[1] - this.props.highlightRows[0]
+                    }
+                    fillColor={0xff0000}
+                    fillAlpha={0.25}
+                  />
+                ) : (
+                  <></>
+                )}
               </PixiViewport>
             )}
           </AppContext.Consumer>
@@ -172,113 +199,125 @@ export class AlignmentCanvasComponent extends React.Component<
 class PixiAlignmentTiled extends React.Component<
   IAlignmentCanvasComponentProps
 > {
-  private fullOffscreenImageData?: ImageData;
+  private cache?: ITiledImages;
 
   render() {
     if (!this.props.alignment) {
       return null;
     }
 
-    const sequences = this.props.alignment.getSequences();
-    const fullWidth = this.props.alignment.getMaxSequenceLength();
-    const fullHeight = sequences.length;
+    if (!this.cache) {
+      const sequences = this.props.alignment.getSequences();
+      const fullWidth = this.props.alignment.getMaxSequenceLength();
+      const fullHeight = sequences.length;
 
-    //
-    //generate multiple tiled images from the alignment
-    //
-    const targetTileWidth = Math.min(400, fullWidth);
-    const targetTileHeight = Math.min(400, fullHeight);
+      //
+      //generate multiple tiled images from the alignment
+      //
+      const targetTileWidth = Math.min(400, fullWidth);
+      const targetTileHeight = Math.min(400, fullHeight);
 
-    const tiledImages: ITiledImages = {
-      targetTileWidth: targetTileWidth,
-      targetTileHeight: targetTileHeight,
-      lastTileWidth:
-        fullWidth % targetTileWidth !== 0
-          ? fullWidth % targetTileWidth
-          : targetTileWidth,
-      lastTileHeight:
-        fullHeight % targetTileHeight !== 0
-          ? fullHeight % targetTileHeight
-          : targetTileHeight,
-      numXTiles:
-        fullWidth % targetTileWidth !== 0
-          ? Math.floor(fullWidth / targetTileWidth) + 1
-          : Math.floor(fullWidth / targetTileWidth),
-      numYTiles:
-        fullHeight % targetTileHeight !== 0
-          ? Math.floor(fullHeight / targetTileHeight) + 1
-          : Math.floor(fullHeight / targetTileHeight),
-      tiles: []
-    };
+      const tiledImages: ITiledImages = {
+        targetTileWidth: targetTileWidth,
+        targetTileHeight: targetTileHeight,
+        lastTileWidth:
+          fullWidth % targetTileWidth !== 0
+            ? fullWidth % targetTileWidth
+            : targetTileWidth,
+        lastTileHeight:
+          fullHeight % targetTileHeight !== 0
+            ? fullHeight % targetTileHeight
+            : targetTileHeight,
+        numXTiles:
+          fullWidth % targetTileWidth !== 0
+            ? Math.floor(fullWidth / targetTileWidth) + 1
+            : Math.floor(fullWidth / targetTileWidth),
+        numYTiles:
+          fullHeight % targetTileHeight !== 0
+            ? Math.floor(fullHeight / targetTileHeight) + 1
+            : Math.floor(fullHeight / targetTileHeight),
+        tiles: []
+      };
 
-    for (
-      let tileYNumber = 0;
-      tileYNumber < tiledImages.numYTiles;
-      tileYNumber++
-    ) {
       for (
-        let tileXNumber = 0;
-        tileXNumber < tiledImages.numXTiles;
-        tileXNumber++
+        let tileYNumber = 0;
+        tileYNumber < tiledImages.numYTiles;
+        tileYNumber++
       ) {
-        const tileCanvas = document.createElement(
-          "canvas"
-        ) as HTMLCanvasElement;
-        tileCanvas.height =
-          tileYNumber === tiledImages.numYTiles - 1
-            ? tiledImages.lastTileHeight
-            : targetTileHeight;
-        tileCanvas.width =
-          tileXNumber === tiledImages.numXTiles - 1
-            ? tiledImages.lastTileWidth
-            : targetTileWidth;
+        for (
+          let tileXNumber = 0;
+          tileXNumber < tiledImages.numXTiles;
+          tileXNumber++
+        ) {
+          const tileCanvas = document.createElement(
+            "canvas"
+          ) as HTMLCanvasElement;
+          tileCanvas.height =
+            tileYNumber === tiledImages.numYTiles - 1
+              ? tiledImages.lastTileHeight
+              : targetTileHeight;
+          tileCanvas.width =
+            tileXNumber === tiledImages.numXTiles - 1
+              ? tiledImages.lastTileWidth
+              : targetTileWidth;
 
-        const seqOffsetY = tileYNumber * targetTileHeight;
-        const letterOffsetX = tileXNumber * targetTileWidth;
+          const seqOffsetY = tileYNumber * targetTileHeight;
+          const letterOffsetX = tileXNumber * targetTileWidth;
 
-        const tileCanvasContext = tileCanvas.getContext("2d");
-        tileCanvasContext?.fillRect(0, 0, tileCanvas.width, tileCanvas.height); //unclear why necessary
-        const tileImageData = tileCanvasContext?.getImageData(
-          0,
-          0,
-          tileCanvas.width,
-          tileCanvas.height
-        );
+          const tileCanvasContext = tileCanvas.getContext("2d");
+          tileCanvasContext?.fillRect(
+            0,
+            0,
+            tileCanvas.width,
+            tileCanvas.height
+          ); //unclear why necessary
+          const tileImageData = tileCanvasContext?.getImageData(
+            0,
+            0,
+            tileCanvas.width,
+            tileCanvas.height
+          );
 
-        if (tileImageData && tileCanvasContext) {
-          let imageDataIdx = 0;
-          for (let seqIdx = 0; seqIdx < tileCanvas.height; seqIdx++) {
-            const seq = sequences[seqIdx + seqOffsetY];
-            for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
-              const letter = seq.sequence[letterIdx + letterOffsetX];
-              const aa = AminoAcid.fromSingleLetterCode(letter);
+          if (tileImageData && tileCanvasContext) {
+            let imageDataIdx = 0;
+            for (let seqIdx = 0; seqIdx < tileCanvas.height; seqIdx++) {
+              const seq = sequences[seqIdx + seqOffsetY];
+              for (
+                let letterIdx = 0;
+                letterIdx < tileCanvas.width;
+                letterIdx++
+              ) {
+                const letter = seq.sequence[letterIdx + letterOffsetX];
+                const aa = AminoAcid.fromSingleLetterCode(letter);
 
-              tileImageData.data[imageDataIdx] = aa.rgb.red;
-              tileImageData.data[imageDataIdx + 1] = aa.rgb.green;
-              tileImageData.data[imageDataIdx + 2] = aa.rgb.blue;
+                tileImageData.data[imageDataIdx] = aa.rgb.red;
+                tileImageData.data[imageDataIdx + 1] = aa.rgb.green;
+                tileImageData.data[imageDataIdx + 2] = aa.rgb.blue;
 
-              imageDataIdx += 4;
+                imageDataIdx += 4;
+              }
             }
+            tileCanvasContext.putImageData(tileImageData, 0, 0);
           }
-          tileCanvasContext.putImageData(tileImageData, 0, 0);
-        }
 
-        tiledImages.tiles.push({
-          tileX: tileXNumber,
-          tileY: tileYNumber,
-          pixelX: letterOffsetX,
-          pixelY: seqOffsetY,
-          width: tileCanvas.width,
-          height: tileCanvas.height,
-          image: tileCanvas
-        });
+          tiledImages.tiles.push({
+            tileX: tileXNumber,
+            tileY: tileYNumber,
+            pixelX: letterOffsetX,
+            pixelY: seqOffsetY,
+            width: tileCanvas.width,
+            height: tileCanvas.height,
+            image: tileCanvas
+          });
+        }
       }
+      this.cache = tiledImages;
     }
 
-    console.log("tiledImages", tiledImages);
+    //console.log("tiledImages", this.cache);
     return (
       <>
-        {tiledImages.tiles.map(tile => (
+        {this.cache.tiles.map(tile => (
           <Sprite
             source={tile.image}
             x={tile.pixelX}

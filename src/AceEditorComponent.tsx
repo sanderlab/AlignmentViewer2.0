@@ -12,8 +12,9 @@ export interface IAceEditorComponentProps {
   readonly type: AceEditorTypes;
 }
 
-export class AceEditorComponent extends React.Component<IAceEditorComponentProps> {
-
+export class AceEditorComponent extends React.Component<
+  IAceEditorComponentProps
+> {
   private editor?: Ace.Editor;
 
   /**
@@ -21,31 +22,31 @@ export class AceEditorComponent extends React.Component<IAceEditorComponentProps
    * through the maxLength. Taken from alignmentviewer 1.0:
    *     https://github.com/sanderlab/alignmentviewer
    * May want to implement this better in the future (SVG + sliding tooltip for cursor?)
-   * @param maxLength 
+   * @param maxLength
    */
-  _generatePositionRuler(maxLength: number): string{
-      let s = ''; // should be a better way to do this to be honest
-      for (let i = 1; i <= maxLength+1; i++) {
-          const Q = i % 10 === 0;
-          const Q5 = !Q && i % 5 === 0;
-          s += Q ? '|' : Q5 ? ':' : '.';
-          if (!Q) {
-              continue;
-          }
-          const sn = '' + i;
-          const np = s.length - sn.length - 1; // where num starts
-          if (np < 0) {
-              continue;
-          }
-          s = s.substr(0, np) + sn + '|';
+  _generatePositionRuler(maxLength: number): string {
+    let s = ""; // should be a better way to do this to be honest
+    for (let i = 1; i <= maxLength + 1; i++) {
+      const Q = i % 10 === 0;
+      const Q5 = !Q && i % 5 === 0;
+      s += Q ? "|" : Q5 ? ":" : ".";
+      if (!Q) {
+        continue;
       }
-      return (s); // this.hruler = s.replace(/ /g, '.');
+      const sn = "" + i;
+      const np = s.length - sn.length - 1; // where num starts
+      if (np < 0) {
+        continue;
+      }
+      s = s.substr(0, np) + sn + "|";
+    }
+    return s; // this.hruler = s.replace(/ /g, '.');
   }
 
   //
   //setup ace editors
   //
-  prepAceEditor(el: HTMLElement) {
+  setupAndInsertAceEditor(el: HTMLElement) {
     this.editor = ace.edit(el);
     this.editor.setShowPrintMargin(false);
     this.editor.setReadOnly(true);
@@ -55,7 +56,9 @@ export class AceEditorComponent extends React.Component<IAceEditorComponentProps
     this.editor.renderer.setShowGutter(false);
     this.editor.renderer.setPadding(0);
 
-    if ([AceEditorTypes.query, AceEditorTypes.alignment].includes(this.props.type)) {
+    if (
+      [AceEditorTypes.query, AceEditorTypes.alignment].includes(this.props.type)
+    ) {
       this.editor.session.setMode("ace/mode/alignment");
     }
     this.editor.renderer.$cursorLayer.element.style.display = "none";
@@ -75,51 +78,56 @@ export class AceEditorComponent extends React.Component<IAceEditorComponentProps
       );
       var characterWidth = this.editor.renderer.characterWidth;
       const columnMouseover = document.getElementById("column_mouseover");
-      if (columnMouseover){
-        columnMouseover.style.left = screenCoordinates.pageX - extraPadding / 2 - 2 + "px";
+      if (columnMouseover) {
+        columnMouseover.style.left =
+          screenCoordinates.pageX - extraPadding / 2 - 2 + "px";
         columnMouseover.style.width = characterWidth + extraPadding + "px";
         columnMouseover.style.display = "block";
       }
     });
-
-    //
-    // insert data
-    //
-    if (this.props.type === AceEditorTypes.query) {
-      this.editor.insert(this.props.alignment.getTargetSequence().sequence);
-    } else if (this.props.type === AceEditorTypes.alignment) {
-      this.editor.insert(this.props.alignment.getSequences().map(x => x.sequence).join("\n"));
-    } else if (this.props.type === AceEditorTypes.position) {
-      const maxSequenceLength = this.props.alignment.getSequences().reduce((acc, seq) =>{
-        if (seq.sequence.length>acc) { acc = seq.sequence.length; }
-        return acc;
-      }, -1);
-      this.editor.insert(this._generatePositionRuler(maxSequenceLength));
-    } else {
-      this.editor.insert("invalid type passed to AceEditorComponent");
-    }
-
-    el.style.visibility = "visible";
-    this.props.editorLoaded(this.editor);
+    return this.editor;
   }
 
-  divLoaded(e: HTMLDivElement | null){
-    if(e && !this.editor){ //only run if editor not loaded
-      this.prepAceEditor(e);
+  insertDataIntoEditor() {
+    if (this.editor) {
+      if (this.props.type === AceEditorTypes.query) {
+        this.editor.insert(this.props.alignment.getTargetSequence().sequence);
+      } else if (this.props.type === AceEditorTypes.alignment) {
+        this.editor.insert(
+          this.props.alignment
+            .getSequences()
+            .map(x => x.sequence)
+            .join("\n")
+        );
+      } else if (this.props.type === AceEditorTypes.position) {
+        const maxSequenceLength = this.props.alignment
+          .getSequences()
+          .reduce((acc, seq) => {
+            if (seq.sequence.length > acc) {
+              acc = seq.sequence.length;
+            }
+            return acc;
+          }, -1);
+        this.editor.insert(this._generatePositionRuler(maxSequenceLength));
+      } else {
+        this.editor.insert("invalid type passed to AceEditorComponent");
+      }
     }
   }
 
-  componentWillUnmount(){
-    //TODO: notify parent of unloading and release editor
+  divLoaded(e: HTMLDivElement | null) {
+    if (e && !this.editor) {
+      //only run if editor not loaded
+      this.setupAndInsertAceEditor(e);
+      this.insertDataIntoEditor();
 
+      e.classList.add("loaded");
+      this.props.editorLoaded(this.editor!); //inform parent of loading.
+    }
   }
 
   render() {
-    return (
-      <div
-        id={this.props.id}
-        ref={e => this.divLoaded(e)}
-      ></div>
-    );
+    //console.log("RENDERING EDITOR: " + this.props.id);
+    return <div id={this.props.id} ref={e => this.divLoaded(e)}></div>;
   }
 }
