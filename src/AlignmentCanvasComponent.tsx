@@ -37,31 +37,73 @@ interface ITiledImages {
   }[];
 }
 
+interface ISliderComponentProps {
+  init: number;
+  min: number;
+  max: number;
+  label: string;
+  sliderChanged(newValue: number): void;
+}
+interface ISliderComponentState {
+  value: number;
+}
+
+class SliderComponent extends React.Component<
+  ISliderComponentProps,
+  ISliderComponentState
+> {
+  constructor(props: ISliderComponentProps) {
+    super(props);
+    this.state = {
+      value: this.props.init
+    };
+  }
+
+  render() {
+    return (
+      <div>
+        <label htmlFor={this.props.label}>{this.props.label}</label>
+        <input
+          type="range"
+          min={this.props.min}
+          max={this.props.max}
+          value={this.state.value}
+          className="slider"
+          id={this.props.label}
+          onChange={e => {
+            const value = parseFloat(e.currentTarget.value);
+            this.setState({
+              value
+            });
+            this.props.sliderChanged(value);
+          }}
+        ></input>
+        <span>({this.state.value})</span>
+      </div>
+    );
+  }
+}
+
 export class AlignmentCanvasComponent extends React.Component<
   IAlignmentCanvasComponentProps
 > {
   app?: PIXI.Application;
+  scaleX: number = 1;
+  scaleY: number = 1;
 
   constructor(props: IAlignmentCanvasComponentProps) {
     super(props);
   }
 
-  buttonClicked(e: React.MouseEvent<HTMLInputElement, MouseEvent>) {
-    console.log(this.app);
+  sliderChanged(newValue: number, xy: "x" | "y") {
     if (this.app) {
-      if (e.currentTarget.checked) {
-        //this.app.stage.scale.x = 10;
-        this.app.stage.children.forEach(sprite => {
-          console.log("sprite", sprite);
-          sprite.scale.x = 10;
-        });
-      } else {
-        //this.app.stage.scale.x = 1;
-        this.app.stage.children.forEach(sprite => {
-          console.log("sprite", sprite);
-          sprite.scale.x = 1;
-        });
-      }
+      this.app.stage.children.forEach(sprite => {
+        if (xy === "x") {
+          sprite.scale.x = newValue;
+        } else {
+          sprite.scale.y = newValue;
+        }
+      });
     }
   }
 
@@ -69,14 +111,18 @@ export class AlignmentCanvasComponent extends React.Component<
     if (!this.props.alignment || !this.props.characterWidth) {
       return null;
     }
-
+    const numSequences = this.props.alignment.getSequences().length;
     const maxSeqLength = this.props.alignment.getMaxSequenceLength();
-    const totalWidth = this.props.characterWidth * maxSeqLength;
 
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST; //
+    //TODO: still anti-aliases on retina devices. probably requires
+    //      writing 4x the pixels and telling pixi that it is a reina
+    //      image
+    //PIXI.settings.RESOLUTION = 2;
+    //PIXI.settings.ROUND_PIXELS = true; //
     return (
       <div id={this.props.id}>
-        <Stage width={maxSeqLength * 2} height={650} options={{}}>
+        <Stage width={485} height={650} options={{}}>
           <AppContext.Consumer>
             {app => {
               this.app = app;
@@ -85,7 +131,11 @@ export class AlignmentCanvasComponent extends React.Component<
           </AppContext.Consumer>
           <AppContext.Consumer>
             {app => (
-              <PixiViewport app={app}>
+              <PixiViewport
+                app={app}
+                numColumns={maxSeqLength}
+                numRows={numSequences}
+              >
                 <PixiAlignmentTiled
                   id="tiled-alignment"
                   alignment={this.props.alignment}
@@ -95,13 +145,26 @@ export class AlignmentCanvasComponent extends React.Component<
             )}
           </AppContext.Consumer>
         </Stage>
-        <input
-          type="checkbox"
-          onClick={e => this.buttonClicked(e)}
-          name="scaleX"
-          id="scaleX"
-        ></input>
-        <label htmlFor="scaleX">scaleX</label>
+
+        <SliderComponent
+          init={1}
+          min={1}
+          max={10}
+          label={"scaleX"}
+          sliderChanged={newValue => {
+            this.sliderChanged(newValue, "x");
+          }}
+        ></SliderComponent>
+
+        <SliderComponent
+          init={1}
+          min={1}
+          max={10}
+          label={"scaleY"}
+          sliderChanged={newValue => {
+            this.sliderChanged(newValue, "y");
+          }}
+        ></SliderComponent>
       </div>
     );
   }
@@ -115,9 +178,6 @@ class PixiAlignmentTiled extends React.Component<
     if (!this.props.alignment) {
       return null;
     }
-
-    let letterCount = 0; //stats
-    const start = new Date().getMilliseconds();
 
     const sequences = this.props.alignment.getSequences();
     const fullWidth = this.props.alignment.getMaxSequenceLength();
@@ -193,9 +253,9 @@ class PixiAlignmentTiled extends React.Component<
               const letter = seq.sequence[letterIdx + letterOffsetX];
               const aa = AminoAcid.fromSingleLetterCode(letter);
 
-              tileImageData.data[imageDataIdx] = aa.rgba[0];
-              tileImageData.data[imageDataIdx + 1] = aa.rgba[1];
-              tileImageData.data[imageDataIdx + 2] = aa.rgba[2];
+              tileImageData.data[imageDataIdx] = aa.rgb.red;
+              tileImageData.data[imageDataIdx + 1] = aa.rgb.green;
+              tileImageData.data[imageDataIdx + 2] = aa.rgb.blue;
 
               imageDataIdx += 4;
             }
@@ -226,6 +286,8 @@ class PixiAlignmentTiled extends React.Component<
             key={`${tile.tileX}_${tile.tileY}`}
           ></Sprite>
         ))}
+
+        {/* debugging - orient a zero zero 
         <Text
           text="0, 0"
           anchor={0}
@@ -233,11 +295,11 @@ class PixiAlignmentTiled extends React.Component<
           y={0}
           style={
             new TextStyle({
-              fontSize: 50,
-              fill: ["#ffffff"]
+              fontSize: 25,
+              fill: ["#000"]
             })
           }
-        ></Text>
+        ></Text>*/}
       </>
     );
   }
@@ -246,32 +308,26 @@ class PixiAlignmentTiled extends React.Component<
 const PixiViewport = PixiComponent<any, any>("PixiViewport", {
   create(props: any) {
     const app: PIXI.Application = props.app;
-    console.log(
-      JSON.stringify({
-        screenWidth: props.app.renderer.width,
-        screenHeight: props.app.renderer.height,
-        worldWidth: 1000,
-        worldHeight: 1000
-      })
-    );
+    app.renderer.backgroundColor = 0xffffff;
 
     return new Viewport({
-      screenWidth: props.app.renderer.width,
-      screenHeight: props.app.renderer.height,
-      worldWidth: props.app.renderer.width,
-      worldHeight: 24000,
-      interaction: props.app.renderer.plugins.interaction
+      screenWidth: app.renderer.width,
+      screenHeight: app.renderer.height,
+      worldWidth: props.numColumns, //app.renderer.width,
+      worldHeight: props.numRows, //23627,
+      interaction: app.renderer.plugins.interaction
     })
-
       .drag()
       .pinch()
       .wheel()
       .decelerate()
       .clamp({
-        top: true,
-        bottom: true,
-        right: true,
-        left: true
+        direction: "all"
+      })
+      .bounce({ friction: 0.1, time: 500, underflow: "center" })
+      .clampZoom({
+        maxHeight: props.app.renderer.height,
+        maxWidth: props.app.renderer.width
       });
   }
 });
