@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { AceEditorComponent } from "./AceEditorComponent";
+import { AceMSAComponent } from "./AceMSAComponent";
 import ScrollSync, { ScrollType } from "./ScrollSync";
 import { Ace } from "ace-builds";
 import { SequenceLogoComponent } from "./SequenceLogoComponent";
@@ -10,6 +10,7 @@ import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
 
 export enum AceEditorTypes {
   query,
+  consensus,
   alignment,
   position
 }
@@ -59,8 +60,8 @@ class App extends React.Component<AppProps, AppState> {
       editor.renderer.on("afterRender", () => {
         // BREAKS LOGO, rerenders everything below and kills performance. React lifecycle stuff.
         this.setState({
-          alignmentEditorFirstRow: editor.renderer.getFirstVisibleRow(),
-          alignmentEditorLastRow: editor.renderer.getLastVisibleRow()
+          alignmentEditorFirstRow: editor.renderer.getFirstFullyVisibleRow(),
+          alignmentEditorLastRow: editor.renderer.getLastFullyVisibleRow()
         });
       });
     }
@@ -101,9 +102,21 @@ class App extends React.Component<AppProps, AppState> {
             ></SequenceLogoComponent>
           }
         </div>
+        <div className="consensusseq_box">
+          {
+            <AceMSAComponent
+              id="ace-consensusseq"
+              type={AceEditorTypes.consensus}
+              alignment={this.state.alignment}
+              editorLoaded={editor => {
+                this._aceEditorLoaded("ace-consensusseq", editor);
+              }}
+            />
+          }
+        </div>
         <div className="queryseq_box">
           {
-            <AceEditorComponent
+            <AceMSAComponent
               id="ace-queryseq"
               type={AceEditorTypes.query}
               alignment={this.state.alignment}
@@ -115,7 +128,7 @@ class App extends React.Component<AppProps, AppState> {
         </div>
         <div className="position_box">
           {
-            <AceEditorComponent
+            <AceMSAComponent
               id="ace-positions"
               type={AceEditorTypes.position}
               alignment={this.state.alignment}
@@ -144,7 +157,7 @@ class App extends React.Component<AppProps, AppState> {
         </div>
 
         <div className="alignment_box">
-          <AceEditorComponent
+          <AceMSAComponent
             id="ace-alignment"
             type={AceEditorTypes.alignment}
             alignment={this.state.alignment}
