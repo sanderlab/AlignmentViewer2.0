@@ -1,5 +1,4 @@
 import React from "react";
-import "./App.css";
 import ace, { Ace } from "ace-builds";
 
 export interface IAceEditorComponentProps {

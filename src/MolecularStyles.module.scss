@@ -1,0 +1,280 @@
+/**
+ * MolecularStyles.module.scss
+ * 
+ * Style definitions for amino acids and nucleotides in e.g. an alignment or logo.
+ *  
+ * INDIVIDUAL AMINO ACID / NUCLEOTIDE CLASSES
+ * The Ace editor prefixes all classes it adds in the alignment mode with "ace_". Because
+ * of this, any other components (e.g., logo plots) should also apply classes with this
+ * prefix. Amino acids and nucleotides will be styled with the single letter upper case
+ * character, prefixed with ace_ (e.g., Alanine and Adenine would both be ace_A).
+ * 
+ * Positional modifying classes can be accessed via 4 exported parameters:
+ *    preAceQueryClass:       string to indicate a residue matches the query sequence (this
+ *                                (should only be used by the ace highlight parser)
+ *    preAceConsensusClass:   string to indicate a residue matches the consensus sequence 
+ *                                (should only be used by the ace highlight parser)
+ *    aceQueryClass:          final ace_ prefixed class name to indicate a residue matches 
+ *                            the query sequence 
+ *    aceConsensusClass:      final ace_ prefixed class name to indicate a residue matches    
+ *                            the consensus sequence
+ *
+ * TOP LEVEL STYLING
+ * Style of an alignment or logo are dictated by 3 parent element classes #1, #2, #3.
+ * All 3 are required and must be on the same parent element. The top level classes
+ * are "exported" and should be read by typescript and the value placed as the classes:
+ *  Class  Exported Parameter    Description
+ *  -----  ------------------    -----------
+ *    #1   aaAlignTypeClass            style alignment as amino acid sequences
+ *    #1   ntAlignTypeClass            style alignment as nucleotide sequences
+ *
+ *    #2   styPosAllClass              style all positions 
+ *    #2   styPosQueryClass            style only positions that have the ace_query class 
+ *    #2   styPosQueryDiffClass        style only positions that don't have the ace_query class 
+ *    #2   styPosConsensusClass        style only positions that have the ace_consensus class 
+ *    #2   styPosConsensusDiffClass    style only positions that don't have the ace_consensus class 
+ *
+ *    #3   aaStyClass_{STYLENAME}      amino acid style with name {STYLENAME} excluding curly braces
+ *    #3   aaStyColorOrder_{STYLENAME} order of amino acids in the colors object for this style. this
+ *                                     string is comma space (, ) delimited.
+ *    #3   aaStyColors_{STYLENAME}     colors for all amino acids for this style. this string is 
+ *                                     comma space (, ) delimited.
+ *    #3   ntStyClass_{STYLENAME}      nucleotide style with name {STYLENAME} excluding curly braces
+ *    #3   ntStyColorOrder_{STYLENAME} order of nucleotides in the colors object for this style. this
+ *                                     string is comma space (, ) delimited.
+ *    #3   ntStyColors_{STYLENAME}     colors for all nucleotides for this style. this string is 
+ *                                     comma space (, ) delimited.
+ *
+ *
+ * Example: e.g.:
+ *   <div class="$alignTypeAA $aaStyleDefault $styPosQuery">
+ *     <logo .../> || <aceMSA .../>
+ *   </div>
+ */
+
+//ace specific props
+$acePrefix: ace_;
+$preAceQueryClass: query;
+$preAceConsensusClass: consensus;
+$aceQueryClass: $acePrefix + $preAceQueryClass;
+$aceConsensusClass: $acePrefix + $preAceConsensusClass;
+
+//general global props
+$aaStyleClassPrefix: aa-alignment-style-;
+$ntStyleClassPrefix: nt-alignment-style-;
+$styPosClassPrefix: alignment-positions-tostyle-;
+$defaultBackgroundAlpha: 0.25;
+
+//both nucleotide and amino acid have the same options for position coloring
+$styPosAll: $styPosClassPrefix + all;
+$styPosQuery: $styPosClassPrefix + query;
+$styPosQueryDiff: $styPosClassPrefix + query-diff;
+$styPosConsensus: $styPosClassPrefix + consensus;
+$styPosConsensusDiff: $styPosClassPrefix + consensus-diff;
+
+//amino acid props
+$aaProps: (
+  topLevelAlignmentClass: alignment-aa,
+  styles: (
+    Default: (
+      topLevelClass: $aaStyleClassPrefix + default,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      colors: (
+        A: #33cc00,
+        R: #cc0000,
+        N: #6600cc,
+        D: #0033ff,
+        C: #ffff00,
+        Q: #6600cc,
+        E: #0033ff,
+        G: #33cc00,
+        H: #009900,
+        I: #33cc00,
+        L: #33cc00,
+        K: #cc0000,
+        M: #33cc00,
+        F: #009900,
+        P: #33cc00,
+        S: #0099ff,
+        T: #0099ff,
+        W: #009900,
+        Y: #009900,
+        V: #33cc00
+      )
+    ),
+    Hydrophobicity: (
+      topLevelClass: $aaStyleClassPrefix + hydrophobicity,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      colors: (
+        A: #009900,
+        R: #000cff,
+        N: #000cff,
+        D: #000cff,
+        C: #009900,
+        Q: #b5b5b5,
+        E: #000cff,
+        G: #b5b5b5,
+        H: #b5b5b5,
+        I: #ff0000,
+        L: #ff0000,
+        K: #000cff,
+        M: #ff0000,
+        F: #ff0000,
+        P: #000cff,
+        S: #b5b5b5,
+        T: #b5b5b5,
+        W: #ff0000,
+        Y: #009900,
+        V: #ff0000
+      )
+    )
+  )
+);
+
+//amino acid props
+$ntProps: (
+  topLevelAlignmentClass: alignment-nt,
+  styles: (
+    Default: (
+      topLevelClass: $ntStyleClassPrefix + default,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      colors: (
+        A: #5050ff,
+        C: #e00000,
+        G: #00c000,
+        T: #e6e600,
+        U: #cc9900,
+        R: #2e8b57,
+        Y: #ff8c00
+      )
+    )
+  )
+);
+
+//
+// EXPORT
+// export alignment type classes, color scheme classes, position coloring classes,
+// and then individual colors for use in javascript.
+//
+
+:export {
+  acePrefix: $acePrefix;
+  preAceQueryClass: $preAceQueryClass;
+  preAceConsensusClass: $preAceConsensusClass;
+  aceQueryClass: $aceQueryClass;
+  aceConsensusClass: $aceConsensusClass;
+
+  aaAlignTypeClass: map-get($aaProps, topLevelAlignmentClass);
+  ntAlignTypeClass: map-get($ntProps, topLevelAlignmentClass);
+
+  styPosAllClass: $styPosAll;
+  styPosQueryClass: $styPosQuery;
+  styPosQueryDiffClass: $styPosQueryDiff;
+  styPosConsensusClass: $styPosConsensus;
+  styPosConsensusDiffClass: $styPosConsensusDiff;
+}
+
+//export coloring
+:export {
+  @each $styleName, $styleObj in map-get($aaProps, styles) {
+    #{unquote("aaStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
+    #{unquote("aaStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
+    #{unquote("aaStyColorOrder_"+$styleName)}: map-keys(
+      map-get($styleObj, colors)
+    );
+    #{unquote("aaStyColors_"+$styleName)}: map-values(
+      map-get($styleObj, colors)
+    );
+  }
+}
+:export {
+  @each $styleName, $styleObj in map-get($ntProps, styles) {
+    #{unquote("ntStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
+    #{unquote("ntStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
+    #{unquote("ntStyColorOrder_"+$styleName)}: map-keys(
+      map-get($styleObj, colors)
+    );
+    #{unquote("ntStyColors_"+$styleName)}: map-values(
+      map-get($styleObj, colors)
+    );
+  }
+}
+
+//
+// AMINO ACID CLASS DEFINITIONS
+//
+// Programmatically combine into one big set of selectors. Export
+// as global selector to avoid distinct naming from css modules.
+//
+
+:global .ace_S {
+  //SPECIAL CASE: the glyph for "S" needs to have a fill and stroke
+  stroke: #000000;
+}
+
+@each $styleName, $styleObj in map-get($aaProps, styles) {
+  $alignmentClass: map-get($aaProps, topLevelAlignmentClass);
+  $styleClass: map-get($styleObj, topLevelClass);
+  $backgroundAlpha: map-get($styleObj, backgroundAlpha);
+
+  @each $aa, $color in map-get($styleObj, colors) {
+    $aceAAClass: $acePrefix + $aa;
+    :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
+      .#{$aceAAClass}.#{$aceConsensusClass},
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
+      .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
+      .#{$aceAAClass}.#{$aceQueryClass},
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
+      .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+      @if $aa == S {
+        //serine glyph needs stoke coloring also
+        color: $color;
+        stroke: $color;
+        fill: #ffffff;
+        background-color: rgba($color, $backgroundAlpha);
+      } @else {
+        color: $color;
+        fill: $color;
+        background-color: rgba($color, $backgroundAlpha);
+      }
+    }
+  }
+}
+
+//
+// NUCLEOTIDE CLASS DEFINITIONS
+// Programmatically combine into one big set of selectors. Export
+// as global selector to avoid distinct naming from css modules.
+//
+@each $styleName, $styleObj in map-get($ntProps, styles) {
+  $alignmentClass: map-get($ntProps, topLevelAlignmentClass);
+  $styleClass: map-get($styleObj, topLevelClass);
+  $backgroundAlpha: map-get($styleObj, backgroundAlpha);
+
+  @each $nt, $color in map-get($styleObj, colors) {
+    $aceNTClass: $acePrefix + $nt;
+    :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceNTClass},
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
+      .#{$aceNTClass}.#{$aceConsensusClass},
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
+      .#{$aceNTClass}:not(.#{$aceConsensusClass}),
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
+      .#{$aceNTClass}.#{$aceQueryClass},
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
+      .#{$aceNTClass}:not(.#{$aceQueryClass}) {
+      color: $color;
+      fill: $color;
+      background-color: rgba($color, $backgroundAlpha);
+    }
+  }
+}

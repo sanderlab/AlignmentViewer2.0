@@ -1,19 +1,21 @@
 import React from "react";
 import Alignment from "./Alignment";
-import AminoAcid from "./AminoAcid";
+import { Nucleotide, AminoAcid } from "./Residues";
 import * as PIXI from "pixi.js";
-import {
-  PixiComponent,
-  Stage,
-  Sprite,
-  AppContext,
-  Text
-} from "@inlet/react-pixi";
+import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";
 import { Viewport } from "pixi-viewport";
-import { TextStyle, Graphics } from "pixi.js";
+import { Graphics } from "pixi.js";
+import {
+  IColorScheme,
+  PositionsToStyle,
+  AlignmentTypes
+} from "./MolecularStyles";
 
 export interface IAlignmentCanvasComponentProps {
   alignment: Alignment;
+  alignmentType: AlignmentTypes;
+  positionsToStyle: PositionsToStyle;
+  colorScheme: IColorScheme;
   highlightRows?: [number, number]; //[startRowNum, endRowNum]
 
   readonly id: string;
@@ -111,10 +113,8 @@ export class AlignmentCanvasComponent extends React.Component<
       this.app.stage.children.forEach(sprite => {
         if (xy === "x") {
           sprite.scale.x = newValue;
-          console.log("scalex:" + newValue);
         } else {
           sprite.scale.y = newValue;
-          console.log("scaley:" + newValue);
         }
       });
     }
@@ -153,18 +153,35 @@ export class AlignmentCanvasComponent extends React.Component<
                 <PixiAlignmentTiled
                   id="tiled-alignment"
                   alignment={this.props.alignment}
+                  alignmentType={this.props.alignmentType}
+                  colorScheme={this.props.colorScheme}
+                  positionsToStyle={this.props.positionsToStyle}
                 />
                 {this.props.highlightRows ? (
-                  <AlignmentHighlighter
-                    x={0}
-                    y={this.props.highlightRows[0]}
-                    width={maxSeqLength}
-                    height={
-                      this.props.highlightRows[1] - this.props.highlightRows[0]
-                    }
-                    fillColor={0xff0000}
-                    fillAlpha={0.25}
-                  />
+                  <>
+                    <AlignmentHighlighter
+                      x={0}
+                      y={this.props.highlightRows[0]}
+                      width={maxSeqLength / 100} //1%
+                      height={
+                        this.props.highlightRows[1] -
+                        this.props.highlightRows[0]
+                      }
+                      fillColor={0xff0000}
+                      fillAlpha={0.75}
+                    />
+                    <AlignmentHighlighter
+                      x={maxSeqLength - maxSeqLength / 100}
+                      y={this.props.highlightRows[0]}
+                      width={maxSeqLength / 100} //1%
+                      height={
+                        this.props.highlightRows[1] -
+                        this.props.highlightRows[0]
+                      }
+                      fillColor={0xff0000}
+                      fillAlpha={0.75}
+                    />
+                  </>
                 ) : (
                   <></>
                 )}
@@ -172,7 +189,7 @@ export class AlignmentCanvasComponent extends React.Component<
             )}
           </AppContext.Consumer>
         </Stage>
-
+        {/*
         <SliderComponent
           init={1}
           min={1}
@@ -192,6 +209,7 @@ export class AlignmentCanvasComponent extends React.Component<
             this.sliderChanged(newValue, "y");
           }}
         ></SliderComponent>
+        */}
       </div>
     );
   }
@@ -199,146 +217,169 @@ export class AlignmentCanvasComponent extends React.Component<
 class PixiAlignmentTiled extends React.Component<
   IAlignmentCanvasComponentProps
 > {
-  private cache?: ITiledImages;
+  private currentColorScheme?: IColorScheme;
+  private currentPositionsStyled?: PositionsToStyle;
+
+  shouldComponentUpdate(nextProps: IAlignmentCanvasComponentProps) {
+    return (
+      nextProps.colorScheme !== this.currentColorScheme ||
+      nextProps.positionsToStyle !== this.currentPositionsStyled
+    );
+  }
 
   render() {
     if (!this.props.alignment) {
       return null;
     }
 
-    if (!this.cache) {
-      const sequences = this.props.alignment.getSequences();
-      const fullWidth = this.props.alignment.getMaxSequenceLength();
-      const fullHeight = sequences.length;
+    console.log("RERENDER");
+    const sequences = this.props.alignment.getSequences();
+    const fullWidth = this.props.alignment.getMaxSequenceLength();
+    const fullHeight = sequences.length;
 
-      //
-      //generate multiple tiled images from the alignment
-      //
-      const targetTileWidth = Math.min(400, fullWidth);
-      const targetTileHeight = Math.min(400, fullHeight);
+    //
+    //generate multiple tiled images from the alignment
+    //
+    const targetTileWidth = Math.min(400, fullWidth);
+    const targetTileHeight = Math.min(400, fullHeight);
 
-      const tiledImages: ITiledImages = {
-        targetTileWidth: targetTileWidth,
-        targetTileHeight: targetTileHeight,
-        lastTileWidth:
-          fullWidth % targetTileWidth !== 0
-            ? fullWidth % targetTileWidth
-            : targetTileWidth,
-        lastTileHeight:
-          fullHeight % targetTileHeight !== 0
-            ? fullHeight % targetTileHeight
-            : targetTileHeight,
-        numXTiles:
-          fullWidth % targetTileWidth !== 0
-            ? Math.floor(fullWidth / targetTileWidth) + 1
-            : Math.floor(fullWidth / targetTileWidth),
-        numYTiles:
-          fullHeight % targetTileHeight !== 0
-            ? Math.floor(fullHeight / targetTileHeight) + 1
-            : Math.floor(fullHeight / targetTileHeight),
-        tiles: []
-      };
+    const tiledImages: ITiledImages = {
+      targetTileWidth: targetTileWidth,
+      targetTileHeight: targetTileHeight,
+      lastTileWidth:
+        fullWidth % targetTileWidth !== 0
+          ? fullWidth % targetTileWidth
+          : targetTileWidth,
+      lastTileHeight:
+        fullHeight % targetTileHeight !== 0
+          ? fullHeight % targetTileHeight
+          : targetTileHeight,
+      numXTiles:
+        fullWidth % targetTileWidth !== 0
+          ? Math.floor(fullWidth / targetTileWidth) + 1
+          : Math.floor(fullWidth / targetTileWidth),
+      numYTiles:
+        fullHeight % targetTileHeight !== 0
+          ? Math.floor(fullHeight / targetTileHeight) + 1
+          : Math.floor(fullHeight / targetTileHeight),
+      tiles: []
+    };
 
+    for (
+      let tileYNumber = 0;
+      tileYNumber < tiledImages.numYTiles;
+      tileYNumber++
+    ) {
       for (
-        let tileYNumber = 0;
-        tileYNumber < tiledImages.numYTiles;
-        tileYNumber++
+        let tileXNumber = 0;
+        tileXNumber < tiledImages.numXTiles;
+        tileXNumber++
       ) {
-        for (
-          let tileXNumber = 0;
-          tileXNumber < tiledImages.numXTiles;
-          tileXNumber++
-        ) {
-          const tileCanvas = document.createElement(
-            "canvas"
-          ) as HTMLCanvasElement;
-          tileCanvas.height =
-            tileYNumber === tiledImages.numYTiles - 1
-              ? tiledImages.lastTileHeight
-              : targetTileHeight;
-          tileCanvas.width =
-            tileXNumber === tiledImages.numXTiles - 1
-              ? tiledImages.lastTileWidth
-              : targetTileWidth;
+        const tileCanvas = document.createElement(
+          "canvas"
+        ) as HTMLCanvasElement;
+        tileCanvas.height =
+          tileYNumber === tiledImages.numYTiles - 1
+            ? tiledImages.lastTileHeight
+            : targetTileHeight;
+        tileCanvas.width =
+          tileXNumber === tiledImages.numXTiles - 1
+            ? tiledImages.lastTileWidth
+            : targetTileWidth;
 
-          const seqOffsetY = tileYNumber * targetTileHeight;
-          const letterOffsetX = tileXNumber * targetTileWidth;
+        const seqOffsetY = tileYNumber * targetTileHeight;
+        const letterOffsetX = tileXNumber * targetTileWidth;
 
-          const tileCanvasContext = tileCanvas.getContext("2d");
-          tileCanvasContext?.fillRect(
-            0,
-            0,
-            tileCanvas.width,
-            tileCanvas.height
-          ); //unclear why necessary
-          const tileImageData = tileCanvasContext?.getImageData(
-            0,
-            0,
-            tileCanvas.width,
-            tileCanvas.height
-          );
+        const tileCanvasContext = tileCanvas.getContext("2d");
+        tileCanvasContext?.fillRect(0, 0, tileCanvas.width, tileCanvas.height); //unclear why necessary
+        const tileImageData = tileCanvasContext?.getImageData(
+          0,
+          0,
+          tileCanvas.width,
+          tileCanvas.height
+        );
 
-          if (tileImageData && tileCanvasContext) {
-            let imageDataIdx = 0;
-            for (let seqIdx = 0; seqIdx < tileCanvas.height; seqIdx++) {
-              const seq = sequences[seqIdx + seqOffsetY];
-              for (
-                let letterIdx = 0;
-                letterIdx < tileCanvas.width;
-                letterIdx++
-              ) {
-                const letter = seq.sequence[letterIdx + letterOffsetX];
-                const aa = AminoAcid.fromSingleLetterCode(letter);
+        const consensusSequence = this.props.alignment.getConsensus();
+        const querySequence = this.props.alignment.getTargetSequence().sequence;
+        const moleculeClass =
+          this.props.alignmentType === AlignmentTypes.AMINOACID
+            ? AminoAcid
+            : Nucleotide;
 
-                tileImageData.data[imageDataIdx] = aa.rgb.red;
-                tileImageData.data[imageDataIdx + 1] = aa.rgb.green;
-                tileImageData.data[imageDataIdx + 2] = aa.rgb.blue;
+        if (tileImageData && tileCanvasContext) {
+          let imageDataIdx = 0;
+          for (let seqIdx = 0; seqIdx < tileCanvas.height; seqIdx++) {
+            const seq = sequences[seqIdx + seqOffsetY];
+            for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
+              const letter = seq.sequence[letterIdx + letterOffsetX];
+              let molecule = moleculeClass.UNKNOWN;
 
-                imageDataIdx += 4;
+              if (this.props.positionsToStyle === PositionsToStyle.ALL) {
+                molecule = moleculeClass.fromSingleLetterCode(letter);
+              } else {
+                const isConsensus =
+                  consensusSequence[letterIdx + letterOffsetX].letter ===
+                  letter;
+                const isQuery =
+                  querySequence[letterIdx + letterOffsetX] === letter;
+                if (
+                  (this.props.positionsToStyle === PositionsToStyle.CONSENSUS &&
+                    isConsensus) ||
+                  (this.props.positionsToStyle ===
+                    PositionsToStyle.CONSENSUS_DIFF &&
+                    !isConsensus) ||
+                  (this.props.positionsToStyle === PositionsToStyle.QUERY &&
+                    isQuery) ||
+                  (this.props.positionsToStyle ===
+                    PositionsToStyle.QUERY_DIFF &&
+                    !isQuery)
+                ) {
+                  molecule = moleculeClass.fromSingleLetterCode(letter);
+                }
               }
-            }
-            tileCanvasContext.putImageData(tileImageData, 0, 0);
-          }
 
-          tiledImages.tiles.push({
-            tileX: tileXNumber,
-            tileY: tileYNumber,
-            pixelX: letterOffsetX,
-            pixelY: seqOffsetY,
-            width: tileCanvas.width,
-            height: tileCanvas.height,
-            image: tileCanvas
-          });
+              const colorScheme =
+                molecule.colors[this.props.colorScheme.commonName];
+              tileImageData.data[imageDataIdx] = colorScheme.rgb.red;
+              tileImageData.data[imageDataIdx + 1] = colorScheme.rgb.green;
+              tileImageData.data[imageDataIdx + 2] = colorScheme.rgb.blue;
+              tileImageData.data[imageDataIdx + 3] = 255; //alpha between 0 (transparent) and 255 (opaque)
+
+              imageDataIdx += 4;
+            }
+          }
+          tileCanvasContext.putImageData(tileImageData, 0, 0);
         }
+
+        tiledImages.tiles.push({
+          tileX: tileXNumber,
+          tileY: tileYNumber,
+          pixelX: letterOffsetX,
+          pixelY: seqOffsetY,
+          width: tileCanvas.width,
+          height: tileCanvas.height,
+          image: tileCanvas
+        });
       }
-      this.cache = tiledImages;
     }
 
-    //console.log("tiledImages", this.cache);
+    this.currentColorScheme = this.props.colorScheme;
+    this.currentPositionsStyled = this.props.positionsToStyle;
+
     return (
       <>
-        {this.cache.tiles.map(tile => (
+        {tiledImages.tiles.map(tile => (
           <Sprite
             source={tile.image}
             x={tile.pixelX}
             y={tile.pixelY}
-            key={`${tile.tileX}_${tile.tileY}`}
+            key={`${tile.tileX}_
+                  ${tile.tileY}_
+                  ${this.props.colorScheme.commonName}_
+                  ${this.props.positionsToStyle.key}_
+                  ${this.props.alignmentType.key}`}
           ></Sprite>
         ))}
-
-        {/* debugging - orient a zero zero 
-        <Text
-          text="0, 0"
-          anchor={0}
-          x={0}
-          y={0}
-          style={
-            new TextStyle({
-              fontSize: 25,
-              fill: ["#000"]
-            })
-          }
-        ></Text>*/}
       </>
     );
   }

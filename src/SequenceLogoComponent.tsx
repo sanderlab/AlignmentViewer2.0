@@ -1,12 +1,27 @@
+/**
+ *
+ * Sequence logo component.
+ * Inspired / derived from https://github.com/weng-lab/logojs-package
+ *  (but much simpler)
+ */
+
 import React from "react";
-import "./App.css";
 import Alignment from "./Alignment";
-import AminoAcid from "./AminoAcid";
-import { RawLogo } from "logojs-react";
+import { GlyphFactory } from "./SequenceLogoGlyphs";
+import { acePrefix } from "./MolecularStyles";
+
+interface IGlyphFrequency {
+  frequency: number;
+  letter: {
+    letter: string;
+    classNames: string;
+  };
+}
+interface IGlyphStack extends Array<IGlyphFrequency> {}
 
 export interface ISequenceLogoComponentProps {
   alignment: Alignment;
-  characterWidth: number;
+  glyphWidth: number;
 
   logoLoaded(node: HTMLDivElement): void;
 
@@ -35,59 +50,100 @@ export class SequenceLogoComponent extends React.Component<
   }
 
   render() {
-    //console.warn("render start");
-    if (!this.props.alignment || !this.props.characterWidth) {
+    if (!this.props.alignment || !this.props.glyphWidth) {
       return null;
     }
 
-    //console.warn("render continue");
-
     const positionalLetterCounts = this.props.alignment.getPositionalLetterCounts();
     const lettersSorted = this.props.alignment.getSortedAlphaLetters();
-    //console.log("positionalLetterCounts", positionalLetterCounts);
-    //console.log("lettersSorted:", lettersSorted);
 
     //calculate the frequencies of all letters in each column
     const frequencies: number[][] = [];
     positionalLetterCounts.forEach((letterCounts, position) => {
-      const totalCount = Object.keys(letterCounts).reduce((total, letter) => {
-        total += letterCounts[letter];
-        return total;
-      }, 0);
+      const totalCountAtPosition = Object.keys(letterCounts).reduce(
+        (total, letter) => {
+          total += letterCounts[letter];
+          return total;
+        },
+        0
+      );
 
-      const positionalFrequencies: number[] = lettersSorted.map(letter => {
+      const frequenciesAtPosition: number[] = lettersSorted.map(letter => {
         let freq = 0;
         if (letter in letterCounts) {
-          freq = letterCounts[letter] / totalCount;
+          freq = letterCounts[letter] / totalCountAtPosition;
         }
         return freq;
       });
 
-      frequencies.push(positionalFrequencies);
+      frequencies.push(frequenciesAtPosition);
     });
 
-    var alphabet = lettersSorted.map(letter => {
+    //load alphabet information
+    const sortedAlphabet = lettersSorted.map(letter => {
       return {
-        regex: letter,
-        className: AminoAcid.fromSingleLetterCode(letter).aceBaseClass
+        letter: letter,
+        classNames: acePrefix + letter
       };
     });
 
-    const glyphWidth = this.props.characterWidth;
-    const totalWidth = frequencies.length * glyphWidth;
+    //munge in alphabet and sort by frequency
+    const logoData = frequencies.map((frequenciesAtPosition, positionIdx) => {
+      return frequenciesAtPosition
+        .map((frequency, letterIdx) => {
+          return {
+            frequency: frequency,
+            letter: sortedAlphabet[letterIdx]
+          };
+        })
+        .filter(freq => {
+          return freq.frequency !== 0;
+        })
+        .sort((a, b) => (a.frequency > b.frequency ? 1 : -1));
+    });
 
+    const totalWidth = frequencies.length * this.props.glyphWidth;
+    const totalHeight = 100;
     this.loaded = true;
+
+    /**
+     * Generate the svg elements for a single position, i.e., column
+     */
+    const generateGlyphStack = (positionalFrequencies: IGlyphStack) => {
+      let dy = 100;
+
+      const xscale = 2 / logoData.length; // not exact, but works.
+      return positionalFrequencies.map((freq, idx) => {
+        dy = dy - freq.frequency * 100;
+
+        //return freq.letter.glyph()
+        const selectedGlyph = GlyphFactory.glyphFromChar(freq.letter.letter)({
+          className: freq.letter.classNames,
+          transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
+          key: "idx" + idx
+        });
+        return selectedGlyph;
+      });
+    };
+
     return (
       <div id={this.props.id} ref={e => this.divLoaded(e)}>
-        <svg viewBox={`0 10 ${totalWidth} 100`} style={{ width: totalWidth }}>
-          <g transform="translate(0,12) scale(1, 0.95)">
-            <RawLogo
-              values={frequencies}
-              alphabet={alphabet}
-              glyphWidth={glyphWidth}
-              stackHeight={100}
-            />
-          </g>
+        <svg
+          preserveAspectRatio="none"
+          viewBox={`0 0 ${logoData.length} 100`}
+          style={{ width: totalWidth, height: totalHeight }}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {logoData.map((singlePositionData, positionIdx) => {
+            return (
+              <g
+                transform={`translate(${positionIdx},0)`}
+                key={"p_" + positionIdx}
+              >
+                {generateGlyphStack(singlePositionData)}
+              </g>
+            );
+          })}
         </svg>
       </div>
     );

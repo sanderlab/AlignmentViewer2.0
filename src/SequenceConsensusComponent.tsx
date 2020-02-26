@@ -1,5 +1,4 @@
 import React from "react";
-import "./App.css";
 import Alignment from "./Alignment";
 
 export interface ISequenceConsensusComponentProps {
@@ -10,16 +9,14 @@ export interface ISequenceConsensusComponentProps {
   readonly id: string;
 }
 
-interface ISequenceConsensusComponentState {
-  
-}
+interface ISequenceConsensusComponentState {}
 
-export class SequenceConsensusComponent extends React.Component<ISequenceConsensusComponentProps, 
-                                                                ISequenceConsensusComponentState> {
-
-  
+export class SequenceConsensusComponent extends React.Component<
+  ISequenceConsensusComponentProps,
+  ISequenceConsensusComponentState
+> {
   render() {
-    if (!this.props.alignment || !this.props.characterWidth){
+    if (!this.props.alignment || !this.props.characterWidth) {
       return null;
     }
 
@@ -27,17 +24,13 @@ export class SequenceConsensusComponent extends React.Component<ISequenceConsens
     const totalWidth = this.props.characterWidth * maxSeqLength;
     const consensus = this.props.alignment.getConsensus();
 
-    
-
     return (
       <div
         id={this.props.id}
         ref={el => {
           this.props.consensusPlotLoaded(el as HTMLDivElement);
         }}
-      >
-        
-      </div>
+      ></div>
     );
   }
 }

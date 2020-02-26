@@ -1,5 +1,4 @@
 import React from "react";
-import "./App.css";
 import Alignment from "./Alignment";
 
 export interface ISequenceConservationComponentProps {
@@ -186,7 +185,7 @@ export class SequenceConservationComponent extends React.Component<
             <svg
               className={hoveredClass}
               viewBox={`3 -100 ${totalWidth} 100`}
-              style={{ width: totalWidth }}
+              width={totalWidth}
               onMouseEnter={() => this.handleSvgHover(true)}
               onMouseLeave={() => this.handleSvgHover(false)}
             >

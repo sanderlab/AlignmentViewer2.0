@@ -1,13 +1,21 @@
 import React from "react";
-import "./AceAlignmentMode";
-import "./App.css";
-import ace, { Ace } from "ace-builds";
-import { AceEditorTypes } from "./App";
+import ace from "ace-builds";
 import Alignment from "./Alignment";
+import {
+  PositionsToStyle,
+  AlignmentTypes,
+  AlignmentStyle
+} from "./MolecularStyles";
+import { Ace } from "ace-builds";
+import { AceEditorTypes } from "./App";
+import { defineNewAlignmentMode } from "./AceAlignmentMode";
 
 export interface IAceMSAComponentProps {
   editorLoaded(editor: Ace.Editor): void;
   alignment: Alignment;
+
+  topLevelClassNames?: string;
+
   readonly id: string;
   readonly type: AceEditorTypes;
 }
@@ -19,6 +27,7 @@ export interface IAceMSAComponentState {
   mouseContainerX?: number;
   mouseContainerY?: number;
   characterWidth?: number;
+  zoomLevel: number;
 }
 
 export class AceMSAComponent extends React.Component<
@@ -27,9 +36,14 @@ export class AceMSAComponent extends React.Component<
 > {
   private editor?: Ace.Editor;
 
+  static defaultProps: Partial<IAceMSAComponentProps> = {
+    //alignmentTypeClass: AlignmentTypes.AMINOACID.className,
+    //colorPositionClass: PositionsToStyle.ALL.className,
+    //colorSchemeClass: MolecularStyles.AminoAcidColorSchemes[0].className
+  };
+
   constructor(props: IAceMSAComponentProps) {
     super(props);
-    this.setState({});
   }
 
   /**
@@ -79,7 +93,9 @@ export class AceMSAComponent extends React.Component<
         AceEditorTypes.consensus
       ].includes(this.props.type)
     ) {
-      this.editor.session.setMode("ace/mode/alignment");
+      const modeName = "ace/mode/" + this.props.alignment.getName();
+      defineNewAlignmentMode(modeName, this.props.alignment);
+      this.editor.session.setMode(modeName);
     }
 
     //
@@ -179,6 +195,8 @@ export class AceMSAComponent extends React.Component<
     });
   }
 
+  changeZoom(zoomLevel: number) {}
+
   render() {
     let xOffsetIndicator;
     if (this.state && typeof this.state.mouseContainerX === "number") {
@@ -210,9 +228,11 @@ export class AceMSAComponent extends React.Component<
       );
     }
 
-    //console.log("RENDERING EDITOR: " + this.props.id);
     return (
-      <div className="ace-msa-holder" onMouseLeave={() => this.mouseExited()}>
+      <div
+        className={this.props.topLevelClassNames}
+        onMouseLeave={() => this.mouseExited()}
+      >
         <div id={this.props.id} ref={e => this.divLoaded(e)}></div>
         {xOffsetIndicator}
       </div>
