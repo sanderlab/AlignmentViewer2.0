@@ -77,6 +77,7 @@ $aaProps: (
   topLevelAlignmentClass: alignment-aa,
   styles: (
     Default: (
+      description: "Default",
       topLevelClass: $aaStyleClassPrefix + default,
       backgroundAlpha: $defaultBackgroundAlpha,
       colors: (
@@ -103,30 +104,33 @@ $aaProps: (
       )
     ),
     Hydrophobicity: (
+      description: "Hydrophobicity (red = hydrophilic, blue = hydrophobic)",
       topLevelClass: $aaStyleClassPrefix + hydrophobicity,
       backgroundAlpha: $defaultBackgroundAlpha,
-      colors: (
-        A: #009900,
-        R: #000cff,
-        N: #000cff,
-        D: #000cff,
-        C: #009900,
-        Q: #b5b5b5,
-        E: #000cff,
-        G: #b5b5b5,
-        H: #b5b5b5,
-        I: #ff0000,
-        L: #ff0000,
-        K: #000cff,
-        M: #ff0000,
-        F: #ff0000,
-        P: #000cff,
-        S: #b5b5b5,
-        T: #b5b5b5,
-        W: #ff0000,
-        Y: #009900,
-        V: #ff0000
-      )
+      //https://www.sigmaaldrich.com/life-science/metabolomics/learning-center/amino-acid-reference-chart.html
+        colors:
+        (
+          F: #ff0000,
+          I: #ff0000,
+          W: #ff0606,
+          L: #ff0606,
+          V: #ff4c4c,
+          M: #ff5252,
+          Y: #ff7777,
+          C: #ffa5a5,
+          A: #ffc0c0,
+          T: #e1e1ff,
+          H: #d0d0ff,
+          G: #b6b6ff,
+          S: #a5a5ff,
+          Q: #9595ff,
+          R: #8787ff,
+          K: #6969ff,
+          N: #5959ff,
+          E: #4f4fff,
+          P: #1d1dff,
+          D: #0000ff
+        )
     )
   )
 );
@@ -136,6 +140,7 @@ $ntProps: (
   topLevelAlignmentClass: alignment-nt,
   styles: (
     Default: (
+      description: "Default",
       topLevelClass: $ntStyleClassPrefix + default,
       backgroundAlpha: $defaultBackgroundAlpha,
       colors: (
@@ -178,6 +183,9 @@ $ntProps: (
 :export {
   @each $styleName, $styleObj in map-get($aaProps, styles) {
     #{unquote("aaStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
+    #{unquote("aaStyDesc_"+$styleName)}: unquote(
+      map-get($styleObj, description)
+    );
     #{unquote("aaStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
     #{unquote("aaStyColorOrder_"+$styleName)}: map-keys(
       map-get($styleObj, colors)
@@ -190,6 +198,9 @@ $ntProps: (
 :export {
   @each $styleName, $styleObj in map-get($ntProps, styles) {
     #{unquote("ntStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
+    #{unquote("ntStyDesc_"+$styleName)}: unquote(
+      map-get($styleObj, description)
+    );
     #{unquote("ntStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
     #{unquote("ntStyColorOrder_"+$styleName)}: map-keys(
       map-get($styleObj, colors)

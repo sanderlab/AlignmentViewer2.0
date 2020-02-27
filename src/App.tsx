@@ -145,7 +145,7 @@ class App extends React.Component<AppProps, AppState> {
                           });
                         }}
                       />
-                      {colorScheme.commonName}
+                      {colorScheme.description}
                     </label>
                   </div>
                 );

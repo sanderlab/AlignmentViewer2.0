@@ -14,6 +14,7 @@ import styles from "./MolecularStyles.module.scss";
  */
 export interface IColorScheme {
   commonName: string;
+  description: string;
   backgroundAlpha: number;
   className: string;
   colors: {
@@ -41,8 +42,10 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
       const hexValues = styles[
         moleculeType + "StyColors_" + colorSchemeName
       ].split(", ");
+      const description = styles[moleculeType + "StyDesc_" + colorSchemeName];
       acc.push({
         commonName: colorSchemeName,
+        description: description,
         className: styles[styleName],
         backgroundAlpha: parseFloat(
           styles[moleculeType + "StyBGAlpha_" + colorSchemeName]
