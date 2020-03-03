@@ -10,6 +10,11 @@ import Alignment from "./Alignment";
 import { GlyphFactory } from "./SequenceLogoGlyphs";
 import { acePrefix } from "./MolecularStyles";
 
+export enum LOGO_TYPES {
+  LETTERS = "letter stack",
+  BARS = "bar plot"
+}
+
 interface IGlyphFrequency {
   frequency: number;
   letter: {
@@ -22,6 +27,7 @@ interface IGlyphStack extends Array<IGlyphFrequency> {}
 export interface ISequenceLogoComponentProps {
   alignment: Alignment;
   glyphWidth: number;
+  logoType: LOGO_TYPES;
 
   logoLoaded(node: HTMLDivElement): void;
 
@@ -42,8 +48,8 @@ export class SequenceLogoComponent extends React.Component<
     }
   }
 
-  shouldComponentUpdate() {
-    if (this.loaded === false) {
+  shouldComponentUpdate(nextProps: ISequenceLogoComponentProps) {
+    if (this.loaded === false || this.props.logoType !== nextProps.logoType) {
       return true;
     }
     return false;
@@ -108,19 +114,31 @@ export class SequenceLogoComponent extends React.Component<
 
     /**
      * Generate the svg elements for a single position, i.e., column
+     *
      */
-    const generateGlyphStack = (positionalFrequencies: IGlyphStack) => {
+    const generateStack = (positionalFrequencies: IGlyphStack) => {
       let dy = 100;
 
       const xscale = 2 / logoData.length; // not exact, but works.
       return positionalFrequencies.map((freq, idx) => {
         dy = dy - freq.frequency * 100;
 
-        //return freq.letter.glyph()
+        if (this.props.logoType === LOGO_TYPES.BARS) {
+          return (
+            <rect
+              width="100"
+              height="100"
+              transform={`translate(0, ${dy}) scale(${xscale},${freq.frequency})`}
+              className={freq.letter.classNames}
+              key={`idxrect_${idx}`}
+            ></rect>
+          );
+        }
+
         const selectedGlyph = GlyphFactory.glyphFromChar(freq.letter.letter)({
           className: freq.letter.classNames,
           transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
-          key: "idx" + idx
+          key: `idxglyph_${idx}`
         });
         return selectedGlyph;
       });
@@ -140,7 +158,7 @@ export class SequenceLogoComponent extends React.Component<
                 transform={`translate(${positionIdx},0)`}
                 key={"p_" + positionIdx}
               >
-                {generateGlyphStack(singlePositionData)}
+                {generateStack(singlePositionData)}
               </g>
             );
           })}

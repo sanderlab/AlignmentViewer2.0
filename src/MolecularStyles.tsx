@@ -80,8 +80,12 @@ export class AlignmentTypes {
     ALL_NUCLEOTIDE_COLORSCHEMES
   );
 
-  static listAll() {
-    return [AlignmentTypes.NUCLEOTIDE, AlignmentTypes.AMINOACID];
+  static list = [AlignmentTypes.AMINOACID, AlignmentTypes.NUCLEOTIDE];
+
+  static fromKey(key: string) {
+    return AlignmentTypes.list.find(at => {
+      return at.key === key;
+    });
   }
 
   private constructor(
@@ -125,14 +129,18 @@ export class PositionsToStyle {
     styles.styPosConsensusDiffClass
   );
 
-  static listAll() {
-    return [
-      PositionsToStyle.ALL,
-      PositionsToStyle.QUERY,
-      PositionsToStyle.QUERY_DIFF,
-      PositionsToStyle.CONSENSUS,
-      PositionsToStyle.CONSENSUS_DIFF
-    ];
+  static list = [
+    PositionsToStyle.ALL,
+    PositionsToStyle.QUERY,
+    PositionsToStyle.QUERY_DIFF,
+    PositionsToStyle.CONSENSUS,
+    PositionsToStyle.CONSENSUS_DIFF
+  ];
+
+  static fromKey(key: string) {
+    return PositionsToStyle.list.find(at => {
+      return at.key === key;
+    });
   }
 
   // private to disallow creating other instances of this type

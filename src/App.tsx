@@ -4,7 +4,7 @@ import { Ace } from "ace-builds";
 import Alignment from "./Alignment";
 import ScrollSync, { ScrollType } from "./ScrollSync";
 import { AceMSAComponent } from "./AceMSAComponent";
-import { SequenceLogoComponent } from "./SequenceLogoComponent";
+import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
 import { SequenceConservationComponent } from "./SequenceConservationComponent";
 import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
 import {
@@ -31,7 +31,8 @@ export interface AppState {
   alignmentEditorFirstRow?: number;
   alignmentEditorLastRow?: number;
 
-  alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  logoPlotStyle: LOGO_TYPES;
 }
 
 class App extends React.Component<AppProps, AppState> {
@@ -40,7 +41,8 @@ class App extends React.Component<AppProps, AppState> {
     this.state = {
       aceEditors: [],
       aceCharacterWidth: 0,
-      alignmentStyle: new AminoAcidAlignmentStyle() //TODO - decide based on alignment
+      style: new AminoAcidAlignmentStyle(), //TODO - decide based on alignment
+      logoPlotStyle: LOGO_TYPES.LETTERS
     };
 
     //setup scroll groups
@@ -92,95 +94,112 @@ class App extends React.Component<AppProps, AppState> {
       <div className="App">
         <div id="column_mouseover"></div>
 
+        {/* global parameters */}
         <div className="testing_box">
           <form>
-            <label>Alignment Type:</label>
-            {AlignmentTypes.listAll().map(alignmentType => {
-              return (
-                <div className="radio" key={alignmentType.className}>
-                  <label>
-                    <input
-                      type="radio"
-                      value={alignmentType.className}
-                      checked={
-                        this.state.alignmentStyle.alignmentType ===
-                        alignmentType
+            <div>
+              <label>
+                Alignment Type:
+                <select
+                  value={this.state.style.alignmentType.key}
+                  onChange={e =>
+                    this.setState({
+                      style: AlignmentStyle.fromAlignmentType(
+                        AlignmentTypes.fromKey(e.target.value)!
+                      )
+                    })
+                  }
+                >
+                  {AlignmentTypes.list.map(alignmentType => {
+                    return (
+                      <option value={alignmentType.key}>
+                        {alignmentType.description}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            </div>
+            <div>
+              <label>
+                Style:
+                <select
+                  value={this.state.style.alignmentType.allColorSchemes.indexOf(
+                    this.state.style.colorScheme
+                  )}
+                  onChange={e => {
+                    this.setState({
+                      style: {
+                        ...this.state.style,
+                        colorScheme: this.state.style.alignmentType
+                          .allColorSchemes[parseInt(e.target.value)]
                       }
-                      onChange={e =>
-                        this.setState({
-                          alignmentStyle: AlignmentStyle.fromAlignmentType(
-                            alignmentType
-                          )
-                        })
+                    });
+                  }}
+                >
+                  {this.state.style.alignmentType.allColorSchemes.map(
+                    (colorScheme: IColorScheme, index: number) => {
+                      return (
+                        <option key={index} value={index}>
+                          {colorScheme.description}
+                        </option>
+                      );
+                    }
+                  )}
+                </select>
+              </label>
+            </div>
+            <div>
+              <label>
+                Positions to Style:
+                <select
+                  value={PositionsToStyle.list.indexOf(
+                    this.state.style.positionsToStyle
+                  )}
+                  onChange={e => {
+                    this.setState({
+                      style: {
+                        ...this.state.style,
+                        positionsToStyle:
+                          PositionsToStyle.list[parseInt(e.target.value)]
                       }
-                    />
-                    {alignmentType.description}
-                  </label>
-                </div>
-              );
-            })}
-          </form>
+                    });
+                  }}
+                >
+                  {PositionsToStyle.list.map(
+                    (pts: PositionsToStyle, index: number) => {
+                      return (
+                        <option key={index} value={index}>
+                          {pts.description}
+                        </option>
+                      );
+                    }
+                  )}
+                </select>
+              </label>
+            </div>
 
-          <form>
-            <label>Style:</label>
-            {this.state.alignmentStyle.alignmentType.allColorSchemes.map(
-              (colorScheme: IColorScheme) => {
-                return (
-                  <div className="radio" key={colorScheme.className}>
-                    <label>
-                      <input
-                        type="radio"
-                        value={colorScheme.className}
-                        checked={
-                          this.state.alignmentStyle.colorScheme === colorScheme
-                        }
-                        onChange={e => {
-                          const newAlignmentStyle = AlignmentStyle.fromAlignmentType(
-                            this.state.alignmentStyle.alignmentType
-                          );
-                          newAlignmentStyle.colorScheme = colorScheme;
-                          newAlignmentStyle.positionsToStyle = this.state.alignmentStyle.positionsToStyle;
-                          this.setState({
-                            alignmentStyle: newAlignmentStyle
-                          });
-                        }}
-                      />
-                      {colorScheme.description}
-                    </label>
-                  </div>
-                );
-              }
-            )}
-          </form>
-
-          <form>
-            <label>Positions to Style:</label>
-            {PositionsToStyle.listAll().map(ptc => {
-              return (
-                <div className="radio" key={ptc.className}>
-                  <label>
-                    <input
-                      type="radio"
-                      value={ptc.className}
-                      checked={
-                        this.state.alignmentStyle.positionsToStyle === ptc
-                      }
-                      onChange={e => {
-                        const newAlignmentStyle = AlignmentStyle.fromAlignmentType(
-                          this.state.alignmentStyle.alignmentType
-                        );
-                        newAlignmentStyle.colorScheme = this.state.alignmentStyle.colorScheme;
-                        newAlignmentStyle.positionsToStyle = ptc;
-                        this.setState({
-                          alignmentStyle: newAlignmentStyle
-                        });
-                      }}
-                    />
-                    {ptc.description}
-                  </label>
-                </div>
-              );
-            })}
+            <div>
+              <label>
+                Sequence logo Style:
+                <select
+                  value={this.state.logoPlotStyle}
+                  onChange={e => {
+                    this.setState({
+                      logoPlotStyle: e.target.value as LOGO_TYPES
+                    });
+                  }}
+                >
+                  {Object.values(LOGO_TYPES).map(logoType => {
+                    return (
+                      <option key={logoType} value={logoType}>
+                        {logoType}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            </div>
           </form>
         </div>
 
@@ -197,8 +216,8 @@ class App extends React.Component<AppProps, AppState> {
           }
         </div>
         <div
-          className={`logo_box ${this.state.alignmentStyle.alignmentType.className}
-                               ${this.state.alignmentStyle.colorScheme.className} 
+          className={`logo_box ${this.state.style.alignmentType.className}
+                               ${this.state.style.colorScheme.className} 
                                ${PositionsToStyle.ALL.className}`}
         >
           {
@@ -206,6 +225,7 @@ class App extends React.Component<AppProps, AppState> {
               id="sequence_logo"
               alignment={this.state.alignment}
               glyphWidth={this.state.aceCharacterWidth}
+              logoType={this.state.logoPlotStyle}
               logoLoaded={element => {
                 this._elementLoaded("sequence_logo", element as HTMLElement);
               }}
@@ -219,9 +239,9 @@ class App extends React.Component<AppProps, AppState> {
               type={AceEditorTypes.consensus}
               alignment={this.state.alignment}
               topLevelClassNames={[
-                this.state.alignmentStyle.alignmentType.className,
-                this.state.alignmentStyle.positionsToStyle.className,
-                this.state.alignmentStyle.colorScheme.className
+                this.state.style.alignmentType.className,
+                this.state.style.positionsToStyle.className,
+                this.state.style.colorScheme.className
               ].join(" ")}
               editorLoaded={editor => {
                 this._aceEditorLoaded("ace-consensusseq", editor);
@@ -236,9 +256,9 @@ class App extends React.Component<AppProps, AppState> {
               type={AceEditorTypes.query}
               alignment={this.state.alignment}
               topLevelClassNames={[
-                this.state.alignmentStyle.alignmentType.className,
-                this.state.alignmentStyle.positionsToStyle.className,
-                this.state.alignmentStyle.colorScheme.className
+                this.state.style.alignmentType.className,
+                this.state.style.positionsToStyle.className,
+                this.state.style.colorScheme.className
               ].join(" ")}
               editorLoaded={editor => {
                 this._aceEditorLoaded("ace-queryseq", editor);
@@ -263,9 +283,9 @@ class App extends React.Component<AppProps, AppState> {
             <AlignmentCanvasComponent
               id="alignment_canvas"
               alignment={this.state.alignment}
-              alignmentType={this.state.alignmentStyle.alignmentType}
-              positionsToStyle={this.state.alignmentStyle.positionsToStyle}
-              colorScheme={this.state.alignmentStyle.colorScheme}
+              alignmentType={this.state.style.alignmentType}
+              positionsToStyle={this.state.style.positionsToStyle}
+              colorScheme={this.state.style.colorScheme}
               highlightRows={
                 this.state.alignmentEditorFirstRow !== undefined &&
                 this.state.alignmentEditorLastRow !== undefined
@@ -285,9 +305,9 @@ class App extends React.Component<AppProps, AppState> {
             type={AceEditorTypes.alignment}
             alignment={this.state.alignment}
             topLevelClassNames={[
-              this.state.alignmentStyle.alignmentType.className,
-              this.state.alignmentStyle.positionsToStyle.className,
-              this.state.alignmentStyle.colorScheme.className
+              this.state.style.alignmentType.className,
+              this.state.style.positionsToStyle.className,
+              this.state.style.colorScheme.className
             ].join(" ")}
             editorLoaded={editor => {
               this._aceEditorLoaded("ace-alignment", editor);

@@ -104,10 +104,35 @@ $aaProps: (
       )
     ),
     Hydrophobicity: (
-      description: "Hydrophobicity (red = hydrophilic, blue = hydrophobic)",
-      topLevelClass: $aaStyleClassPrefix + hydrophobicity,
+      description: "Hydrophobicity",
+      //(red = hydrophilic, blue = hydrophobic)
+        topLevelClass: $aaStyleClassPrefix + hydrophobicity,
       backgroundAlpha: $defaultBackgroundAlpha,
-      //https://www.sigmaaldrich.com/life-science/metabolomics/learning-center/amino-acid-reference-chart.html
+      /*
+      colors based on: https://www.sigmaaldrich.com/life-science/metabolomics/learning-center/amino-acid-reference-chart.html
+      to get hex in python:
+          from matplotlib import cm
+          def rgb2hex(r,g,b):
+            return "#{:02x}{:02x}{:02x}".format(r,g,b)
+
+          redBlueColormap = cm.get_cmap('bwr', 155)
+          aas = {  
+            'F': 100,   'I': 99,  'W': 97,  'L': 97,  'V': 76,  'M': 74, 'Y': 63,  
+            'C': 49,  'A': 41,   'T': 13,  'H': 8,  'G': 0, 'S': -5,  'Q': -10,   
+            'R': -14,  'K': -23,  'N': -28,  'E': -31, 'P': -46,  'D': -55
+          }
+
+          //normalize and convert to rgb
+          rgba = {}
+          for aa in aas.keys(): 
+            rgba[aa] = redBlueColormap(aas[aa]+55)
+
+          hex = {}
+          for aa in aas.keys(): 
+              hex[aa] = rgb2hex(int(rgba[aa][0]*255), int(rgba[aa][1]*255), int(rgba[aa][2]*255))
+
+          print(hex);
+      */
         colors:
         (
           F: #ff0000,
@@ -218,11 +243,6 @@ $ntProps: (
 // as global selector to avoid distinct naming from css modules.
 //
 
-:global .ace_S {
-  //SPECIAL CASE: the glyph for "S" needs to have a fill and stroke
-  stroke: #000000;
-}
-
 @each $styleName, $styleObj in map-get($aaProps, styles) {
   $alignmentClass: map-get($aaProps, topLevelAlignmentClass);
   $styleClass: map-get($styleObj, topLevelClass);
@@ -247,6 +267,7 @@ $ntProps: (
         //serine glyph needs stoke coloring also
         color: $color;
         stroke: $color;
+        //fill: $color;
         fill: #ffffff;
         background-color: rgba($color, $backgroundAlpha);
       } @else {
@@ -286,6 +307,46 @@ $ntProps: (
       color: $color;
       fill: $color;
       background-color: rgba($color, $backgroundAlpha);
+    }
+  }
+}
+
+/**
+ *
+ *
+ * SPECIAL CASES
+ *
+ *
+ */
+
+//SPECIAL CASE 1
+//
+//the glyph for "S" needs to have a fill and stroke
+//this selector captures an odd case - when user selects
+//nucleotide alignment and there is an S in the alignment
+//it would disappear in the logo plot without this class.
+:global .#{$acePrefix}S {
+  stroke: #000000;
+}
+
+//SPECIAL CASE 2
+//
+//logo plot fo "S" when rectangles are shown needs to have
+//fill with the color, not white as required for the glyph
+@each $styleName, $styleObj in map-get($aaProps, styles) {
+  $alignmentClass: map-get($aaProps, topLevelAlignmentClass);
+  $styleClass: map-get($styleObj, topLevelClass);
+
+  @each $aa, $color in map-get($styleObj, colors) {
+    $aceAAClass: $acePrefix + $aa;
+    :global
+      .#{$alignmentClass}.#{$styleClass}.#{$styPosAll}
+      svg
+      rect.#{$aceAAClass} {
+      @if $aa == S {
+        //serine glyph needs stoke coloring also
+        fill: $color;
+      }
     }
   }
 }
