@@ -129,7 +129,7 @@ export class AlignmentCanvasComponent extends React.Component<
 
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST; //
     //TODO: still anti-aliases on retina devices. probably requires
-    //      writing 4x the pixels and telling pixi that it is a reina
+    //      writing 4x the pixels and telling pixi that it is a retina
     //      image
     //PIXI.settings.RESOLUTION = 2;
     //PIXI.settings.ROUND_PIXELS = true; //
