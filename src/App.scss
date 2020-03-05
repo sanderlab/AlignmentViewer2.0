@@ -1,3 +1,30 @@
 /** App.scss */
 .App {
 }
+
+.settings_box {
+  font-size: 11px;
+  margin: auto;
+  width: 450px;
+  border: 2px solid black;
+  padding: 15px;
+}
+.settings_box h3 {
+  padding-top: 0;
+  margin-top: 0;
+  text-align: center;
+}
+
+.settings_box label strong {
+  width: 200px;
+  display: inline-block;
+}
+.settings_box label select,
+.settings_box label .zoom-level {
+  width: 200px;
+  display: inline-block;
+}
+
+.av_holder {
+  padding-top: 20px;
+}
