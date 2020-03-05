@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SequenceConservationComponent Should render when given default props. 1`] = `
+<div>
+  <div
+    style={
+      Object {
+        "backgroundColor": "rgba(255,255,255,0.9)",
+        "border": "solid 1px black",
+        "color": "red",
+        "padding": "3px",
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+        "visibility": "hidden",
+        "zIndex": 1000,
+      }
+    }
+  >
+    <span
+      style={
+        Object {
+          "color": "red",
+        }
+      }
+    >
+      Entropy
+    </span>
+    <span
+      style={
+        Object {
+          "color": "green",
+          "paddingLeft": 10,
+        }
+      }
+    >
+      # Gaps
+    </span>
+  </div>
+  <div
+    id="test-sequence-logo-component"
+  >
+    <div
+      className="svg_container"
+    >
+      <svg
+        className="conservation"
+        onMouseEnter={[Function]}
+        onMouseLeave={[Function]}
+        viewBox="3 -100 -3 100"
+        width={-3}
+      >
+        <g
+          className="gapCount"
+          transform="scale(1, -1)"
+        />
+        <g
+          className="entropy"
+          transform="scale(1, -1)"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+`;

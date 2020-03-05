@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SequenceLogoComponent Should render when given default props. 1`] = `
+<div
+  id="test-sequence-logo-component"
+>
+  <svg
+    preserveAspectRatio="none"
+    style={
+      Object {
+        "height": 100,
+        "width": 0,
+      }
+    }
+    viewBox="0 0 0 100"
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
+`;

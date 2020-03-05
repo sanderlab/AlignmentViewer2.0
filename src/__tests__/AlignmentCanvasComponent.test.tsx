@@ -3,8 +3,7 @@ import { shallow, default as Enzyme } from "enzyme";
 import "jest-canvas-mock";
 import Adapter from "enzyme-adapter-react-16";
 
-Enzyme.configure({ adapter: new Adapter() });
-import { default as Alignment } from "../Alignment";
+import Alignment from "../Alignment";
 import { AlignmentCanvasComponent } from "../AlignmentCanvasComponent";
 import {
   AlignmentTypes,
@@ -13,8 +12,8 @@ import {
 } from "../MolecularStyles";
 
 describe("AlignmentCanvasComponent", () => {
-  beforeEach(() => {
-    jest.doMock("pixi.js");
+  beforeAll(() => {
+    Enzyme.configure({ adapter: new Adapter() });
   });
   it("Should render", () => {
     const wrapper = shallow(

@@ -15,7 +15,6 @@ describe("defineNewAlignmentMode", () => {
     mode => {
       const expectedError =
         "ace mode name must be of the form '/ace/mode/MODENAME'";
-      console.log(mode);
       expect(() =>
         defineNewAlignmentMode(mode, new Alignment("", []))
       ).toThrowError(expectedError);
