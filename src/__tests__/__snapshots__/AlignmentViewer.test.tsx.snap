@@ -1,0 +1,190 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlignmentViewer Should render 1`] = `
+<div
+  className="AlignmentViewer"
+>
+  <div
+    id="column_mouseover"
+  />
+  <div
+    className="conservation_box"
+  >
+    <SequenceConservationComponent
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Array [],
+        }
+      }
+      characterWidth={0}
+      conservationPlotLoaded={[Function]}
+      id="sequence_conservation"
+    />
+  </div>
+  <div
+    className="logo_box undefined
+                                
+                               undefined"
+  >
+    <SequenceLogoComponent
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Array [],
+        }
+      }
+      glyphWidth={0}
+      id="sequence_logo"
+      logoLoaded={[Function]}
+      logoType="bar plot"
+    />
+  </div>
+  <div
+    className="consensusseq_box"
+  >
+    <AceMSAComponent
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Array [],
+        }
+      }
+      editorLoaded={[Function]}
+      fontSize={0}
+      id="ace-consensusseq"
+      topLevelClassNames="  "
+      type={1}
+    />
+  </div>
+  <div
+    className="queryseq_box"
+  >
+    <AceMSAComponent
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Array [],
+        }
+      }
+      editorLoaded={[Function]}
+      fontSize={0}
+      id="ace-queryseq"
+      topLevelClassNames="  "
+      type={0}
+    />
+  </div>
+  <div
+    className="position_box"
+  >
+    <AceMSAComponent
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Array [],
+        }
+      }
+      editorLoaded={[Function]}
+      fontSize={0}
+      id="ace-positions"
+      type={3}
+    />
+  </div>
+  <div
+    className="datatable_box"
+    id="datatable"
+  >
+    <AlignmentCanvasComponent
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Array [],
+        }
+      }
+      alignmentType={
+        AlignmentTypes {
+          "allColorSchemes": Array [
+            Object {
+              "backgroundAlpha": NaN,
+              "className": "",
+              "colors": Object {
+                "": "",
+              },
+              "commonName": "Default",
+              "description": "",
+            },
+          ],
+          "className": undefined,
+          "description": "Nucleotide Sequences",
+          "key": "nucleotide-alignment",
+        }
+      }
+      colorScheme={
+        Object {
+          "backgroundAlpha": NaN,
+          "className": "",
+          "colors": Object {
+            "": "",
+          },
+          "commonName": "Default",
+          "description": "",
+        }
+      }
+      id="alignment_canvas"
+      positionsToStyle={
+        PositionsToStyle {
+          "className": undefined,
+          "description": "All",
+          "key": "all",
+        }
+      }
+    />
+  </div>
+  <div
+    className="alignment_box"
+  >
+    <AceMSAComponent
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Array [],
+        }
+      }
+      characterSizeChanged={[Function]}
+      editorLoaded={[Function]}
+      fontSize={0}
+      id="ace-alignment"
+      topLevelClassNames="  "
+      type={2}
+    />
+  </div>
+</div>
+`;
