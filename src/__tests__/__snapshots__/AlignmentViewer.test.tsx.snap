@@ -65,7 +65,7 @@ exports[`AlignmentViewer Should render 1`] = `
       editorLoaded={[Function]}
       fontSize={0}
       id="ace-consensusseq"
-      topLevelClassNames="  "
+      topLevelClassNames="   "
       type={1}
     />
   </div>
@@ -86,7 +86,7 @@ exports[`AlignmentViewer Should render 1`] = `
       editorLoaded={[Function]}
       fontSize={0}
       id="ace-queryseq"
-      topLevelClassNames="  "
+      topLevelClassNames="   "
       type={0}
     />
   </div>
@@ -155,6 +155,7 @@ exports[`AlignmentViewer Should render 1`] = `
         }
       }
       id="alignment_canvas"
+      mouseDown={[Function]}
       positionsToStyle={
         PositionsToStyle {
           "className": undefined,
@@ -182,7 +183,7 @@ exports[`AlignmentViewer Should render 1`] = `
       editorLoaded={[Function]}
       fontSize={0}
       id="ace-alignment"
-      topLevelClassNames="  "
+      topLevelClassNames="   "
       type={2}
     />
   </div>

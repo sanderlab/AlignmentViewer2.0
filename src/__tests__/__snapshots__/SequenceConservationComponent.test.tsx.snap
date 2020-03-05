@@ -20,7 +20,7 @@ exports[`SequenceConservationComponent Should render when given default props. 1
     <span
       style={
         Object {
-          "color": "red",
+          "color": "#000000",
         }
       }
     >
@@ -29,7 +29,7 @@ exports[`SequenceConservationComponent Should render when given default props. 1
     <span
       style={
         Object {
-          "color": "green",
+          "color": "#b7b7b7",
           "paddingLeft": 10,
         }
       }
@@ -47,16 +47,21 @@ exports[`SequenceConservationComponent Should render when given default props. 1
         className="conservation"
         onMouseEnter={[Function]}
         onMouseLeave={[Function]}
-        viewBox="3 -100 -3 100"
-        width={-3}
+        preserveAspectRatio="none"
+        style={
+          Object {
+            "height": 100,
+            "width": -3,
+          }
+        }
+        viewBox="0 0 -1 100"
+        xmlns="http://www.w3.org/2000/svg"
       >
         <g
           className="gapCount"
-          transform="scale(1, -1)"
         />
         <g
           className="entropy"
-          transform="scale(1, -1)"
         />
       </svg>
     </div>
