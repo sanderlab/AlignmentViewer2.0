@@ -7,9 +7,6 @@ jestGlobal["ts-jest"] = {
   tsConfig: "test/tsconfig.json"
 };
 
-jestGlobal["ts-jest"] = {
-  tsConfig: "test/tsconfig.json"
-};
 export default () => {
   Enzyme.configure({ adapter: new Adapter() });
 };
