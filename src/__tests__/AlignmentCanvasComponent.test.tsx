@@ -1,7 +1,6 @@
 import * as React from "react";
-import { shallow } from "enzyme";
+import { shallow, default as Enzyme } from "enzyme";
 import "jest-canvas-mock";
-import Enzyme from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 
 Enzyme.configure({ adapter: new Adapter() });

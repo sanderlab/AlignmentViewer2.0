@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AceMSAComponent Should render 1`] = `
+<div
+  onMouseLeave={[Function]}
+>
+  <div />
+</div>
+`;

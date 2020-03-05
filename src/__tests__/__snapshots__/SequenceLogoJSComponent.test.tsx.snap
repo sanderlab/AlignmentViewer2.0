@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SequenceLogoJSComponent Should render 1`] = `
+<div
+  id="test-Sequence-Logo"
+>
+  <svg
+    style={
+      Object {
+        "width": 0,
+      }
+    }
+    viewBox="0 10 0 100"
+  >
+    <g
+      transform="translate(0,12) scale(1, 0.95)"
+    >
+      <kt
+        alphabet={Array []}
+        glyphWidth={2}
+        stackHeight={100}
+        values={Array []}
+      />
+    </g>
+  </svg>
+</div>
+`;

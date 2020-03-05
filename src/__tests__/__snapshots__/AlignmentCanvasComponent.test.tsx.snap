@@ -1,3 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AlignmentCanvasComponent Should render 1`] = `ShallowWrapper {}`;
+exports[`AlignmentCanvasComponent Should render 1`] = `
+<div
+  id="My-Alignment-ID"
+>
+  <t
+    height={650}
+    onMount={[Function]}
+    onUnmount={[Function]}
+    options={Object {}}
+    raf={true}
+    renderOnComponentChange={true}
+    width={485}
+  >
+    <ContextConsumer>
+      <Component />
+    </ContextConsumer>
+    <ContextConsumer>
+      <Component />
+    </ContextConsumer>
+  </t>
+</div>
+`;
