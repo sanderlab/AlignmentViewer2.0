@@ -8,7 +8,8 @@ import {
   AlignmentStyle,
   AlignmentTypes,
   PositionsToStyle,
-  IColorScheme
+  IColorScheme,
+  ResidueDetailTypes
 } from "./MolecularStyles";
 import { LOGO_TYPES } from "./SequenceLogoComponent";
 
@@ -47,8 +48,11 @@ export default class App extends React.Component<AppProps, AppState> {
   render() {
     return !this.state || !this.state.alignment || !this.state.style ? null : (
       <div>
-        <div className="testing_box">
+        <div className="settings_box">
           <form>
+            <div>
+              <h3>AlignmentViewer 2.0 Settings Demo</h3>
+            </div>
             <div>
               <label>
                 <strong>Alignment Type:</strong>
@@ -98,6 +102,32 @@ export default class App extends React.Component<AppProps, AppState> {
                       );
                     }
                   )}
+                </select>
+              </label>
+            </div>
+            <div>
+              <label>
+                <strong>Residue Detail:</strong>
+                <select
+                  value={this.state.style.residueDetail.key}
+                  onChange={e => {
+                    this.setState({
+                      style: {
+                        ...this.state.style!,
+                        residueDetail: ResidueDetailTypes.fromKey(
+                          e.target.value
+                        )!
+                      }
+                    });
+                  }}
+                >
+                  {ResidueDetailTypes.list.map(rd => {
+                    return (
+                      <option key={rd.key} value={rd.key}>
+                        {rd.description}
+                      </option>
+                    );
+                  })}
                 </select>
               </label>
             </div>
@@ -156,40 +186,44 @@ export default class App extends React.Component<AppProps, AppState> {
             <div>
               <label>
                 <strong>Zoom:</strong>
-                <button
-                  type="button"
-                  disabled={this.state.zoomLevel < 3}
-                  onClick={e => {
-                    this.setState({
-                      zoomLevel: this.state.zoomLevel - 1
-                    });
-                  }}
-                >
-                  -
-                </button>
-                {this.state.zoomLevel}
-                <button
-                  type="button"
-                  disabled={this.state.zoomLevel > 15}
-                  onClick={e => {
-                    this.setState({
-                      zoomLevel: this.state.zoomLevel + 1
-                    });
-                  }}
-                >
-                  +
-                </button>
+                <div className="zoom-level">
+                  <button
+                    type="button"
+                    disabled={this.state.zoomLevel < 3}
+                    onClick={e => {
+                      this.setState({
+                        zoomLevel: this.state.zoomLevel - 1
+                      });
+                    }}
+                  >
+                    -
+                  </button>
+                  {this.state.zoomLevel}
+                  <button
+                    type="button"
+                    disabled={this.state.zoomLevel > 15}
+                    onClick={e => {
+                      this.setState({
+                        zoomLevel: this.state.zoomLevel + 1
+                      });
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
               </label>
             </div>
           </form>
         </div>
 
-        <AlignmentViewer
-          alignment={this.state.alignment}
-          style={this.state.style}
-          logoPlotStyle={this.state.logoPlotStyle}
-          zoomLevel={this.state.zoomLevel}
-        ></AlignmentViewer>
+        <div className="av_holder">
+          <AlignmentViewer
+            alignment={this.state.alignment}
+            style={this.state.style}
+            logoPlotStyle={this.state.logoPlotStyle}
+            zoomLevel={this.state.zoomLevel}
+          ></AlignmentViewer>
+        </div>
       </div>
     );
   }

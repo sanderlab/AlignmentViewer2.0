@@ -120,6 +120,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
               alignment={this.props.alignment}
               fontSize={this.props.zoomLevel}
               topLevelClassNames={[
+                this.props.style.residueDetail.className,
                 this.props.style.alignmentType.className,
                 this.props.style.positionsToStyle.className,
                 this.props.style.colorScheme.className
@@ -138,6 +139,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
               alignment={this.props.alignment}
               fontSize={this.props.zoomLevel}
               topLevelClassNames={[
+                this.props.style.residueDetail.className,
                 this.props.style.alignmentType.className,
                 this.props.style.positionsToStyle.className,
                 this.props.style.colorScheme.className
@@ -169,6 +171,9 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
               alignmentType={this.props.style.alignmentType}
               positionsToStyle={this.props.style.positionsToStyle}
               colorScheme={this.props.style.colorScheme}
+              mouseDown={(x, y) => {
+                console.log("someone clicked on the canvas:" + x + "," + y);
+              }}
               highlightRows={
                 this.state.alignmentEditorFirstRow !== undefined &&
                 this.state.alignmentEditorLastRow !== undefined
@@ -189,8 +194,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
             alignment={this.props.alignment}
             fontSize={this.props.zoomLevel}
             topLevelClassNames={[
-              //transparentLetterClass,
-              //transparentBackgroundClass,
+              this.props.style.residueDetail.className,
               this.props.style.alignmentType.className,
               this.props.style.positionsToStyle.className,
               this.props.style.colorScheme.className

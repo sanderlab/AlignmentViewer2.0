@@ -18,6 +18,8 @@ export interface IAlignmentCanvasComponentProps {
   colorScheme: IColorScheme;
   highlightRows?: [number, number]; //[startRowNum, endRowNum]
 
+  mouseDown?(x: number, y: number): void;
+
   readonly id: string;
 }
 
@@ -145,6 +147,7 @@ export class AlignmentCanvasComponent extends React.Component<
                 app={app}
                 numColumns={maxSeqLength}
                 numRows={numSequences}
+                mouseDown={this.props.mouseDown}
               >
                 <PixiAlignmentTiled
                   id="tiled-alignment"
@@ -236,7 +239,6 @@ class PixiAlignmentTiled extends React.Component<
       return null;
     }
 
-    console.log("RERENDER");
     const sequences = this.props.alignment.getSequences();
     const fullWidth = this.props.alignment.getMaxSequenceLength();
     const fullHeight = sequences.length;
@@ -393,8 +395,7 @@ const PixiViewport = PixiComponent<any, any>("PixiViewport", {
   create(props: any) {
     const app: PIXI.Application = props.app;
     app.renderer.backgroundColor = 0xffffff;
-
-    return new Viewport({
+    const vp = new Viewport({
       screenWidth: app.renderer.width,
       screenHeight: app.renderer.height,
       worldWidth: props.numColumns, //app.renderer.width,
@@ -413,5 +414,12 @@ const PixiViewport = PixiComponent<any, any>("PixiViewport", {
         maxHeight: props.app.renderer.height,
         maxWidth: props.app.renderer.width
       });
+
+    vp.on("clicked", e => {
+      if (props.mouseDown) {
+        props.mouseDown(e.world.x, e.world.y);
+      }
+    });
+    return vp;
   }
 });

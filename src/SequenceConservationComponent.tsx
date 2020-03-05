@@ -100,15 +100,8 @@ export class SequenceConservationComponent extends React.Component<
 
     normalizedEntropies.forEach((normalizedEntropy, idx) => {
       toReturn.push(
-        <g
-          transform={`translate(${idx * this.props.characterWidth +
-            this.props.characterWidth / 2},0)`}
-          key={idx}
-        >
-          <rect
-            width={`${this.props.characterWidth / 2}`}
-            height={`${normalizedEntropy}`}
-          ></rect>
+        <g transform={`translate(${idx},${100 - normalizedEntropy})`} key={idx}>
+          <rect width={0.5} height={`${normalizedEntropy}`}></rect>
         </g>
       );
     });
@@ -126,13 +119,12 @@ export class SequenceConservationComponent extends React.Component<
     const toReturn: JSX.Element[] = [];
     const numSequences = this.props.alignment.getSequences().length;
     const gapCounts = this.props.alignment.getGapsPerColumn();
+
     for (let i = 0; i < maxSeqLength; i++) {
+      const gapPercentage = (gapCounts[i] / numSequences) * 100;
       toReturn.push(
-        <g transform={`translate(${i * this.props.characterWidth},0)`} key={i}>
-          <rect
-            width={`${this.props.characterWidth / 2}`}
-            height={`${(gapCounts[i] / numSequences) * 100}`}
-          ></rect>
+        <g transform={`translate(${i + 0.5},${100 - gapPercentage})`} key={i}>
+          <rect width={0.5} height={gapPercentage}></rect>
         </g>
       );
     }
@@ -177,24 +169,23 @@ export class SequenceConservationComponent extends React.Component<
             zIndex: 1000
           }}
         >
-          <span style={{ color: "red" }}>Entropy</span>
-          <span style={{ color: "green", paddingLeft: 10 }}>&#35; Gaps</span>
+          <span style={{ color: "#000000" }}>Entropy</span>
+          <span style={{ color: "#b7b7b7", paddingLeft: 10 }}>&#35; Gaps</span>
         </div>
+
         <div id={this.props.id} ref={e => this.divLoaded(e)}>
           <div className="svg_container">
             <svg
+              preserveAspectRatio="none"
+              viewBox={`0 0 ${maxSeqLength} 100`}
+              style={{ width: totalWidth, height: 100 }}
               className={hoveredClass}
-              viewBox={`3 -100 ${totalWidth} 100`}
-              width={totalWidth}
+              xmlns="http://www.w3.org/2000/svg"
               onMouseEnter={() => this.handleSvgHover(true)}
               onMouseLeave={() => this.handleSvgHover(false)}
             >
-              <g className="gapCount" transform="scale(1, -1)">
-                {this.createGapCountGs(maxSeqLength)}
-              </g>
-              <g className="entropy" transform="scale(1, -1)">
-                {this.createConservationCountGs()}
-              </g>
+              <g className="gapCount">{this.createGapCountGs(maxSeqLength)}</g>
+              <g className="entropy">{this.createConservationCountGs()}</g>
             </svg>
           </div>
         </div>

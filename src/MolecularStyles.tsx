@@ -151,6 +151,42 @@ export class PositionsToStyle {
   ) {}
 }
 
+export class ResidueDetailTypes {
+  static readonly BOTH = new ResidueDetailTypes(
+    "both",
+    "Style Background and Letters",
+    ""
+  );
+  static readonly LETTER_ONLY = new ResidueDetailTypes(
+    "letter-only",
+    "Only Style Letters",
+    styles.transparentBackgroundClass
+  );
+  static readonly BACKGROUND_ONLY = new ResidueDetailTypes(
+    "background-only",
+    "Only Style Background",
+    styles.transparentLetterClass
+  );
+
+  static list = [
+    ResidueDetailTypes.BOTH,
+    ResidueDetailTypes.LETTER_ONLY,
+    ResidueDetailTypes.BACKGROUND_ONLY
+  ];
+
+  static fromKey(key: string) {
+    return ResidueDetailTypes.list.find(at => {
+      return at.key === key;
+    });
+  }
+
+  private constructor(
+    public readonly key: string,
+    public readonly description: string,
+    public readonly className: string
+  ) {}
+}
+
 /**
  * Object to describe the style of a set of sequences (MSA, logo, etc).
  * Contains 2 key parameters:
@@ -166,6 +202,7 @@ export abstract class AlignmentStyle {
   abstract readonly alignmentType: AlignmentTypes;
   abstract colorScheme: IColorScheme;
   abstract positionsToStyle: PositionsToStyle;
+  abstract residueDetail: ResidueDetailTypes;
 
   static fromAlignmentType(alignmentType: AlignmentTypes) {
     if (alignmentType === AlignmentTypes.AMINOACID)
@@ -185,7 +222,8 @@ export class AminoAcidAlignmentStyle implements AlignmentStyle {
 
   constructor(
     public colorScheme: IColorScheme = ALL_AMINOACID_COLORSCHEMES[0],
-    public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL
+    public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
+    public residueDetail: ResidueDetailTypes = ResidueDetailTypes.BOTH
   ) {}
 }
 
@@ -202,7 +240,8 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
 
   constructor(
     public colorScheme: IColorScheme = ALL_NUCLEOTIDE_COLORSCHEMES[0],
-    public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL
+    public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
+    public residueDetail: ResidueDetailTypes = ResidueDetailTypes.BOTH
   ) {}
 }
 
