@@ -1,6 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SequenceLogoJSComponent Should render 1`] = `
+exports[`SequenceLogoJSComponent Should render when given an alignment. 1`] = `
+<div
+  id="test-Sequence-Logo"
+>
+  <svg
+    style={
+      Object {
+        "width": 6,
+      }
+    }
+    viewBox="0 10 6 100"
+  >
+    <g
+      transform="translate(0,12) scale(1, 0.95)"
+    >
+      <kt
+        alphabet={
+          Array [
+            Object {
+              "className": "ace_A",
+              "regex": "A",
+            },
+            Object {
+              "className": "ace_B",
+              "regex": "B",
+            },
+            Object {
+              "className": "ace_C",
+              "regex": "C",
+            },
+          ]
+        }
+        glyphWidth={2}
+        stackHeight={100}
+        values={
+          Array [
+            Array [
+              1,
+              0,
+              0,
+            ],
+            Array [
+              0,
+              1,
+              0,
+            ],
+            Array [
+              0,
+              0,
+              1,
+            ],
+          ]
+        }
+      />
+    </g>
+  </svg>
+</div>
+`;
+
+exports[`SequenceLogoJSComponent Should render when given an empty alignment. 1`] = `
 <div
   id="test-Sequence-Logo"
 >

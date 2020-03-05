@@ -1,5 +1,74 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] = `
+<div
+  id="test-sequence-logo-component"
+>
+  <svg
+    preserveAspectRatio="none"
+    style={
+      Object {
+        "height": 100,
+        "width": 9,
+      }
+    }
+    viewBox="0 0 3 100"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g
+      key="p_0"
+      transform="translate(0,0)"
+    >
+      <rect
+        className="acePrefixE"
+        height="100"
+        key="idxrect_0"
+        transform="translate(0, 50) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+      <rect
+        className="acePrefixC"
+        height="100"
+        key="idxrect_1"
+        transform="translate(0, 0) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+    </g>
+    <g
+      key="p_1"
+      transform="translate(1,0)"
+    >
+      <rect
+        className="acePrefixD"
+        height="100"
+        key="idxrect_0"
+        transform="translate(0, 0) scale(0.6666666666666666,1)"
+        width="100"
+      />
+    </g>
+    <g
+      key="p_2"
+      transform="translate(2,0)"
+    >
+      <rect
+        className="acePrefixE"
+        height="100"
+        key="idxrect_0"
+        transform="translate(0, 50) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+      <rect
+        className="acePrefixC"
+        height="100"
+        key="idxrect_1"
+        transform="translate(0, 0) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+    </g>
+  </svg>
+</div>
+`;
+
 exports[`SequenceLogoComponent Should render when given default props. 1`] = `
 <div
   id="test-sequence-logo-component"

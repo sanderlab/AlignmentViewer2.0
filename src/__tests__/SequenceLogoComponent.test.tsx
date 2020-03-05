@@ -23,4 +23,22 @@ describe("SequenceLogoComponent", () => {
     );
     expect(wrapper).toMatchSnapshot();
   });
+
+  it("Should render when given a basic alignment.", () => {
+    const wrapper = shallow(
+      <SequenceLogoComponent
+        alignment={
+          new Alignment("my-alignment", [
+            { id: "my-alignment-1", sequence: "CDE" },
+            { id: "my-alignment-2", sequence: "EDC" }
+          ])
+        }
+        glyphWidth={3}
+        id={"test-sequence-logo-component"}
+        logoType={LOGO_TYPES.BARS}
+        logoLoaded={jest.fn()}
+      />
+    );
+    expect(wrapper).toMatchSnapshot();
+  });
 });
