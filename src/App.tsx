@@ -1,52 +1,33 @@
 import React from "react";
 import "./App.scss";
-import { Ace } from "ace-builds";
 import Alignment from "./Alignment";
-import ScrollSync, { ScrollType } from "./ScrollSync";
-import { AceMSAComponent } from "./AceMSAComponent";
-import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
-import { SequenceConservationComponent } from "./SequenceConservationComponent";
-import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
+import { AlignmentViewer } from "./AlignmentViewer";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-  AlignmentTypes,
   AlignmentStyle,
+  AlignmentTypes,
   PositionsToStyle,
   IColorScheme
 } from "./MolecularStyles";
-
-export enum AceEditorTypes {
-  query,
-  consensus,
-  alignment,
-  position
-}
+import { LOGO_TYPES } from "./SequenceLogoComponent";
 
 export interface AppProps {}
 export interface AppState {
-  aceCharacterWidth: number;
-  aceEditors: Ace.Editor[];
   alignment?: Alignment;
-  alignmentEditorFirstRow?: number;
-  alignmentEditorLastRow?: number;
-
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  style?: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   logoPlotStyle: LOGO_TYPES;
+  zoomLevel: number;
 }
 
-class App extends React.Component<AppProps, AppState> {
+export default class App extends React.Component<AppProps, AppState> {
   constructor(props: AppProps) {
     super(props);
     this.state = {
-      aceEditors: [],
-      aceCharacterWidth: 0,
-      style: new AminoAcidAlignmentStyle(), //TODO - decide based on alignment
-      logoPlotStyle: LOGO_TYPES.LETTERS
+      style: new AminoAcidAlignmentStyle(),
+      logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
+      zoomLevel: 12
     };
-
-    //setup scroll groups
-    ScrollSync.getInstance().setScrollerGroup("horiz", ScrollType.horizontal);
   }
 
   async componentDidMount() {
@@ -58,48 +39,19 @@ class App extends React.Component<AppProps, AppState> {
       alignment: Alignment.fromFile(
         "7fa1c5691376beab198788a726917d48_b0.4.a2m",
         await result.text()
-      )
+      ),
+      style: new AminoAcidAlignmentStyle()
     });
-  }
-
-  _aceEditorLoaded(id: string, editor: Ace.Editor) {
-    console.log("_aceEditorLoaded id =" + id);
-    let scrollSync = ScrollSync.getInstance();
-    scrollSync.registerScroller(editor, "horiz");
-    this.setState({
-      aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
-      aceEditors: [editor].concat(this.state.aceEditors)
-    });
-
-    //track visible rows to show in canvas MSA
-    if (id === "ace-alignment") {
-      editor.renderer.on("afterRender", () => {
-        // BREAKS LOGO, rerenders everything below and kills performance. React lifecycle stuff.
-        this.setState({
-          alignmentEditorFirstRow: editor.renderer.getFirstFullyVisibleRow(),
-          alignmentEditorLastRow: editor.renderer.getLastFullyVisibleRow()
-        });
-      });
-    }
-  }
-
-  _elementLoaded(id: string, scroller: HTMLElement) {
-    console.log("_elementLoaded id =" + id);
-    let scrollSync = ScrollSync.getInstance();
-    scrollSync.registerScroller(scroller, "horiz");
   }
 
   render() {
-    return !this.state.alignment ? null : (
-      <div className="App">
-        <div id="column_mouseover"></div>
-
-        {/* global parameters */}
+    return !this.state || !this.state.alignment || !this.state.style ? null : (
+      <div>
         <div className="testing_box">
           <form>
             <div>
               <label>
-                Alignment Type:
+                <strong>Alignment Type:</strong>
                 <select
                   value={this.state.style.alignmentType.key}
                   onChange={e =>
@@ -112,7 +64,7 @@ class App extends React.Component<AppProps, AppState> {
                 >
                   {AlignmentTypes.list.map(alignmentType => {
                     return (
-                      <option value={alignmentType.key}>
+                      <option value={alignmentType.key} key={alignmentType.key}>
                         {alignmentType.description}
                       </option>
                     );
@@ -122,7 +74,7 @@ class App extends React.Component<AppProps, AppState> {
             </div>
             <div>
               <label>
-                Style:
+                <strong>Style:</strong>
                 <select
                   value={this.state.style.alignmentType.allColorSchemes.indexOf(
                     this.state.style.colorScheme
@@ -130,8 +82,8 @@ class App extends React.Component<AppProps, AppState> {
                   onChange={e => {
                     this.setState({
                       style: {
-                        ...this.state.style,
-                        colorScheme: this.state.style.alignmentType
+                        ...this.state.style!,
+                        colorScheme: this.state.style!.alignmentType
                           .allColorSchemes[parseInt(e.target.value)]
                       }
                     });
@@ -151,7 +103,7 @@ class App extends React.Component<AppProps, AppState> {
             </div>
             <div>
               <label>
-                Positions to Style:
+                <strong>Positions to Style:</strong>
                 <select
                   value={PositionsToStyle.list.indexOf(
                     this.state.style.positionsToStyle
@@ -159,7 +111,7 @@ class App extends React.Component<AppProps, AppState> {
                   onChange={e => {
                     this.setState({
                       style: {
-                        ...this.state.style,
+                        ...this.state.style!,
                         positionsToStyle:
                           PositionsToStyle.list[parseInt(e.target.value)]
                       }
@@ -181,7 +133,7 @@ class App extends React.Component<AppProps, AppState> {
 
             <div>
               <label>
-                Sequence logo Style:
+                <strong>Sequence Logo Style:</strong>
                 <select
                   value={this.state.logoPlotStyle}
                   onChange={e => {
@@ -200,123 +152,45 @@ class App extends React.Component<AppProps, AppState> {
                 </select>
               </label>
             </div>
+
+            <div>
+              <label>
+                <strong>Zoom:</strong>
+                <button
+                  type="button"
+                  disabled={this.state.zoomLevel < 3}
+                  onClick={e => {
+                    this.setState({
+                      zoomLevel: this.state.zoomLevel - 1
+                    });
+                  }}
+                >
+                  -
+                </button>
+                {this.state.zoomLevel}
+                <button
+                  type="button"
+                  disabled={this.state.zoomLevel > 15}
+                  onClick={e => {
+                    this.setState({
+                      zoomLevel: this.state.zoomLevel + 1
+                    });
+                  }}
+                >
+                  +
+                </button>
+              </label>
+            </div>
           </form>
         </div>
 
-        <div className="conservation_box">
-          {
-            <SequenceConservationComponent
-              id="sequence_conservation"
-              alignment={this.state.alignment}
-              characterWidth={this.state.aceCharacterWidth}
-              conservationPlotLoaded={element => {
-                this._elementLoaded("sequence_conservation", element);
-              }}
-            />
-          }
-        </div>
-        <div
-          className={`logo_box ${this.state.style.alignmentType.className}
-                               ${this.state.style.colorScheme.className} 
-                               ${PositionsToStyle.ALL.className}`}
-        >
-          {
-            <SequenceLogoComponent
-              id="sequence_logo"
-              alignment={this.state.alignment}
-              glyphWidth={this.state.aceCharacterWidth}
-              logoType={this.state.logoPlotStyle}
-              logoLoaded={element => {
-                this._elementLoaded("sequence_logo", element as HTMLElement);
-              }}
-            />
-          }
-        </div>
-        <div className="consensusseq_box">
-          {
-            <AceMSAComponent
-              id="ace-consensusseq"
-              type={AceEditorTypes.consensus}
-              alignment={this.state.alignment}
-              topLevelClassNames={[
-                this.state.style.alignmentType.className,
-                this.state.style.positionsToStyle.className,
-                this.state.style.colorScheme.className
-              ].join(" ")}
-              editorLoaded={editor => {
-                this._aceEditorLoaded("ace-consensusseq", editor);
-              }}
-            />
-          }
-        </div>
-        <div className="queryseq_box">
-          {
-            <AceMSAComponent
-              id="ace-queryseq"
-              type={AceEditorTypes.query}
-              alignment={this.state.alignment}
-              topLevelClassNames={[
-                this.state.style.alignmentType.className,
-                this.state.style.positionsToStyle.className,
-                this.state.style.colorScheme.className
-              ].join(" ")}
-              editorLoaded={editor => {
-                this._aceEditorLoaded("ace-queryseq", editor);
-              }}
-            />
-          }
-        </div>
-        <div className="position_box">
-          {
-            <AceMSAComponent
-              id="ace-positions"
-              type={AceEditorTypes.position}
-              alignment={this.state.alignment}
-              editorLoaded={editor => {
-                this._aceEditorLoaded("ace-positions", editor);
-              }}
-            />
-          }
-        </div>
-        <div className="datatable_box" id="datatable">
-          {
-            <AlignmentCanvasComponent
-              id="alignment_canvas"
-              alignment={this.state.alignment}
-              alignmentType={this.state.style.alignmentType}
-              positionsToStyle={this.state.style.positionsToStyle}
-              colorScheme={this.state.style.colorScheme}
-              highlightRows={
-                this.state.alignmentEditorFirstRow !== undefined &&
-                this.state.alignmentEditorLastRow !== undefined
-                  ? [
-                      this.state.alignmentEditorFirstRow,
-                      this.state.alignmentEditorLastRow
-                    ]
-                  : undefined
-              }
-            />
-          }
-        </div>
-
-        <div className="alignment_box">
-          <AceMSAComponent
-            id="ace-alignment"
-            type={AceEditorTypes.alignment}
-            alignment={this.state.alignment}
-            topLevelClassNames={[
-              this.state.style.alignmentType.className,
-              this.state.style.positionsToStyle.className,
-              this.state.style.colorScheme.className
-            ].join(" ")}
-            editorLoaded={editor => {
-              this._aceEditorLoaded("ace-alignment", editor);
-            }}
-          />
-        </div>
+        <AlignmentViewer
+          alignment={this.state.alignment}
+          style={this.state.style}
+          logoPlotStyle={this.state.logoPlotStyle}
+          zoomLevel={this.state.zoomLevel}
+        ></AlignmentViewer>
       </div>
     );
   }
 }
-
-export default App;
