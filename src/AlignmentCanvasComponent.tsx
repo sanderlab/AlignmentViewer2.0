@@ -104,10 +104,6 @@ export class AlignmentCanvasComponent extends React.Component<
   scaleX: number = 1;
   scaleY: number = 1;
 
-  constructor(props: IAlignmentCanvasComponentProps) {
-    super(props);
-  }
-
   sliderChanged(newValue: number, xy: "x" | "y") {
     if (this.app) {
       this.app.stage.children.forEach(sprite => {
@@ -221,10 +217,18 @@ class PixiAlignmentTiled extends React.Component<
   private currentPositionsStyled?: PositionsToStyle;
 
   shouldComponentUpdate(nextProps: IAlignmentCanvasComponentProps) {
-    return (
+    const toReturn =
       nextProps.colorScheme !== this.currentColorScheme ||
-      nextProps.positionsToStyle !== this.currentPositionsStyled
-    );
+      nextProps.positionsToStyle !== this.currentPositionsStyled;
+    /*console.log(
+      "UPDATING Canvas Tiling: " +
+        (nextProps.colorScheme !== this.currentColorScheme) +
+        ":" +
+        (nextProps.positionsToStyle !== this.currentPositionsStyled) +
+        " :: " +
+        toReturn
+    );*/
+    return toReturn;
   }
 
   render() {

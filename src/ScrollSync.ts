@@ -84,6 +84,7 @@ export default class ScrollSync {
       scrollerFractionScrolled =
         newScrollLeft / (scroller.scrollWidth - scroller.offsetWidth);
     }
+    /*
     console.log(
       "FRACTION SCROLLED:",
       scrollerFractionScrolled +
@@ -91,7 +92,7 @@ export default class ScrollSync {
         newScrollLeft +
         "px), max=" +
         this._getAceMaxScrollWidth(scroller)
-    );
+    );*/
 
     //update other nodes in the group
     const group = this._groupScrollpropsHM[groupName];
@@ -156,11 +157,13 @@ export default class ScrollSync {
   registerScroller(scroller: HTMLElement | Ace.Editor, groupName: string) {
     const group = this._groupScrollpropsHM[groupName];
     if (!group) {
-      throw `Error: attempt to register scroll sync on unknown group "{groupName}"
-                    please register group first with setScrollerGroup`;
+      throw new Error(`Error: attempt to register scroll sync on unknown group "${groupName}"
+                    please register group first with setScrollerGroup`);
     }
     if (group.scrollers.includes(scroller)) {
-      throw `Error: attempt to readd  scroller to group "{groupName}"`;
+      throw new Error(
+        `Error: attempt to readd  scroller to group "${groupName}"`
+      );
     }
 
     group.scrollers.push(scroller);
@@ -193,7 +196,7 @@ export default class ScrollSync {
             this._handleHorizontalScrollEvent(
               scroller,
               groupName,
-              (<HTMLElement>e.target).scrollLeft
+              (e.target as HTMLElement).scrollLeft
             );
           }
           this._blockNextScrollEvent.set(scroller, false);

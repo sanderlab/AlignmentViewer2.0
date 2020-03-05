@@ -60,6 +60,8 @@ $aceQueryClass: $acePrefix + $preAceQueryClass;
 $aceConsensusClass: $acePrefix + $preAceConsensusClass;
 
 //general global props
+$transparentLetterClass: transparent-letters;
+$transparentBackgroundClass: transparent-background;
 $aaStyleClassPrefix: aa-alignment-style-;
 $ntStyleClassPrefix: nt-alignment-style-;
 $styPosClassPrefix: alignment-positions-tostyle-;
@@ -193,6 +195,8 @@ $ntProps: (
   preAceConsensusClass: $preAceConsensusClass;
   aceQueryClass: $aceQueryClass;
   aceConsensusClass: $aceConsensusClass;
+  transparentLetterClass: $transparentLetterClass;
+  transparentBackgroundClass: $transparentBackgroundClass;
 
   aaAlignTypeClass: map-get($aaProps, topLevelAlignmentClass);
   ntAlignTypeClass: map-get($ntProps, topLevelAlignmentClass);
@@ -250,6 +254,22 @@ $ntProps: (
 
   @each $aa, $color in map-get($styleObj, colors) {
     $aceAAClass: $acePrefix + $aa;
+
+    //set background color to white if the "no background color" class is added
+    :global
+      .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
+      .#{$aceAAClass} {
+      background-color: transparent !important;
+    }
+    //remove alpha on background color and hide letter coloring
+    //"no letter color" class is added
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}
+      .#{$aceAAClass} {
+      background-color: $color !important;
+      color: rgba($color, 0) !important;
+    }
+
     :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
     :global
       .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
@@ -267,7 +287,6 @@ $ntProps: (
         //serine glyph needs stoke coloring also
         color: $color;
         stroke: $color;
-        //fill: $color;
         fill: #ffffff;
         background-color: rgba($color, $backgroundAlpha);
       } @else {
@@ -291,6 +310,22 @@ $ntProps: (
 
   @each $nt, $color in map-get($styleObj, colors) {
     $aceNTClass: $acePrefix + $nt;
+
+    //set background color to white if the "no background color" class is added
+    :global
+      .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
+      .#{$aceNTClass} {
+      background-color: transparent !important;
+    }
+    //remove alpha on background color and hide letter coloring
+    //"no letter color" class is added
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}
+      .#{$aceNTClass} {
+      background-color: rgba($color, 1) !important;
+      color: rgba($color, 0) !important;
+    }
+
     :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceNTClass},
     :global
       .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
@@ -305,7 +340,7 @@ $ntProps: (
       .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
       .#{$aceNTClass}:not(.#{$aceQueryClass}) {
       color: $color;
-      fill: $color;
+      fill: $color; //for logo
       background-color: rgba($color, $backgroundAlpha);
     }
   }

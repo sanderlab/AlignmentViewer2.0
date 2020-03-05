@@ -207,6 +207,13 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
 }
 
 /**
+ * Export globals
+ */
+const transparentLetterClass = styles.transparentLetterClass;
+const transparentBackgroundClass = styles.transparentBackgroundClass;
+export { transparentBackgroundClass, transparentLetterClass };
+
+/**
  * Export ace helper parameters and functions.
  */
 const acePrefix = styles.acePrefix;

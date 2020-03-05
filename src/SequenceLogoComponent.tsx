@@ -49,7 +49,11 @@ export class SequenceLogoComponent extends React.Component<
   }
 
   shouldComponentUpdate(nextProps: ISequenceLogoComponentProps) {
-    if (this.loaded === false || this.props.logoType !== nextProps.logoType) {
+    if (
+      this.loaded === false ||
+      this.props.logoType !== nextProps.logoType ||
+      this.props.glyphWidth !== nextProps.glyphWidth
+    ) {
       return true;
     }
     return false;

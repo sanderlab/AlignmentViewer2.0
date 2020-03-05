@@ -1,18 +1,22 @@
 import React from "react";
 import ace from "ace-builds";
 import Alignment from "./Alignment";
-import {
-  PositionsToStyle,
-  AlignmentTypes,
-  AlignmentStyle
-} from "./MolecularStyles";
 import { Ace } from "ace-builds";
-import { AceEditorTypes } from "./App";
 import { defineNewAlignmentMode } from "./AceAlignmentMode";
+
+export enum AceEditorTypes {
+  query,
+  consensus,
+  alignment,
+  position
+}
 
 export interface IAceMSAComponentProps {
   editorLoaded(editor: Ace.Editor): void;
+  characterSizeChanged?(newCharacterWidth: number): void;
+
   alignment: Alignment;
+  fontSize: number;
 
   topLevelClassNames?: string;
 
@@ -36,14 +40,25 @@ export class AceMSAComponent extends React.Component<
 > {
   private editor?: Ace.Editor;
 
-  static defaultProps: Partial<IAceMSAComponentProps> = {
-    //alignmentTypeClass: AlignmentTypes.AMINOACID.className,
-    //colorPositionClass: PositionsToStyle.ALL.className,
-    //colorSchemeClass: MolecularStyles.AminoAcidColorSchemes[0].className
-  };
-
-  constructor(props: IAceMSAComponentProps) {
-    super(props);
+  componentDidUpdate(prevProps: IAceMSAComponentProps) {
+    if (this.props.fontSize + "px" !== this.editor?.getFontSize()) {
+      /*console.log(
+        "start font size: " +
+          this.editor?.getFontSize() +
+          " :: width=" +
+          this.editor?.renderer.characterWidth +
+          ", ratio=" +
+          parseFloat(this.editor?.getFontSize()!) /
+            this.editor?.renderer.characterWidth!
+      );*/
+      this.editor?.setFontSize(this.props.fontSize + "px");
+      if (
+        this.props.characterSizeChanged &&
+        this.editor?.renderer.characterWidth
+      ) {
+        this.props.characterSizeChanged(this.editor?.renderer.characterWidth);
+      }
+    }
   }
 
   /**
@@ -81,7 +96,7 @@ export class AceMSAComponent extends React.Component<
     this.editor.setReadOnly(true);
     this.editor.setHighlightActiveLine(false);
     this.editor.setHighlightGutterLine(false);
-    this.editor.setFontSize("12px");
+    this.editor.setFontSize(this.props.fontSize + "px");
     this.editor.renderer.setShowGutter(false);
     this.editor.renderer.setPadding(0);
     this.editor.renderer.$cursorLayer.element.style.display = "none";
@@ -111,7 +126,6 @@ export class AceMSAComponent extends React.Component<
         pos.row,
         pos.column
       );
-      var characterWidth = this.editor.renderer.characterHeight;
       var characterWidth = this.editor.renderer.characterWidth;
       const columnMouseover = document.getElementById("column_mouseover");
       if (columnMouseover) {

@@ -107,6 +107,7 @@ export class AminoAcid implements IAminoAcid {
         if (aa === singleLetterCode) {
           return true;
         }
+        return false;
       });
 
       let hexString = "#ffffff";
@@ -166,6 +167,7 @@ export class Nucleotide implements INucleotide {
         if (aa === singleLetterCode) {
           return true;
         }
+        return false;
       });
 
       let hexString = "#ffffff";
