@@ -1,8 +1,11 @@
+import fetchMock from "jest-fetch-mock";
 import Alignment, { ISequence } from "../Alignment";
+import { enableFetchMocks } from "jest-fetch-mock";
+import * as fs from "fs";
 
-describe.only("Alignment", () => {
-  //let pse1TargetSequence: ISequence;
-  //let pse1Alignment: Alignment;
+describe("Alignment", () => {
+  let pse1TargetSequence: ISequence;
+  let pse1Alignment: Alignment;
 
   it("Should allow sorting.", () => {
     const alignment = new Alignment("Test-Sequence", [
@@ -44,11 +47,16 @@ describe.only("Alignment", () => {
     expect(alignment.getTargetSequence()).toEqual(seq1);
   });
 
-  /*
   beforeAll(async () => {
-    const result = await fetch(
-      `../public/7fa1c5691376beab198788a726917d48_b0.4.a2m`
-    );
+    enableFetchMocks();
+
+    const sequenceFile = fs
+      .readFileSync("public/7fa1c5691376beab198788a726917d48_b0.4.a2m")
+      .toString();
+    // Snippet taken from public/7fa1c5691376beab198788a726917d48_b0.4.a2m
+    fetchMock.mockResponse(sequenceFile);
+
+    const result = await fetch(`http://localhost:11037/api/file.a2m`);
     pse1Alignment = Alignment.fromFile(
       "7fa1c5691376beab198788a726917d48_b0.4.a2m",
       await result.text()
@@ -58,5 +66,4 @@ describe.only("Alignment", () => {
       "7fa1c5691376beab198788a726917d48_b0.4.a2m"
     );
   });
-  */
 });
