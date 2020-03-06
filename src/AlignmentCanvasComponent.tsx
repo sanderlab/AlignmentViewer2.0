@@ -106,6 +106,10 @@ export class AlignmentCanvasComponent extends React.Component<
   scaleX: number = 1;
   scaleY: number = 1;
 
+  static defaultProps = {
+    mouseDown: () => {}
+  };
+
   sliderChanged(newValue: number, xy: "x" | "y") {
     if (this.app) {
       this.app.stage.children.forEach(sprite => {
