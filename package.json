@@ -76,7 +76,7 @@
       "json",
       "text"
     ],
-    "globalSetup": "<rootDir>/test/setupJest.ts",
+    "globalSetup": "<rootDir>/test/SetupJest.ts",
     "moduleNameMapper": {
       "^.+\\.(css|scss|cssmodule)$": "identity-obj-proxy"
     },
