@@ -1,6 +1,6 @@
 import React from "react";
 import ace from "ace-builds";
-import Alignment from "./Alignment";
+import Alignment, { SequenceSortOptions } from "./Alignment";
 import { Ace } from "ace-builds";
 import { defineNewAlignmentMode } from "./AceAlignmentMode";
 
@@ -16,6 +16,7 @@ export interface IAceMSAComponentProps {
   characterSizeChanged?(newCharacterWidth: number): void;
 
   alignment: Alignment;
+  sortBy: SequenceSortOptions;
   fontSize: number;
 
   topLevelClassNames?: string;
@@ -42,15 +43,6 @@ export class AceMSAComponent extends React.Component<
 
   componentDidUpdate(prevProps: IAceMSAComponentProps) {
     if (this.props.fontSize + "px" !== this.editor?.getFontSize()) {
-      /*console.log(
-        "start font size: " +
-          this.editor?.getFontSize() +
-          " :: width=" +
-          this.editor?.renderer.characterWidth +
-          ", ratio=" +
-          parseFloat(this.editor?.getFontSize()!) /
-            this.editor?.renderer.characterWidth!
-      );*/
       this.editor?.setFontSize(this.props.fontSize + "px");
       if (
         this.props.characterSizeChanged &&
@@ -58,6 +50,21 @@ export class AceMSAComponent extends React.Component<
       ) {
         this.props.characterSizeChanged(this.editor?.renderer.characterWidth);
       }
+    }
+
+    if (
+      this.props.sortBy !== prevProps.sortBy &&
+      this.props.type === AceEditorTypes.alignment
+    ) {
+      this.editor!.selectAll();
+      this.editor!.removeLines();
+
+      this.editor!.insert(
+        this.props.alignment
+          .getSequences(this.props.sortBy)
+          .map(x => x.sequence)
+          .join("\n")
+      );
     }
   }
 
@@ -166,19 +173,12 @@ export class AceMSAComponent extends React.Component<
       } else if (this.props.type === AceEditorTypes.alignment) {
         this.editor.insert(
           this.props.alignment
-            .getSequences()
+            .getSequences(this.props.sortBy)
             .map(x => x.sequence)
             .join("\n")
         );
       } else if (this.props.type === AceEditorTypes.position) {
-        const maxSequenceLength = this.props.alignment
-          .getSequences()
-          .reduce((acc, seq) => {
-            if (seq.sequence.length > acc) {
-              acc = seq.sequence.length;
-            }
-            return acc;
-          }, -1);
+        const maxSequenceLength = this.props.alignment.getMaxSequenceLength();
         this.editor.insert(
           AceMSAComponent.generateTextualRuler(maxSequenceLength)
         );

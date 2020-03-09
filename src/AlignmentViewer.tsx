@@ -1,7 +1,7 @@
 import React from "react";
 import "./AlignmentViewer.scss";
 import { Ace } from "ace-builds";
-import Alignment from "./Alignment";
+import Alignment, { SequenceSortOptions } from "./Alignment";
 import ScrollSync, { ScrollType } from "./ScrollSync";
 import { AceMSAComponent, AceEditorTypes } from "./AceMSAComponent";
 import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
@@ -18,6 +18,7 @@ export interface AppProps {
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
+  sortBy: SequenceSortOptions;
 }
 export interface AppState {
   aceCharacterWidth: number;
@@ -119,6 +120,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
               type={AceEditorTypes.consensus}
               alignment={this.props.alignment}
               fontSize={this.props.zoomLevel}
+              sortBy={this.props.sortBy}
               topLevelClassNames={[
                 this.props.style.residueDetail.className,
                 this.props.style.alignmentType.className,
@@ -138,6 +140,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
               type={AceEditorTypes.query}
               alignment={this.props.alignment}
               fontSize={this.props.zoomLevel}
+              sortBy={this.props.sortBy}
               topLevelClassNames={[
                 this.props.style.residueDetail.className,
                 this.props.style.alignmentType.className,
@@ -157,6 +160,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
               type={AceEditorTypes.position}
               alignment={this.props.alignment}
               fontSize={this.props.zoomLevel}
+              sortBy={this.props.sortBy}
               editorLoaded={editor => {
                 this._aceEditorLoaded("ace-positions", editor);
               }}
@@ -171,6 +175,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
               alignmentType={this.props.style.alignmentType}
               positionsToStyle={this.props.style.positionsToStyle}
               colorScheme={this.props.style.colorScheme}
+              sortBy={this.props.sortBy}
               mouseDown={(x, y) => {
                 console.log("someone clicked on the canvas:" + x + "," + y);
               }}
@@ -193,6 +198,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
             type={AceEditorTypes.alignment}
             alignment={this.props.alignment}
             fontSize={this.props.zoomLevel}
+            sortBy={this.props.sortBy}
             topLevelClassNames={[
               this.props.style.residueDetail.className,
               this.props.style.alignmentType.className,

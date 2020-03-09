@@ -1,5 +1,5 @@
 import React from "react";
-import Alignment from "./Alignment";
+import Alignment, { SequenceSortOptions } from "./Alignment";
 import { Nucleotide, AminoAcid } from "./Residues";
 import * as PIXI from "pixi.js";
 import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";
@@ -14,6 +14,7 @@ import {
 export interface IAlignmentCanvasComponentProps {
   alignment: Alignment;
   alignmentType: AlignmentTypes;
+  sortBy: SequenceSortOptions;
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
   highlightRows?: [number, number]; //[startRowNum, endRowNum]
@@ -39,53 +40,6 @@ interface ITiledImages {
     height: number;
     image: HTMLCanvasElement;
   }[];
-}
-
-interface ISliderComponentProps {
-  init: number;
-  min: number;
-  max: number;
-  label: string;
-  sliderChanged(newValue: number): void;
-}
-interface ISliderComponentState {
-  value: number;
-}
-
-class SliderComponent extends React.Component<
-  ISliderComponentProps,
-  ISliderComponentState
-> {
-  constructor(props: ISliderComponentProps) {
-    super(props);
-    this.state = {
-      value: this.props.init
-    };
-  }
-
-  render() {
-    return (
-      <div>
-        <label htmlFor={this.props.label}>{this.props.label}</label>
-        <input
-          type="range"
-          min={this.props.min}
-          max={this.props.max}
-          value={this.state.value}
-          className="slider"
-          id={this.props.label}
-          onChange={e => {
-            const value = parseFloat(e.currentTarget.value);
-            this.setState({
-              value
-            });
-            this.props.sliderChanged(value);
-          }}
-        ></input>
-        <span>({this.state.value})</span>
-      </div>
-    );
-  }
 }
 
 const AlignmentHighlighter = PixiComponent("AlignmentHighlighter", {
@@ -153,6 +107,7 @@ export class AlignmentCanvasComponent extends React.Component<
                   id="tiled-alignment"
                   alignment={this.props.alignment}
                   alignmentType={this.props.alignmentType}
+                  sortBy={this.props.sortBy}
                   colorScheme={this.props.colorScheme}
                   positionsToStyle={this.props.positionsToStyle}
                 />
@@ -188,27 +143,6 @@ export class AlignmentCanvasComponent extends React.Component<
             )}
           </AppContext.Consumer>
         </Stage>
-        {/*
-        <SliderComponent
-          init={1}
-          min={1}
-          max={10}
-          label={"scaleX"}
-          sliderChanged={newValue => {
-            this.sliderChanged(newValue, "x");
-          }}
-        ></SliderComponent>
-
-        <SliderComponent
-          init={1}
-          min={1}
-          max={10}
-          label={"scaleY"}
-          sliderChanged={newValue => {
-            this.sliderChanged(newValue, "y");
-          }}
-        ></SliderComponent>
-        */}
       </div>
     );
   }
@@ -216,13 +150,11 @@ export class AlignmentCanvasComponent extends React.Component<
 class PixiAlignmentTiled extends React.Component<
   IAlignmentCanvasComponentProps
 > {
-  private currentColorScheme?: IColorScheme;
-  private currentPositionsStyled?: PositionsToStyle;
-
   shouldComponentUpdate(nextProps: IAlignmentCanvasComponentProps) {
     const toReturn =
-      nextProps.colorScheme !== this.currentColorScheme ||
-      nextProps.positionsToStyle !== this.currentPositionsStyled;
+      nextProps.colorScheme !== this.props.colorScheme ||
+      nextProps.positionsToStyle !== this.props.positionsToStyle ||
+      nextProps.sortBy !== this.props.sortBy;
     /*console.log(
       "UPDATING Canvas Tiling: " +
         (nextProps.colorScheme !== this.currentColorScheme) +
@@ -239,7 +171,7 @@ class PixiAlignmentTiled extends React.Component<
       return null;
     }
 
-    const sequences = this.props.alignment.getSequences();
+    const sequences = this.props.alignment.getSequences(this.props.sortBy);
     const fullWidth = this.props.alignment.getMaxSequenceLength();
     const fullHeight = sequences.length;
 
@@ -369,8 +301,7 @@ class PixiAlignmentTiled extends React.Component<
       }
     }
 
-    this.currentColorScheme = this.props.colorScheme;
-    this.currentPositionsStyled = this.props.positionsToStyle;
+    console.log("CANVAS rerender [" + this.props.sortBy.key + "]", sequences);
 
     return (
       <>
@@ -383,7 +314,8 @@ class PixiAlignmentTiled extends React.Component<
                   ${tile.tileY}_
                   ${this.props.colorScheme.commonName}_
                   ${this.props.positionsToStyle.key}_
-                  ${this.props.alignmentType.key}`}
+                  ${this.props.alignmentType.key}_
+                  ${this.props.sortBy.key}`}
           ></Sprite>
         ))}
       </>

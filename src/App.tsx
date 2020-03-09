@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.scss";
-import Alignment from "./Alignment";
+import Alignment, { SequenceSortOptions } from "./Alignment";
 import { AlignmentViewer } from "./AlignmentViewer";
 import {
   AminoAcidAlignmentStyle,
@@ -11,12 +11,13 @@ import {
   IColorScheme,
   ResidueDetailTypes
 } from "./MolecularStyles";
-import { LOGO_TYPES } from "./SequenceLogoComponent";
+import { LOGO_TYPES, SequenceLogoComponent } from "./SequenceLogoComponent";
 
 export interface AppProps {}
 export interface AppState {
   alignment?: Alignment;
   style?: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  sortBy: SequenceSortOptions;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
 }
@@ -27,7 +28,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.state = {
       style: new AminoAcidAlignmentStyle(),
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
-      zoomLevel: 12
+      zoomLevel: 12,
+      sortBy: SequenceSortOptions.INPUT
     };
   }
 
@@ -37,7 +39,7 @@ export default class App extends React.Component<AppProps, AppState> {
     );
 
     this.setState({
-      alignment: Alignment.fromFile(
+      alignment: Alignment.fromFileContents(
         "7fa1c5691376beab198788a726917d48_b0.4.a2m",
         await result.text()
       ),
@@ -53,6 +55,29 @@ export default class App extends React.Component<AppProps, AppState> {
             <div>
               <h3>AlignmentViewer 2.0 Settings Demo</h3>
             </div>
+
+            <div>
+              <label>
+                <strong>Sort order:</strong>
+                <select
+                  value={this.state.sortBy.key}
+                  onChange={e =>
+                    this.setState({
+                      sortBy: SequenceSortOptions.fromKey(e.target.value)!
+                    })
+                  }
+                >
+                  {SequenceSortOptions.list.map(sso => {
+                    return (
+                      <option value={sso.key} key={sso.key}>
+                        {sso.description}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            </div>
+
             <div>
               <label>
                 <strong>Alignment Type:</strong>
@@ -222,6 +247,7 @@ export default class App extends React.Component<AppProps, AppState> {
             style={this.state.style}
             logoPlotStyle={this.state.logoPlotStyle}
             zoomLevel={this.state.zoomLevel}
+            sortBy={this.state.sortBy}
           ></AlignmentViewer>
         </div>
       </div>
