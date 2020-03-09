@@ -148,7 +148,7 @@ export default class Alignment {
    * by calling setTargetSequence() after creation
    * @param sequences
    */
-  private constructor(name: string, sequencesAsInput: ISequence[]) {
+  public constructor(name: string, sequencesAsInput: ISequence[]) {
     this.name = name;
     this.sequences = new Map<SequenceSortOptions, ISequence[]>();
     this.sequences.set(SequenceSortOptions.INPUT, sequencesAsInput);

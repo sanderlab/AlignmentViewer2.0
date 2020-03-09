@@ -20,9 +20,9 @@ describe("Alignment", () => {
       { id: "id-2", sequence: "CBA" }
     ]);
     const expected = new Map();
-    expected.set(1, { A: 0.5, C: 0.5 });
-    expected.set(2, { B: 1 });
-    expected.set(3, { A: 0.5, C: 0.5 });
+    expected.set(0, { A: 0.5, C: 0.5 });
+    expected.set(1, { B: 1 });
+    expected.set(2, { A: 0.5, C: 0.5 });
     expect(alignment.getPositionalLetterCounts(true)).toEqual(expected);
   });
 
@@ -32,9 +32,9 @@ describe("Alignment", () => {
       { id: "id-2", sequence: "CBA" }
     ]);
     const expected = new Map();
-    expected.set(1, { A: 1, C: 1 });
-    expected.set(2, { B: 2 });
-    expected.set(3, { A: 1, C: 1 });
+    expected.set(0, { A: 1, C: 1 });
+    expected.set(1, { B: 2 });
+    expected.set(2, { A: 1, C: 1 });
     expect(alignment.getPositionalLetterCounts()).toEqual(expected);
   });
 
@@ -57,7 +57,7 @@ describe("Alignment", () => {
     fetchMock.mockResponse(sequenceFile);
 
     const result = await fetch(`http://localhost:11037/api/file.a2m`);
-    pse1Alignment = Alignment.fromFile(
+    pse1Alignment = Alignment.fromFileContents(
       "7fa1c5691376beab198788a726917d48_b0.4.a2m",
       await result.text()
     );

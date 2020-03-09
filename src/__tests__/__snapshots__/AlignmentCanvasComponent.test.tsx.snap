@@ -36,132 +36,132 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
         Object {
           "letter": "C",
           "occurrences": 10,
-          "position": 3,
+          "position": 2,
         },
         Object {
           "letter": "D",
           "occurrences": 10,
-          "position": 4,
+          "position": 3,
         },
         Object {
           "letter": "E",
           "occurrences": 10,
-          "position": 5,
+          "position": 4,
         },
         Object {
           "letter": "F",
           "occurrences": 10,
-          "position": 6,
+          "position": 5,
         },
         Object {
           "letter": "G",
           "occurrences": 10,
-          "position": 7,
+          "position": 6,
         },
         Object {
           "letter": "H",
           "occurrences": 10,
-          "position": 8,
+          "position": 7,
         },
         Object {
           "letter": "I",
           "occurrences": 10,
-          "position": 9,
+          "position": 8,
         },
         Object {
           "letter": "J",
           "occurrences": 10,
-          "position": 10,
+          "position": 9,
         },
         Object {
           "letter": "K",
           "occurrences": 10,
-          "position": 11,
+          "position": 10,
         },
         Object {
           "letter": "L",
           "occurrences": 10,
-          "position": 12,
+          "position": 11,
         },
         Object {
           "letter": "M",
           "occurrences": 10,
-          "position": 13,
+          "position": 12,
         },
         Object {
           "letter": "N",
           "occurrences": 10,
-          "position": 14,
+          "position": 13,
         },
         Object {
           "letter": "O",
           "occurrences": 10,
-          "position": 15,
+          "position": 14,
         },
         Object {
           "letter": "P",
           "occurrences": 10,
-          "position": 16,
+          "position": 15,
         },
         Object {
           "letter": "Q",
           "occurrences": 10,
-          "position": 17,
+          "position": 16,
         },
         Object {
           "letter": "R",
           "occurrences": 10,
-          "position": 18,
+          "position": 17,
         },
         Object {
           "letter": "S",
           "occurrences": 10,
-          "position": 19,
+          "position": 18,
         },
         Object {
           "letter": "T",
           "occurrences": 10,
-          "position": 20,
+          "position": 19,
         },
         Object {
           "letter": "U",
           "occurrences": 10,
-          "position": 21,
+          "position": 20,
         },
         Object {
           "letter": "V",
           "occurrences": 10,
-          "position": 22,
+          "position": 21,
         },
         Object {
           "letter": "W",
           "occurrences": 10,
-          "position": 23,
+          "position": 22,
         },
         Object {
           "letter": "X",
           "occurrences": 10,
-          "position": 24,
+          "position": 23,
         },
         Object {
           "letter": "Y",
           "occurrences": 10,
-          "position": 25,
+          "position": 24,
         },
         Object {
           "letter": "Z",
           "occurrences": 10,
-          "position": 26,
+          "position": 25,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -194,127 +194,138 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
-        3 => Object {
+        2 => Object {
           "C": 10,
         },
-        4 => Object {
+        3 => Object {
           "D": 10,
         },
-        5 => Object {
+        4 => Object {
           "E": 10,
         },
-        6 => Object {
+        5 => Object {
           "F": 10,
         },
-        7 => Object {
+        6 => Object {
           "G": 10,
         },
-        8 => Object {
+        7 => Object {
           "H": 10,
         },
-        9 => Object {
+        8 => Object {
           "I": 10,
         },
-        10 => Object {
+        9 => Object {
           "J": 10,
         },
-        11 => Object {
+        10 => Object {
           "K": 10,
         },
-        12 => Object {
+        11 => Object {
           "L": 10,
         },
-        13 => Object {
+        12 => Object {
           "M": 10,
         },
-        14 => Object {
+        13 => Object {
           "N": 10,
         },
-        15 => Object {
+        14 => Object {
           "O": 10,
         },
-        16 => Object {
+        15 => Object {
           "P": 10,
         },
-        17 => Object {
+        16 => Object {
           "Q": 10,
         },
-        18 => Object {
+        17 => Object {
           "R": 10,
         },
-        19 => Object {
+        18 => Object {
           "S": 10,
         },
-        20 => Object {
+        19 => Object {
           "T": 10,
         },
-        21 => Object {
+        20 => Object {
           "U": 10,
         },
-        22 => Object {
+        21 => Object {
           "V": 10,
         },
-        23 => Object {
+        22 => Object {
           "W": 10,
         },
-        24 => Object {
+        23 => Object {
           "X": 10,
         },
-        25 => Object {
+        24 => Object {
           "Y": 10,
         },
-        26 => Object {
+        25 => Object {
           "Z": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "big-sequence-0",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-1",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-2",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-3",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-4",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-5",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-6",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-7",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-8",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "big-sequence-9",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "big-sequence-0",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-1",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-2",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-3",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-4",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-5",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-6",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-7",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-8",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "big-sequence-9",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "big-sequence-0",
+        "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
     }
   }
   alignmentType={
@@ -353,6 +364,14 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
       "className": undefined,
       "description": "All",
       "key": "all",
+    }
+  }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
     }
   }
 >
@@ -410,132 +429,132 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
         Object {
           "letter": "C",
           "occurrences": 10,
-          "position": 3,
+          "position": 2,
         },
         Object {
           "letter": "D",
           "occurrences": 10,
-          "position": 4,
+          "position": 3,
         },
         Object {
           "letter": "E",
           "occurrences": 10,
-          "position": 5,
+          "position": 4,
         },
         Object {
           "letter": "F",
           "occurrences": 10,
-          "position": 6,
+          "position": 5,
         },
         Object {
           "letter": "G",
           "occurrences": 10,
-          "position": 7,
+          "position": 6,
         },
         Object {
           "letter": "H",
           "occurrences": 10,
-          "position": 8,
+          "position": 7,
         },
         Object {
           "letter": "I",
           "occurrences": 10,
-          "position": 9,
+          "position": 8,
         },
         Object {
           "letter": "J",
           "occurrences": 10,
-          "position": 10,
+          "position": 9,
         },
         Object {
           "letter": "K",
           "occurrences": 10,
-          "position": 11,
+          "position": 10,
         },
         Object {
           "letter": "L",
           "occurrences": 10,
-          "position": 12,
+          "position": 11,
         },
         Object {
           "letter": "M",
           "occurrences": 10,
-          "position": 13,
+          "position": 12,
         },
         Object {
           "letter": "N",
           "occurrences": 10,
-          "position": 14,
+          "position": 13,
         },
         Object {
           "letter": "O",
           "occurrences": 10,
-          "position": 15,
+          "position": 14,
         },
         Object {
           "letter": "P",
           "occurrences": 10,
-          "position": 16,
+          "position": 15,
         },
         Object {
           "letter": "Q",
           "occurrences": 10,
-          "position": 17,
+          "position": 16,
         },
         Object {
           "letter": "R",
           "occurrences": 10,
-          "position": 18,
+          "position": 17,
         },
         Object {
           "letter": "S",
           "occurrences": 10,
-          "position": 19,
+          "position": 18,
         },
         Object {
           "letter": "T",
           "occurrences": 10,
-          "position": 20,
+          "position": 19,
         },
         Object {
           "letter": "U",
           "occurrences": 10,
-          "position": 21,
+          "position": 20,
         },
         Object {
           "letter": "V",
           "occurrences": 10,
-          "position": 22,
+          "position": 21,
         },
         Object {
           "letter": "W",
           "occurrences": 10,
-          "position": 23,
+          "position": 22,
         },
         Object {
           "letter": "X",
           "occurrences": 10,
-          "position": 24,
+          "position": 23,
         },
         Object {
           "letter": "Y",
           "occurrences": 10,
-          "position": 25,
+          "position": 24,
         },
         Object {
           "letter": "Z",
           "occurrences": 10,
-          "position": 26,
+          "position": 25,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -568,127 +587,138 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
-        3 => Object {
+        2 => Object {
           "C": 10,
         },
-        4 => Object {
+        3 => Object {
           "D": 10,
         },
-        5 => Object {
+        4 => Object {
           "E": 10,
         },
-        6 => Object {
+        5 => Object {
           "F": 10,
         },
-        7 => Object {
+        6 => Object {
           "G": 10,
         },
-        8 => Object {
+        7 => Object {
           "H": 10,
         },
-        9 => Object {
+        8 => Object {
           "I": 10,
         },
-        10 => Object {
+        9 => Object {
           "J": 10,
         },
-        11 => Object {
+        10 => Object {
           "K": 10,
         },
-        12 => Object {
+        11 => Object {
           "L": 10,
         },
-        13 => Object {
+        12 => Object {
           "M": 10,
         },
-        14 => Object {
+        13 => Object {
           "N": 10,
         },
-        15 => Object {
+        14 => Object {
           "O": 10,
         },
-        16 => Object {
+        15 => Object {
           "P": 10,
         },
-        17 => Object {
+        16 => Object {
           "Q": 10,
         },
-        18 => Object {
+        17 => Object {
           "R": 10,
         },
-        19 => Object {
+        18 => Object {
           "S": 10,
         },
-        20 => Object {
+        19 => Object {
           "T": 10,
         },
-        21 => Object {
+        20 => Object {
           "U": 10,
         },
-        22 => Object {
+        21 => Object {
           "V": 10,
         },
-        23 => Object {
+        22 => Object {
           "W": 10,
         },
-        24 => Object {
+        23 => Object {
           "X": 10,
         },
-        25 => Object {
+        24 => Object {
           "Y": 10,
         },
-        26 => Object {
+        25 => Object {
           "Z": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "nt-sequence-0",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-1",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-2",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-3",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-4",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-5",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-6",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-7",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-8",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-        Object {
-          "id": "nt-sequence-9",
-          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "nt-sequence-0",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-1",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-2",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-3",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-4",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-5",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-6",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-7",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-8",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+          Object {
+            "id": "nt-sequence-9",
+            "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "nt-sequence-0",
+        "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
     }
   }
   alignmentType={
@@ -729,6 +759,14 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
       "key": "all",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="My-Alignment-ID"
@@ -757,7 +795,15 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
       "globalAlphaLetterCounts": Object {},
       "name": "My-Alignment",
       "positionalLetterCounts": Map {},
-      "sequences": Array [],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [],
+      },
+      "targetSequence": undefined,
     }
   }
   alignmentType={
@@ -796,6 +842,14 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
       "className": undefined,
       "description": "All",
       "key": "all",
+    }
+  }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
     }
   }
 >
@@ -856,12 +910,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -870,55 +924,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -957,6 +1022,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "className": undefined,
       "description": "All",
       "key": "all",
+    }
+  }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
     }
   }
 >
@@ -994,12 +1067,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1008,55 +1081,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -1097,6 +1181,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "all",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Nucleotides"
@@ -1132,12 +1224,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1146,55 +1238,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -1235,6 +1338,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "consensus",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Amino Acids"
@@ -1270,12 +1381,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1284,55 +1395,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -1373,6 +1495,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "consensus",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Nucleotides"
@@ -1408,12 +1538,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1422,55 +1552,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -1511,6 +1652,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "consensus-diff",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Amino Acids"
@@ -1546,12 +1695,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1560,55 +1709,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -1649,6 +1809,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "consensus-diff",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Nucleotides"
@@ -1684,12 +1852,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1698,55 +1866,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -1787,6 +1966,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "query",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Amino Acids"
@@ -1822,12 +2009,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1836,55 +2023,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -1925,6 +2123,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "query",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Nucleotides"
@@ -1960,12 +2166,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -1974,55 +2180,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -2063,6 +2280,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "query-diff",
     }
   }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
+    }
+  }
 >
   <div
     id="Amino Acids"
@@ -2098,12 +2323,12 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         Object {
           "letter": "A",
           "occurrences": 10,
-          "position": 1,
+          "position": 0,
         },
         Object {
           "letter": "B",
           "occurrences": 10,
-          "position": 2,
+          "position": 1,
         },
       ],
       "globalAlphaLetterCounts": Object {
@@ -2112,55 +2337,66 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       },
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
-        1 => Object {
+        0 => Object {
           "A": 10,
         },
-        2 => Object {
+        1 => Object {
           "B": 10,
         },
       },
-      "sequences": Array [
-        Object {
-          "id": "sequence-0",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-1",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-2",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-3",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-4",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-5",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-6",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-7",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-8",
-          "sequence": "AB",
-        },
-        Object {
-          "id": "sequence-9",
-          "sequence": "AB",
-        },
-      ],
+      "sequences": Map {
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        } => Array [
+          Object {
+            "id": "sequence-0",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-1",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-2",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-3",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-4",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-5",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-6",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-7",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-8",
+            "sequence": "AB",
+          },
+          Object {
+            "id": "sequence-9",
+            "sequence": "AB",
+          },
+        ],
+      },
+      "targetSequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
     }
   }
   alignmentType={
@@ -2199,6 +2435,14 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "className": undefined,
       "description": "Different from Query",
       "key": "query-diff",
+    }
+  }
+  sortBy={
+    SequenceSortOptions {
+      "description": "As input",
+      "distanceFn": undefined,
+      "isTargetSequenceDependent": false,
+      "key": "as-input",
     }
   }
 >

@@ -3,7 +3,7 @@ import * as React from "react";
 import { mount, shallow, default as Enzyme } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 
-import Alignment from "../Alignment";
+import Alignment, { SequenceSortOptions } from "../Alignment";
 import { AlignmentCanvasComponent } from "../AlignmentCanvasComponent";
 import {
   AlignmentTypes,
@@ -50,6 +50,7 @@ describe("AlignmentCanvasComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
+        sortBy={SequenceSortOptions.INPUT}
         id={"My-Alignment-ID"}
       />
     );
@@ -63,6 +64,7 @@ describe("AlignmentCanvasComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
+        sortBy={SequenceSortOptions.INPUT}
         id={"My-Alignment-ID"}
       />
     );
@@ -80,6 +82,7 @@ describe("AlignmentCanvasComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
+        sortBy={SequenceSortOptions.INPUT}
         id={"My-Alignment-ID"}
       />
     );
@@ -105,6 +108,7 @@ describe("AlignmentCanvasComponent", () => {
           alignmentType={AlignmentTypes.AMINOACID}
           positionsToStyle={positionsToStyle}
           colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
+          sortBy={SequenceSortOptions.INPUT}
           id={"Amino Acids"}
         />
       );
@@ -114,6 +118,7 @@ describe("AlignmentCanvasComponent", () => {
           alignmentType={AlignmentTypes.NUCLEOTIDE}
           positionsToStyle={positionsToStyle}
           colorScheme={ALL_NUCLEOTIDE_COLORSCHEMES[0]}
+          sortBy={SequenceSortOptions.INPUT}
           id={"Nucleotides"}
         />
       );
@@ -133,6 +138,7 @@ describe("AlignmentCanvasComponent", () => {
         alignmentType={AlignmentTypes.NUCLEOTIDE}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_NUCLEOTIDE_COLORSCHEMES[0]}
+        sortBy={SequenceSortOptions.INPUT}
         id={"My-Alignment-ID"}
       />
     );
@@ -152,6 +158,7 @@ describe("AlignmentCanvasComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
+        sortBy={SequenceSortOptions.INPUT}
         id={"My-Alignment-ID"}
       />
     );

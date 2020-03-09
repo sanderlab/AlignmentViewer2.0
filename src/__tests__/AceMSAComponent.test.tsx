@@ -3,7 +3,7 @@ import { mount, shallow, default as Enzyme } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 import "jest-canvas-mock";
 
-import Alignment from "../Alignment";
+import Alignment, { SequenceSortOptions } from "../Alignment";
 import { AceMSAComponent, AceEditorTypes } from "../AceMSAComponent";
 import { Ace, default as ace } from "ace-builds";
 
@@ -52,6 +52,7 @@ describe("AceMSAComponent", () => {
         fontSize={4}
         id={"ace-msa-editor"}
         type={AceEditorTypes.alignment}
+        sortBy={SequenceSortOptions.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -67,6 +68,7 @@ describe("AceMSAComponent", () => {
         fontSize={4}
         id={"ace-msa-editor"}
         type={AceEditorTypes.alignment}
+        sortBy={SequenceSortOptions.INPUT}
       />
     );
     expect(editorLoadedSpy).toHaveBeenCalled();
@@ -112,6 +114,7 @@ describe("AceMSAComponent", () => {
         fontSize={4}
         id={"ace-msa-editor"}
         type={editor}
+        sortBy={SequenceSortOptions.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
