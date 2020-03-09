@@ -1,11 +1,31 @@
-import fetchMock from "jest-fetch-mock";
+import "jest-webgl-canvas-mock";
 import Alignment, { ISequence } from "../Alignment";
-import { enableFetchMocks } from "jest-fetch-mock";
 import * as fs from "fs";
+
+import { enableFetchMocks, default as fetchMock } from "jest-fetch-mock";
+enableFetchMocks();
 
 describe("Alignment", () => {
   let pse1TargetSequence: ISequence;
   let pse1Alignment: Alignment;
+
+  beforeAll(async () => {
+    const sequenceFile = fs
+      .readFileSync("public/7fa1c5691376beab198788a726917d48_b0.4.a2m")
+      .toString();
+    // Snippet taken from public/7fa1c5691376beab198788a726917d48_b0.4.a2m
+    fetchMock.mockResponse(sequenceFile);
+
+    const result = await fetch(`http://localhost:11037/api/file.a2m`);
+    pse1Alignment = Alignment.fromFileContents(
+      "7fa1c5691376beab198788a726917d48_b0.4.a2m",
+      await result.text()
+    );
+    pse1TargetSequence = pse1Alignment.getSequences()[0];
+    expect(pse1Alignment.getName()).toEqual(
+      "7fa1c5691376beab198788a726917d48_b0.4.a2m"
+    );
+  });
 
   it("Should allow sorting.", () => {
     const alignment = new Alignment("Test-Sequence", [
@@ -45,25 +65,5 @@ describe("Alignment", () => {
       { id: "id-2", sequence: "CBA" }
     ]);
     expect(alignment.getTargetSequence()).toEqual(seq1);
-  });
-
-  beforeAll(async () => {
-    enableFetchMocks();
-
-    const sequenceFile = fs
-      .readFileSync("public/7fa1c5691376beab198788a726917d48_b0.4.a2m")
-      .toString();
-    // Snippet taken from public/7fa1c5691376beab198788a726917d48_b0.4.a2m
-    fetchMock.mockResponse(sequenceFile);
-
-    const result = await fetch(`http://localhost:11037/api/file.a2m`);
-    pse1Alignment = Alignment.fromFileContents(
-      "7fa1c5691376beab198788a726917d48_b0.4.a2m",
-      await result.text()
-    );
-    pse1TargetSequence = pse1Alignment.getSequences()[0];
-    expect(pse1Alignment.getName()).toEqual(
-      "7fa1c5691376beab198788a726917d48_b0.4.a2m"
-    );
   });
 });

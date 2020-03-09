@@ -1,11 +1,13 @@
+import { Ace, default as ace } from "ace-builds";
+import "jest-webgl-canvas-mock";
 import * as React from "react";
-import { mount, shallow, default as Enzyme } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
-import "jest-canvas-mock";
 
 import Alignment, { SequenceSortOptions } from "../Alignment";
 import { AceMSAComponent, AceEditorTypes } from "../AceMSAComponent";
-import { Ace, default as ace } from "ace-builds";
+
+import { mount, shallow, default as Enzyme } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
+Enzyme.configure({ adapter: new Adapter() });
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -27,10 +29,6 @@ jest.mock("../MolecularStyles.module.scss", () => {
 describe("AceMSAComponent", () => {
   let editor: Ace.Editor;
   let editorLoadedSpy: jest.Mock;
-
-  beforeAll(() => {
-    Enzyme.configure({ adapter: new Adapter() });
-  });
 
   beforeEach(() => {
     jest.clearAllTimers();

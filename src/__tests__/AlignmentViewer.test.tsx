@@ -1,11 +1,14 @@
+import "jest-webgl-canvas-mock";
 import * as React from "react";
-import { shallow, default as Enzyme } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
-import "jest-canvas-mock";
+
 import Alignment, { SequenceSortOptions } from "../Alignment";
 import { AlignmentViewer } from "../AlignmentViewer";
 import { AlignmentStyle, AlignmentTypes } from "../MolecularStyles";
 import { LOGO_TYPES } from "../SequenceLogoComponent";
+
+import { shallow, default as Enzyme } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
+Enzyme.configure({ adapter: new Adapter() });
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -25,10 +28,6 @@ jest.mock("../MolecularStyles.module.scss", () => {
 });
 
 describe("AlignmentViewer", () => {
-  beforeAll(() => {
-    Enzyme.configure({ adapter: new Adapter() });
-  });
-
   it("Should render", () => {
     const wrapper = shallow(
       <AlignmentViewer

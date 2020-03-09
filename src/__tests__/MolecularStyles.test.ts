@@ -1,3 +1,4 @@
+import "jest-webgl-canvas-mock";
 import {
   AlignmentStyle,
   AlignmentTypes,

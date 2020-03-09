@@ -1,7 +1,5 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
-import { mount, shallow, default as Enzyme } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
 
 import Alignment, { SequenceSortOptions } from "../Alignment";
 import { AlignmentCanvasComponent } from "../AlignmentCanvasComponent";
@@ -11,6 +9,10 @@ import {
   ALL_AMINOACID_COLORSCHEMES,
   ALL_NUCLEOTIDE_COLORSCHEMES
 } from "../MolecularStyles";
+
+import { mount, shallow, default as Enzyme } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
+Enzyme.configure({ adapter: new Adapter() });
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -40,9 +42,7 @@ describe("AlignmentCanvasComponent", () => {
       sequence
     };
   };
-  beforeAll(() => {
-    Enzyme.configure({ adapter: new Adapter() });
-  });
+
   it("Should match the shallow snapshot.", () => {
     const wrapper = shallow(
       <AlignmentCanvasComponent
