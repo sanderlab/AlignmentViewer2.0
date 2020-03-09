@@ -1,13 +1,13 @@
+import "jest-webgl-canvas-mock";
 import * as React from "react";
-import { mount, default as Enzyme } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+
 import ScrollSync, { ScrollType } from "../ScrollSync";
 
-describe("ScrollSync", () => {
-  beforeAll(() => {
-    Enzyme.configure({ adapter: new Adapter() });
-  });
+import { mount, default as Enzyme } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
+Enzyme.configure({ adapter: new Adapter() });
 
+describe("ScrollSync", () => {
   it("Should work.", () => {
     const scrollSyncInstance = ScrollSync.getInstance();
     expect(scrollSyncInstance).not.toBeUndefined();

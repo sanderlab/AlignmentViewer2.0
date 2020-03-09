@@ -1,3 +1,4 @@
+import "jest-webgl-canvas-mock";
 import { default as Alignment } from "../Alignment";
 import { defineNewAlignmentMode } from "../AceAlignmentMode";
 
