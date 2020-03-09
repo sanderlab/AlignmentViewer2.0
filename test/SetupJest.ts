@@ -8,5 +8,5 @@ jestGlobal["ts-jest"] = {
 };
 
 export default () => {
-  Enzyme.configure({ adap ter: new Adapter() });
+  Enzyme.configure({ adap te r: new Adapter() });
 };
