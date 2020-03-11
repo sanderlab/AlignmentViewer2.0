@@ -96,9 +96,11 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
 
   protected renderSequenceLogo = () => (
     <div
-      className={`logo_box ${this.props.style.alignmentType.className}
-                       ${this.props.style.colorScheme.className} 
-                       ${PositionsToStyle.ALL.className}`}
+      className={
+        `logo_box ${this.props.style.alignmentType.className} ` +
+        `${this.props.style.colorScheme.className} ` +
+        `${PositionsToStyle.ALL.className}`
+      }
     >
       {
         <SequenceLogoComponent

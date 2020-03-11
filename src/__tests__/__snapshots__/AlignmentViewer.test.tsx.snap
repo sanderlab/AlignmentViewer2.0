@@ -35,9 +35,7 @@ exports[`AlignmentViewer Should render 1`] = `
     />
   </div>
   <div
-    className="logo_box undefined
-                        
-                       undefined"
+    className="logo_box undefined  undefined"
   >
     <SequenceLogoComponent
       alignment={
