@@ -259,9 +259,8 @@ class PixiAlignmentTiled extends React.Component<
       const seq = sequences[seqIdx + offsets.seqY];
       for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
         const letter = seq.sequence[letterIdx + offsets.letterX];
-        const molecule = this.getCurrentMoleculeColors(letter, letterIdx, offsets);
+        const colorScheme = this.getCurrentMoleculeColors(letter, letterIdx, offsets);
 
-        const colorScheme = molecule.colors[this.props.colorScheme.commonName];
         tileImageData.data[imageDataIdx] = colorScheme.rgb.red;
         tileImageData.data[imageDataIdx + 1] = colorScheme.rgb.green;
         tileImageData.data[imageDataIdx + 2] = colorScheme.rgb.blue;
