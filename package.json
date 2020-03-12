@@ -1,6 +1,6 @@
 {
   "name": "alignmentviewer2",
-  "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/build",
+  "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
