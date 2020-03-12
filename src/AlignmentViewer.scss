@@ -1,6 +1,113 @@
 /** App.scss */
 @use "./MolecularStyles.module.scss";
 
+$layoutGapSize: 5px;
+$annotationContentGapSize: 20px;
+$rowHeight: 25px;
+
+.alignment_viewer.annotation-closed .av-annotation {
+  display: none;
+}
+
+.alignment_viewer {
+  display: grid;
+  grid-template-columns: 10px repeat(auto-fill, minmax(200px, 1fr)) 10px;
+  grid-auto-rows: minmax($rowHeight, auto);
+  grid-gap: $layoutGapSize;
+
+  .av-widget {
+    grid-column: 2 / -2;
+    grid-row-start: auto;
+
+    display: flex;
+    flex-direction: row;
+
+    position: relative;
+  }
+  .av-widget.av-webgl-msa {
+    display: none;
+  }
+  .av-widget.av-conservation-gaps {
+    grid-row-end: span 3;
+  }
+  .av-widget.av-sequence-logo {
+    grid-row-end: span 4;
+  }
+  .av-widget.av-ace-msa {
+    grid-row-end: span 23;
+  }
+
+  .av-annotation,
+  .av-content {
+    display: flex;
+    overflow: scroll;
+  }
+  .av-annotation {
+    flex: 0 1 20%;
+    justify-content: flex-end;
+    align-items: center;
+    /* bit of a hack to put space between annotation and content */
+    margin-right: $annotationContentGapSize;
+    font-weight: bold;
+    text-align: right;
+  }
+  .av-content {
+    flex: 1 0 80%;
+    position: relative;
+    align-items: center;
+  }
+
+  .av-widget.av-consensus-seq #ace-consensusseq,
+  .av-widget.av-target-seq #ace-queryseq,
+  .av-widget.av-position-indicator #ace-positions {
+    line-height: $rowHeight;
+  }
+
+  .av-widget.av-consensus-seq #ace-consensusseq,
+  .av-widget.av-target-seq #ace-queryseq,
+  .av-widget.av-position-indicator #ace-positions,
+  .av-widget.av-ace-msa #ace-alignment {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+
+  svg.conservation .gapCount rect {
+    fill: #b7b7b7;
+  }
+  svg.conservation .entropy rect {
+    fill: #000000;
+  }
+}
+
+/*
+.alignment-viewer .av-widget .close-widget{
+	position: absolute;
+	top:0;
+	right:0;
+	padding:5px;
+}
+.alignment-viewer .av-widget .close-widget button{
+  background: none!important;
+  border: none;
+  padding: 0!important;
+  cursor: pointer;
+  color: red;
+  font-weight: bold;
+}
+.alignment-viewer .av-widget .close-widget button:focus { 
+outline: none; 
+}
+*/
+
+/*
+ * OLD
+
 .AlignmentViewer {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -21,17 +128,16 @@
 .ace_content {
   cursor: auto;
 }
-
+*/
 /**
  * Conservation / Entropy / Gap plots
- */
+ 
 .conservation_box {
   position: relative;
   grid-column-start: 2;
   grid-column-end: 4;
   grid-row-start: 1;
   grid-row-end: 1;
-  /*border:solid yellow 1px;*/
 }
 #sequence_conservation {
   position: absolute;
@@ -53,18 +159,17 @@ svg.conservation .gapCount rect {
 }
 svg.conservation .entropy rect {
   fill: #000000;
-}
+}*/
 
 /**
  * Logo plot
- */
+ 
 .logo_box {
   position: relative;
   grid-column-start: 2;
   grid-column-end: 4;
   grid-row-start: 2;
   grid-row-end: 2;
-  /*border:solid blue 1px;*/
 }
 .logo_box #sequence_logo {
   position: absolute;
@@ -73,11 +178,11 @@ svg.conservation .entropy rect {
   top: 0;
   bottom: 0;
   overflow-x: scroll;
-}
+}*/
 
 /**
  * Position indicator
- */
+ 
 .position_box {
   position: relative;
   grid-column-start: 2;
@@ -101,11 +206,11 @@ svg.conservation .entropy rect {
   overflow-x: hidden;
   border-bottom: 1px solid red;
   border-top: 1px solid red;
-}
+}*/
 
 /**
  * Query Sequence
- */
+ 
 .queryseq_box {
   position: relative;
   grid-column-start: 2;
@@ -127,11 +232,11 @@ svg.conservation .entropy rect {
   padding-left: 3px;
   overflow: scroll;
   overflow-x: hidden;
-}
+}*/
 
 /**
  * Consensus Sequence
- */
+ 
 .consensusseq_box {
   position: relative;
   grid-column-start: 2;
@@ -153,11 +258,11 @@ svg.conservation .entropy rect {
   padding-left: 3px;
   overflow: scroll;
   overflow-x: hidden;
-}
+}*/
 
 /**
  * Individual sequence data as well as the MSA as a canvas in WebGL
- */
+ 
 .datatable_box {
   position: relative;
   grid-column-start: 1;
@@ -166,10 +271,10 @@ svg.conservation .entropy rect {
   grid-row-end: 6;
   overflow: scroll;
 }
-
+*/
 /**
  * Full ace alignment
- */
+ 
 .alignment_box #ace-alignment {
   position: absolute;
   top: 0px;
@@ -184,11 +289,12 @@ svg.conservation .entropy rect {
 }
 .alignment_box #ace-alignment.loaded {
   visibility: visible;
-}
+}*/
 
 /**
  * Interaction indicators
- */
+ 
+
 #column_mouseover {
   position: absolute;
   display: none;
@@ -197,3 +303,4 @@ svg.conservation .entropy rect {
   z-index: 1000;
   border: solid 2px purple;
 }
+*/

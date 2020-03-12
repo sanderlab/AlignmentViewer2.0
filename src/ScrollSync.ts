@@ -47,6 +47,14 @@ export default class ScrollSync {
   }
 
   /**
+   * Is a scroller an Ace Editor or an HTMLElement.
+   * @param scroller
+   */
+  protected scrollerIsAce(scroller: HTMLElement | Ace.Editor): boolean {
+    return "renderer" in scroller;
+  }
+
+  /**
    * Returns the width of the hidden area (scroll width) in px of the element or ace editor.
    * @param scroller
    */

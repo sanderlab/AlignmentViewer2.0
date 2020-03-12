@@ -214,7 +214,7 @@ export class AceMSAComponent extends React.Component<
   render() {
     let xOffsetIndicator;
     if (this.state && typeof this.state.mouseContainerX === "number") {
-      xOffsetIndicator = (
+      /*xOffsetIndicator = (
         <div
           style={{
             position: "absolute",
@@ -239,7 +239,7 @@ export class AceMSAComponent extends React.Component<
             {(this.state.mouseColumn as number) + 1}
           </div>
         </div>
-      );
+      );*/
     }
 
     return (
