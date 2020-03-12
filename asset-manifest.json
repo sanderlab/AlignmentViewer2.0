@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/AlignmentViewer2.0/build/static/css/main.365b7c84.chunk.css",
+    "main.js": "/AlignmentViewer2.0/build/static/js/main.dda627bb.chunk.js",
+    "main.js.map": "/AlignmentViewer2.0/build/static/js/main.dda627bb.chunk.js.map",
+    "runtime-main.js": "/AlignmentViewer2.0/build/static/js/runtime-main.65fc1701.js",
+    "runtime-main.js.map": "/AlignmentViewer2.0/build/static/js/runtime-main.65fc1701.js.map",
+    "static/js/2.d24c602c.chunk.js": "/AlignmentViewer2.0/build/static/js/2.d24c602c.chunk.js",
+    "static/js/2.d24c602c.chunk.js.map": "/AlignmentViewer2.0/build/static/js/2.d24c602c.chunk.js.map",
+    "index.html": "/AlignmentViewer2.0/build/index.html",
+    "precache-manifest.02d19f4d023cae55b9ac311c640eb6c1.js": "/AlignmentViewer2.0/build/precache-manifest.02d19f4d023cae55b9ac311c640eb6c1.js",
+    "service-worker.js": "/AlignmentViewer2.0/build/service-worker.js",
+    "static/css/main.365b7c84.chunk.css.map": "/AlignmentViewer2.0/build/static/css/main.365b7c84.chunk.css.map",
+    "static/js/2.d24c602c.chunk.js.LICENSE": "/AlignmentViewer2.0/build/static/js/2.d24c602c.chunk.js.LICENSE"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.65fc1701.js",
+    "static/js/2.d24c602c.chunk.js",
+    "static/css/main.365b7c84.chunk.css",
+    "static/js/main.dda627bb.chunk.js"
+  ]
+}
