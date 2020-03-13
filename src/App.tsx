@@ -12,6 +12,7 @@ import {
   ResidueDetailTypes
 } from "./MolecularStyles";
 import { LOGO_TYPES, SequenceLogoComponent } from "./SequenceLogoComponent";
+import { MiniMap } from "./components/MiniMap";
 
 export interface AppProps {}
 export interface AppState {
@@ -52,6 +53,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return !alignment || !style ? null : (
       <div>
         {this.renderSettingsBox(style)}
+        {this.renderMiniMap()}
         <div className="av_holder">
           <AlignmentViewer
             alignment={alignment}
@@ -302,4 +304,21 @@ export default class App extends React.Component<AppProps, AppState> {
       </div>
     );
   };
+
+  protected renderMiniMap() {
+    const { alignment, logoPlotStyle, sortBy, style, zoomLevel } = this.state;
+
+    return (
+      alignment &&
+      style && (
+        <MiniMap
+          width={400}
+          height={400}
+          alignment={alignment}
+          style={style}
+          sortBy={sortBy}
+        />
+      )
+    );
+  }
 }

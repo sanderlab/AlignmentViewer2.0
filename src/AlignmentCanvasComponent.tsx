@@ -259,7 +259,11 @@ class PixiAlignmentTiled extends React.Component<
       const seq = sequences[seqIdx + offsets.seqY];
       for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
         const letter = seq.sequence[letterIdx + offsets.letterX];
-        const colorScheme = this.getCurrentMoleculeColors(letter, letterIdx, offsets);
+        const colorScheme = this.getCurrentMoleculeColors(
+          letter,
+          letterIdx,
+          offsets
+        );
 
         tileImageData.data[imageDataIdx] = colorScheme.rgb.red;
         tileImageData.data[imageDataIdx + 1] = colorScheme.rgb.green;
@@ -355,7 +359,7 @@ class PixiAlignmentTiled extends React.Component<
         molecule = moleculeClass.fromSingleLetterCode(letter);
       }
     }
-    return molecule.colors[colorScheme.commonName];;
+    return molecule.colors[colorScheme.commonName];
   }
 
   protected initializeTiledImages({
