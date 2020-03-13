@@ -74,22 +74,80 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
   };
 
   _elementLoaded(id: string, scroller: HTMLElement) {
-    console.log("_elementLoaded id =" + id);
+    console.log("_elementLoaded id =" + id + ":", scroller);
+
     let scrollSync = ScrollSync.getInstance();
     scrollSync.registerScroller(scroller, "horiz");
   }
 
+  protected generateWidget(
+    className: string,
+    desc: string,
+    content: JSX.Element
+  ) {
+    return (
+      <div
+        className={`av-widget ${className}`}
+        ref={e => {
+          //TODO: move into separate component .. Ref can be null here and
+          //      also good to keep track of removal / addition for scroll sync
+          //console.log("the ref is:", e);
+        }}
+      >
+        <div className="av-annotation">{desc}</div>
+        <div className="av-content">{content}</div>
+      </div>
+    );
+  }
+
   render() {
     return !this.props.alignment ? null : (
-      <div className="AlignmentViewer">
-        <div id="column_mouseover"></div>
-        {this.renderConservationBox()}
-        {this.renderSequenceLogo()}
-        {this.renderConsensusQueryBox()}
-        {this.renderQuerySeqBox()}
-        {this.renderPositionBox()}
-        {this.renderDatatableBox()}
-        {this.renderAlignmentBox()}
+      <div className="alignment_viewer">
+        {/*<div id="column_mouseover"></div>*/}
+
+        {this.generateWidget(
+          "av-conservation-gaps",
+          "Conservation / gaps:",
+          this.renderConservationBox()
+        )}
+
+        {this.generateWidget(
+          "av-sequence-logo",
+          "Logo:",
+          this.renderSequenceLogo()
+        )}
+
+        {this.generateWidget(
+          "av-consensus-seq",
+          "Consensus sequence:",
+          this.renderConsensusQueryBox()
+        )}
+
+        {this.generateWidget(
+          "av-target-seq",
+          "Query sequence:",
+          this.renderQuerySeqBox()
+        )}
+
+        {this.generateWidget(
+          "av-position-indicator",
+          "Position:",
+          this.renderPositionBox()
+        )}
+
+        {this.generateWidget(
+          "av-ace-msa",
+          "Individual sequence annotations go here..",
+          this.renderAlignmentBox()
+        )}
+
+        {/*
+        //this is where we would add the webgl msa ..
+        this.generateWidget(
+          "av-webgl-msa",
+          "",
+          this.renderDatatableBox()
+        )*/}
       </div>
     );
   }
@@ -109,25 +167,22 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
           glyphWidth={this.state.aceCharacterWidth}
           logoType={this.props.logoPlotStyle}
           logoLoaded={element => {
-            this._elementLoaded("sequence_logo", element as HTMLElement);
+            //this._elementLoaded("sequence_logo", element as HTMLElement);
           }}
         />
       }
     </div>
   );
+
   protected renderConservationBox = () => (
-    <div className="conservation_box">
-      {
-        <SequenceConservationComponent
-          id="sequence_conservation"
-          alignment={this.props.alignment}
-          characterWidth={this.state.aceCharacterWidth}
-          conservationPlotLoaded={element => {
-            this._elementLoaded("sequence_conservation", element);
-          }}
-        />
-      }
-    </div>
+    <SequenceConservationComponent
+      id="sequence_conservation"
+      alignment={this.props.alignment}
+      characterWidth={this.state.aceCharacterWidth}
+      conservationPlotLoaded={element => {
+        //this._elementLoaded("sequence_conservation", element);
+      }}
+    />
   );
 
   protected renderConsensusQueryBox = () => (

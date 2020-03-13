@@ -2,284 +2,284 @@
 
 exports[`AlignmentViewer Should render 1`] = `
 <div
-  className="AlignmentViewer"
+  className="alignment_viewer"
 >
   <div
-    id="column_mouseover"
-  />
-  <div
-    className="conservation_box"
+    className="av-widget av-conservation-gaps"
   >
-    <SequenceConservationComponent
-      alignment={
-        Alignment {
-          "allAlphaLettersSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "sequences": Map {
-            SequenceSortOptions {
-              "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
-              "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-        }
-      }
-      characterWidth={0}
-      conservationPlotLoaded={[Function]}
-      id="sequence_conservation"
-    />
-  </div>
-  <div
-    className="logo_box undefined  undefined"
-  >
-    <SequenceLogoComponent
-      alignment={
-        Alignment {
-          "allAlphaLettersSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "sequences": Map {
-            SequenceSortOptions {
-              "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
-              "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-        }
-      }
-      glyphWidth={0}
-      id="sequence_logo"
-      logoLoaded={[Function]}
-      logoType="bar plot"
-    />
-  </div>
-  <div
-    className="consensusseq_box"
-  >
-    <AceMSAComponent
-      alignment={
-        Alignment {
-          "allAlphaLettersSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "sequences": Map {
-            SequenceSortOptions {
-              "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
-              "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-        }
-      }
-      editorLoaded={[Function]}
-      fontSize={0}
-      id="ace-consensusseq"
-      sortBy={
-        SequenceSortOptions {
-          "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
-          "key": "as-input",
-        }
-      }
-      topLevelClassNames="   "
-      type={1}
-    />
-  </div>
-  <div
-    className="queryseq_box"
-  >
-    <AceMSAComponent
-      alignment={
-        Alignment {
-          "allAlphaLettersSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "sequences": Map {
-            SequenceSortOptions {
-              "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
-              "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-        }
-      }
-      editorLoaded={[Function]}
-      fontSize={0}
-      id="ace-queryseq"
-      sortBy={
-        SequenceSortOptions {
-          "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
-          "key": "as-input",
-        }
-      }
-      topLevelClassNames="   "
-      type={0}
-    />
-  </div>
-  <div
-    className="position_box"
-  >
-    <AceMSAComponent
-      alignment={
-        Alignment {
-          "allAlphaLettersSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "sequences": Map {
-            SequenceSortOptions {
-              "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
-              "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-        }
-      }
-      editorLoaded={[Function]}
-      fontSize={0}
-      id="ace-positions"
-      sortBy={
-        SequenceSortOptions {
-          "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
-          "key": "as-input",
-        }
-      }
-      type={3}
-    />
-  </div>
-  <div
-    className="datatable_box"
-    id="datatable"
-  >
-    <AlignmentCanvasComponent
-      alignment={
-        Alignment {
-          "allAlphaLettersSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "sequences": Map {
-            SequenceSortOptions {
-              "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
-              "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-        }
-      }
-      alignmentType={
-        AlignmentTypes {
-          "allColorSchemes": Array [
-            Object {
-              "backgroundAlpha": NaN,
-              "className": "",
-              "colors": Object {
-                "": "",
-              },
-              "commonName": "Default",
-              "description": "",
+    <div
+      className="av-annotation"
+    >
+      Conservation / gaps:
+    </div>
+    <div
+      className="av-content"
+    >
+      <SequenceConservationComponent
+        alignment={
+          Alignment {
+            "allAlphaLettersSorted": Array [],
+            "consensus": Array [],
+            "globalAlphaLetterCounts": Object {},
+            "name": "",
+            "positionalLetterCounts": Map {},
+            "sequences": Map {
+              SequenceSortOptions {
+                "description": "As input",
+                "distanceFn": undefined,
+                "isTargetSequenceDependent": false,
+                "key": "as-input",
+              } => Array [],
             },
-          ],
-          "className": undefined,
-          "description": "Nucleotide Sequences",
-          "key": "nucleotide-alignment",
+            "targetSequence": undefined,
+          }
         }
-      }
-      colorScheme={
-        Object {
-          "backgroundAlpha": NaN,
-          "className": "",
-          "colors": Object {
-            "": "",
-          },
-          "commonName": "Default",
-          "description": "",
-        }
-      }
-      id="alignment_canvas"
-      mouseDown={[Function]}
-      positionsToStyle={
-        PositionsToStyle {
-          "className": undefined,
-          "description": "All",
-          "key": "all",
-        }
-      }
-      sortBy={
-        SequenceSortOptions {
-          "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
-          "key": "as-input",
-        }
-      }
-    />
+        characterWidth={0}
+        conservationPlotLoaded={[Function]}
+        id="sequence_conservation"
+      />
+    </div>
   </div>
   <div
-    className="alignment_box"
+    className="av-widget av-sequence-logo"
   >
-    <AceMSAComponent
-      alignment={
-        Alignment {
-          "allAlphaLettersSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "sequences": Map {
+    <div
+      className="av-annotation"
+    >
+      Logo:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="logo_box undefined  undefined"
+      >
+        <SequenceLogoComponent
+          alignment={
+            Alignment {
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+            }
+          }
+          glyphWidth={0}
+          id="sequence_logo"
+          logoLoaded={[Function]}
+          logoType="bar plot"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-consensus-seq"
+  >
+    <div
+      className="av-annotation"
+    >
+      Consensus sequence:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="consensusseq_box"
+      >
+        <AceMSAComponent
+          alignment={
+            Alignment {
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+            }
+          }
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-consensusseq"
+          sortBy={
             SequenceSortOptions {
               "description": "As input",
               "distanceFn": undefined,
               "isTargetSequenceDependent": false,
               "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-        }
-      }
-      characterSizeChanged={[Function]}
-      editorLoaded={[Function]}
-      fontSize={0}
-      id="ace-alignment"
-      sortBy={
-        SequenceSortOptions {
-          "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
-          "key": "as-input",
-        }
-      }
-      topLevelClassNames="   "
-      type={2}
-    />
+            }
+          }
+          topLevelClassNames="   "
+          type={1}
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-target-seq"
+  >
+    <div
+      className="av-annotation"
+    >
+      Query sequence:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="queryseq_box"
+      >
+        <AceMSAComponent
+          alignment={
+            Alignment {
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+            }
+          }
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-queryseq"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+          topLevelClassNames="   "
+          type={0}
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-position-indicator"
+  >
+    <div
+      className="av-annotation"
+    >
+      Position:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="position_box"
+      >
+        <AceMSAComponent
+          alignment={
+            Alignment {
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+            }
+          }
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-positions"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+          type={3}
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-ace-msa"
+  >
+    <div
+      className="av-annotation"
+    >
+      Individual sequence annotations go here..
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="alignment_box"
+      >
+        <AceMSAComponent
+          alignment={
+            Alignment {
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+            }
+          }
+          characterSizeChanged={[Function]}
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-alignment"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+          topLevelClassNames="   "
+          type={2}
+        />
+      </div>
+    </div>
   </div>
 </div>
 `;
