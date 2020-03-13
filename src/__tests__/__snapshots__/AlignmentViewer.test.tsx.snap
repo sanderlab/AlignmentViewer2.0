@@ -52,7 +52,7 @@ exports[`AlignmentViewer Should render 1`] = `
       className="av-content"
     >
       <div
-        className="undefined  undefined"
+        className="logo_box undefined  undefined"
       >
         <SequenceLogoComponent
           alignment={
