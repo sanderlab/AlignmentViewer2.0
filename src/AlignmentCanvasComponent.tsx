@@ -5,6 +5,7 @@ import * as PIXI from "pixi.js";
 import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";
 import { Viewport } from "pixi-viewport";
 import { Graphics } from "pixi.js";
+
 import {
   IColorScheme,
   PositionsToStyle,
@@ -120,7 +121,12 @@ export class AlignmentCanvasComponent extends React.Component<
       ? highlightRows[1] - highlightRows[0]
       : undefined;
     return (
-      <div id={id} onScroll={this.onScroll}>
+      <div
+        id={id}
+        onWheel={this.onWheel}
+        onMouseEnter={this.onMouseEnter}
+        onMouseLeave={this.onMouseLeave}
+      >
         <Stage
           width={stageResolution?.width}
           height={stageResolution?.height}
@@ -182,9 +188,16 @@ export class AlignmentCanvasComponent extends React.Component<
     />
   );
 
-  protected onScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    console.log("scroll");
-    // e.stopPropagation();
+  protected onMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    document.body.style.overflow = "hidden";
+  };
+
+  protected onMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    document.body.style.overflow = "auto";
+  };
+
+  protected onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
   };
 }
 class PixiAlignmentTiled extends React.Component<
@@ -192,6 +205,7 @@ class PixiAlignmentTiled extends React.Component<
 > {
   shouldComponentUpdate(nextProps: IAlignmentCanvasComponentProps) {
     const toReturn =
+      nextProps.alignment !== this.props.alignment ||
       nextProps.colorScheme !== this.props.colorScheme ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
       nextProps.sortBy !== this.props.sortBy;
@@ -448,10 +462,6 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
     } = props;
     app.renderer.backgroundColor = 0xffffff;
 
-    console.log(app.renderer.width);
-    console.log(app.renderer.height);
-    console.log(numColumns);
-    console.log(numRows);
     let vp = new Viewport({
       screenWidth: app.renderer.width,
       screenHeight: app.renderer.height,
@@ -459,7 +469,7 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       worldHeight: numRows, //23627,
       interaction: app.renderer.plugins.interaction
     })
-      // .decelerate()
+      .decelerate()
       .clamp({
         direction: "all"
       })
