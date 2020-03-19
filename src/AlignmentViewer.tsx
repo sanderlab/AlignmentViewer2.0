@@ -37,7 +37,11 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
     };
 
     //setup scroll groups
-    ScrollSync.getInstance().setScrollerGroup("horiz", ScrollType.horizontal);
+    ScrollSync.getInstance().setScrollerGroup(
+      "horizontal",
+      ScrollType.horizontal
+    );
+    ScrollSync.getInstance().setScrollerGroup("vertical", ScrollType.vertical);
   }
 
   _handleCharacterSizeChanged = (newCharSize: number) => {
@@ -46,20 +50,31 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
     });
   };
 
-  _aceEditorLoaded = (id: string, editor: Ace.Editor) => {
-    console.log(
-      "_aceEditorLoaded id =" + id + ", metrics:",
-      //@ts-ignore
-      editor.renderer.$fontMetrics
-    );
+  _aceEditorLoaded = (
+    id: string,
+    editor: Ace.Editor,
+    scrollSyncDirection: ScrollType
+  ) => {
+    console.log("_aceEditorLoaded id =" + id);
+
     let scrollSync = ScrollSync.getInstance();
-    scrollSync.registerScroller(editor, "horiz");
+    if (
+      scrollSyncDirection === ScrollType.horizontal ||
+      scrollSyncDirection === ScrollType.both
+    ) {
+      scrollSync.registerScroller(editor, "horizontal");
+    }
+    if (
+      scrollSyncDirection === ScrollType.vertical ||
+      scrollSyncDirection === ScrollType.both
+    ) {
+      scrollSync.registerScroller(editor, "vertical");
+    }
     this.setState({
       aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
       aceEditors: [editor].concat(this.state.aceEditors)
     });
 
-    console.log("");
     //track visible rows to show in canvas MSA
     if (id === "ace-alignment") {
       editor.renderer.on("afterRender", () => {
@@ -83,7 +98,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
 
   protected generateWidget(
     className: string,
-    desc: string,
+    annotation: string | JSX.Element,
     content: JSX.Element
   ) {
     return (
@@ -95,7 +110,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
           //console.log("the ref is:", e);
         }}
       >
-        <div className="av-annotation">{desc}</div>
+        <div className="av-annotation">{annotation}</div>
         <div className="av-content">{content}</div>
       </div>
     );
@@ -139,7 +154,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
 
         {this.generateWidget(
           "av-ace-msa",
-          "Individual sequence annotations go here..",
+          this.renderAlignmentAnnotationBox(),
           this.renderAlignmentBox()
         )}
 
@@ -203,7 +218,11 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
             this.props.style.colorScheme.className
           ].join(" ")}
           editorLoaded={editor => {
-            this._aceEditorLoaded("ace-consensusseq", editor);
+            this._aceEditorLoaded(
+              "ace-consensusseq",
+              editor,
+              ScrollType.horizontal
+            );
           }}
         />
       }
@@ -226,7 +245,11 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
             this.props.style.colorScheme.className
           ].join(" ")}
           editorLoaded={editor => {
-            this._aceEditorLoaded("ace-queryseq", editor);
+            this._aceEditorLoaded(
+              "ace-queryseq",
+              editor,
+              ScrollType.horizontal
+            );
           }}
         />
       }
@@ -243,7 +266,11 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
           fontSize={this.props.zoomLevel}
           sortBy={this.props.sortBy}
           editorLoaded={editor => {
-            this._aceEditorLoaded("ace-positions", editor);
+            this._aceEditorLoaded(
+              "ace-positions",
+              editor,
+              ScrollType.horizontal
+            );
           }}
         />
       }
@@ -293,7 +320,27 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
         ].join(" ")}
         characterSizeChanged={this._handleCharacterSizeChanged}
         editorLoaded={editor => {
-          this._aceEditorLoaded("ace-alignment", editor);
+          this._aceEditorLoaded("ace-alignment", editor, ScrollType.both);
+        }}
+      />
+    </div>
+  );
+
+  protected renderAlignmentAnnotationBox = () => (
+    <div className="alignment_metadata_box">
+      <AceMSAComponent
+        id="ace-alignment-metadata"
+        type={AceEditorTypes.alignment_metadata}
+        alignment={this.props.alignment}
+        fontSize={this.props.zoomLevel}
+        sortBy={this.props.sortBy}
+        characterSizeChanged={this._handleCharacterSizeChanged}
+        editorLoaded={editor => {
+          this._aceEditorLoaded(
+            "ace-alignment-metadata",
+            editor,
+            ScrollType.vertical
+          );
         }}
       />
     </div>

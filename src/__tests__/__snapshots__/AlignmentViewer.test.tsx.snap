@@ -308,7 +308,7 @@ exports[`AlignmentViewer Should render 1`] = `
               "key": "as-input",
             }
           }
-          type={3}
+          type={4}
         />
       </div>
     </div>
@@ -319,7 +319,43 @@ exports[`AlignmentViewer Should render 1`] = `
     <div
       className="av-annotation"
     >
-      Individual sequence annotations go here..
+      <div
+        className="alignment_metadata_box"
+      >
+        <AceMSAComponent
+          alignment={
+            Alignment {
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+            }
+          }
+          characterSizeChanged={[Function]}
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-alignment-metadata"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+          type={3}
+        />
+      </div>
     </div>
     <div
       className="av-content"

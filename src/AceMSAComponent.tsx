@@ -8,6 +8,7 @@ export enum AceEditorTypes {
   query,
   consensus,
   alignment,
+  alignment_metadata,
   position
 }
 
@@ -177,6 +178,13 @@ export class AceMSAComponent extends React.Component<
             .map(x => x.sequence)
             .join("\n")
         );
+      } else if (this.props.type === AceEditorTypes.alignment_metadata) {
+        this.editor.insert(
+          this.props.alignment
+            .getSequences(this.props.sortBy)
+            .map(x => x.id)
+            .join("\n")
+        );
       } else if (this.props.type === AceEditorTypes.position) {
         const maxSequenceLength = this.props.alignment.getMaxSequenceLength();
         this.editor.insert(
@@ -194,7 +202,7 @@ export class AceMSAComponent extends React.Component<
       this.setupAndInsertAceEditor(e);
       this.insertDataIntoEditor();
 
-      e.classList.add("loaded");
+      //e.classList.add("loaded");
       this.props.editorLoaded(this.editor!); //inform parent of loading.
     }
   }
