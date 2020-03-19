@@ -52,7 +52,8 @@ export class SequenceLogoComponent extends React.Component<
     if (
       this.loaded === false ||
       this.props.logoType !== nextProps.logoType ||
-      this.props.glyphWidth !== nextProps.glyphWidth
+      this.props.glyphWidth !== nextProps.glyphWidth ||
+      this.props.alignment !== nextProps.alignment
     ) {
       return true;
     }

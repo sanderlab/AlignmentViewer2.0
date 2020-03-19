@@ -25,8 +25,8 @@ export class SequenceLogoJSComponent extends React.Component<
     }
   }
 
-  shouldComponentUpdate() {
-    if (this.loaded === false) {
+  shouldComponentUpdate(nextProps: ISequenceLogoJSComponentProps) {
+    if (this.loaded === false || this.props.alignment !== nextProps.alignment) {
       return true;
     }
     return false;

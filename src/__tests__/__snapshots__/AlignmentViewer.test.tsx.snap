@@ -85,7 +85,7 @@ exports[`AlignmentViewer Should render 1`] = `
         },
       }
     }
-    width={150}
+    width={-1}
   />
   <div
     className="av-widget av-conservation-gaps"

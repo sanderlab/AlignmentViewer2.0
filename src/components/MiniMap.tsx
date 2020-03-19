@@ -99,6 +99,7 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
       <button onClick={this.onZoomIn}>+</button>
     </div>
   );
+
   protected onMouseDown = (x: number, y: number) => {
     const { onClick } = this.props;
     if (onClick) {
@@ -116,7 +117,8 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
   protected onZoomOut = () => {
     const { zoomPercent } = this.state;
     this.setState({
-      zoomPercent: Math.max(0, zoomPercent - 0.25)
+      // A zoomPercent of 0 will not actually zoom out!
+      zoomPercent: Math.max(0.25, zoomPercent - 0.25)
     });
   };
 

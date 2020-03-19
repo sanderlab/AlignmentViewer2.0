@@ -348,12 +348,11 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
 
   protected renderMiniMap() {
     const { alignment, sortBy, style } = this.props;
-
     return (
       alignment &&
       style && (
         <MiniMap
-          width={150}
+          width={alignment.getMaxSequenceLength()}
           height={500}
           alignHorizontal={"right"}
           alignment={alignment}

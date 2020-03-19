@@ -12,6 +12,7 @@ import {
   ResidueDetailTypes
 } from "./MolecularStyles";
 import { LOGO_TYPES } from "./SequenceLogoComponent";
+import { FileInputComponent } from "./components/FileInputComponent";
 
 export interface AppProps {}
 export interface AppState {
@@ -34,14 +35,9 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   async componentDidMount() {
-    const result = await fetch(
-      `${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`
-    );
-
     this.setState({
-      alignment: Alignment.fromFileContents(
-        "7fa1c5691376beab198788a726917d48_b0.4.a2m",
-        await result.text()
+      alignment: await this.getAlignmentForFile(
+        "7fa1c5691376beab198788a726917d48_b0.4.a2m"
       ),
       style: new AminoAcidAlignmentStyle()
     });
@@ -65,6 +61,12 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   }
 
+  protected getAlignmentForFile = async (filename: string) => {
+    const result = await fetch(`${process.env.PUBLIC_URL}/${filename}`);
+
+    return Alignment.fromFileContents(filename, await result.text());
+  };
+
   protected renderSettingsBox = (
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
   ) => {
@@ -81,6 +83,7 @@ export default class App extends React.Component<AppProps, AppState> {
           {this.renderPositionStyling(style)}
           {this.renderSequenceLogo()}
           {this.renderZoomButtons()}
+          {this.renderFileUpload()}
         </form>
       </div>
     );
@@ -301,5 +304,23 @@ export default class App extends React.Component<AppProps, AppState> {
         </label>
       </div>
     );
+  };
+
+  protected renderFileUpload = () => {
+    return (
+      <div>
+        <FileInputComponent
+          labelText={"Upload Sequence File:"}
+          onFileLoadCb={this.onFileUpload}
+        />
+      </div>
+    );
+  };
+
+  protected onFileUpload = async (file: File) => {
+    const fileText = await file.text();
+    this.setState({
+      alignment: Alignment.fromFileContents(file.name, fileText)
+    });
   };
 }

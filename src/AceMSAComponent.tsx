@@ -54,8 +54,9 @@ export class AceMSAComponent extends React.Component<
     }
 
     if (
-      this.props.sortBy !== prevProps.sortBy &&
-      this.props.type === AceEditorTypes.alignment
+      this.props.alignment !== prevProps.alignment ||
+      (this.props.sortBy !== prevProps.sortBy &&
+        this.props.type === AceEditorTypes.alignment)
     ) {
       this.editor!.selectAll();
       this.editor!.removeLines();
