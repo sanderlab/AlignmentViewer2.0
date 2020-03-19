@@ -12,6 +12,7 @@ import {
   NucleotideAlignmentStyle,
   PositionsToStyle
 } from "./MolecularStyles";
+import { MiniMap } from "./components/MiniMap";
 
 export interface AppProps {
   alignment: Alignment;
@@ -103,6 +104,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
   render() {
     return !this.props.alignment ? null : (
       <div className="alignment_viewer">
+        {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
 
         {this.generateWidget(
@@ -296,4 +298,48 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
       />
     </div>
   );
+
+  protected renderMiniMap() {
+    const { alignment, sortBy, style } = this.props;
+
+    return (
+      alignment &&
+      style && (
+        <MiniMap
+          width={150}
+          height={500}
+          alignHorizontal={"right"}
+          alignment={alignment}
+          style={style}
+          sortBy={sortBy}
+          highlightRows={
+            this.state.alignmentEditorFirstRow !== undefined &&
+            this.state.alignmentEditorLastRow !== undefined
+              ? [
+                  this.state.alignmentEditorFirstRow,
+                  this.state.alignmentEditorLastRow
+                ]
+              : undefined
+          }
+          onClick={this.onMinimapClick}
+        />
+      )
+    );
+  }
+
+  protected onMinimapClick = (x: number, y: number) => {
+    const {
+      aceEditors,
+      alignmentEditorFirstRow,
+      alignmentEditorLastRow
+    } = this.state;
+    let rowCount = 40;
+    if (alignmentEditorFirstRow && alignmentEditorLastRow) {
+      rowCount = alignmentEditorLastRow - alignmentEditorFirstRow;
+    }
+
+    if (aceEditors.length >= 1) {
+      aceEditors[0].scrollToRow(Math.floor(y - rowCount / 2));
+    }
+  };
 }

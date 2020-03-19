@@ -4,6 +4,89 @@ exports[`AlignmentViewer Should render 1`] = `
 <div
   className="alignment_viewer"
 >
+  <MiniMap
+    alignHorizontal="right"
+    alignVertical="top"
+    alignment={
+      Alignment {
+        "allAlphaLettersSorted": Array [],
+        "consensus": Array [],
+        "globalAlphaLetterCounts": Object {},
+        "name": "",
+        "positionalLetterCounts": Map {},
+        "sequences": Map {
+          SequenceSortOptions {
+            "description": "As input",
+            "distanceFn": undefined,
+            "isTargetSequenceDependent": false,
+            "key": "as-input",
+          } => Array [],
+        },
+        "targetSequence": undefined,
+      }
+    }
+    height={500}
+    onClick={[Function]}
+    sortBy={
+      SequenceSortOptions {
+        "description": "As input",
+        "distanceFn": undefined,
+        "isTargetSequenceDependent": false,
+        "key": "as-input",
+      }
+    }
+    style={
+      NucleotideAlignmentStyle {
+        "alignmentType": AlignmentTypes {
+          "allColorSchemes": Array [
+            Object {
+              "backgroundAlpha": NaN,
+              "className": "",
+              "colors": Object {
+                "": "",
+              },
+              "commonName": "Default",
+              "description": "",
+            },
+          ],
+          "className": undefined,
+          "description": "Nucleotide Sequences",
+          "key": "nucleotide-alignment",
+        },
+        "allColorSchemes": Array [
+          Object {
+            "backgroundAlpha": NaN,
+            "className": "",
+            "colors": Object {
+              "": "",
+            },
+            "commonName": "Default",
+            "description": "",
+          },
+        ],
+        "colorScheme": Object {
+          "backgroundAlpha": NaN,
+          "className": "",
+          "colors": Object {
+            "": "",
+          },
+          "commonName": "Default",
+          "description": "",
+        },
+        "positionsToStyle": PositionsToStyle {
+          "className": undefined,
+          "description": "All",
+          "key": "all",
+        },
+        "residueDetail": ResidueDetailTypes {
+          "className": "",
+          "description": "Style Background and Letters",
+          "key": "both",
+        },
+      }
+    }
+    width={150}
+  />
   <div
     className="av-widget av-conservation-gaps"
   >
