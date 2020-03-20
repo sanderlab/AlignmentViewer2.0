@@ -478,13 +478,26 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
         maxHeight: app.renderer.height,
         maxWidth: app.renderer.width
       });
+    /*
+      .drag()
+      .pinch()
+      .wheel()
+      .decelerate()
+      .clamp({
+        direction: "all"
+      })
+      .bounce({ friction: 0.1, time: 500, underflow: "center" })
+      .clampZoom({
+        maxHeight: app.renderer.height,
+        maxWidth: app.renderer.width
+      });*/
 
     // !IMPORTANT
     // Two-finger drag on trackpad is also enabled by this.
     // Issue currently open: https://github.com/davidfig/pixi-viewport/issues/143
     if (useDrag) {
       vp = vp.drag({
-        direction: "all"
+        direction: "all" //this is the line that kills pinch
       });
     }
 

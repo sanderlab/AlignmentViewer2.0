@@ -277,6 +277,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
     </div>
   );
 
+  /*
   protected renderDatatableBox = () => (
     <div className="datatable_box" id="datatable">
       {
@@ -303,7 +304,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
       }
     </div>
   );
-
+*/
   protected renderAlignmentBox = () => (
     <div className="alignment_box">
       <AceMSAComponent

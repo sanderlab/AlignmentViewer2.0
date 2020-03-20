@@ -82,8 +82,8 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
           highlightRows={highlightRows}
           viewportProps={{
             useDrag: true,
-            usePinch: false,
-            useWheel: false,
+            usePinch: true,
+            useWheel: true,
             zoomPercent
           }}
           mouseDown={this.onMouseDown}
