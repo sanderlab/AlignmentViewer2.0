@@ -7,6 +7,9 @@
   padding: 15px;
 }
 .settings_box h3 {
+  text-align: center;
+}
+.settings_box h2 {
   padding-top: 0;
   margin-top: 0;
   text-align: center;
@@ -22,20 +25,20 @@
   display: inline-block;
 }
 
+.examples button.button-link {
+  border: 1px solid transparent;
+}
+
 button.button-link {
   background: none !important;
   border: none;
-  padding: 0 !important;
+  //padding: 0 !important;
   /*optional*/
-  font-family: arial, sans-serif;
+  //font-family: arial, sans-serif;
   /*input has OS specific font-family*/
   color: #069;
   text-decoration: underline;
   cursor: pointer;
-}
-
-.settings_box .file-selector button {
-  display: inline-block;
 }
 
 .av_holder {

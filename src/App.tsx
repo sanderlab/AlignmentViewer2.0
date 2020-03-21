@@ -68,20 +68,25 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   }
 
+  /*
   protected getAlignmentForFile = async (filename: string) => {
     const result = await fetch(`${process.env.PUBLIC_URL}/${filename}`);
 
     return Alignment.fromFileContents(filename, await result.text());
-  };
+  };*/
 
   protected renderSettingsBox = (
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
   ) => {
+    const { alignment } = this.state;
+    const alignmentName = alignment ? <h3>{alignment.getName()}</h3> : <></>;
+
     return (
       <div className="settings_box">
         <form>
           <div>
-            <h3>AlignmentViewer 2.0 Settings Demo</h3>
+            <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
+            {alignmentName}
           </div>
           {this.renderSortControl()}
           {this.renderAlignmentTypeLabel(style)}
@@ -91,6 +96,7 @@ export default class App extends React.Component<AppProps, AppState> {
           {this.renderSequenceLogo()}
           {this.renderZoomButtons()}
           {this.renderFileUpload()}
+          {this.renderExampleLinks()}
         </form>
       </div>
     );
@@ -315,25 +321,40 @@ export default class App extends React.Component<AppProps, AppState> {
 
   protected renderFileUpload = () => {
     return (
-      <div className="file-selector">
+      <div>
         <FileInputComponent
           labelText={"Upload Sequence File:"}
           onFileLoadCb={this.onFileUpload}
         />
-        <button
-          type="button"
-          className="button-link"
-          onClick={async e =>
-            this.setState({
-              alignment: await this.getAlignmentForFile(
-                "7fa1c5691376beab198788a726917d48_b0.4.a2m"
-              ),
-              style: new AminoAcidAlignmentStyle()
-            })
-          }
-        >
-          use example alignment (β-lactamase)
-        </button>
+      </div>
+    );
+  };
+
+  protected renderExampleLinks = () => {
+    return (
+      <div className="examples">
+        <label>
+          <strong>Example Alignments:</strong>
+          <button
+            type="button"
+            className="button-link"
+            onClick={async e => {
+              const f = new File(
+                [
+                  await (
+                    await fetch(
+                      `${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`
+                    )
+                  ).blob()
+                ],
+                "beta_lactamase_example.fasta"
+              );
+              this.onFileUpload(f);
+            }}
+          >
+            β-lactamase
+          </button>
+        </label>
       </div>
     );
   };

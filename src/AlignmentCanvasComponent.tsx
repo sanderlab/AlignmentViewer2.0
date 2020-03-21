@@ -197,7 +197,7 @@ export class AlignmentCanvasComponent extends React.Component<
   };
 
   protected onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
+    //e.preventDefault(); //TODO Drew is this necessary?
   };
 }
 class PixiAlignmentTiled extends React.Component<
