@@ -17,7 +17,7 @@ import { FileInputComponent } from "./components/FileInputComponent";
 export interface AppProps {}
 export interface AppState {
   alignment?: Alignment;
-  style?: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   sortBy: SequenceSortOptions;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
@@ -35,28 +35,35 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   async componentDidMount() {
-    this.setState({
+    /*this.setState({
       alignment: await this.getAlignmentForFile(
         "7fa1c5691376beab198788a726917d48_b0.4.a2m"
       ),
       style: new AminoAcidAlignmentStyle()
-    });
+    });*/
   }
 
   render() {
     const { alignment, logoPlotStyle, sortBy, style, zoomLevel } = this.state;
-    return !alignment || !style ? null : (
+
+    const alignmentElement = !alignment ? (
+      <></>
+    ) : (
+      <div className="av_holder">
+        <AlignmentViewer
+          alignment={alignment}
+          style={style}
+          logoPlotStyle={logoPlotStyle}
+          zoomLevel={zoomLevel}
+          sortBy={sortBy}
+        ></AlignmentViewer>
+      </div>
+    );
+
+    return (
       <div>
         {this.renderSettingsBox(style)}
-        <div className="av_holder">
-          <AlignmentViewer
-            alignment={alignment}
-            style={style}
-            logoPlotStyle={logoPlotStyle}
-            zoomLevel={zoomLevel}
-            sortBy={sortBy}
-          ></AlignmentViewer>
-        </div>
+        {alignmentElement}
       </div>
     );
   }
@@ -308,11 +315,25 @@ export default class App extends React.Component<AppProps, AppState> {
 
   protected renderFileUpload = () => {
     return (
-      <div>
+      <div className="file-selector">
         <FileInputComponent
           labelText={"Upload Sequence File:"}
           onFileLoadCb={this.onFileUpload}
         />
+        <button
+          type="button"
+          className="button-link"
+          onClick={async e =>
+            this.setState({
+              alignment: await this.getAlignmentForFile(
+                "7fa1c5691376beab198788a726917d48_b0.4.a2m"
+              ),
+              style: new AminoAcidAlignmentStyle()
+            })
+          }
+        >
+          use example alignment (β-lactamase)
+        </button>
       </div>
     );
   };
