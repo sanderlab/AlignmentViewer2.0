@@ -5,7 +5,7 @@ export interface ISequenceConservationComponentProps {
   alignment: Alignment;
   characterWidth: number;
 
-  conservationPlotLoaded(node: HTMLDivElement): void;
+  conservationPlotLoaded?(node: HTMLDivElement): void;
 
   readonly id: string;
 }
@@ -135,7 +135,9 @@ export class SequenceConservationComponent extends React.Component<
     if (e && !this.scrollerDiv) {
       //only run if first time element available
       this.scrollerDiv = e;
-      this.props.conservationPlotLoaded(this.scrollerDiv);
+      if (this.props.conservationPlotLoaded) {
+        this.props.conservationPlotLoaded(this.scrollerDiv);
+      }
     }
   }
 

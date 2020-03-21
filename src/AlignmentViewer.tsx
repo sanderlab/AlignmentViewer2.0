@@ -55,7 +55,7 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
     editor: Ace.Editor,
     scrollSyncDirection: ScrollType
   ) => {
-    console.log("_aceEditorLoaded id =" + id);
+    //console.log("_aceEditorLoaded id =" + id);
 
     let scrollSync = ScrollSync.getInstance();
     if (
@@ -89,29 +89,35 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
     }
   };
 
-  _elementLoaded(id: string, scroller: HTMLElement) {
-    console.log("_elementLoaded id =" + id + ":", scroller);
+  _elementLoaded(className: string, scroller: HTMLElement) {
+    //console.log("_elementLoaded className =" + className + ":", scroller);
 
     let scrollSync = ScrollSync.getInstance();
-    scrollSync.registerScroller(scroller, "horiz");
+    scrollSync.registerScroller(scroller, "horizontal", true);
   }
 
   protected generateWidget(
     className: string,
     annotation: string | JSX.Element,
-    content: JSX.Element
+    content: JSX.Element,
+    addToScrollSync?: boolean
   ) {
     return (
-      <div
-        className={`av-widget ${className}`}
-        ref={e => {
-          //TODO: move into separate component .. Ref can be null here and
-          //      also good to keep track of removal / addition for scroll sync
-          //console.log("the ref is:", e);
-        }}
-      >
+      <div className={`av-widget ${className}`}>
         <div className="av-annotation">{annotation}</div>
-        <div className="av-content">{content}</div>
+        <div
+          className="av-content"
+          ref={e => {
+            if (e && addToScrollSync) {
+              //TODO: move into separate component .. Ref can be null here and
+              //      also good to keep track of removal / addition for scroll sync
+              //console.log("the ref is:", e);
+              this._elementLoaded(className, e);
+            }
+          }}
+        >
+          {content}
+        </div>
       </div>
     );
   }
@@ -125,13 +131,15 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
         {this.generateWidget(
           "av-conservation-gaps",
           "Conservation / gaps:",
-          this.renderConservationBox()
+          this.renderConservationBox(),
+          true
         )}
 
         {this.generateWidget(
           "av-sequence-logo",
           "Logo:",
-          this.renderSequenceLogo()
+          this.renderSequenceLogo(),
+          true
         )}
 
         {this.generateWidget(
@@ -183,9 +191,6 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
           alignment={this.props.alignment}
           glyphWidth={this.state.aceCharacterWidth}
           logoType={this.props.logoPlotStyle}
-          logoLoaded={element => {
-            //this._elementLoaded("sequence_logo", element as HTMLElement);
-          }}
         />
       }
     </div>
@@ -196,9 +201,6 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
       id="sequence_conservation"
       alignment={this.props.alignment}
       characterWidth={this.state.aceCharacterWidth}
-      conservationPlotLoaded={element => {
-        //this._elementLoaded("sequence_conservation", element);
-      }}
     />
   );
 

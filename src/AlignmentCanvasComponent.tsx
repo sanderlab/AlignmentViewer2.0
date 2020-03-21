@@ -283,7 +283,8 @@ class PixiAlignmentTiled extends React.Component<
                   ${colorScheme.commonName}_
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
-                  ${sortBy.key}`}
+                  ${sortBy.key}_
+                  ${alignment.getName()}`}
           ></Sprite>
         ))}
       </>

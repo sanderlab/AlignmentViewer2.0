@@ -29,7 +29,7 @@ export interface ISequenceLogoComponentProps {
   glyphWidth: number;
   logoType: LOGO_TYPES;
 
-  logoLoaded(node: HTMLDivElement): void;
+  logoLoaded?(node: HTMLDivElement): void;
 
   readonly id: string;
 }
@@ -44,7 +44,9 @@ export class SequenceLogoComponent extends React.Component<
     if (e && !this.scrollerDiv) {
       //only run if first time element available
       this.scrollerDiv = e;
-      this.props.logoLoaded(this.scrollerDiv);
+      if (this.props.logoLoaded) {
+        this.props.logoLoaded(this.scrollerDiv);
+      }
     }
   }
 

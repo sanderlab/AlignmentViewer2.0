@@ -60,13 +60,7 @@ export class AceMSAComponent extends React.Component<
     ) {
       this.editor!.selectAll();
       this.editor!.removeLines();
-
-      this.editor!.insert(
-        this.props.alignment
-          .getSequences(this.props.sortBy)
-          .map(x => x.sequence)
-          .join("\n")
-      );
+      this.insertDataIntoEditor();
     }
   }
 

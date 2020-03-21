@@ -205,16 +205,25 @@ export default class ScrollSync {
    * Register an element or ace editor for scroll synchronization.
    * @param scroller
    * @param groupName
+   * @param dontErrorOnDuplicate if true, silently returns if the scroller is already registered
+   *                             with this group, otherwise throws an error.
    */
-  registerScroller(scroller: HTMLElement | Ace.Editor, groupName: string) {
+  registerScroller(
+    scroller: HTMLElement | Ace.Editor,
+    groupName: string,
+    dontErrorOnDuplicate?: boolean
+  ) {
     const group = this._groupScrollpropsHM[groupName];
     if (!group) {
       throw new Error(`Error: attempt to register scroll sync on unknown group "${groupName}"
                     please register group first with setScrollerGroup`);
     }
     if (group.scrollers.includes(scroller)) {
+      if (dontErrorOnDuplicate) {
+        return;
+      }
       throw new Error(
-        `Error: attempt to readd  scroller to group "${groupName}"`
+        `Error: attempt to re-add scroller to group "${groupName}"`
       );
     }
 
