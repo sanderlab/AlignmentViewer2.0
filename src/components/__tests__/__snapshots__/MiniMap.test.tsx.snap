@@ -94,8 +94,8 @@ exports[`MiniMap Should render with default props. 1`] = `
       viewportProps={
         Object {
           "useDrag": true,
-          "usePinch": false,
-          "useWheel": false,
+          "usePinch": true,
+          "useWheel": true,
           "zoomPercent": 1,
         }
       }

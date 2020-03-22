@@ -118,7 +118,6 @@ exports[`AlignmentViewer Should render 1`] = `
           }
         }
         characterWidth={0}
-        conservationPlotLoaded={[Function]}
         id="sequence_conservation"
       />
     </div>
@@ -158,7 +157,6 @@ exports[`AlignmentViewer Should render 1`] = `
           }
           glyphWidth={0}
           id="sequence_logo"
-          logoLoaded={[Function]}
           logoType="bar plot"
         />
       </div>
