@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "204068a46fa83b3ddc1a1799dcdd1ec5",
+    "revision": "24cd03c8d812a16c6affb9075878b32d",
     "url": "/AlignmentViewer2.0/index.html"
   },
   {
-    "revision": "6b3bdc5d4149ab15deab",
+    "revision": "73b3b2046686088c5702",
     "url": "/AlignmentViewer2.0/static/css/main.4b1175c8.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/AlignmentViewer2.0/static/js/2.6723f52e.chunk.js.LICENSE"
   },
   {
-    "revision": "6b3bdc5d4149ab15deab",
-    "url": "/AlignmentViewer2.0/static/js/main.68f731ac.chunk.js"
+    "revision": "73b3b2046686088c5702",
+    "url": "/AlignmentViewer2.0/static/js/main.7b94bdbf.chunk.js"
   },
   {
     "revision": "f400d0c7b63e5de49010",
