@@ -104,18 +104,6 @@ export class AceMSAComponent extends React.Component<
     this.editor.renderer.setPadding(0);
     this.editor.renderer.$cursorLayer.element.style.display = "none";
 
-    if (
-      [
-        AceEditorTypes.query,
-        AceEditorTypes.alignment,
-        AceEditorTypes.consensus
-      ].includes(this.props.type)
-    ) {
-      const modeName = "ace/mode/" + this.props.alignment.getName();
-      defineNewAlignmentMode(modeName, this.props.alignment);
-      this.editor.session.setMode(modeName);
-    }
-
     //
     // column highlighter
     //
@@ -155,6 +143,18 @@ export class AceMSAComponent extends React.Component<
 
   insertDataIntoEditor() {
     if (this.editor) {
+      if (
+        [
+          AceEditorTypes.query,
+          AceEditorTypes.alignment,
+          AceEditorTypes.consensus
+        ].includes(this.props.type)
+      ) {
+        const modeName = "ace/mode/" + this.props.alignment.getName();
+        defineNewAlignmentMode(modeName, this.props.alignment);
+        this.editor.session.setMode(modeName);
+      }
+
       if (this.props.type === AceEditorTypes.query) {
         this.editor.insert(this.props.alignment.getTargetSequence().sequence);
       } else if (this.props.type === AceEditorTypes.consensus) {
