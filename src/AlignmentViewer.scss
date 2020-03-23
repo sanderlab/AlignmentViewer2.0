@@ -84,6 +84,10 @@ $rowHeight: 25px;
   svg.conservation .entropy rect {
     fill: #000000;
   }
+
+  .mini-map.hidden {
+    display: none;
+  }
 }
 
 /*

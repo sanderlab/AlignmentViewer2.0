@@ -20,6 +20,8 @@ export interface AppProps {
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
   sortBy: SequenceSortOptions;
+  showMiniMap?: boolean;
+  showAnnotations?: boolean;
 }
 export interface AppState {
   aceCharacterWidth: number;
@@ -123,8 +125,12 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
   }
 
   render() {
+    const annotationClass = this.props.showAnnotations
+      ? ""
+      : " annotation-closed";
+
     return !this.props.alignment ? null : (
-      <div className="alignment_viewer">
+      <div className={`alignment_viewer${annotationClass}`}>
         {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
 
@@ -350,28 +356,33 @@ export class AlignmentViewer extends React.Component<AppProps, AppState> {
   );
 
   protected renderMiniMap() {
-    const { alignment, sortBy, style } = this.props;
+    const { alignment, sortBy, style, showMiniMap } = this.props;
+
+    const mmClassName = showMiniMap ? "mini-map" : "mini-map hidden";
+
     return (
       alignment &&
       style && (
-        <MiniMap
-          width={alignment.getMaxSequenceLength()}
-          height={500}
-          alignHorizontal={"right"}
-          alignment={alignment}
-          style={style}
-          sortBy={sortBy}
-          highlightRows={
-            this.state.alignmentEditorFirstRow !== undefined &&
-            this.state.alignmentEditorLastRow !== undefined
-              ? [
-                  this.state.alignmentEditorFirstRow,
-                  this.state.alignmentEditorLastRow
-                ]
-              : undefined
-          }
-          onClick={this.onMinimapClick}
-        />
+        <div className={mmClassName}>
+          <MiniMap
+            width={alignment.getMaxSequenceLength()}
+            height={window.innerHeight}
+            alignHorizontal={"right"}
+            alignment={alignment}
+            style={style}
+            sortBy={sortBy}
+            highlightRows={
+              this.state.alignmentEditorFirstRow !== undefined &&
+              this.state.alignmentEditorLastRow !== undefined
+                ? [
+                    this.state.alignmentEditorFirstRow,
+                    this.state.alignmentEditorLastRow
+                  ]
+                : undefined
+            }
+            onClick={this.onMinimapClick}
+          />
+        </div>
       )
     );
   }

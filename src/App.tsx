@@ -21,6 +21,8 @@ export interface AppState {
   sortBy: SequenceSortOptions;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
+  showMiniMap: boolean;
+  showAnnotations: boolean;
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -30,7 +32,9 @@ export default class App extends React.Component<AppProps, AppState> {
       style: new AminoAcidAlignmentStyle(),
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
       zoomLevel: 12,
-      sortBy: SequenceSortOptions.INPUT
+      sortBy: SequenceSortOptions.INPUT,
+      showMiniMap: false,
+      showAnnotations: true
     };
   }
 
@@ -44,7 +48,15 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   render() {
-    const { alignment, logoPlotStyle, sortBy, style, zoomLevel } = this.state;
+    const {
+      alignment,
+      logoPlotStyle,
+      showAnnotations,
+      showMiniMap,
+      sortBy,
+      style,
+      zoomLevel
+    } = this.state;
 
     const alignmentElement = !alignment ? (
       <></>
@@ -56,6 +68,8 @@ export default class App extends React.Component<AppProps, AppState> {
           logoPlotStyle={logoPlotStyle}
           zoomLevel={zoomLevel}
           sortBy={sortBy}
+          showMiniMap={showMiniMap}
+          showAnnotations={showAnnotations}
         ></AlignmentViewer>
       </div>
     );
@@ -88,13 +102,16 @@ export default class App extends React.Component<AppProps, AppState> {
             <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
             {alignmentName}
           </div>
-          {this.renderSortControl()}
           {this.renderAlignmentTypeLabel(style)}
+          {this.renderSortControl()}
           {this.renderColorScheme(style)}
           {this.renderResidueDetail(style)}
           {this.renderPositionStyling(style)}
           {this.renderSequenceLogo()}
           {this.renderZoomButtons()}
+          {this.renderMiniMapToggle()}
+          {this.renderAnnotationToggle()}
+          <br></br>
           {this.renderFileUpload()}
           {this.renderExampleLinks()}
         </form>
@@ -288,7 +305,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <label>
-          <strong>Zoom:</strong>
+          <strong>Character size:</strong>
           <div className="zoom-level">
             <button
               type="button"
@@ -354,6 +371,50 @@ export default class App extends React.Component<AppProps, AppState> {
           >
             β-lactamase
           </button>
+        </label>
+      </div>
+    );
+  };
+
+  protected renderMiniMapToggle = () => {
+    return (
+      <div className="minimap-toggle">
+        <label>
+          <strong>Show MiniMap:</strong>
+
+          <input
+            name="showMiniMap"
+            type="checkbox"
+            checked={this.state.showMiniMap}
+            onChange={e => {
+              const target = e.target;
+              this.setState({
+                showMiniMap: target.checked
+              });
+            }}
+          />
+        </label>
+      </div>
+    );
+  };
+
+  protected renderAnnotationToggle = () => {
+    return (
+      <div className="annotation-toggle">
+        <label>
+          <strong>Show Annotations:</strong>
+
+          <input
+            name="showAnnotations"
+            type="checkbox"
+            checked={this.state.showAnnotations}
+            onChange={e => {
+              const target = e.target;
+              this.setState({
+                showAnnotations: target.checked
+              });
+            }}
+          />
         </label>
       </div>
     );

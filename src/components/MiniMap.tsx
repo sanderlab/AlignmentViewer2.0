@@ -44,7 +44,9 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
         style={{
           zIndex: 100000,
           ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
-          ...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
+          //...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
+          top: 0,
+          bottom: 0,
           height,
           position: "fixed",
           width
