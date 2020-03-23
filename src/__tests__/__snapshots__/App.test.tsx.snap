@@ -14,30 +14,6 @@ exports[`App Should render within 2 minutes. 1`] = `
       <div>
         <label>
           <strong>
-            Sort order:
-          </strong>
-          <select
-            onChange={[Function]}
-            value="as-input"
-          >
-            <option
-              key="as-input"
-              value="as-input"
-            >
-              As input
-            </option>
-            <option
-              key="hamming-dist-to-target"
-              value="hamming-dist-to-target"
-            >
-              Hamming distance to target sequence
-            </option>
-          </select>
-        </label>
-      </div>
-      <div>
-        <label>
-          <strong>
             Alignment Type:
           </strong>
           <select
@@ -55,6 +31,30 @@ exports[`App Should render within 2 minutes. 1`] = `
               value="nucleotide-alignment"
             >
               Nucleotide Sequences
+            </option>
+          </select>
+        </label>
+      </div>
+      <div>
+        <label>
+          <strong>
+            Sort order:
+          </strong>
+          <select
+            onChange={[Function]}
+            value="as-input"
+          >
+            <option
+              key="as-input"
+              value="as-input"
+            >
+              As input
+            </option>
+            <option
+              key="hamming-dist-to-target"
+              value="hamming-dist-to-target"
+            >
+              Hamming distance to target sequence
             </option>
           </select>
         </label>
@@ -174,7 +174,7 @@ exports[`App Should render within 2 minutes. 1`] = `
       <div>
         <label>
           <strong>
-            Zoom:
+            Character size:
           </strong>
           <div
             className="zoom-level"
@@ -197,6 +197,37 @@ exports[`App Should render within 2 minutes. 1`] = `
           </div>
         </label>
       </div>
+      <div
+        className="minimap-toggle"
+      >
+        <label>
+          <strong>
+            Show MiniMap:
+          </strong>
+          <input
+            checked={false}
+            name="showMiniMap"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </label>
+      </div>
+      <div
+        className="annotation-toggle"
+      >
+        <label>
+          <strong>
+            Show Annotations:
+          </strong>
+          <input
+            checked={true}
+            name="showAnnotations"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </label>
+      </div>
+      <br />
       <div>
         <FileInputComponent
           labelText="Upload Sequence File:"

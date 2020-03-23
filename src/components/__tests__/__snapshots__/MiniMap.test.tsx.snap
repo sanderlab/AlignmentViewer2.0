@@ -4,6 +4,7 @@ exports[`MiniMap Should render with default props. 1`] = `
 <div
   style={
     Object {
+      "bottom": 0,
       "height": 600,
       "position": "fixed",
       "right": 0,
