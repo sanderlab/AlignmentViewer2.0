@@ -15,6 +15,15 @@
   text-align: center;
 }
 
+.settings_box .settings-header {
+  position: relative;
+}
+.settings_box .settings-header button {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
 .settings_box label strong {
   width: 200px;
   display: inline-block;

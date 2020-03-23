@@ -23,6 +23,7 @@ export interface AppState {
   zoomLevel: number;
   showMiniMap: boolean;
   showAnnotations: boolean;
+  showSettings: boolean;
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -34,7 +35,8 @@ export default class App extends React.Component<AppProps, AppState> {
       zoomLevel: 12,
       sortBy: SequenceSortOptions.INPUT,
       showMiniMap: false,
-      showAnnotations: true
+      showAnnotations: true,
+      showSettings: true
     };
   }
 
@@ -98,22 +100,58 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div className="settings_box">
         <form>
-          <div>
-            <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
-            {alignmentName}
+          <div className="settings-header">
+            <button
+              style={{
+                display: this.state.showSettings ? "none" : "block"
+              }}
+              type="button"
+              className="button-link"
+              onClick={e => {
+                this.setState({
+                  showSettings: true
+                });
+              }}
+            >
+              Expand
+            </button>
+            <button
+              style={{
+                display: this.state.showSettings ? "block" : "none"
+              }}
+              type="button"
+              className="button-link"
+              onClick={e => {
+                this.setState({
+                  showSettings: false
+                });
+              }}
+            >
+              Hide
+            </button>
+            <div>
+              <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
+              {alignmentName}
+            </div>
           </div>
-          {this.renderAlignmentTypeLabel(style)}
-          {this.renderSortControl()}
-          {this.renderColorScheme(style)}
-          {this.renderResidueDetail(style)}
-          {this.renderPositionStyling(style)}
-          {this.renderSequenceLogo()}
-          {this.renderZoomButtons()}
-          {this.renderMiniMapToggle()}
-          {this.renderAnnotationToggle()}
-          <br></br>
-          {this.renderFileUpload()}
-          {this.renderExampleLinks()}
+          <div
+            style={{
+              display: this.state.showSettings ? "block" : "none"
+            }}
+          >
+            {this.renderAlignmentTypeLabel(style)}
+            {this.renderSortControl()}
+            {this.renderColorScheme(style)}
+            {this.renderResidueDetail(style)}
+            {this.renderPositionStyling(style)}
+            {this.renderSequenceLogo()}
+            {this.renderZoomButtons()}
+            {this.renderMiniMapToggle()}
+            {this.renderAnnotationToggle()}
+            <br></br>
+            {this.renderFileUpload()}
+            {this.renderExampleLinks()}
+          </div>
         </form>
       </div>
     );
