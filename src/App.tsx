@@ -11,15 +11,19 @@ import {
   IColorScheme,
   ResidueDetailTypes
 } from "./MolecularStyles";
-import { LOGO_TYPES, SequenceLogoComponent } from "./SequenceLogoComponent";
+import { LOGO_TYPES } from "./SequenceLogoComponent";
+import { FileInputComponent } from "./components/FileInputComponent";
 
 export interface AppProps {}
 export interface AppState {
   alignment?: Alignment;
-  style?: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   sortBy: SequenceSortOptions;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
+  showMiniMap: boolean;
+  showAnnotations: boolean;
+  showSettings: boolean;
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -29,58 +33,125 @@ export default class App extends React.Component<AppProps, AppState> {
       style: new AminoAcidAlignmentStyle(),
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
       zoomLevel: 12,
-      sortBy: SequenceSortOptions.INPUT
+      sortBy: SequenceSortOptions.INPUT,
+      showMiniMap: false,
+      showAnnotations: true,
+      showSettings: true
     };
   }
 
   async componentDidMount() {
-    const result = await fetch(
-      `${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`
-    );
-
-    this.setState({
-      alignment: Alignment.fromFileContents(
-        "7fa1c5691376beab198788a726917d48_b0.4.a2m",
-        await result.text()
+    /*this.setState({
+      alignment: await this.getAlignmentForFile(
+        "7fa1c5691376beab198788a726917d48_b0.4.a2m"
       ),
       style: new AminoAcidAlignmentStyle()
-    });
+    });*/
   }
 
   render() {
-    const { alignment, logoPlotStyle, sortBy, style, zoomLevel } = this.state;
-    return !alignment || !style ? null : (
+    const {
+      alignment,
+      logoPlotStyle,
+      showAnnotations,
+      showMiniMap,
+      sortBy,
+      style,
+      zoomLevel
+    } = this.state;
+
+    const alignmentElement = !alignment ? (
+      <></>
+    ) : (
+      <div className="av_holder">
+        <AlignmentViewer
+          alignment={alignment}
+          style={style}
+          logoPlotStyle={logoPlotStyle}
+          zoomLevel={zoomLevel}
+          sortBy={sortBy}
+          showMiniMap={showMiniMap}
+          showAnnotations={showAnnotations}
+        ></AlignmentViewer>
+      </div>
+    );
+
+    return (
       <div>
         {this.renderSettingsBox(style)}
-        <div className="av_holder">
-          <AlignmentViewer
-            alignment={alignment}
-            style={style}
-            logoPlotStyle={logoPlotStyle}
-            zoomLevel={zoomLevel}
-            sortBy={sortBy}
-          ></AlignmentViewer>
-        </div>
+        {alignmentElement}
       </div>
     );
   }
 
+  /*
+  protected getAlignmentForFile = async (filename: string) => {
+    const result = await fetch(`${process.env.PUBLIC_URL}/${filename}`);
+
+    return Alignment.fromFileContents(filename, await result.text());
+  };*/
+
   protected renderSettingsBox = (
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
   ) => {
+    const { alignment } = this.state;
+    const alignmentName = alignment ? <h3>{alignment.getName()}</h3> : <></>;
+
     return (
       <div className="settings_box">
         <form>
-          <div>
-            <h3>AlignmentViewer 2.0 Settings Demo</h3>
+          <div className="settings-header">
+            <button
+              style={{
+                display: this.state.showSettings ? "none" : "block"
+              }}
+              type="button"
+              className="button-link"
+              onClick={e => {
+                this.setState({
+                  showSettings: true
+                });
+              }}
+            >
+              Expand
+            </button>
+            <button
+              style={{
+                display: this.state.showSettings ? "block" : "none"
+              }}
+              type="button"
+              className="button-link"
+              onClick={e => {
+                this.setState({
+                  showSettings: false
+                });
+              }}
+            >
+              Hide
+            </button>
+            <div>
+              <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
+              {alignmentName}
+            </div>
           </div>
-          {this.renderSortControl()}
-          {this.renderAlignmentTypeLabel(style)}
-          {this.renderColorScheme(style)}
-          {this.renderResidueDetail(style)}
-          {this.renderPositionStyling(style)}
-          {this.renderSequenceLogo()}
-          {this.renderZoomButtons()}
+          <div
+            style={{
+              display: this.state.showSettings ? "block" : "none"
+            }}
+          >
+            {this.renderAlignmentTypeLabel(style)}
+            {this.renderSortControl()}
+            {this.renderColorScheme(style)}
+            {this.renderResidueDetail(style)}
+            {this.renderPositionStyling(style)}
+            {this.renderSequenceLogo()}
+            {this.renderZoomButtons()}
+            {this.renderMiniMapToggle()}
+            {this.renderAnnotationToggle()}
+            <br></br>
+            {this.renderFileUpload()}
+            {this.renderExampleLinks()}
+          </div>
         </form>
       </div>
     );
@@ -272,7 +343,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <label>
-          <strong>Zoom:</strong>
+          <strong>Character size:</strong>
           <div className="zoom-level">
             <button
               type="button"
@@ -301,5 +372,96 @@ export default class App extends React.Component<AppProps, AppState> {
         </label>
       </div>
     );
+  };
+
+  protected renderFileUpload = () => {
+    return (
+      <div>
+        <FileInputComponent
+          labelText={"Upload Sequence File:"}
+          onFileLoadCb={this.onFileUpload}
+        />
+      </div>
+    );
+  };
+
+  protected renderExampleLinks = () => {
+    return (
+      <div className="examples">
+        <label>
+          <strong>Example Alignments:</strong>
+          <button
+            type="button"
+            className="button-link"
+            onClick={async e => {
+              const f = new File(
+                [
+                  await (
+                    await fetch(
+                      `${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`
+                    )
+                  ).blob()
+                ],
+                "beta_lactamase_example.fasta"
+              );
+              this.onFileUpload(f);
+            }}
+          >
+            β-lactamase
+          </button>
+        </label>
+      </div>
+    );
+  };
+
+  protected renderMiniMapToggle = () => {
+    return (
+      <div className="minimap-toggle">
+        <label>
+          <strong>Show MiniMap:</strong>
+
+          <input
+            name="showMiniMap"
+            type="checkbox"
+            checked={this.state.showMiniMap}
+            onChange={e => {
+              const target = e.target;
+              this.setState({
+                showMiniMap: target.checked
+              });
+            }}
+          />
+        </label>
+      </div>
+    );
+  };
+
+  protected renderAnnotationToggle = () => {
+    return (
+      <div className="annotation-toggle">
+        <label>
+          <strong>Show Annotations:</strong>
+
+          <input
+            name="showAnnotations"
+            type="checkbox"
+            checked={this.state.showAnnotations}
+            onChange={e => {
+              const target = e.target;
+              this.setState({
+                showAnnotations: target.checked
+              });
+            }}
+          />
+        </label>
+      </div>
+    );
+  };
+
+  protected onFileUpload = async (file: File) => {
+    const fileText = await file.text();
+    this.setState({
+      alignment: Alignment.fromFileContents(file.name, fileText)
+    });
   };
 }

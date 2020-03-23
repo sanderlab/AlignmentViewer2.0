@@ -374,15 +374,36 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="My-Alignment-ID"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -767,15 +788,36 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="My-Alignment-ID"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -852,15 +894,36 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="My-Alignment-ID"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -874,12 +937,19 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
 exports[`AlignmentCanvasComponent Should match the shallow snapshot. 1`] = `
 <div
   id="My-Alignment-ID"
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+  onWheel={[Function]}
 >
   <t
     height={650}
     onMount={[Function]}
     onUnmount={[Function]}
-    options={Object {}}
+    options={
+      Object {
+        "transparent": true,
+      }
+    }
     raf={true}
     renderOnComponentChange={true}
     width={485}
@@ -1032,15 +1102,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Amino Acids"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -1189,15 +1280,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Nucleotides"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -1346,15 +1458,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Amino Acids"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -1503,15 +1636,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Nucleotides"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -1660,15 +1814,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Amino Acids"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -1817,15 +1992,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Nucleotides"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -1974,15 +2170,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Amino Acids"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -2131,15 +2348,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Nucleotides"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -2288,15 +2526,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Amino Acids"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}
@@ -2445,15 +2704,36 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
+  stageResolution={
+    Object {
+      "height": 650,
+      "width": 485,
+    }
+  }
+  viewportProps={
+    Object {
+      "useDrag": true,
+      "usePinch": true,
+      "useWheel": true,
+      "zoomPercent": 0,
+    }
+  }
 >
   <div
     id="Nucleotides"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    onWheel={[Function]}
   >
     <t
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
-      options={Object {}}
+      options={
+        Object {
+          "transparent": true,
+        }
+      }
       raf={true}
       renderOnComponentChange={true}
       width={485}

@@ -31,7 +31,15 @@ export default class ScrollSync {
   static singleton: undefined | ScrollSync = undefined;
 
   private _groupScrollpropsHM: { [key: string]: ScrollProps } = {};
-  private _blockNextScrollEvent: Map<
+  private _lastScrollerOffsets: Map<
+    Ace.Editor | HTMLElement,
+    { lastTop: number; lastLeft: number }
+  > = new Map();
+  private _blockNextHorizontalScrollEvent: Map<
+    Ace.Editor | HTMLElement,
+    boolean
+  > = new Map();
+  private _blockNextVerticalScrollEvent: Map<
     Ace.Editor | HTMLElement,
     boolean
   > = new Map();
@@ -46,42 +54,87 @@ export default class ScrollSync {
     return this.singleton;
   }
 
-  /**
-   * Is a scroller an Ace Editor or an HTMLElement.
-   * @param scroller
-   */
-  protected scrollerIsAce(scroller: HTMLElement | Ace.Editor): boolean {
-    return "renderer" in scroller;
-  }
+  _setScrollerLastOffsets(scroller: HTMLElement | Ace.Editor) {}
 
   /**
    * Returns the width of the hidden area (scroll width) in px of the element or ace editor.
    * @param scroller
    */
-  _getAceMaxScrollWidth(scroller: HTMLElement | Ace.Editor): number {
-    if ("renderer" in scroller) {
-      //scroller is an ace editor
-      return (
-        scroller.renderer.$getLongestLine() +
-        2 * scroller.renderer.$padding -
-        scroller.renderer.$size.scrollerWidth
-      );
-    }
-    return -1;
+  _getAceMaxScrollWidth(scroller: Ace.Editor): number {
+    //scroller is an ace editor
+    return (
+      scroller.renderer.$getLongestLine() +
+      2 * scroller.renderer.$padding -
+      scroller.renderer.$size.scrollerWidth
+    );
   }
 
   /**
    *
+   */
+  _handleScrollEvent(
+    scrolledScroller: HTMLElement | Ace.Editor,
+    groupName: string,
+    newScrollValue: number,
+    scrollDirection: ScrollType.horizontal | ScrollType.vertical
+  ) {
+    if (!this._blockNextHorizontalScrollEvent.get(scrolledScroller)) {
+      this._setScrollerLastOffsets(scrolledScroller);
+      //update other nodes in the group
+      const group = this._groupScrollpropsHM[groupName];
+      group.scrollers.forEach(siblingScroller => {
+        if (siblingScroller !== scrolledScroller) {
+          if ("renderer" in siblingScroller) {
+            //the siblingScroller is an ace editor
+            if (
+              scrollDirection === ScrollType.horizontal &&
+              siblingScroller.session.getScrollLeft() !== newScrollValue
+            ) {
+              this._blockNextHorizontalScrollEvent.set(siblingScroller, true);
+              siblingScroller.session.setScrollLeft(newScrollValue); //not proportional
+            } else if (
+              scrollDirection === ScrollType.vertical &&
+              siblingScroller.session.getScrollTop() !== newScrollValue
+            ) {
+              this._blockNextVerticalScrollEvent.set(siblingScroller, true);
+              siblingScroller.session.setScrollTop(newScrollValue); //not proportional
+            }
+          } else {
+            //the siblingScroller is an html element
+            if (
+              scrollDirection === ScrollType.horizontal &&
+              siblingScroller.scrollLeft !== newScrollValue
+            ) {
+              this._blockNextHorizontalScrollEvent.set(siblingScroller, true);
+              siblingScroller.scrollLeft = newScrollValue;
+            } else if (
+              scrollDirection === ScrollType.vertical &&
+              siblingScroller.scrollTop !== newScrollValue
+            ) {
+              this._blockNextVerticalScrollEvent.set(siblingScroller, true);
+              siblingScroller.scrollTop = newScrollValue;
+            }
+          }
+        }
+      });
+    }
+    this._blockNextHorizontalScrollEvent.set(scrolledScroller, false);
+  }
+
+  /**
+   * DEPRICATING _handleHorizontalScrollEvent
    * @param scroller
    * @param groupName
    * @param newScrollLeft
-   */
+   
   _handleHorizontalScrollEvent(
     scroller: HTMLElement | Ace.Editor,
     groupName: string,
     newScrollLeft: number
   ) {
-    //determine properties of the node being scrolled
+    this._setScrollerLastOffsets(scroller);
+
+    //determine properties of the node being scrolled and set "last" scrolled numbers
     var scrollerFractionScrolled;
     if ("renderer" in scroller) {
       //the node being scrolled is an ace editor
@@ -92,15 +145,6 @@ export default class ScrollSync {
       scrollerFractionScrolled =
         newScrollLeft / (scroller.scrollWidth - scroller.offsetWidth);
     }
-    /*
-    console.log(
-      "FRACTION SCROLLED:",
-      scrollerFractionScrolled +
-        " (which equals: " +
-        newScrollLeft +
-        "px), max=" +
-        this._getAceMaxScrollWidth(scroller)
-    );*/
 
     //update other nodes in the group
     const group = this._groupScrollpropsHM[groupName];
@@ -116,10 +160,10 @@ export default class ScrollSync {
           if (
             proportionalScrollLeft !== targetScroller.session.getScrollLeft()
           ) {
-            //targetScroller.session.setScrollLeft(proportionalScrollLeft);
+          //targetScroller.session.setScrollLeft(proportionalScrollLeft);
           }
           if (targetScroller.session.getScrollLeft() !== newScrollLeft) {
-            this._blockNextScrollEvent.set(targetScroller, true);
+            this._blockNextHorizontalScrollEvent.set(targetScroller, true);
             targetScroller.session.setScrollLeft(newScrollLeft); //TODO: KEEP / REMOVE? CURRENTLY TESTING (not proportional)
           }
         } else {
@@ -130,16 +174,16 @@ export default class ScrollSync {
             scrollerFractionScrolled * targetMaxWidth
           );
           if (targetScroller.scrollLeft !== proportionalScrollLeft) {
-            //targetScroller.scrollLeft = proportionalScrollLeft;
+          //targetScroller.scrollLeft = proportionalScrollLeft;
           }
           if (targetScroller.scrollLeft !== newScrollLeft) {
-            this._blockNextScrollEvent.set(targetScroller, true);
+            this._blockNextHorizontalScrollEvent.set(targetScroller, true);
             targetScroller.scrollLeft = newScrollLeft; //TODO: KEEP / REMOVE? CURRENTLY TESTING (not proportional)
           }
         }
       }
     }
-  }
+  }*/
 
   /**
    * Add or modify a group of synchronized scrollers.
@@ -161,58 +205,83 @@ export default class ScrollSync {
    * Register an element or ace editor for scroll synchronization.
    * @param scroller
    * @param groupName
+   * @param dontErrorOnDuplicate if true, silently returns if the scroller is already registered
+   *                             with this group, otherwise throws an error.
    */
-  registerScroller(scroller: HTMLElement | Ace.Editor, groupName: string) {
+  registerScroller(
+    scroller: HTMLElement | Ace.Editor,
+    groupName: string,
+    dontErrorOnDuplicate?: boolean
+  ) {
     const group = this._groupScrollpropsHM[groupName];
     if (!group) {
       throw new Error(`Error: attempt to register scroll sync on unknown group "${groupName}"
                     please register group first with setScrollerGroup`);
     }
     if (group.scrollers.includes(scroller)) {
+      if (dontErrorOnDuplicate) {
+        return;
+      }
       throw new Error(
-        `Error: attempt to readd  scroller to group "${groupName}"`
+        `Error: attempt to re-add scroller to group "${groupName}"`
       );
     }
 
     group.scrollers.push(scroller);
+    this._setScrollerLastOffsets(scroller); // initialize "last" offsets
 
     if ("renderer" in scroller) {
       //the scroller is an ace editor
-      if (group.scrolltype === ScrollType.both || ScrollType.horizontal) {
+      if (
+        group.scrolltype === ScrollType.both ||
+        group.scrolltype === ScrollType.horizontal
+      ) {
         scroller.session.on("changeScrollLeft", newScrollLeft => {
-          if (!this._blockNextScrollEvent.get(scroller)) {
-            this._handleHorizontalScrollEvent(
-              scroller,
-              groupName,
-              Math.round(scroller.session.getScrollLeft())
-            );
-          }
-          this._blockNextScrollEvent.set(scroller, false);
+          this._handleScrollEvent(
+            scroller,
+            groupName,
+            Math.round(scroller.session.getScrollLeft()),
+            ScrollType.horizontal
+          );
         });
       }
-      if (group.scrolltype === ScrollType.both || ScrollType.vertical) {
-        //TODO implement vertical sync
-        //scroller.session.on("changeScrollTop", e => {
-        //    console.log(groupName + ' set to ' + e + ' from top by ' + aceEditor.id);
-        //});
+
+      if (
+        group.scrolltype === ScrollType.both ||
+        group.scrolltype === ScrollType.vertical
+      ) {
+        scroller.session.on("changeScrollTop", e => {
+          this._handleScrollEvent(
+            scroller,
+            groupName,
+            Math.round(scroller.session.getScrollTop()),
+            ScrollType.vertical
+          );
+        });
       }
     } else {
       //the scroller is an html element
-      if (group.scrolltype === ScrollType.both || ScrollType.horizontal) {
-        scroller.onscroll = e => {
-          if (e.target && !this._blockNextScrollEvent.get(scroller)) {
-            this._handleHorizontalScrollEvent(
-              scroller,
-              groupName,
-              (e.target as HTMLElement).scrollLeft
-            );
-          }
-          this._blockNextScrollEvent.set(scroller, false);
-        };
-      }
-      if (group.scrolltype === ScrollType.both || ScrollType.vertical) {
-        //TODO implement vertical sync
-      }
+      scroller.onscroll = e => {
+        //determine direction - if the last scroll left !== to the new left
+        //then it is horizontal otherwise it is vertical
+        const direction =
+          (e.target as HTMLElement).scrollLeft !==
+          this._lastScrollerOffsets.get(scroller)?.lastLeft
+            ? ScrollType.horizontal
+            : ScrollType.vertical;
+
+        if (
+          group.scrolltype === ScrollType.both ||
+          group.scrolltype === direction
+        ) {
+          this._handleScrollEvent(
+            scroller,
+            groupName,
+            (e.target as HTMLElement).scrollLeft,
+            direction
+          );
+        }
+      };
     }
   }
 }

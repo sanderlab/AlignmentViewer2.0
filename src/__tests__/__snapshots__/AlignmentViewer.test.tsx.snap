@@ -2,8 +2,95 @@
 
 exports[`AlignmentViewer Should render 1`] = `
 <div
-  className="alignment_viewer"
+  className="alignment_viewer annotation-closed"
 >
+  <div
+    className="mini-map hidden"
+  >
+    <MiniMap
+      alignHorizontal="right"
+      alignVertical="top"
+      alignment={
+        Alignment {
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Map {
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            } => Array [],
+          },
+          "targetSequence": undefined,
+        }
+      }
+      height={768}
+      onClick={[Function]}
+      sortBy={
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        }
+      }
+      style={
+        NucleotideAlignmentStyle {
+          "alignmentType": AlignmentTypes {
+            "allColorSchemes": Array [
+              Object {
+                "backgroundAlpha": NaN,
+                "className": "",
+                "colors": Object {
+                  "": "",
+                },
+                "commonName": "Default",
+                "description": "",
+              },
+            ],
+            "className": undefined,
+            "description": "Nucleotide Sequences",
+            "key": "nucleotide-alignment",
+          },
+          "allColorSchemes": Array [
+            Object {
+              "backgroundAlpha": NaN,
+              "className": "",
+              "colors": Object {
+                "": "",
+              },
+              "commonName": "Default",
+              "description": "",
+            },
+          ],
+          "colorScheme": Object {
+            "backgroundAlpha": NaN,
+            "className": "",
+            "colors": Object {
+              "": "",
+            },
+            "commonName": "Default",
+            "description": "",
+          },
+          "positionsToStyle": PositionsToStyle {
+            "className": undefined,
+            "description": "All",
+            "key": "all",
+          },
+          "residueDetail": ResidueDetailTypes {
+            "className": "",
+            "description": "Style Background and Letters",
+            "key": "both",
+          },
+        }
+      }
+      width={-1}
+    />
+  </div>
   <div
     className="av-widget av-conservation-gaps"
   >
@@ -35,7 +122,6 @@ exports[`AlignmentViewer Should render 1`] = `
           }
         }
         characterWidth={0}
-        conservationPlotLoaded={[Function]}
         id="sequence_conservation"
       />
     </div>
@@ -75,7 +161,6 @@ exports[`AlignmentViewer Should render 1`] = `
           }
           glyphWidth={0}
           id="sequence_logo"
-          logoLoaded={[Function]}
           logoType="bar plot"
         />
       </div>
@@ -225,7 +310,7 @@ exports[`AlignmentViewer Should render 1`] = `
               "key": "as-input",
             }
           }
-          type={3}
+          type={4}
         />
       </div>
     </div>
@@ -236,7 +321,43 @@ exports[`AlignmentViewer Should render 1`] = `
     <div
       className="av-annotation"
     >
-      Individual sequence annotations go here..
+      <div
+        className="alignment_metadata_box"
+      >
+        <AceMSAComponent
+          alignment={
+            Alignment {
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+            }
+          }
+          characterSizeChanged={[Function]}
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-alignment-metadata"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+          type={3}
+        />
+      </div>
     </div>
     <div
       className="av-content"

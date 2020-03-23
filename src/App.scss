@@ -7,9 +7,21 @@
   padding: 15px;
 }
 .settings_box h3 {
+  text-align: center;
+}
+.settings_box h2 {
   padding-top: 0;
   margin-top: 0;
   text-align: center;
+}
+
+.settings_box .settings-header {
+  position: relative;
+}
+.settings_box .settings-header button {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .settings_box label strong {
@@ -20,6 +32,22 @@
 .settings_box label .zoom-level {
   width: 200px;
   display: inline-block;
+}
+
+.examples button.button-link {
+  border: 1px solid transparent;
+}
+
+button.button-link {
+  background: none !important;
+  border: none;
+  //padding: 0 !important;
+  /*optional*/
+  //font-family: arial, sans-serif;
+  /*input has OS specific font-family*/
+  color: #069;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .av_holder {

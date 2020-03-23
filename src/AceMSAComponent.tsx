@@ -8,6 +8,7 @@ export enum AceEditorTypes {
   query,
   consensus,
   alignment,
+  alignment_metadata,
   position
 }
 
@@ -53,18 +54,13 @@ export class AceMSAComponent extends React.Component<
     }
 
     if (
-      this.props.sortBy !== prevProps.sortBy &&
-      this.props.type === AceEditorTypes.alignment
+      this.props.alignment !== prevProps.alignment ||
+      (this.props.sortBy !== prevProps.sortBy &&
+        this.props.type === AceEditorTypes.alignment)
     ) {
       this.editor!.selectAll();
       this.editor!.removeLines();
-
-      this.editor!.insert(
-        this.props.alignment
-          .getSequences(this.props.sortBy)
-          .map(x => x.sequence)
-          .join("\n")
-      );
+      this.insertDataIntoEditor();
     }
   }
 
@@ -108,18 +104,6 @@ export class AceMSAComponent extends React.Component<
     this.editor.renderer.setPadding(0);
     this.editor.renderer.$cursorLayer.element.style.display = "none";
 
-    if (
-      [
-        AceEditorTypes.query,
-        AceEditorTypes.alignment,
-        AceEditorTypes.consensus
-      ].includes(this.props.type)
-    ) {
-      const modeName = "ace/mode/" + this.props.alignment.getName();
-      defineNewAlignmentMode(modeName, this.props.alignment);
-      this.editor.session.setMode(modeName);
-    }
-
     //
     // column highlighter
     //
@@ -159,6 +143,18 @@ export class AceMSAComponent extends React.Component<
 
   insertDataIntoEditor() {
     if (this.editor) {
+      if (
+        [
+          AceEditorTypes.query,
+          AceEditorTypes.alignment,
+          AceEditorTypes.consensus
+        ].includes(this.props.type)
+      ) {
+        const modeName = "ace/mode/" + this.props.alignment.getName();
+        defineNewAlignmentMode(modeName, this.props.alignment);
+        this.editor.session.setMode(modeName);
+      }
+
       if (this.props.type === AceEditorTypes.query) {
         this.editor.insert(this.props.alignment.getTargetSequence().sequence);
       } else if (this.props.type === AceEditorTypes.consensus) {
@@ -175,6 +171,13 @@ export class AceMSAComponent extends React.Component<
           this.props.alignment
             .getSequences(this.props.sortBy)
             .map(x => x.sequence)
+            .join("\n")
+        );
+      } else if (this.props.type === AceEditorTypes.alignment_metadata) {
+        this.editor.insert(
+          this.props.alignment
+            .getSequences(this.props.sortBy)
+            .map(x => x.id)
             .join("\n")
         );
       } else if (this.props.type === AceEditorTypes.position) {
@@ -194,7 +197,7 @@ export class AceMSAComponent extends React.Component<
       this.setupAndInsertAceEditor(e);
       this.insertDataIntoEditor();
 
-      e.classList.add("loaded");
+      //e.classList.add("loaded");
       this.props.editorLoaded(this.editor!); //inform parent of loading.
     }
   }

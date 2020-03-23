@@ -145,6 +145,7 @@ describe("AlignmentCanvasComponent", () => {
     expect(wrapper).toMatchSnapshot();
   });
 
+  // Skipping for performance!
   it.skip("Should handle a supersized sequence.", () => {
     const sequences = new Array();
     const expectedHeight = 1000;

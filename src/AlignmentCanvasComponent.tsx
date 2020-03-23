@@ -5,6 +5,7 @@ import * as PIXI from "pixi.js";
 import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";
 import { Viewport } from "pixi-viewport";
 import { Graphics } from "pixi.js";
+
 import {
   IColorScheme,
   PositionsToStyle,
@@ -18,6 +19,11 @@ export interface IAlignmentCanvasComponentProps {
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
   highlightRows?: [number, number]; //[startRowNum, endRowNum]
+  stageResolution?: {
+    width: number;
+    height: number;
+  };
+  viewportProps?: Partial<IViewportProps>;
 
   mouseDown?(x: number, y: number): void;
 
@@ -61,7 +67,17 @@ export class AlignmentCanvasComponent extends React.Component<
   scaleY: number = 1;
 
   static defaultProps = {
-    mouseDown: () => {}
+    mouseDown: () => {},
+    stageResolution: {
+      width: 485,
+      height: 650
+    },
+    viewportProps: {
+      useDrag: true,
+      usePinch: true,
+      useWheel: true,
+      zoomPercent: 0
+    }
   };
 
   sliderChanged(newValue: number, xy: "x" | "y") {
@@ -77,11 +93,22 @@ export class AlignmentCanvasComponent extends React.Component<
   }
 
   render() {
-    if (!this.props.alignment) {
+    const {
+      alignment,
+      alignmentType,
+      colorScheme,
+      highlightRows,
+      id,
+      positionsToStyle,
+      sortBy,
+      stageResolution,
+      viewportProps
+    } = this.props;
+    if (!alignment) {
       return null;
     }
-    const numSequences = this.props.alignment.getSequences().length;
-    const maxSeqLength = this.props.alignment.getMaxSequenceLength();
+    const numSequences = alignment.getSequences().length;
+    const maxSeqLength = alignment.getMaxSequenceLength();
 
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST; //
     //TODO: still anti-aliases on retina devices. probably requires
@@ -90,12 +117,21 @@ export class AlignmentCanvasComponent extends React.Component<
     //PIXI.settings.RESOLUTION = 2;
     //PIXI.settings.ROUND_PIXELS = true; //
 
-    const height = this.props.highlightRows
-      ? this.props.highlightRows[1] - this.props.highlightRows[0]
+    const height = highlightRows
+      ? highlightRows[1] - highlightRows[0]
       : undefined;
     return (
-      <div id={this.props.id}>
-        <Stage width={485} height={650} options={{}}>
+      <div
+        id={id}
+        onWheel={this.onWheel}
+        onMouseEnter={this.onMouseEnter}
+        onMouseLeave={this.onMouseLeave}
+      >
+        <Stage
+          width={stageResolution?.width}
+          height={stageResolution?.height}
+          options={{ transparent: true }}
+        >
           <AppContext.Consumer>
             {app => {
               this.app = app;
@@ -109,27 +145,22 @@ export class AlignmentCanvasComponent extends React.Component<
                 numColumns={maxSeqLength}
                 numRows={numSequences}
                 mouseDown={this.props.mouseDown}
+                {...viewportProps}
               >
                 <PixiAlignmentTiled
                   id="tiled-alignment"
-                  alignment={this.props.alignment}
-                  alignmentType={this.props.alignmentType}
-                  sortBy={this.props.sortBy}
-                  colorScheme={this.props.colorScheme}
-                  positionsToStyle={this.props.positionsToStyle}
+                  alignment={alignment}
+                  alignmentType={alignmentType}
+                  sortBy={sortBy}
+                  colorScheme={colorScheme}
+                  positionsToStyle={positionsToStyle}
                 />
                 {height ? (
                   <>
                     {this.renderAlignmentHighlighter({
                       x: 0,
                       y: this.props.highlightRows![0],
-                      width: maxSeqLength / 100, //1%
-                      height
-                    })}
-                    {this.renderAlignmentHighlighter({
-                      x: maxSeqLength - maxSeqLength / 100,
-                      y: this.props.highlightRows![0],
-                      width: maxSeqLength / 100, //1%
+                      width: maxSeqLength,
                       height
                     })}
                   </>
@@ -153,15 +184,28 @@ export class AlignmentCanvasComponent extends React.Component<
     fillAlpha?: number;
   }) => (
     <AlignmentHighlighter
-      {...{ fillColor: 0xff0000, fillAlpha: 0.75, ...props }}
+      {...{ fillColor: 0xff0000, fillAlpha: 0.25, ...props }}
     />
   );
+
+  protected onMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    document.body.style.overflow = "hidden";
+  };
+
+  protected onMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    document.body.style.overflow = "auto";
+  };
+
+  protected onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    //e.preventDefault(); //TODO Drew is this necessary?
+  };
 }
 class PixiAlignmentTiled extends React.Component<
   IAlignmentCanvasComponentProps
 > {
   shouldComponentUpdate(nextProps: IAlignmentCanvasComponentProps) {
     const toReturn =
+      nextProps.alignment !== this.props.alignment ||
       nextProps.colorScheme !== this.props.colorScheme ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
       nextProps.sortBy !== this.props.sortBy;
@@ -239,7 +283,8 @@ class PixiAlignmentTiled extends React.Component<
                   ${colorScheme.commonName}_
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
-                  ${sortBy.key}`}
+                  ${sortBy.key}_
+                  ${alignment.getName()}`}
           ></Sprite>
         ))}
       </>
@@ -259,7 +304,11 @@ class PixiAlignmentTiled extends React.Component<
       const seq = sequences[seqIdx + offsets.seqY];
       for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
         const letter = seq.sequence[letterIdx + offsets.letterX];
-        const colorScheme = this.getCurrentMoleculeColors(letter, letterIdx, offsets);
+        const colorScheme = this.getCurrentMoleculeColors(
+          letter,
+          letterIdx,
+          offsets
+        );
 
         tileImageData.data[imageDataIdx] = colorScheme.rgb.red;
         tileImageData.data[imageDataIdx + 1] = colorScheme.rgb.green;
@@ -355,7 +404,7 @@ class PixiAlignmentTiled extends React.Component<
         molecule = moleculeClass.fromSingleLetterCode(letter);
       }
     }
-    return molecule.colors[colorScheme.commonName];;
+    return molecule.colors[colorScheme.commonName];
   }
 
   protected initializeTiledImages({
@@ -388,17 +437,49 @@ class PixiAlignmentTiled extends React.Component<
   }
 }
 
-const PixiViewport = PixiComponent<any, any>("PixiViewport", {
-  create(props: any) {
-    const app: PIXI.Application = props.app;
+export interface IViewportProps {
+  useDrag?: boolean; // Allows the user to drag the viewport around.
+  usePinch?: boolean; // Allows the user to pinch to zoom; e.g. on a trackpad.
+  useWheel?: boolean; // Allows the user to use a mouse wheel to zoom.
+  numColumns: number;
+  numRows: number;
+  app: PIXI.Application;
+  mouseDown?: (x: number, y: number) => void;
+  zoomPercent?: number;
+}
+
+let viewport: Viewport;
+
+const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
+  create(props: IViewportProps) {
+    const {
+      app,
+      numColumns,
+      numRows,
+      useDrag,
+      usePinch,
+      useWheel,
+      zoomPercent
+    } = props;
     app.renderer.backgroundColor = 0xffffff;
-    const vp = new Viewport({
+
+    let vp = new Viewport({
       screenWidth: app.renderer.width,
       screenHeight: app.renderer.height,
-      worldWidth: props.numColumns, //app.renderer.width,
-      worldHeight: props.numRows, //23627,
+      worldWidth: Math.max(numColumns, app.renderer.width) + 1, //app.renderer.width,
+      worldHeight: numRows, //23627,
       interaction: app.renderer.plugins.interaction
     })
+      .decelerate()
+      .clamp({
+        direction: "all"
+      })
+      .bounce({ friction: 0.1, time: 150, underflow: "center" })
+      .clampZoom({
+        maxHeight: app.renderer.height,
+        maxWidth: app.renderer.width
+      });
+    /*
       .drag()
       .pinch()
       .wheel()
@@ -408,15 +489,48 @@ const PixiViewport = PixiComponent<any, any>("PixiViewport", {
       })
       .bounce({ friction: 0.1, time: 500, underflow: "center" })
       .clampZoom({
-        maxHeight: props.app.renderer.height,
-        maxWidth: props.app.renderer.width
-      });
+        maxHeight: app.renderer.height,
+        maxWidth: app.renderer.width
+      });*/
 
+    // !IMPORTANT
+    // Two-finger drag on trackpad is also enabled by this.
+    // Issue currently open: https://github.com/davidfig/pixi-viewport/issues/143
+    if (useDrag) {
+      vp = vp.drag({
+        direction: "all" //this is the line that kills pinch
+      });
+    }
+
+    if (usePinch) {
+      vp = vp.pinch();
+    }
+
+    if (useWheel) {
+      vp = vp.wheel();
+    }
+
+    console.log(zoomPercent);
+    if (zoomPercent) {
+      vp = vp.zoomPercent(zoomPercent);
+    }
     vp.on("clicked", e => {
       if (props.mouseDown) {
         props.mouseDown(e.world.x, e.world.y);
       }
     });
+
+    viewport = vp;
     return vp;
+  },
+  applyProps(
+    ins: PIXI.Graphics,
+    oldProps: IViewportProps,
+    newProps: IViewportProps
+  ) {
+    if (oldProps.zoomPercent !== newProps.zoomPercent && newProps.zoomPercent) {
+      viewport = viewport.setZoom(newProps.zoomPercent, false);
+    }
+    return viewport;
   }
 });

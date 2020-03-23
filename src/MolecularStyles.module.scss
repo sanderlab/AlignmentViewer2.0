@@ -256,20 +256,37 @@ $ntProps: (
     $aceAAClass: $acePrefix + $aa;
 
     //set background color to white if the "no background color" class is added
+    //easier than
     :global
       .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
       .#{$aceAAClass} {
       background-color: transparent !important;
     }
+
     //remove alpha on background color and hide letter coloring
     //"no letter color" class is added
+
     :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}
-      .#{$aceAAClass} {
-      background-color: $color !important;
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosAll}
+      .#{$aceAAClass},
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensus}
+      .#{$aceAAClass}.#{$aceConsensusClass},
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensusDiff}
+      .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQuery}
+      .#{$aceAAClass}.#{$aceQueryClass},
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQueryDiff}
+      .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+      //opacity: 1 !important;
+      background-color: rgba($color, 1) !important;
       color: rgba($color, 0) !important;
     }
 
+    //"default" style - slightly transparent colored background and fully colored letters
     :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
     :global
       .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
@@ -320,12 +337,25 @@ $ntProps: (
     //remove alpha on background color and hide letter coloring
     //"no letter color" class is added
     :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}
-      .#{$aceNTClass} {
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosAll}
+      .#{$aceNTClass},
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensus}
+      .#{$aceNTClass}.#{$aceConsensusClass},
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensusDiff}
+      .#{$aceNTClass}:not(.#{$aceConsensusClass}),
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQuery}
+      .#{$aceNTClass}.#{$aceQueryClass},
+    :global
+      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQueryDiff}
+      .#{$aceNTClass}:not(.#{$aceQueryClass}) {
       background-color: rgba($color, 1) !important;
       color: rgba($color, 0) !important;
     }
 
+    //"default" style - slightly transparent colored background and fully colored letters
     :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceNTClass},
     :global
       .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
