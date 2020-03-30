@@ -17,7 +17,15 @@ export function stringToColor(
 } {
   const ctx = document.createElement("canvas").getContext("2d");
   ctx!.fillStyle = str;
-  const hex = ctx?.fillStyle!;
+  let hex = ctx!.fillStyle!;
+
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+  // (I think only necessary in testing, but might catch odd browser behavior)
+  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+    return r + r + g + g + b + b;
+  });
 
   var rgbaResult = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)!;
   return {
