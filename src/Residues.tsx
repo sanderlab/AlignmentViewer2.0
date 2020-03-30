@@ -1,5 +1,5 @@
 import { GlyphFactory } from "./SequenceLogoGlyphs";
-import { hexToRgb } from "./Utils";
+import { stringToColor } from "./Utils";
 import {
   ALL_AMINOACID_COLORSCHEMES,
   ALL_NUCLEOTIDE_COLORSCHEMES
@@ -110,13 +110,14 @@ export class AminoAcid implements IAminoAcid {
         return false;
       });
 
-      let hexString = "#ffffff";
+      let colorString = "#ffffff";
       if (colorPair) {
-        hexString = colorPair[1];
+        colorString = colorPair[1];
       }
+      const colorInfo = stringToColor(colorString);
       acc[cs.commonName] = {
-        hexString: hexString,
-        rgb: hexToRgb(hexString),
+        hexString: colorInfo.hex,
+        rgb: colorInfo.rgb,
         backgroundAlpha: cs.backgroundAlpha
       };
       return acc;
@@ -170,13 +171,14 @@ export class Nucleotide implements INucleotide {
         return false;
       });
 
-      let hexString = "#ffffff";
+      let colorString = "#ffffff";
       if (colorPair) {
-        hexString = colorPair[1];
+        colorString = colorPair[1];
       }
+      const colorInfo = stringToColor(colorString);
       acc[cs.commonName] = {
-        hexString: hexString,
-        rgb: hexToRgb(hexString),
+        hexString: colorInfo.hex,
+        rgb: colorInfo.rgb,
         backgroundAlpha: cs.backgroundAlpha
       };
       return acc;

@@ -3,6 +3,7 @@
  * for nucleotide and amino acid styles.
  */
 import styles from "./MolecularStyles.module.scss";
+//console.log("STYLES AS INPUT ::::: ", styles);
 
 /**
  * Defines a single color scheme interface which consists of
@@ -38,10 +39,12 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
       const colorSchemeName = styleName.split(moleculeType + "StyClass_")[1];
       const colorOrder = styles[
         moleculeType + "StyColorOrder_" + colorSchemeName
-      ].split(", ");
-      const hexValues = styles[
-        moleculeType + "StyColors_" + colorSchemeName
-      ].split(", ");
+      ]
+        .replace(/ /g, "")
+        .split(","); // "build" removes spaces, but local "run" does not
+      const hexValues = styles[moleculeType + "StyColors_" + colorSchemeName]
+        .replace(/ /g, "")
+        .split(","); // "build" removes spaces, but local "run" does not
       const description = styles[moleculeType + "StyDesc_" + colorSchemeName];
       acc.push({
         commonName: colorSchemeName,
