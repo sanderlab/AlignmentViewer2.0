@@ -1,7 +1,7 @@
 {
   "name": "alignmentviewer2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "@inlet/react-pixi": "^1.2.0",
