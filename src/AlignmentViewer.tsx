@@ -6,7 +6,6 @@ import ScrollSync, { ScrollType } from "./ScrollSync";
 import { AceMSAComponent, AceEditorTypes } from "./AceMSAComponent";
 import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
 import { SequenceConservationComponent } from "./SequenceConservationComponent";
-import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -14,7 +13,7 @@ import {
 } from "./MolecularStyles";
 import { MiniMap } from "./components/MiniMap";
 
-export interface AppProps {
+export interface AlignmentViewerProps {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   logoPlotStyle: LOGO_TYPES;
@@ -23,15 +22,18 @@ export interface AppProps {
   showMiniMap?: boolean;
   showAnnotations?: boolean;
 }
-export interface AppState {
+export interface AlignmentViewerState {
   aceCharacterWidth: number;
   aceEditors: Ace.Editor[];
   alignmentEditorFirstRow?: number;
   alignmentEditorLastRow?: number;
 }
 
-export class AlignmentViewer extends React.Component<AppProps, AppState> {
-  constructor(props: AppProps) {
+export class AlignmentViewer extends React.Component<
+  AlignmentViewerProps,
+  AlignmentViewerState
+> {
+  constructor(props: AlignmentViewerProps) {
     super(props);
     this.state = {
       aceEditors: [],
