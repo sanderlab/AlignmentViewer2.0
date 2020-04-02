@@ -1,8 +1,14 @@
 {
-  "name": "alignmentviewer2",
+  "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
   "version": "0.2.0",
-  "private": true,
+  "private": false,
+  "author": "Nicholas Gauthier",
+  "contributors": [
+    "Andrew Diamantoukos",
+    "Chris Sander"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@inlet/react-pixi": "^1.2.0",
     "@testing-library/jest-dom": "^4.2.4",
