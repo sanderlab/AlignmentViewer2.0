@@ -1,7 +1,7 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import Alignment from "../Alignment";
+import Alignment from "../../common/Alignment";
 import { SequenceLogoComponent, LOGO_TYPES } from "../SequenceLogoComponent";
 
 import { shallow, default as Enzyme } from "enzyme";

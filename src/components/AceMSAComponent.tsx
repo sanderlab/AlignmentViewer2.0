@@ -1,8 +1,8 @@
 import React from "react";
 import ace from "ace-builds";
-import Alignment, { SequenceSortOptions } from "./Alignment";
+import Alignment, { SequenceSortOptions } from "../common/Alignment";
 import { Ace } from "ace-builds";
-import { defineNewAlignmentMode } from "./AceAlignmentMode";
+import { defineNewAlignmentMode } from "../common/AceAlignmentMode";
 
 export enum AceEditorTypes {
   query,

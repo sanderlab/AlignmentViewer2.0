@@ -1,5 +1,5 @@
 import React from "react";
-import Alignment from "./Alignment";
+import Alignment from "../common/Alignment";
 
 export interface ISequenceConservationComponentProps {
   alignment: Alignment;

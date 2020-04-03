@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.scss";
-import Alignment, { SequenceSortOptions } from "./Alignment";
-import { AlignmentViewer } from "./AlignmentViewer";
+import Alignment, { SequenceSortOptions } from "./common/Alignment";
+import { AlignmentViewer } from "./components/AlignmentViewerComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -10,8 +10,8 @@ import {
   PositionsToStyle,
   IColorScheme,
   ResidueDetailTypes
-} from "./MolecularStyles";
-import { LOGO_TYPES } from "./SequenceLogoComponent";
+} from "./common/MolecularStyles";
+import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { FileInputComponent } from "./components/FileInputComponent";
 
 export interface AppProps {}

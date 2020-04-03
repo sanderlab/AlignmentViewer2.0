@@ -4,7 +4,6 @@
  * Inspired / derived from https://github.com/weng-lab/logojs-package
  *
  */
-
 import React from "react";
 
 export class GlyphFactory {

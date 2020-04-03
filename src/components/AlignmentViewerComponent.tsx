@@ -1,8 +1,8 @@
 import React from "react";
 import "./AlignmentViewer.scss";
 import { Ace } from "ace-builds";
-import Alignment, { SequenceSortOptions } from "./Alignment";
-import ScrollSync, { ScrollType } from "./ScrollSync";
+import Alignment, { SequenceSortOptions } from "../common/Alignment";
+import ScrollSync, { ScrollType } from "../common/ScrollSync";
 import { AceMSAComponent, AceEditorTypes } from "./AceMSAComponent";
 import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
 import { SequenceConservationComponent } from "./SequenceConservationComponent";
@@ -10,8 +10,8 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   PositionsToStyle
-} from "./MolecularStyles";
-import { MiniMap } from "./components/MiniMap";
+} from "../common/MolecularStyles";
+import { MiniMap } from "./MiniMap";
 
 export interface AlignmentViewerProps {
   alignment: Alignment;

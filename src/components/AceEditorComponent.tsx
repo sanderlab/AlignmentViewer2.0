@@ -1,8 +1,10 @@
 import React from "react";
-import ace, { Ace } from "ace-builds";
+import ace from "ace-builds";
+import { Ace } from "ace-builds";
 
 export interface IAceEditorComponentProps {
   text: string;
+  fontSize: number;
   /*
   editorOptions: {
     showPrintMargin?: boolean;
@@ -39,7 +41,7 @@ export class AceEditorComponent extends React.Component<
     this.editor.setReadOnly(true);
     this.editor.setHighlightActiveLine(false);
     this.editor.setHighlightGutterLine(false);
-    this.editor.setFontSize("12px");
+    this.editor.setFontSize(this.props.fontSize + "px");
     this.editor.renderer.setShowGutter(false);
     this.editor.renderer.setPadding(0);
     this.editor.renderer.$cursorLayer.element.style.display = "none";

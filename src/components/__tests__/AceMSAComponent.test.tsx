@@ -2,7 +2,7 @@ import { Ace, default as ace } from "ace-builds";
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import Alignment, { SequenceSortOptions } from "../Alignment";
+import Alignment, { SequenceSortOptions } from "../../common/Alignment";
 import { AceMSAComponent, AceEditorTypes } from "../AceMSAComponent";
 
 import { mount, shallow, default as Enzyme } from "enzyme";

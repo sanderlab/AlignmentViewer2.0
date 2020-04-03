@@ -1,6 +1,6 @@
 import React from "react";
-import Alignment, { SequenceSortOptions, ISequence } from "./Alignment";
-import { Nucleotide, AminoAcid } from "./Residues";
+import Alignment, { SequenceSortOptions, ISequence } from "../common/Alignment";
+import { Nucleotide, AminoAcid } from "../common/Residues";
 import * as PIXI from "pixi.js";
 import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";
 import { Viewport } from "pixi-viewport";
@@ -9,8 +9,8 @@ import { Graphics } from "pixi.js";
 import {
   IColorScheme,
   PositionsToStyle,
-  AlignmentTypes
-} from "./MolecularStyles";
+  AlignmentTypes,
+} from "../common/MolecularStyles";
 
 export interface IAlignmentCanvasComponentProps {
   alignment: Alignment;
@@ -56,7 +56,7 @@ const AlignmentHighlighter = PixiComponent("AlignmentHighlighter", {
     instance.beginFill(fillColor, fillAlpha);
     instance.drawRect(x, y, width, height);
     instance.endFill();
-  }
+  },
 });
 
 export class AlignmentCanvasComponent extends React.Component<
@@ -70,19 +70,19 @@ export class AlignmentCanvasComponent extends React.Component<
     mouseDown: () => {},
     stageResolution: {
       width: 485,
-      height: 650
+      height: 650,
     },
     viewportProps: {
       useDrag: true,
       usePinch: true,
       useWheel: true,
-      zoomPercent: 0
-    }
+      zoomPercent: 0,
+    },
   };
 
   sliderChanged(newValue: number, xy: "x" | "y") {
     if (this.app) {
-      this.app.stage.children.forEach(sprite => {
+      this.app.stage.children.forEach((sprite) => {
         if (xy === "x") {
           sprite.scale.x = newValue;
         } else {
@@ -102,7 +102,7 @@ export class AlignmentCanvasComponent extends React.Component<
       positionsToStyle,
       sortBy,
       stageResolution,
-      viewportProps
+      viewportProps,
     } = this.props;
     if (!alignment) {
       return null;
@@ -133,13 +133,13 @@ export class AlignmentCanvasComponent extends React.Component<
           options={{ transparent: true }}
         >
           <AppContext.Consumer>
-            {app => {
+            {(app) => {
               this.app = app;
               return <></>;
             }}
           </AppContext.Consumer>
           <AppContext.Consumer>
-            {app => (
+            {(app) => (
               <PixiViewport
                 app={app}
                 numColumns={maxSeqLength}
@@ -161,7 +161,7 @@ export class AlignmentCanvasComponent extends React.Component<
                       x: 0,
                       y: this.props.highlightRows![0],
                       width: maxSeqLength,
-                      height
+                      height,
                     })}
                   </>
                 ) : (
@@ -230,7 +230,7 @@ class PixiAlignmentTiled extends React.Component<
       alignmentType,
       colorScheme,
       positionsToStyle,
-      sortBy
+      sortBy,
     } = this.props;
 
     // Generate multiple tiled images from the alignment
@@ -242,7 +242,7 @@ class PixiAlignmentTiled extends React.Component<
       fullWidth,
       fullHeight,
       targetTileWidth: Math.min(400, fullWidth),
-      targetTileHeight: Math.min(400, fullHeight)
+      targetTileHeight: Math.min(400, fullHeight),
     };
 
     const tiledImages: ITiledImages = this.initializeTiledImages(sizes);
@@ -273,7 +273,7 @@ class PixiAlignmentTiled extends React.Component<
 
     return (
       <>
-        {tiledImages.tiles.map(tile => (
+        {tiledImages.tiles.map((tile) => (
           <Sprite
             source={tile.image}
             x={tile.pixelX}
@@ -341,7 +341,7 @@ class PixiAlignmentTiled extends React.Component<
 
     const offsets = {
       seqY: tileYNumber * targetTileHeight,
-      letterX: tileXNumber * targetTileWidth
+      letterX: tileXNumber * targetTileWidth,
     };
 
     const tileCanvasContext = tileCanvas.getContext("2d");
@@ -370,7 +370,7 @@ class PixiAlignmentTiled extends React.Component<
       pixelY: offsets.seqY,
       width: tileCanvas.width,
       height: tileCanvas.height,
-      image: tileCanvas
+      image: tileCanvas,
     };
   }
 
@@ -411,7 +411,7 @@ class PixiAlignmentTiled extends React.Component<
     targetTileWidth = 0,
     targetTileHeight = 0,
     fullWidth = 0,
-    fullHeight = 0
+    fullHeight = 0,
   }): ITiledImages {
     return {
       targetTileWidth: targetTileWidth,
@@ -432,7 +432,7 @@ class PixiAlignmentTiled extends React.Component<
         fullHeight % targetTileHeight !== 0
           ? Math.floor(fullHeight / targetTileHeight) + 1
           : Math.floor(fullHeight / targetTileHeight),
-      tiles: []
+      tiles: [],
     };
   }
 }
@@ -459,7 +459,7 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       useDrag,
       usePinch,
       useWheel,
-      zoomPercent
+      zoomPercent,
     } = props;
     app.renderer.backgroundColor = 0xffffff;
 
@@ -468,16 +468,16 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       screenHeight: app.renderer.height,
       worldWidth: Math.max(numColumns, app.renderer.width) + 1, //app.renderer.width,
       worldHeight: numRows, //23627,
-      interaction: app.renderer.plugins.interaction
+      interaction: app.renderer.plugins.interaction,
     })
       .decelerate()
       .clamp({
-        direction: "all"
+        direction: "all",
       })
       .bounce({ friction: 0.1, time: 150, underflow: "center" })
       .clampZoom({
         maxHeight: app.renderer.height,
-        maxWidth: app.renderer.width
+        maxWidth: app.renderer.width,
       });
     /*
       .drag()
@@ -498,7 +498,7 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
     // Issue currently open: https://github.com/davidfig/pixi-viewport/issues/143
     if (useDrag) {
       vp = vp.drag({
-        direction: "all" //this is the line that kills pinch
+        direction: "all", //this is the line that kills pinch
       });
     }
 
@@ -514,7 +514,7 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
     if (zoomPercent) {
       vp = vp.zoomPercent(zoomPercent);
     }
-    vp.on("clicked", e => {
+    vp.on("clicked", (e) => {
       if (props.mouseDown) {
         props.mouseDown(e.world.x, e.world.y);
       }
@@ -532,5 +532,5 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       viewport = viewport.setZoom(newProps.zoomPercent, false);
     }
     return viewport;
-  }
+  },
 });

@@ -1,14 +1,14 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import Alignment, { SequenceSortOptions } from "../Alignment";
-import { AlignmentCanvasComponent } from "../AlignmentCanvasComponent";
+import Alignment, { SequenceSortOptions } from "../../common/Alignment";
+import { AlignmentCanvasComponent } from "../../components/AlignmentCanvasComponent";
 import {
   AlignmentTypes,
   PositionsToStyle,
   ALL_AMINOACID_COLORSCHEMES,
-  ALL_NUCLEOTIDE_COLORSCHEMES
-} from "../MolecularStyles";
+  ALL_NUCLEOTIDE_COLORSCHEMES,
+} from "../../common/MolecularStyles";
 
 import { mount, shallow, default as Enzyme } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
@@ -27,7 +27,7 @@ jest.mock("../MolecularStyles.module.scss", () => {
     ntStyClass_Default: "mock-nt-class",
     ntStyColorOrder_Default: "",
     ntStyColors_Default: "",
-    ntStyDesc_Default: "mock-nt-style-desc"
+    ntStyDesc_Default: "mock-nt-style-desc",
   };
 });
 
@@ -39,7 +39,7 @@ describe("AlignmentCanvasComponent", () => {
     }
     return {
       id,
-      sequence
+      sequence,
     };
   };
 
@@ -94,10 +94,10 @@ describe("AlignmentCanvasComponent", () => {
     PositionsToStyle.CONSENSUS,
     PositionsToStyle.CONSENSUS_DIFF,
     PositionsToStyle.QUERY,
-    PositionsToStyle.QUERY_DIFF
+    PositionsToStyle.QUERY_DIFF,
   ])(
     "Should match the snapshot when styling the %s position.",
-    positionsToStyle => {
+    (positionsToStyle) => {
       const sequences = new Array();
       for (let i = 0; i < 10; ++i) {
         sequences.push(generateSequence(`sequence-${i}`, 2));

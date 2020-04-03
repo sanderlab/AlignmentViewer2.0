@@ -1,11 +1,11 @@
 import * as React from "react";
 
-import { AlignmentCanvasComponent } from "../AlignmentCanvasComponent";
-import Alignment, { SequenceSortOptions } from "../Alignment";
+import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
+import Alignment, { SequenceSortOptions } from "../common/Alignment";
 import {
   AminoAcidAlignmentStyle,
-  NucleotideAlignmentStyle
-} from "../MolecularStyles";
+  NucleotideAlignmentStyle,
+} from "../common/MolecularStyles";
 
 export interface IMiniMapProps {
   alignHorizontal: "left" | "right";
@@ -28,12 +28,12 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
     alignHorizontal: "right",
     alignVertical: "top",
     height: 600,
-    width: 300
+    width: 300,
   };
   constructor(props: IMiniMapProps) {
     super(props);
     this.state = {
-      zoomPercent: 1
+      zoomPercent: 1,
     };
   }
 
@@ -49,7 +49,7 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
           bottom: 0,
           height,
           position: "fixed",
-          width
+          width,
         }}
       >
         {this.renderCanvasComponent()}
@@ -65,7 +65,7 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
       highlightRows,
       sortBy,
       style,
-      width
+      width,
     } = this.props;
     const { zoomPercent } = this.state;
     return (
@@ -79,14 +79,14 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
           sortBy={sortBy}
           stageResolution={{
             width,
-            height
+            height,
           }}
           highlightRows={highlightRows}
           viewportProps={{
             useDrag: true,
             usePinch: true,
             useWheel: true,
-            zoomPercent
+            zoomPercent,
           }}
           mouseDown={this.onMouseDown}
         />
@@ -112,7 +112,7 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
   protected onZoomIn = () => {
     const { zoomPercent } = this.state;
     this.setState({
-      zoomPercent: Math.min(8, zoomPercent + 0.25)
+      zoomPercent: Math.min(8, zoomPercent + 0.25),
     });
   };
 
@@ -120,13 +120,13 @@ export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
     const { zoomPercent } = this.state;
     this.setState({
       // A zoomPercent of 0 will not actually zoom out!
-      zoomPercent: Math.max(0.25, zoomPercent - 0.25)
+      zoomPercent: Math.max(0.25, zoomPercent - 0.25),
     });
   };
 
   protected onZoomReset = () => {
     this.setState({
-      zoomPercent: 1
+      zoomPercent: 1,
     });
   };
 }

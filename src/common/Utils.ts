@@ -23,8 +23,8 @@ export function stringToColor(
   // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
   // (I think only necessary in testing, but might catch odd browser behavior)
   var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-    return r + r + g + g + b + b;
+  hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+    return "#" + r + r + g + g + b + b;
   });
 
   var rgbaResult = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)!;
@@ -33,7 +33,7 @@ export function stringToColor(
     rgb: {
       red: parseInt(rgbaResult[1], 16),
       green: parseInt(rgbaResult[2], 16),
-      blue: parseInt(rgbaResult[3], 16)
-    }
+      blue: parseInt(rgbaResult[3], 16),
+    },
   };
 }
