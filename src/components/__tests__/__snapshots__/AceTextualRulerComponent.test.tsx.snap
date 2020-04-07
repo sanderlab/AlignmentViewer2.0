@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AceEditorComponent Should render 1`] = `
+exports[`AceTextualRulerComponent Should render when given default props. 1`] = `
 <div
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
 >
   <div
-    id="test-id"
+    id="ace-msa-editor"
   />
 </div>
 `;

@@ -1,10 +1,13 @@
+import { generateUUIDv4 } from "./Utils";
+import { defineNewAlignmentMode } from "./AceAlignmentMode";
+
 export interface ISequence {
   id: string;
   sequence: string;
 }
 
 enum DistanceFunctions {
-  "hamming"
+  "hamming",
 }
 export class SequenceSortOptions {
   static readonly INPUT = new SequenceSortOptions(
@@ -21,11 +24,11 @@ export class SequenceSortOptions {
 
   static list = [
     SequenceSortOptions.INPUT,
-    SequenceSortOptions.HAMMING_DIST_TARGET
+    SequenceSortOptions.HAMMING_DIST_TARGET,
   ];
 
   static fromKey(key: string) {
-    return SequenceSortOptions.list.find(at => {
+    return SequenceSortOptions.list.find((at) => {
       return at.key === key;
     });
   }
@@ -48,6 +51,8 @@ export class SequenceSortOptions {
  *     fromFileContents: accepts a fasta file-like string
  */
 export default class Alignment {
+  private uuid: string;
+  private aceEditorMode: string | undefined;
   private name: string;
   private sequences: Map<SequenceSortOptions, ISequence[]>;
   private targetSequence: ISequence;
@@ -75,7 +80,7 @@ export default class Alignment {
       if (seqArr.length > 1) {
         var seqObj = {
           id: seqArr[0],
-          sequence: seqArr.slice(1).join("")
+          sequence: seqArr.slice(1).join(""),
         };
         sequences.push(seqObj);
       }
@@ -149,6 +154,7 @@ export default class Alignment {
    * @param sequences
    */
   public constructor(name: string, sequencesAsInput: ISequence[]) {
+    this.uuid = generateUUIDv4();
     this.name = name;
     this.sequences = new Map<SequenceSortOptions, ISequence[]>();
     this.sequences.set(SequenceSortOptions.INPUT, sequencesAsInput);
@@ -220,7 +226,7 @@ export default class Alignment {
         return {
           position: position,
           letter: topLetter,
-          occurrences: letterCounts[topLetter]
+          occurrences: letterCounts[topLetter],
         };
       }
     );
@@ -232,11 +238,32 @@ export default class Alignment {
   }
 
   /**
+   * Get a unique uuid for this alignment.
+   * @returns a uuid string for this alignment
+   */
+  getUUID() {
+    return this.uuid;
+  }
+
+  /**
    * Get the name of this alignment
    * @returns a name for the alignment - usually the filename
    */
   getName() {
     return this.name;
+  }
+
+  /**
+   * Get an ace editor mode for this alignemnt. If one doesn't exist
+   * then it will be defined.
+   * @returns the ace editor mode for this alignment
+   */
+  getAceEditorMode() {
+    if (!this.aceEditorMode) {
+      this.aceEditorMode = "ace/mode/" + this.uuid;
+      defineNewAlignmentMode(this.aceEditorMode, this);
+    }
+    return this.aceEditorMode;
   }
 
   /**
@@ -377,7 +404,7 @@ export default class Alignment {
    * IMPORTANT: Requires re-sorting
    */
   setTargetSequence(newTarget: ISequence) {
-    const targetInAlignment = this.getSequences().find(seq => {
+    const targetInAlignment = this.getSequences().find((seq) => {
       if (seq === newTarget) {
         return true;
       }
@@ -407,7 +434,7 @@ export default class Alignment {
     switch (distFn) {
       case DistanceFunctions.hamming:
         return inputSequences
-          .map(s => s)
+          .map((s) => s)
           .sort((seq1, seq2) => {
             const dist1 = Alignment.getSequenceDistance(
               this.targetSequence,

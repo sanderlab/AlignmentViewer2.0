@@ -4,7 +4,9 @@ We are using [Jest](https://facebook.github.io/jest) as our unit testing framewo
 
 ## Enzyme
 
-As of this writing, we are using [Create React App](https://create-react-app.dev/) as a foundation and [enzyme](https://airbnb.io/enzyme/) for rendering components. The former has a lot of configuration baked, but is missing a piece for the latter - and the [proposed solution is a lie](https://create-react-app.dev/docs/running-tests/#srcsetuptestsjs)).
+As of this writing, we are using [Create React App](https://create-react-app.dev/) as a foundation and [enzyme](https://airbnb.io/enzyme/) for rendering components. The former has a lot of configuration baked, but is missing a piece for the latter - and the [proposed solution](https://create-react-app.dev/docs/running-tests/#srcsetuptestsjs)) maybe\* doesn't work.
+
+**\*** NG: the filename in the alignment viewer repo was misspelled - that might have been the issue. Either way, we are using the `src/setuptests.js` to add global mocks (e.g., for they `crypto` module).
 
 To get enzyme setup in your test file, you will need to include some variation of these 3 lines in the your test file:
 

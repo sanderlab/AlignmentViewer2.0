@@ -10,7 +10,11 @@ import { AceEditorComponent } from "../AceEditorComponent";
 describe("AceEditorComponent", () => {
   it("Should render", () => {
     const wrapper = shallow(
-      <AceEditorComponent text={"Test Text"} mouseMove={jest.fn()} />
+      <AceEditorComponent
+        id="test-id"
+        text={"testing"}
+        fontSize={3}
+      ></AceEditorComponent>
     );
     expect(wrapper).toMatchSnapshot();
   });

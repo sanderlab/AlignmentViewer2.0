@@ -23,7 +23,10 @@ export interface IMiniMapState {
   zoomPercent: number;
 }
 
-export class MiniMap extends React.Component<IMiniMapProps, IMiniMapState> {
+export default class MiniMapComponent extends React.Component<
+  IMiniMapProps,
+  IMiniMapState
+> {
   public static defaultProps = {
     alignHorizontal: "right",
     alignVertical: "top",

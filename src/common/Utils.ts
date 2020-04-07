@@ -37,3 +37,18 @@ export function stringToColor(
     },
   };
 }
+
+/**
+ * Generate a UUID. Modified from:
+ * https://stackoverflow.com/questions/105034
+ */
+export function generateUUIDv4() {
+  const x = (([1e7] as any) + -1e3 + -4e3 + -8e3 + -1e11) as string;
+  return x.replace(/[018]/g, function (c: string) {
+    return (
+      parseInt(c) ^
+      (window.crypto.getRandomValues(new Uint8Array(1))[0] &
+        (15 >> (parseInt(c) / 4)))
+    ).toString(16);
+  });
+}

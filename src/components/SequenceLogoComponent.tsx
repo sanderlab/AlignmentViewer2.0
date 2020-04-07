@@ -12,7 +12,7 @@ import { acePrefix } from "../common/MolecularStyles";
 
 export enum LOGO_TYPES {
   LETTERS = "letter stack",
-  BARS = "bar plot"
+  BARS = "bar plot",
 }
 
 interface IGlyphFrequency {
@@ -24,7 +24,7 @@ interface IGlyphFrequency {
 }
 interface IGlyphStack extends Array<IGlyphFrequency> {}
 
-export interface ISequenceLogoComponentProps {
+export interface ISequenceLogoProps {
   alignment: Alignment;
   glyphWidth: number;
   logoType: LOGO_TYPES;
@@ -34,9 +34,7 @@ export interface ISequenceLogoComponentProps {
   readonly id: string;
 }
 
-export class SequenceLogoComponent extends React.Component<
-  ISequenceLogoComponentProps
-> {
+export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
   private scrollerDiv?: HTMLDivElement | null;
   private loaded: boolean = false;
 
@@ -50,7 +48,7 @@ export class SequenceLogoComponent extends React.Component<
     }
   }
 
-  shouldComponentUpdate(nextProps: ISequenceLogoComponentProps) {
+  shouldComponentUpdate(nextProps: ISequenceLogoProps) {
     if (
       this.loaded === false ||
       this.props.logoType !== nextProps.logoType ||
@@ -81,7 +79,7 @@ export class SequenceLogoComponent extends React.Component<
         0
       );
 
-      const frequenciesAtPosition: number[] = lettersSorted.map(letter => {
+      const frequenciesAtPosition: number[] = lettersSorted.map((letter) => {
         let freq = 0;
         if (letter in letterCounts) {
           freq = letterCounts[letter] / totalCountAtPosition;
@@ -93,10 +91,10 @@ export class SequenceLogoComponent extends React.Component<
     });
 
     //load alphabet information
-    const sortedAlphabet = lettersSorted.map(letter => {
+    const sortedAlphabet = lettersSorted.map((letter) => {
       return {
         letter: letter,
-        classNames: acePrefix + letter
+        classNames: acePrefix + letter,
       };
     });
 
@@ -106,10 +104,10 @@ export class SequenceLogoComponent extends React.Component<
         .map((frequency, letterIdx) => {
           return {
             frequency: frequency,
-            letter: sortedAlphabet[letterIdx]
+            letter: sortedAlphabet[letterIdx],
           };
         })
-        .filter(freq => {
+        .filter((freq) => {
           return freq.frequency !== 0;
         })
         .sort((a, b) => (a.frequency > b.frequency ? 1 : -1));
@@ -145,14 +143,14 @@ export class SequenceLogoComponent extends React.Component<
         const selectedGlyph = GlyphFactory.glyphFromChar(freq.letter.letter)({
           className: freq.letter.classNames,
           transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
-          key: `idxglyph_${idx}`
+          key: `idxglyph_${idx}`,
         });
         return selectedGlyph;
       });
     };
 
     return (
-      <div id={this.props.id} ref={e => this.divLoaded(e)}>
+      <div id={this.props.id} ref={(e) => this.divLoaded(e)}>
         <svg
           preserveAspectRatio="none"
           viewBox={`0 0 ${logoData.length} 100`}

@@ -3,17 +3,21 @@ import "./AlignmentViewer.scss";
 import { Ace } from "ace-builds";
 import Alignment, { SequenceSortOptions } from "../common/Alignment";
 import ScrollSync, { ScrollType } from "../common/ScrollSync";
-import { AceMSAComponent, AceEditorTypes } from "./AceMSAComponent";
 import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
 import { SequenceConservationComponent } from "./SequenceConservationComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-  PositionsToStyle
+  PositionsToStyle,
 } from "../common/MolecularStyles";
-import { MiniMap } from "./MiniMap";
+import MiniMapComponent from "./MiniMapComponent";
+import AceMultipleSequenceAlignmentComponent from "./AceMultipleSequenceAlignmentComponent";
+import AceConsensusSequenceComponent from "./AceConsensusSequenceComponent";
+import AceTargetSequenceComponent from "./AceTargetSequenceComponent";
+import AceTextualRulerComponent from "./AceTextualRulerComponent";
+import { AceEditorComponent } from "./AceEditorComponent";
 
-export interface AlignmentViewerProps {
+export interface IAlignmentViewerProps {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   logoPlotStyle: LOGO_TYPES;
@@ -22,22 +26,22 @@ export interface AlignmentViewerProps {
   showMiniMap?: boolean;
   showAnnotations?: boolean;
 }
-export interface AlignmentViewerState {
+export interface IAlignmentViewerState {
   aceCharacterWidth: number;
   aceEditors: Ace.Editor[];
-  alignmentEditorFirstRow?: number;
-  alignmentEditorLastRow?: number;
+  alignmentEditorVisibleFirstRow?: number;
+  alignmentEditorVisibleLastRow?: number;
 }
 
 export class AlignmentViewer extends React.Component<
-  AlignmentViewerProps,
-  AlignmentViewerState
+  IAlignmentViewerProps,
+  IAlignmentViewerState
 > {
-  constructor(props: AlignmentViewerProps) {
+  constructor(props: IAlignmentViewerProps) {
     super(props);
     this.state = {
       aceEditors: [],
-      aceCharacterWidth: 0
+      aceCharacterWidth: 0,
     };
 
     //setup scroll groups
@@ -49,9 +53,11 @@ export class AlignmentViewer extends React.Component<
   }
 
   _handleCharacterSizeChanged = (newCharSize: number) => {
-    this.setState({
-      aceCharacterWidth: newCharSize
-    });
+    if (this.state.aceCharacterWidth !== newCharSize) {
+      this.setState({
+        aceCharacterWidth: newCharSize,
+      });
+    }
   };
 
   _aceEditorLoaded = (
@@ -76,7 +82,7 @@ export class AlignmentViewer extends React.Component<
     }
     this.setState({
       aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
-      aceEditors: [editor].concat(this.state.aceEditors)
+      aceEditors: [editor].concat(this.state.aceEditors),
     });
 
     //track visible rows to show in canvas MSA
@@ -85,38 +91,32 @@ export class AlignmentViewer extends React.Component<
         // BREAKS LOGO, rerenders everything below and kills performance. React lifecycle stuff.
         setTimeout(() => {
           this.setState({
-            alignmentEditorFirstRow: editor.renderer.getFirstFullyVisibleRow(),
-            alignmentEditorLastRow: editor.renderer.getLastFullyVisibleRow()
+            alignmentEditorVisibleFirstRow: editor.renderer.getFirstFullyVisibleRow(),
+            alignmentEditorVisibleLastRow: editor.renderer.getLastFullyVisibleRow(),
           });
         });
       });
     }
   };
 
-  _elementLoaded(className: string, scroller: HTMLElement) {
-    //console.log("_elementLoaded className =" + className + ":", scroller);
-
-    let scrollSync = ScrollSync.getInstance();
-    scrollSync.registerScroller(scroller, "horizontal", true);
-  }
-
   protected generateWidget(
     className: string,
     annotation: string | JSX.Element,
     content: JSX.Element,
-    addToScrollSync?: boolean
+    addAsElementToScrollSync?: boolean
   ) {
     return (
       <div className={`av-widget ${className}`}>
         <div className="av-annotation">{annotation}</div>
         <div
           className="av-content"
-          ref={e => {
-            if (e && addToScrollSync) {
+          ref={(e) => {
+            if (e && addAsElementToScrollSync) {
               //TODO: move into separate component .. Ref can be null here and
               //      also good to keep track of removal / addition for scroll sync
               //console.log("the ref is:", e);
-              this._elementLoaded(className, e);
+              let scrollSync = ScrollSync.getInstance();
+              scrollSync.registerScroller(e, "horizontal", true);
             }
           }}
         >
@@ -127,11 +127,15 @@ export class AlignmentViewer extends React.Component<
   }
 
   render() {
+    if (!this.props.alignment) {
+      return null;
+    }
+
     const annotationClass = this.props.showAnnotations
       ? ""
       : " annotation-closed";
 
-    return !this.props.alignment ? null : (
+    return (
       <div className={`alignment_viewer${annotationClass}`}>
         {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
@@ -214,146 +218,117 @@ export class AlignmentViewer extends React.Component<
 
   protected renderConsensusQueryBox = () => (
     <div className="consensusseq_box">
-      {
-        <AceMSAComponent
-          id="ace-consensusseq"
-          type={AceEditorTypes.consensus}
-          alignment={this.props.alignment}
-          fontSize={this.props.zoomLevel}
-          sortBy={this.props.sortBy}
-          topLevelClassNames={[
-            this.props.style.residueDetail.className,
-            this.props.style.alignmentType.className,
-            this.props.style.positionsToStyle.className,
-            this.props.style.colorScheme.className
-          ].join(" ")}
-          editorLoaded={editor => {
-            this._aceEditorLoaded(
-              "ace-consensusseq",
-              editor,
-              ScrollType.horizontal
-            );
-          }}
-        />
-      }
+      <AceConsensusSequenceComponent
+        id="ace-consensusseq"
+        alignment={this.props.alignment}
+        fontSize={this.props.zoomLevel}
+        sortBy={this.props.sortBy}
+        classNames={[
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
+        ].join(" ")}
+        editorLoaded={(editor) => {
+          this._aceEditorLoaded(
+            "ace-consensusseq",
+            editor,
+            ScrollType.horizontal
+          );
+        }}
+      ></AceConsensusSequenceComponent>
     </div>
   );
 
   protected renderQuerySeqBox = () => (
     <div className="queryseq_box">
-      {
-        <AceMSAComponent
-          id="ace-queryseq"
-          type={AceEditorTypes.query}
-          alignment={this.props.alignment}
-          fontSize={this.props.zoomLevel}
-          sortBy={this.props.sortBy}
-          topLevelClassNames={[
-            this.props.style.residueDetail.className,
-            this.props.style.alignmentType.className,
-            this.props.style.positionsToStyle.className,
-            this.props.style.colorScheme.className
-          ].join(" ")}
-          editorLoaded={editor => {
-            this._aceEditorLoaded(
-              "ace-queryseq",
-              editor,
-              ScrollType.horizontal
-            );
-          }}
-        />
-      }
+      <AceTargetSequenceComponent
+        id="ace-queryseq"
+        alignment={this.props.alignment}
+        fontSize={this.props.zoomLevel}
+        sortBy={this.props.sortBy}
+        classNames={[
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
+        ].join(" ")}
+        editorLoaded={(editor) => {
+          this._aceEditorLoaded("ace-queryseq", editor, ScrollType.horizontal);
+        }}
+      ></AceTargetSequenceComponent>
     </div>
   );
 
   protected renderPositionBox = () => (
     <div className="position_box">
       {
-        <AceMSAComponent
+        <AceTextualRulerComponent
           id="ace-positions"
-          type={AceEditorTypes.position}
           alignment={this.props.alignment}
           fontSize={this.props.zoomLevel}
-          sortBy={this.props.sortBy}
-          editorLoaded={editor => {
+          editorLoaded={(editor) => {
             this._aceEditorLoaded(
               "ace-positions",
               editor,
               ScrollType.horizontal
             );
           }}
+          mouseEnter={() => {
+            //console.log("mouse entered position box");
+          }}
+          mouseLeave={() => {
+            //console.log("mouse left position box");
+          }}
+          mouseMove={(e) => {
+            //console.log("mouse moved in position box", e);
+          }}
+          mouseDown={(e) => {
+            //console.log("mouse down in position box", e);
+          }}
         />
       }
     </div>
   );
 
-  /*
-  protected renderDatatableBox = () => (
-    <div className="datatable_box" id="datatable">
-      {
-        <AlignmentCanvasComponent
-          id="alignment_canvas"
-          alignment={this.props.alignment}
-          alignmentType={this.props.style.alignmentType}
-          positionsToStyle={this.props.style.positionsToStyle}
-          colorScheme={this.props.style.colorScheme}
-          sortBy={this.props.sortBy}
-          mouseDown={(x, y) => {
-            console.log("someone clicked on the canvas:" + x + "," + y);
-          }}
-          highlightRows={
-            this.state.alignmentEditorFirstRow !== undefined &&
-            this.state.alignmentEditorLastRow !== undefined
-              ? [
-                  this.state.alignmentEditorFirstRow,
-                  this.state.alignmentEditorLastRow
-                ]
-              : undefined
-          }
-        />
-      }
-    </div>
-  );
-*/
   protected renderAlignmentBox = () => (
     <div className="alignment_box">
-      <AceMSAComponent
+      <AceMultipleSequenceAlignmentComponent
         id="ace-alignment"
-        type={AceEditorTypes.alignment}
         alignment={this.props.alignment}
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
-        topLevelClassNames={[
+        classNames={[
           this.props.style.residueDetail.className,
           this.props.style.alignmentType.className,
           this.props.style.positionsToStyle.className,
-          this.props.style.colorScheme.className
+          this.props.style.colorScheme.className,
         ].join(" ")}
         characterSizeChanged={this._handleCharacterSizeChanged}
-        editorLoaded={editor => {
+        editorLoaded={(editor) => {
           this._aceEditorLoaded("ace-alignment", editor, ScrollType.both);
         }}
-      />
+      ></AceMultipleSequenceAlignmentComponent>
     </div>
   );
 
   protected renderAlignmentAnnotationBox = () => (
     <div className="alignment_metadata_box">
-      <AceMSAComponent
+      <AceEditorComponent
         id="ace-alignment-metadata"
-        type={AceEditorTypes.alignment_metadata}
-        alignment={this.props.alignment}
+        text={this.props.alignment
+          .getSequences(this.props.sortBy)
+          .map((x) => x.id)
+          .join("\n")}
         fontSize={this.props.zoomLevel}
-        sortBy={this.props.sortBy}
-        characterSizeChanged={this._handleCharacterSizeChanged}
-        editorLoaded={editor => {
+        editorLoaded={(editor) => {
           this._aceEditorLoaded(
             "ace-alignment-metadata",
             editor,
             ScrollType.vertical
           );
         }}
-      />
+      ></AceEditorComponent>
     </div>
   );
 
@@ -366,7 +341,7 @@ export class AlignmentViewer extends React.Component<
       alignment &&
       style && (
         <div className={mmClassName}>
-          <MiniMap
+          <MiniMapComponent
             width={alignment.getMaxSequenceLength()}
             height={window.innerHeight}
             alignHorizontal={"right"}
@@ -374,11 +349,11 @@ export class AlignmentViewer extends React.Component<
             style={style}
             sortBy={sortBy}
             highlightRows={
-              this.state.alignmentEditorFirstRow !== undefined &&
-              this.state.alignmentEditorLastRow !== undefined
+              this.state.alignmentEditorVisibleFirstRow !== undefined &&
+              this.state.alignmentEditorVisibleLastRow !== undefined
                 ? [
-                    this.state.alignmentEditorFirstRow,
-                    this.state.alignmentEditorLastRow
+                    this.state.alignmentEditorVisibleFirstRow,
+                    this.state.alignmentEditorVisibleLastRow,
                   ]
                 : undefined
             }
@@ -392,11 +367,14 @@ export class AlignmentViewer extends React.Component<
   protected onMinimapClick = (x: number, y: number) => {
     const {
       aceEditors,
-      alignmentEditorFirstRow,
-      alignmentEditorLastRow
+      alignmentEditorVisibleFirstRow: alignmentEditorFirstRow,
+      alignmentEditorVisibleLastRow: alignmentEditorLastRow,
     } = this.state;
     let rowCount = 40;
-    if (alignmentEditorFirstRow && alignmentEditorLastRow) {
+    if (
+      alignmentEditorFirstRow !== undefined &&
+      alignmentEditorLastRow !== undefined
+    ) {
       rowCount = alignmentEditorLastRow - alignmentEditorFirstRow;
     }
 

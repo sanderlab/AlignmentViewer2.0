@@ -12,7 +12,7 @@ import {
   AlignmentTypes,
 } from "../common/MolecularStyles";
 
-export interface IAlignmentCanvasComponentProps {
+export interface IAlignmentCanvasProps {
   alignment: Alignment;
   alignmentType: AlignmentTypes;
   sortBy: SequenceSortOptions;
@@ -60,7 +60,7 @@ const AlignmentHighlighter = PixiComponent("AlignmentHighlighter", {
 });
 
 export class AlignmentCanvasComponent extends React.Component<
-  IAlignmentCanvasComponentProps
+  IAlignmentCanvasProps
 > {
   app?: PIXI.Application;
   scaleX: number = 1;
@@ -200,10 +200,8 @@ export class AlignmentCanvasComponent extends React.Component<
     //e.preventDefault(); //TODO Drew is this necessary?
   };
 }
-class PixiAlignmentTiled extends React.Component<
-  IAlignmentCanvasComponentProps
-> {
-  shouldComponentUpdate(nextProps: IAlignmentCanvasComponentProps) {
+class PixiAlignmentTiled extends React.Component<IAlignmentCanvasProps> {
+  shouldComponentUpdate(nextProps: IAlignmentCanvasProps) {
     const toReturn =
       nextProps.alignment !== this.props.alignment ||
       nextProps.colorScheme !== this.props.colorScheme ||
@@ -269,8 +267,7 @@ class PixiAlignmentTiled extends React.Component<
       }
     }
 
-    console.log("CANVAS rerender [" + sortBy.key + "]", sequences);
-
+    //console.log("CANVAS rerender [" + sortBy.key + "]", sequences);
     return (
       <>
         {tiledImages.tiles.map((tile) => (
@@ -510,7 +507,7 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       vp = vp.wheel();
     }
 
-    console.log(zoomPercent);
+    //console.log(zoomPercent);
     if (zoomPercent) {
       vp = vp.zoomPercent(zoomPercent);
     }

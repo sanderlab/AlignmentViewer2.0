@@ -1,7 +1,7 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import { MiniMap } from "../MiniMap";
+import MiniMapComponent from "../MiniMapComponent";
 
 import { mount, shallow, default as Enzyme } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
@@ -33,7 +33,7 @@ jest.mock("../MolecularStyles.module.scss", () => {
 describe("MiniMap", () => {
   it("Should render with default props.", () => {
     const wrapper = shallow(
-      <MiniMap
+      <MiniMapComponent
         alignment={new Alignment("", [])}
         style={AlignmentStyle.fromAlignmentType(AlignmentTypes.AMINOACID)}
         sortBy={SequenceSortOptions.INPUT}

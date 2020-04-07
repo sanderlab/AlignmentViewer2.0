@@ -1,7 +1,7 @@
 import React from "react";
 import Alignment from "../common/Alignment";
 
-export interface ISequenceConsensusComponentProps {
+export interface ISequenceConsensusProps {
   alignment: Alignment;
   characterWidth: number;
 
@@ -9,11 +9,8 @@ export interface ISequenceConsensusComponentProps {
   readonly id: string;
 }
 
-interface ISequenceConsensusComponentState {}
-
 export class SequenceConsensusComponent extends React.Component<
-  ISequenceConsensusComponentProps,
-  ISequenceConsensusComponentState
+  ISequenceConsensusProps
 > {
   render() {
     if (!this.props.alignment || !this.props.characterWidth) {
@@ -27,7 +24,7 @@ export class SequenceConsensusComponent extends React.Component<
     return (
       <div
         id={this.props.id}
-        ref={el => {
+        ref={(el) => {
           this.props.consensusPlotLoaded(el as HTMLDivElement);
         }}
       ></div>

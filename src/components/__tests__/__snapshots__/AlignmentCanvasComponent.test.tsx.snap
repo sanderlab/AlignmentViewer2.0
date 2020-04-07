@@ -4,6 +4,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -326,6 +327,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
         "id": "big-sequence-0",
         "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -418,6 +420,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -740,6 +743,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
         "id": "nt-sequence-0",
         "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -832,6 +836,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [],
       "consensus": Array [],
       "globalAlphaLetterCounts": Object {},
@@ -846,6 +851,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
         } => Array [],
       },
       "targetSequence": undefined,
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -972,6 +978,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -1054,6 +1061,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -1150,6 +1158,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -1232,6 +1241,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -1328,6 +1338,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -1410,6 +1421,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -1506,6 +1518,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -1588,6 +1601,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -1684,6 +1698,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -1766,6 +1781,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -1862,6 +1878,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -1944,6 +1961,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -2040,6 +2058,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -2122,6 +2141,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -2218,6 +2238,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -2300,6 +2321,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -2396,6 +2418,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -2478,6 +2501,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={
@@ -2574,6 +2598,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
 <AlignmentCanvasComponent
   alignment={
     Alignment {
+      "aceEditorMode": undefined,
       "allAlphaLettersSorted": Array [
         "A",
         "B",
@@ -2656,6 +2681,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
         "id": "sequence-0",
         "sequence": "AB",
       },
+      "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
   alignmentType={

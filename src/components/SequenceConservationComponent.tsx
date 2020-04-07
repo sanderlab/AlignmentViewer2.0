@@ -1,7 +1,7 @@
 import React from "react";
 import Alignment from "../common/Alignment";
 
-export interface ISequenceConservationComponentProps {
+export interface ISequenceConservationProps {
   alignment: Alignment;
   characterWidth: number;
 
@@ -10,27 +10,27 @@ export interface ISequenceConservationComponentProps {
   readonly id: string;
 }
 
-interface ISequenceConservationComponentState {
+interface ISequenceConservationState {
   isHovered: boolean;
 }
 
 export class SequenceConservationComponent extends React.Component<
-  ISequenceConservationComponentProps,
-  ISequenceConservationComponentState
+  ISequenceConservationProps,
+  ISequenceConservationState
 > {
   private scrollerDiv?: HTMLDivElement | null;
 
-  constructor(props: ISequenceConservationComponentProps) {
+  constructor(props: ISequenceConservationProps) {
     super(props);
     this.state = {
-      isHovered: false
+      isHovered: false,
     };
     this.handleSvgHover = this.handleSvgHover.bind(this);
   }
 
   handleSvgHover(isHovered: boolean) {
     this.setState({
-      isHovered: isHovered
+      isHovered: isHovered,
     });
   }
 
@@ -92,7 +92,7 @@ export class SequenceConservationComponent extends React.Component<
 
     //normalize between 0 and 1
     const maxEmpiricalEntropy = Math.max(...entropies);
-    const normalizedEntropies = entropies.map(entropy => {
+    const normalizedEntropies = entropies.map((entropy) => {
       return (entropy / maxEmpiricalEntropy) * 100;
     });
     //console.log('entropies', entropies);
@@ -168,14 +168,14 @@ export class SequenceConservationComponent extends React.Component<
             right: 0,
             color: "red",
             visibility: this.state.isHovered ? "visible" : "hidden",
-            zIndex: 1000
+            zIndex: 1000,
           }}
         >
           <span style={{ color: "#000000" }}>Entropy</span>
           <span style={{ color: "#b7b7b7", paddingLeft: 10 }}>&#35; Gaps</span>
         </div>
 
-        <div id={this.props.id} ref={e => this.divLoaded(e)}>
+        <div id={this.props.id} ref={(e) => this.divLoaded(e)}>
           <div className="svg_container">
             <svg
               preserveAspectRatio="none"

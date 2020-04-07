@@ -24,7 +24,7 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
 
   (ace as IAceType).define(
     "ace/mode/" + modeName + "_highlight_rules",
-    function(require: Function, exports: any, module: any) {
+    function (require: Function, exports: any, module: any) {
       var oop = require("../lib/oop");
       var TextHighlightRules = require("./text_highlight_rules")
         .TextHighlightRules;
@@ -34,7 +34,7 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
        * to each character. Note that characters may be grouped together
        * if they match the same rule and are side by side.
        */
-      var AlignmentHighlightRules = function(this: any) {
+      var AlignmentHighlightRules = function (this: any) {
         //We define an alignment-specific set of rules that will
         //add other tags such as whether a character matches the
         //consensus sequence.
@@ -55,7 +55,7 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
 
           rules[stateName] = [
             {
-              token: function(letter: string) {
+              token: function (letter: string) {
                 return getClassNamesForAce(
                   letter,
                   letter === alignment.getConsensus()[i].letter,
@@ -63,8 +63,8 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
                 );
               },
               regex: ".",
-              next: nextStateName
-            }
+              next: nextStateName,
+            },
           ];
         }
         this.$rules = rules;
@@ -76,7 +76,7 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
     }
   );
 
-  (ace as IAceType).define("ace/mode/" + modeName, function(
+  (ace as IAceType).define("ace/mode/" + modeName, function (
     require: Function,
     exports: any,
     module: any
@@ -88,13 +88,13 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
       modeName +
       "_highlight_rules").AlignmentHighlightRules;
 
-    const Mode = function(this: any) {
+    const Mode = function (this: any) {
       this.$tokenizer = new Tokenizer(new AlignmentHighlightRules().getRules());
     };
 
     oop.inherits(Mode, TextMode);
 
-    (function() {
+    (function () {
       // Extra logic goes here. (see below)
     }.call(Mode.prototype));
 
