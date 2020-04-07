@@ -1,0 +1,91 @@
+/** AlignmentViewer.scss */
+@use "./MolecularStyles.module.scss";
+
+$layoutGapSize: 5px;
+$annotationContentGapSize: 20px;
+$rowHeight: 25px;
+
+.alignment_viewer.annotation-closed .av-annotation {
+  display: none;
+}
+
+.alignment_viewer {
+  display: grid;
+  grid-template-columns: 10px repeat(auto-fill, minmax(200px, 1fr)) 10px;
+  grid-auto-rows: minmax($rowHeight, auto);
+  grid-gap: $layoutGapSize;
+
+  .av-widget {
+    grid-column: 2 / -2;
+    grid-row-start: auto;
+
+    display: flex;
+    flex-direction: row;
+
+    position: relative;
+  }
+  .av-widget.av-webgl-msa {
+    display: none;
+  }
+  .av-widget.av-conservation-gaps {
+    grid-row-end: span 3;
+  }
+  .av-widget.av-sequence-logo {
+    grid-row-end: span 4;
+  }
+  .av-widget.av-ace-msa {
+    grid-row-end: span 23;
+  }
+
+  .av-annotation,
+  .av-content {
+    display: flex;
+    overflow: scroll;
+  }
+  .av-annotation {
+    flex: 0 1 20%;
+    justify-content: flex-end;
+    align-items: center;
+    /* bit of a hack to put space between annotation and content */
+    margin-right: $annotationContentGapSize;
+    font-weight: bold;
+    text-align: right;
+  }
+  .av-content {
+    flex: 1 0 80%;
+    position: relative;
+    align-items: center;
+  }
+
+  .av-widget.av-consensus-seq #ace-consensusseq,
+  .av-widget.av-target-seq #ace-queryseq,
+  .av-widget.av-position-indicator #ace-positions {
+    line-height: $rowHeight;
+  }
+
+  .av-widget.av-consensus-seq #ace-consensusseq,
+  .av-widget.av-target-seq #ace-queryseq,
+  .av-widget.av-position-indicator #ace-positions,
+  .av-widget.av-ace-msa #ace-alignment,
+  .av-widget.av-ace-msa #ace-alignment-metadata {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+
+  svg.conservation .gapCount rect {
+    fill: #b7b7b7;
+  }
+  svg.conservation .entropy rect {
+    fill: #000000;
+  }
+
+  .mini-map.hidden {
+    display: none;
+  }
+}

@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MiniMap Should render with default props. 1`] = `
+<div
+  style={
+    Object {
+      "bottom": 0,
+      "height": 600,
+      "position": "fixed",
+      "right": 0,
+      "top": 0,
+      "width": 300,
+      "zIndex": 100000,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "opacity": 0.75,
+      }
+    }
+  >
+    <AlignmentCanvasComponent
+      alignment={
+        Alignment {
+          "aceEditorMode": undefined,
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Map {
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            } => Array [],
+          },
+          "targetSequence": undefined,
+          "uuid": "10000000-1000-4000-8000-100000000000",
+        }
+      }
+      alignmentType={
+        AlignmentTypes {
+          "allColorSchemes": Array [
+            Object {
+              "backgroundAlpha": 0,
+              "className": "mock-aa-class",
+              "colors": Object {
+                "": "",
+              },
+              "commonName": "Default",
+              "description": "mock-aa-style-desc",
+            },
+          ],
+          "className": undefined,
+          "description": "Amino Acid Sequences",
+          "key": "aminoacid-alignment",
+        }
+      }
+      colorScheme={
+        Object {
+          "backgroundAlpha": 0,
+          "className": "mock-aa-class",
+          "colors": Object {
+            "": "",
+          },
+          "commonName": "Default",
+          "description": "mock-aa-style-desc",
+        }
+      }
+      id="alignment_canvas"
+      mouseDown={[Function]}
+      positionsToStyle={
+        PositionsToStyle {
+          "className": undefined,
+          "description": "All",
+          "key": "all",
+        }
+      }
+      sortBy={
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        }
+      }
+      stageResolution={
+        Object {
+          "height": 600,
+          "width": 300,
+        }
+      }
+      viewportProps={
+        Object {
+          "useDrag": true,
+          "usePinch": true,
+          "useWheel": true,
+          "zoomPercent": 1,
+        }
+      }
+    />
+  </div>
+  <div
+    style={
+      Object {
+        "opacity": 1,
+        "textAlign": "center",
+      }
+    }
+  >
+    <button
+      onClick={[Function]}
+    >
+      -
+    </button>
+    <button
+      onClick={[Function]}
+    >
+      Reset
+    </button>
+    <button
+      onClick={[Function]}
+    >
+      +
+    </button>
+  </div>
+</div>
+`;

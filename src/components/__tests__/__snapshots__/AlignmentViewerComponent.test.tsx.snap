@@ -1,0 +1,385 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlignmentViewer Should render 1`] = `
+<div
+  className="alignment_viewer annotation-closed"
+>
+  <div
+    className="mini-map hidden"
+  >
+    <MiniMapComponent
+      alignHorizontal="right"
+      alignVertical="top"
+      alignment={
+        Alignment {
+          "aceEditorMode": undefined,
+          "allAlphaLettersSorted": Array [],
+          "consensus": Array [],
+          "globalAlphaLetterCounts": Object {},
+          "name": "",
+          "positionalLetterCounts": Map {},
+          "sequences": Map {
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            } => Array [],
+          },
+          "targetSequence": undefined,
+          "uuid": "10000000-1000-4000-8000-100000000000",
+        }
+      }
+      height={768}
+      onClick={[Function]}
+      sortBy={
+        SequenceSortOptions {
+          "description": "As input",
+          "distanceFn": undefined,
+          "isTargetSequenceDependent": false,
+          "key": "as-input",
+        }
+      }
+      style={
+        NucleotideAlignmentStyle {
+          "alignmentType": AlignmentTypes {
+            "allColorSchemes": Array [
+              Object {
+                "backgroundAlpha": NaN,
+                "className": "",
+                "colors": Object {
+                  "": "",
+                },
+                "commonName": "Default",
+                "description": "",
+              },
+            ],
+            "className": undefined,
+            "description": "Nucleotide Sequences",
+            "key": "nucleotide-alignment",
+          },
+          "allColorSchemes": Array [
+            Object {
+              "backgroundAlpha": NaN,
+              "className": "",
+              "colors": Object {
+                "": "",
+              },
+              "commonName": "Default",
+              "description": "",
+            },
+          ],
+          "colorScheme": Object {
+            "backgroundAlpha": NaN,
+            "className": "",
+            "colors": Object {
+              "": "",
+            },
+            "commonName": "Default",
+            "description": "",
+          },
+          "positionsToStyle": PositionsToStyle {
+            "className": undefined,
+            "description": "All",
+            "key": "all",
+          },
+          "residueDetail": ResidueDetailTypes {
+            "className": "",
+            "description": "Style Background and Letters",
+            "key": "both",
+          },
+        }
+      }
+      width={-1}
+    />
+  </div>
+  <div
+    className="av-widget av-conservation-gaps"
+  >
+    <div
+      className="av-annotation"
+    >
+      Conservation / gaps:
+    </div>
+    <div
+      className="av-content"
+    >
+      <SequenceConservationComponent
+        alignment={
+          Alignment {
+            "aceEditorMode": undefined,
+            "allAlphaLettersSorted": Array [],
+            "consensus": Array [],
+            "globalAlphaLetterCounts": Object {},
+            "name": "",
+            "positionalLetterCounts": Map {},
+            "sequences": Map {
+              SequenceSortOptions {
+                "description": "As input",
+                "distanceFn": undefined,
+                "isTargetSequenceDependent": false,
+                "key": "as-input",
+              } => Array [],
+            },
+            "targetSequence": undefined,
+            "uuid": "10000000-1000-4000-8000-100000000000",
+          }
+        }
+        characterWidth={0}
+        id="sequence_conservation"
+      />
+    </div>
+  </div>
+  <div
+    className="av-widget av-sequence-logo"
+  >
+    <div
+      className="av-annotation"
+    >
+      Logo:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="logo_box undefined  undefined"
+      >
+        <SequenceLogoComponent
+          alignment={
+            Alignment {
+              "aceEditorMode": undefined,
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+              "uuid": "10000000-1000-4000-8000-100000000000",
+            }
+          }
+          glyphWidth={0}
+          id="sequence_logo"
+          logoType="bar plot"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-consensus-seq"
+  >
+    <div
+      className="av-annotation"
+    >
+      Consensus sequence:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="consensusseq_box"
+      >
+        <AceConsensusSequenceComponent
+          alignment={
+            Alignment {
+              "aceEditorMode": undefined,
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+              "uuid": "10000000-1000-4000-8000-100000000000",
+            }
+          }
+          classNames="   "
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-consensusseq"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-target-seq"
+  >
+    <div
+      className="av-annotation"
+    >
+      Query sequence:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="queryseq_box"
+      >
+        <AceTargetSequenceComponent
+          alignment={
+            Alignment {
+              "aceEditorMode": undefined,
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+              "uuid": "10000000-1000-4000-8000-100000000000",
+            }
+          }
+          classNames="   "
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-queryseq"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-position-indicator"
+  >
+    <div
+      className="av-annotation"
+    >
+      Position:
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="position_box"
+      >
+        <AceTextualRulerComponent
+          alignment={
+            Alignment {
+              "aceEditorMode": undefined,
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+              "uuid": "10000000-1000-4000-8000-100000000000",
+            }
+          }
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-positions"
+          mouseDown={[Function]}
+          mouseEnter={[Function]}
+          mouseLeave={[Function]}
+          mouseMove={[Function]}
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="av-widget av-ace-msa"
+  >
+    <div
+      className="av-annotation"
+    >
+      <div
+        className="alignment_metadata_box"
+      >
+        <AceEditorComponent
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-alignment-metadata"
+          text=""
+        />
+      </div>
+    </div>
+    <div
+      className="av-content"
+    >
+      <div
+        className="alignment_box"
+      >
+        <AceMultipleSequenceAlignmentComponent
+          alignment={
+            Alignment {
+              "aceEditorMode": undefined,
+              "allAlphaLettersSorted": Array [],
+              "consensus": Array [],
+              "globalAlphaLetterCounts": Object {},
+              "name": "",
+              "positionalLetterCounts": Map {},
+              "sequences": Map {
+                SequenceSortOptions {
+                  "description": "As input",
+                  "distanceFn": undefined,
+                  "isTargetSequenceDependent": false,
+                  "key": "as-input",
+                } => Array [],
+              },
+              "targetSequence": undefined,
+              "uuid": "10000000-1000-4000-8000-100000000000",
+            }
+          }
+          characterSizeChanged={[Function]}
+          classNames="   "
+          editorLoaded={[Function]}
+          fontSize={0}
+          id="ace-alignment"
+          sortBy={
+            SequenceSortOptions {
+              "description": "As input",
+              "distanceFn": undefined,
+              "isTargetSequenceDependent": false,
+              "key": "as-input",
+            }
+          }
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

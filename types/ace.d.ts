@@ -3,6 +3,9 @@ import { EventEmitter } from "events";
 
 declare module "ace-builds" {
   namespace Ace {
+    interface AceEvent {
+      getDocumentPosition(): { row: number; column: number };
+    }
     interface Editor extends OptionsProvider, EventEmitter {
       on(name: "mousemove", callback: (e: AceEvent) => void): Function;
       on(name: "mousedown", callback: (e: AceEvent) => void): Function;
