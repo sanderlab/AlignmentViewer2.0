@@ -5,22 +5,23 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   PositionsToStyle,
-  getClassNamesForAce
+  getLetterClassNamesForAce,
 } from "../MolecularStyles";
 
 describe("MolecularStyles", () => {
   it("Should get class names for Ace.", () => {
-    let expected = "prefix.preAceConsensusClass.preAceQueryClass";
-    expect(getClassNamesForAce("prefix", true, true)).toEqual(expected);
+    let expected =
+      "prefix.preAceLetterObjClass.preAceConsensusClass.preAceQueryClass";
+    expect(getLetterClassNamesForAce("prefix", true, true)).toEqual(expected);
 
-    expected = "prefix.preAceQueryClass";
-    expect(getClassNamesForAce("prefix", false, true)).toEqual(expected);
+    expected = "prefix.preAceLetterObjClass.preAceQueryClass";
+    expect(getLetterClassNamesForAce("prefix", false, true)).toEqual(expected);
 
-    expected = "prefix";
-    expect(getClassNamesForAce("prefix", false, false)).toEqual(expected);
+    expected = "prefix.preAceLetterObjClass";
+    expect(getLetterClassNamesForAce("prefix", false, false)).toEqual(expected);
 
-    expected = "prefix.preAceQueryClass";
-    expect(getClassNamesForAce("prefix", false, true)).toEqual(expected);
+    expected = "prefix.preAceLetterObjClass.preAceQueryClass";
+    expect(getLetterClassNamesForAce("prefix", false, true)).toEqual(expected);
   });
 
   it("Should handle different Alignment types.", () => {
@@ -36,7 +37,7 @@ describe("MolecularStyles", () => {
     expect(PositionsToStyle.fromKey("all")).toEqual({
       className: "styPosAllClass",
       description: "All",
-      key: "all"
+      key: "all",
     });
   });
 
@@ -44,7 +45,7 @@ describe("MolecularStyles", () => {
     expect(PositionsToStyle.fromKey("query")).toEqual({
       className: "styPosQueryClass",
       description: "Same as Query",
-      key: "query"
+      key: "query",
     });
   });
 
@@ -52,7 +53,7 @@ describe("MolecularStyles", () => {
     expect(PositionsToStyle.fromKey("query-diff")).toEqual({
       className: "styPosQueryDiffClass",
       description: "Different from Query",
-      key: "query-diff"
+      key: "query-diff",
     });
   });
 
@@ -60,7 +61,7 @@ describe("MolecularStyles", () => {
     expect(PositionsToStyle.fromKey("consensus")).toEqual({
       className: "styPosConsensusClass",
       description: "Same as Consensus",
-      key: "consensus"
+      key: "consensus",
     });
   });
 
@@ -68,7 +69,7 @@ describe("MolecularStyles", () => {
     expect(PositionsToStyle.fromKey("consensus-diff")).toEqual({
       className: "styPosConsensusDiffClass",
       description: "Different from Consensus",
-      key: "consensus-diff"
+      key: "consensus-diff",
     });
   });
 
@@ -81,7 +82,7 @@ describe("MolecularStyles", () => {
       allColorSchemes: [],
       className: "aaAlignTypeClass",
       description: "Amino Acid Sequences",
-      key: "aminoacid-alignment"
+      key: "aminoacid-alignment",
     });
   });
 
@@ -90,7 +91,7 @@ describe("MolecularStyles", () => {
       allColorSchemes: [],
       className: "ntAlignTypeClass",
       description: "Nucleotide Sequences",
-      key: "nucleotide-alignment"
+      key: "nucleotide-alignment",
     });
   });
 
