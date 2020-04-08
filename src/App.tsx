@@ -32,7 +32,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.state = {
       style: new AminoAcidAlignmentStyle(),
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
-      zoomLevel: 12,
+      zoomLevel: 14,
       sortBy: SequenceSortOptions.INPUT,
       showMiniMap: false,
       showAnnotations: true,

@@ -9,7 +9,7 @@ import {
 
 export interface IMiniMapProps {
   alignHorizontal: "left" | "right";
-  alignVertical: "top" | "bottom";
+  //alignVertical: "top" | "bottom";
   alignment: Alignment;
   height: number;
   highlightRows?: [number, number];
@@ -29,7 +29,7 @@ export default class MiniMapComponent extends React.Component<
 > {
   public static defaultProps = {
     alignHorizontal: "right",
-    alignVertical: "top",
+    //alignVertical: "top",
     height: 600,
     width: 300,
   };
@@ -40,8 +40,20 @@ export default class MiniMapComponent extends React.Component<
     };
   }
 
+  protected getSizing() {
+    const frameBorderWidth = 1; // in pixels
+    const frameMargin = 2; // in pixels
+    return {
+      borderWidth: frameBorderWidth,
+      margin: frameMargin,
+      frameHeight: this.props.height - 2 * frameMargin - 1 * frameBorderWidth,
+      frameWidth: this.props.width - 2 * frameMargin - 1 * frameBorderWidth,
+    };
+  }
+
   public render() {
-    const { alignHorizontal, alignVertical, height, width } = this.props;
+    const { alignHorizontal, width } = this.props;
+    const size = this.getSizing();
     return (
       <div
         style={{
@@ -50,29 +62,28 @@ export default class MiniMapComponent extends React.Component<
           //...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
           top: 0,
           bottom: 0,
-          height,
+          height: size.frameHeight,
+          width: size.frameWidth,
           position: "fixed",
-          width,
+          backgroundColor: "white",
+          borderColor: "#333333",
+          borderStyle: "solid",
+          borderWidth: `${size.borderWidth}px`,
+          margin: `${size.margin}px`,
         }}
       >
         {this.renderCanvasComponent()}
-        {this.renderZoomControls()}
+        {/*this.renderZoomControls()*/}
       </div>
     );
   }
 
   protected renderCanvasComponent = () => {
-    const {
-      alignment,
-      height,
-      highlightRows,
-      sortBy,
-      style,
-      width,
-    } = this.props;
+    const { alignment, highlightRows, sortBy, style, width } = this.props;
     const { zoomPercent } = this.state;
+    const size = this.getSizing();
     return (
-      <div style={{ opacity: 0.75 }}>
+      <div>
         <AlignmentCanvasComponent
           id="alignment_canvas"
           alignment={alignment}
@@ -81,8 +92,8 @@ export default class MiniMapComponent extends React.Component<
           colorScheme={style.colorScheme}
           sortBy={sortBy}
           stageResolution={{
-            width,
-            height,
+            width: size.frameWidth,
+            height: size.frameHeight,
           }}
           highlightRows={highlightRows}
           viewportProps={{
@@ -96,6 +107,14 @@ export default class MiniMapComponent extends React.Component<
       </div>
     );
   };
+  protected onMouseDown = (x: number, y: number) => {
+    const { onClick } = this.props;
+    if (onClick) {
+      onClick(x, y);
+    }
+  };
+
+  /*
 
   protected renderZoomControls = () => (
     <div style={{ textAlign: "center", opacity: 1 }}>
@@ -104,13 +123,6 @@ export default class MiniMapComponent extends React.Component<
       <button onClick={this.onZoomIn}>+</button>
     </div>
   );
-
-  protected onMouseDown = (x: number, y: number) => {
-    const { onClick } = this.props;
-    if (onClick) {
-      onClick(x, y);
-    }
-  };
 
   protected onZoomIn = () => {
     const { zoomPercent } = this.state;
@@ -131,5 +143,5 @@ export default class MiniMapComponent extends React.Component<
     this.setState({
       zoomPercent: 1,
     });
-  };
+  };*/
 }

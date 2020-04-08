@@ -116,7 +116,6 @@ export class AlignmentCanvasComponent extends React.Component<
     //      image
     //PIXI.settings.RESOLUTION = 2;
     //PIXI.settings.ROUND_PIXELS = true; //
-
     const height = highlightRows
       ? highlightRows[1] - highlightRows[0]
       : undefined;
@@ -215,6 +214,7 @@ class PixiAlignmentTiled extends React.Component<IAlignmentCanvasProps> {
         " :: " +
         toReturn
     );*/
+    console.log("CANVAS rerender??");
     return toReturn;
   }
 
@@ -463,8 +463,8 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
     let vp = new Viewport({
       screenWidth: app.renderer.width,
       screenHeight: app.renderer.height,
-      worldWidth: Math.max(numColumns, app.renderer.width) + 1, //app.renderer.width,
-      worldHeight: numRows, //23627,
+      worldWidth: numColumns,
+      worldHeight: numRows,
       interaction: app.renderer.plugins.interaction,
     })
       .decelerate()
@@ -507,7 +507,6 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       vp = vp.wheel();
     }
 
-    //console.log(zoomPercent);
     if (zoomPercent) {
       vp = vp.zoomPercent(zoomPercent);
     }
@@ -517,9 +516,13 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       }
     });
 
+    //start the component zoomed such that the entire alignment width
+    //is visible in the frame.
+    vp = vp.setZoom(app.renderer.width / numColumns, true);
     viewport = vp;
     return vp;
   },
+  /*
   applyProps(
     ins: PIXI.Graphics,
     oldProps: IViewportProps,
@@ -529,5 +532,5 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
       viewport = viewport.setZoom(newProps.zoomPercent, false);
     }
     return viewport;
-  },
+  },*/
 });

@@ -31,6 +31,9 @@ export interface IAlignmentViewerState {
   aceEditors: Ace.Editor[];
   alignmentEditorVisibleFirstRow?: number;
   alignmentEditorVisibleLastRow?: number;
+
+  windowWidth: number;
+  windowHeight: number;
 }
 
 export class AlignmentViewer extends React.Component<
@@ -42,6 +45,8 @@ export class AlignmentViewer extends React.Component<
     this.state = {
       aceEditors: [],
       aceCharacterWidth: 0,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
     };
 
     //setup scroll groups
@@ -52,7 +57,7 @@ export class AlignmentViewer extends React.Component<
     ScrollSync.getInstance().setScrollerGroup("vertical", ScrollType.vertical);
   }
 
-  _handleCharacterSizeChanged = (newCharSize: number) => {
+  private handleCharacterSizeChanged = (newCharSize: number) => {
     if (this.state.aceCharacterWidth !== newCharSize) {
       this.setState({
         aceCharacterWidth: newCharSize,
@@ -60,7 +65,7 @@ export class AlignmentViewer extends React.Component<
     }
   };
 
-  _aceEditorLoaded = (
+  private aceEditorLoaded = (
     id: string,
     editor: Ace.Editor,
     scrollSyncDirection: ScrollType
@@ -99,7 +104,7 @@ export class AlignmentViewer extends React.Component<
     }
   };
 
-  protected generateWidget(
+  private generateWidget(
     className: string,
     annotation: string | JSX.Element,
     content: JSX.Element,
@@ -124,6 +129,21 @@ export class AlignmentViewer extends React.Component<
         </div>
       </div>
     );
+  }
+
+  protected windowDimensionsUpdated = () => {
+    this.setState({
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+    });
+  };
+
+  componentDidMount() {
+    window.addEventListener("resize", this.windowDimensionsUpdated);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.windowDimensionsUpdated);
   }
 
   render() {
@@ -230,7 +250,7 @@ export class AlignmentViewer extends React.Component<
           this.props.style.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor) => {
-          this._aceEditorLoaded(
+          this.aceEditorLoaded(
             "ace-consensusseq",
             editor,
             ScrollType.horizontal
@@ -254,7 +274,7 @@ export class AlignmentViewer extends React.Component<
           this.props.style.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor) => {
-          this._aceEditorLoaded("ace-queryseq", editor, ScrollType.horizontal);
+          this.aceEditorLoaded("ace-queryseq", editor, ScrollType.horizontal);
         }}
       ></AceTargetSequenceComponent>
     </div>
@@ -268,7 +288,7 @@ export class AlignmentViewer extends React.Component<
           alignment={this.props.alignment}
           fontSize={this.props.zoomLevel}
           editorLoaded={(editor) => {
-            this._aceEditorLoaded(
+            this.aceEditorLoaded(
               "ace-positions",
               editor,
               ScrollType.horizontal
@@ -304,9 +324,9 @@ export class AlignmentViewer extends React.Component<
           this.props.style.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
-        characterSizeChanged={this._handleCharacterSizeChanged}
+        characterSizeChanged={this.handleCharacterSizeChanged}
         editorLoaded={(editor) => {
-          this._aceEditorLoaded("ace-alignment", editor, ScrollType.both);
+          this.aceEditorLoaded("ace-alignment", editor, ScrollType.both);
         }}
       ></AceMultipleSequenceAlignmentComponent>
     </div>
@@ -322,7 +342,7 @@ export class AlignmentViewer extends React.Component<
           .join("\n")}
         fontSize={this.props.zoomLevel}
         editorLoaded={(editor) => {
-          this._aceEditorLoaded(
+          this.aceEditorLoaded(
             "ace-alignment-metadata",
             editor,
             ScrollType.vertical
@@ -334,16 +354,16 @@ export class AlignmentViewer extends React.Component<
 
   protected renderMiniMap() {
     const { alignment, sortBy, style, showMiniMap } = this.props;
+    const { windowWidth, windowHeight } = this.state;
 
     const mmClassName = showMiniMap ? "mini-map" : "mini-map hidden";
-
     return (
       alignment &&
       style && (
         <div className={mmClassName}>
           <MiniMapComponent
-            width={alignment.getMaxSequenceLength()}
-            height={window.innerHeight}
+            width={Math.min(400, alignment.getMaxSequenceLength())}
+            height={windowHeight}
             alignHorizontal={"right"}
             alignment={alignment}
             style={style}
