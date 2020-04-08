@@ -54,8 +54,10 @@
 
 //ace specific props
 $acePrefix: ace_;
+$preAceLetterObjClass: obj;
 $preAceQueryClass: query;
 $preAceConsensusClass: consensus;
+$aceLetterObjClass: $acePrefix + $preAceLetterObjClass;
 $aceQueryClass: $acePrefix + $preAceQueryClass;
 $aceConsensusClass: $acePrefix + $preAceConsensusClass;
 
@@ -82,6 +84,7 @@ $aaProps: (
       description: "Default",
       topLevelClass: $aaStyleClassPrefix + default,
       backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: #cccccc,
       colors: (
         A: #33cc00,
         R: #cc0000,
@@ -102,14 +105,15 @@ $aaProps: (
         T: #0099ff,
         W: #009900,
         Y: #009900,
-        V: #33cc00
-      )
+        V: #33cc00,
+      ),
     ),
     Hydrophobicity: (
       description: "Hydrophobicity",
       //(red = hydrophilic, blue = hydrophobic)
         topLevelClass: $aaStyleClassPrefix + hydrophobicity,
       backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: #cccccc,
       /*
       colors based on: https://www.sigmaaldrich.com/life-science/metabolomics/learning-center/amino-acid-reference-chart.html
       to get hex in python:
@@ -156,10 +160,10 @@ $aaProps: (
           N: #5959ff,
           E: #4f4fff,
           P: #1d1dff,
-          D: #0000ff
-        )
-    )
-  )
+          D: #0000ff,
+        ),
+    ),
+  ),
 );
 
 //amino acid props
@@ -170,6 +174,7 @@ $ntProps: (
       description: "Default",
       topLevelClass: $ntStyleClassPrefix + default,
       backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: #cccccc,
       colors: (
         A: #5050ff,
         C: #e00000,
@@ -177,10 +182,10 @@ $ntProps: (
         T: #e6e600,
         U: #cc9900,
         R: #2e8b57,
-        Y: #ff8c00
-      )
-    )
-  )
+        Y: #ff8c00,
+      ),
+    ),
+  ),
 );
 
 //
@@ -191,8 +196,10 @@ $ntProps: (
 
 :export {
   acePrefix: $acePrefix;
+  preAceLetterObjClass: $preAceLetterObjClass;
   preAceQueryClass: $preAceQueryClass;
   preAceConsensusClass: $preAceConsensusClass;
+  aceLetterObjClass: $aceLetterObjClass;
   aceQueryClass: $aceQueryClass;
   aceConsensusClass: $aceConsensusClass;
   transparentLetterClass: $transparentLetterClass;
@@ -252,11 +259,17 @@ $ntProps: (
   $styleClass: map-get($styleObj, topLevelClass);
   $backgroundAlpha: map-get($styleObj, backgroundAlpha);
 
+  //set default letter color
+  $defaultColor: map-get($styleObj, defaultLetterColor);
+  :global .#{$alignmentClass} .#{$aceLetterObjClass} {
+    color: $defaultColor;
+    fill: $defaultColor;
+  }
+
   @each $aa, $color in map-get($styleObj, colors) {
     $aceAAClass: $acePrefix + $aa;
 
     //set background color to white if the "no background color" class is added
-    //easier than
     :global
       .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
       .#{$aceAAClass} {
@@ -265,7 +278,6 @@ $ntProps: (
 
     //remove alpha on background color and hide letter coloring
     //"no letter color" class is added
-
     :global
       .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosAll}
       .#{$aceAAClass},
@@ -324,6 +336,19 @@ $ntProps: (
   $alignmentClass: map-get($ntProps, topLevelAlignmentClass);
   $styleClass: map-get($styleObj, topLevelClass);
   $backgroundAlpha: map-get($styleObj, backgroundAlpha);
+
+  //set default letter color
+  $defaultColor: map-get($styleObj, defaultLetterColor);
+  :global .#{$alignmentClass} .#{$aceLetterObjClass} {
+    color: $defaultColor;
+    fill: $defaultColor;
+  }
+  //S is special
+  :global .#{$alignmentClass} .#{$acePrefix + S}.#{$aceLetterObjClass} {
+    color: $defaultColor;
+    stroke: $defaultColor;
+    fill: #ffffff;
+  }
 
   @each $nt, $color in map-get($styleObj, colors) {
     $aceNTClass: $acePrefix + $nt;

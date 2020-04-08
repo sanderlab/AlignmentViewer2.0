@@ -8,7 +8,7 @@
 import React from "react";
 import Alignment from "../common/Alignment";
 import { GlyphFactory } from "../common/SequenceLogoGlyphs";
-import { acePrefix } from "../common/MolecularStyles";
+import { getFinalLetterClassNames } from "../common/MolecularStyles";
 
 export enum LOGO_TYPES {
   LETTERS = "letter stack",
@@ -94,7 +94,7 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
     const sortedAlphabet = lettersSorted.map((letter) => {
       return {
         letter: letter,
-        classNames: acePrefix + letter,
+        classNames: getFinalLetterClassNames(letter, false, false),
       };
     });
 

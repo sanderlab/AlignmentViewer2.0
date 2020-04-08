@@ -5,7 +5,7 @@
 
 import { default as ace } from "ace-builds";
 import Alignment from "./Alignment";
-import { getClassNamesForAce } from "./MolecularStyles";
+import { getLetterClassNamesForAce } from "./MolecularStyles";
 
 interface IAceType {
   [key: string]: any;
@@ -56,7 +56,7 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
           rules[stateName] = [
             {
               token: function (letter: string) {
-                return getClassNamesForAce(
+                return getLetterClassNamesForAce(
                   letter,
                   letter === alignment.getConsensus()[i].letter,
                   letter === alignment.getTargetSequence().sequence[i]

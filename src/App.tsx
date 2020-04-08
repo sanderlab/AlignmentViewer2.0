@@ -9,7 +9,7 @@ import {
   AlignmentTypes,
   PositionsToStyle,
   IColorScheme,
-  ResidueDetailTypes
+  ResidueDetailTypes,
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { FileInputComponent } from "./components/FileInputComponent";
@@ -36,7 +36,7 @@ export default class App extends React.Component<AppProps, AppState> {
       sortBy: SequenceSortOptions.INPUT,
       showMiniMap: false,
       showAnnotations: true,
-      showSettings: true
+      showSettings: true,
     };
   }
 
@@ -57,7 +57,7 @@ export default class App extends React.Component<AppProps, AppState> {
       showMiniMap,
       sortBy,
       style,
-      zoomLevel
+      zoomLevel,
     } = this.state;
 
     const alignmentElement = !alignment ? (
@@ -95,7 +95,16 @@ export default class App extends React.Component<AppProps, AppState> {
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
   ) => {
     const { alignment } = this.state;
-    const alignmentName = alignment ? <h3>{alignment.getName()}</h3> : <></>;
+    const alignmentDescription = alignment ? (
+      <div>
+        <h3>{alignment.getName()}</h3>
+        <h4>{`${
+          alignment.getSequences().length
+        } sequences (rows) and ${alignment.getMaxSequenceLength()} positions (columns) `}</h4>
+      </div>
+    ) : (
+      <></>
+    );
 
     return (
       <div className="settings_box">
@@ -103,13 +112,13 @@ export default class App extends React.Component<AppProps, AppState> {
           <div className="settings-header">
             <button
               style={{
-                display: this.state.showSettings ? "none" : "block"
+                display: this.state.showSettings ? "none" : "block",
               }}
               type="button"
               className="button-link"
-              onClick={e => {
+              onClick={(e) => {
                 this.setState({
-                  showSettings: true
+                  showSettings: true,
                 });
               }}
             >
@@ -117,13 +126,13 @@ export default class App extends React.Component<AppProps, AppState> {
             </button>
             <button
               style={{
-                display: this.state.showSettings ? "block" : "none"
+                display: this.state.showSettings ? "block" : "none",
               }}
               type="button"
               className="button-link"
-              onClick={e => {
+              onClick={(e) => {
                 this.setState({
-                  showSettings: false
+                  showSettings: false,
                 });
               }}
             >
@@ -131,12 +140,12 @@ export default class App extends React.Component<AppProps, AppState> {
             </button>
             <div>
               <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
-              {alignmentName}
+              {alignmentDescription}
             </div>
           </div>
           <div
             style={{
-              display: this.state.showSettings ? "block" : "none"
+              display: this.state.showSettings ? "block" : "none",
             }}
           >
             {this.renderAlignmentTypeLabel(style)}
@@ -165,13 +174,13 @@ export default class App extends React.Component<AppProps, AppState> {
           <strong>Sort order:</strong>
           <select
             value={sortBy.key}
-            onChange={e =>
+            onChange={(e) =>
               this.setState({
-                sortBy: SequenceSortOptions.fromKey(e.target.value)!
+                sortBy: SequenceSortOptions.fromKey(e.target.value)!,
               })
             }
           >
-            {SequenceSortOptions.list.map(sso => {
+            {SequenceSortOptions.list.map((sso) => {
               return (
                 <option value={sso.key} key={sso.key}>
                   {sso.description}
@@ -192,15 +201,15 @@ export default class App extends React.Component<AppProps, AppState> {
           <strong>Alignment Type:</strong>
           <select
             value={style.alignmentType.key}
-            onChange={e =>
+            onChange={(e) =>
               this.setState({
                 style: AlignmentStyle.fromAlignmentType(
                   AlignmentTypes.fromKey(e.target.value)!
-                )
+                ),
               })
             }
           >
-            {AlignmentTypes.list.map(alignmentType => {
+            {AlignmentTypes.list.map((alignmentType) => {
               return (
                 <option value={alignmentType.key} key={alignmentType.key}>
                   {alignmentType.description}
@@ -223,15 +232,15 @@ export default class App extends React.Component<AppProps, AppState> {
             value={style.alignmentType.allColorSchemes.indexOf(
               style.colorScheme
             )}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
                 style: {
                   ...style!,
                   colorScheme:
                     style.alignmentType.allColorSchemes[
                       parseInt(e.target.value)
-                    ]
-                }
+                    ],
+                },
               });
             }}
           >
@@ -258,16 +267,16 @@ export default class App extends React.Component<AppProps, AppState> {
           <strong>Residue Detail:</strong>
           <select
             value={style.residueDetail.key}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
                 style: {
                   ...style,
-                  residueDetail: ResidueDetailTypes.fromKey(e.target.value)!
-                }
+                  residueDetail: ResidueDetailTypes.fromKey(e.target.value)!,
+                },
               });
             }}
           >
-            {ResidueDetailTypes.list.map(rd => {
+            {ResidueDetailTypes.list.map((rd) => {
               return (
                 <option key={rd.key} value={rd.key}>
                   {rd.description}
@@ -288,13 +297,13 @@ export default class App extends React.Component<AppProps, AppState> {
           <strong>Positions to Style:</strong>
           <select
             value={PositionsToStyle.list.indexOf(style.positionsToStyle)}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
                 style: {
                   ...style,
                   positionsToStyle:
-                    PositionsToStyle.list[parseInt(e.target.value)]
-                }
+                    PositionsToStyle.list[parseInt(e.target.value)],
+                },
               });
             }}
           >
@@ -320,13 +329,13 @@ export default class App extends React.Component<AppProps, AppState> {
           <strong>Sequence Logo Style:</strong>
           <select
             value={logoPlotStyle}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
-                logoPlotStyle: e.target.value as LOGO_TYPES
+                logoPlotStyle: e.target.value as LOGO_TYPES,
               });
             }}
           >
-            {Object.values(LOGO_TYPES).map(logoType => {
+            {Object.values(LOGO_TYPES).map((logoType) => {
               return (
                 <option key={logoType} value={logoType}>
                   {logoType}
@@ -348,9 +357,9 @@ export default class App extends React.Component<AppProps, AppState> {
             <button
               type="button"
               disabled={zoomLevel < 3}
-              onClick={e => {
+              onClick={(e) => {
                 this.setState({
-                  zoomLevel: zoomLevel - 1
+                  zoomLevel: zoomLevel - 1,
                 });
               }}
             >
@@ -360,9 +369,9 @@ export default class App extends React.Component<AppProps, AppState> {
             <button
               type="button"
               disabled={zoomLevel > 15}
-              onClick={e => {
+              onClick={(e) => {
                 this.setState({
-                  zoomLevel: zoomLevel + 1
+                  zoomLevel: zoomLevel + 1,
                 });
               }}
             >
@@ -393,14 +402,14 @@ export default class App extends React.Component<AppProps, AppState> {
           <button
             type="button"
             className="button-link"
-            onClick={async e => {
+            onClick={async (e) => {
               const f = new File(
                 [
                   await (
                     await fetch(
                       `${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`
                     )
-                  ).blob()
+                  ).blob(),
                 ],
                 "beta_lactamase_example.fasta"
               );
@@ -424,10 +433,10 @@ export default class App extends React.Component<AppProps, AppState> {
             name="showMiniMap"
             type="checkbox"
             checked={this.state.showMiniMap}
-            onChange={e => {
+            onChange={(e) => {
               const target = e.target;
               this.setState({
-                showMiniMap: target.checked
+                showMiniMap: target.checked,
               });
             }}
           />
@@ -446,10 +455,10 @@ export default class App extends React.Component<AppProps, AppState> {
             name="showAnnotations"
             type="checkbox"
             checked={this.state.showAnnotations}
-            onChange={e => {
+            onChange={(e) => {
               const target = e.target;
               this.setState({
-                showAnnotations: target.checked
+                showAnnotations: target.checked,
               });
             }}
           />
@@ -461,7 +470,7 @@ export default class App extends React.Component<AppProps, AppState> {
   protected onFileUpload = async (file: File) => {
     const fileText = await file.text();
     this.setState({
-      alignment: Alignment.fromFileContents(file.name, fileText)
+      alignment: Alignment.fromFileContents(file.name, fileText),
     });
   };
 }
