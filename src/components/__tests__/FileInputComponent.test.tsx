@@ -1,9 +1,7 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import { shallow, default as Enzyme } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
-Enzyme.configure({ adapter: new Adapter() });
+import { shallow } from "enzyme";
 
 import { FileInputComponent } from "../FileInputComponent";
 
@@ -20,7 +18,7 @@ jest.mock("../MolecularStyles.module.scss", () => {
     ntStyClass_Default: "mock-nt-class",
     ntStyColorOrder_Default: "",
     ntStyColors_Default: "",
-    ntStyDesc_Default: "mock-nt-style-desc"
+    ntStyDesc_Default: "mock-nt-style-desc",
   };
 });
 
