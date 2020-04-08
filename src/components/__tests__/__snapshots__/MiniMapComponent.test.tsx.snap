@@ -4,23 +4,22 @@ exports[`MiniMap Should render with default props. 1`] = `
 <div
   style={
     Object {
+      "backgroundColor": "white",
+      "borderColor": "#333333",
+      "borderStyle": "solid",
+      "borderWidth": "1px",
       "bottom": 0,
-      "height": 600,
+      "height": 595,
+      "margin": "2px",
       "position": "fixed",
       "right": 0,
       "top": 0,
-      "width": 300,
+      "width": 295,
       "zIndex": 100000,
     }
   }
 >
-  <div
-    style={
-      Object {
-        "opacity": 0.75,
-      }
-    }
-  >
+  <div>
     <AlignmentCanvasComponent
       alignment={
         Alignment {
@@ -90,8 +89,8 @@ exports[`MiniMap Should render with default props. 1`] = `
       }
       stageResolution={
         Object {
-          "height": 600,
-          "width": 300,
+          "height": 595,
+          "width": 295,
         }
       }
       viewportProps={
@@ -103,30 +102,6 @@ exports[`MiniMap Should render with default props. 1`] = `
         }
       }
     />
-  </div>
-  <div
-    style={
-      Object {
-        "opacity": 1,
-        "textAlign": "center",
-      }
-    }
-  >
-    <button
-      onClick={[Function]}
-    >
-      -
-    </button>
-    <button
-      onClick={[Function]}
-    >
-      Reset
-    </button>
-    <button
-      onClick={[Function]}
-    >
-      +
-    </button>
   </div>
 </div>
 `;

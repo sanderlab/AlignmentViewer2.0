@@ -221,7 +221,7 @@ exports[`App Should render within 2 minutes. 1`] = `
               >
                 -
               </button>
-              12
+              14
               <button
                 disabled={false}
                 onClick={[Function]}
