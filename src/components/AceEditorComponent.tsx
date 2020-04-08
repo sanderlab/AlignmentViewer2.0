@@ -45,6 +45,9 @@ export class AceEditorComponent<
   private editor?: Ace.Editor;
   private lastText?: string;
   private lastMode?: string;
+  private element?: HTMLElement;
+  private lastElementWidth?: number;
+  private lastElementHeight?: number;
 
   /**************************
    *
@@ -76,7 +79,7 @@ export class AceEditorComponent<
    * Load and setup the ace editor
    * @param el the element that will hold the ace editor.
    */
-  protected _setupEditorAndEventListeners(el: HTMLElement) {
+  protected setupEditorAndEventListeners(el: HTMLElement) {
     this.editor = ace.edit(el);
     this.editor.setShowPrintMargin(false);
     this.editor.setReadOnly(true);
@@ -91,7 +94,7 @@ export class AceEditorComponent<
   /**
    * listen to mouse events and report them to instantiator
    */
-  protected _addMouseEventListeners() {
+  protected addMouseEventListeners() {
     if (!this.editor) {
       throw Error("Editor must be defined before adding mouse listeners.");
     }
@@ -141,13 +144,21 @@ export class AceEditorComponent<
    *    setText()
    * @throws an error if the editor is not yet defined.
    */
-  protected _setText() {
+  protected setText() {
     if (!this.editor) {
       throw Error("Editor must be defined to call setText()");
     }
-
     //only update if needed
-    if (!this.lastMode || this.lastMode !== this.getEditorMode()) {
+    if (this.props.fontSize + "px" !== this.editor.getFontSize()) {
+      this.editor.setFontSize(this.props.fontSize + "px");
+      if (
+        this.props.characterSizeChanged &&
+        this.editor.renderer.characterWidth
+      ) {
+        this.props.characterSizeChanged(this.editor.renderer.characterWidth);
+      }
+    }
+    if (this.lastMode !== this.getEditorMode()) {
       const newMode = this.getEditorMode();
       this.editor.session.setMode(newMode!);
       this.lastMode = newMode;
@@ -165,12 +176,15 @@ export class AceEditorComponent<
    * The initial editor load function. Will only run a single time.
    * @param e the HTMLelment that will hold the ace editor
    */
-  protected _initialLoad(e: HTMLDivElement | null) {
+  protected initialLoad(e: HTMLDivElement | null) {
     if (e && !this.editor) {
       //only run if editor not loaded
-      this._setupEditorAndEventListeners(e);
-      this._addMouseEventListeners();
-      this._setText();
+      this.element = e;
+      this.lastElementWidth = e.clientWidth;
+      this.lastElementHeight = e.clientHeight;
+      this.setupEditorAndEventListeners(e);
+      this.addMouseEventListeners();
+      this.setText();
       if (this.props.editorLoaded) {
         this.props.editorLoaded(this.editor!); //inform parent of loading.
       }
@@ -184,22 +198,22 @@ export class AceEditorComponent<
    *
    *
    **************************/
-  componentDidUpdate(prevProps: IAceEditorProps) {
-    if (!this.editor) {
+  componentDidUpdate() {
+    if (!this.editor || !this.element) {
       throw Error(
         "internal error - componentDidUpdate called before editor initialized"
       );
     }
-    if (this.props.fontSize + "px" !== this.editor.getFontSize()) {
-      this.editor?.setFontSize(this.props.fontSize + "px");
-      if (
-        this.props.characterSizeChanged &&
-        this.editor?.renderer.characterWidth
-      ) {
-        this.props.characterSizeChanged(this.editor.renderer.characterWidth);
-      }
+    this.setText(); //smart and will update only if needed.
+    if (
+      this.element.clientWidth !== this.lastElementWidth ||
+      this.element.clientHeight !== this.lastElementHeight
+    ) {
+      this.lastElementWidth = this.element.clientWidth;
+      this.lastElementHeight = this.element.clientHeight;
+      this.editor.resize();
     }
-    this._setText(); //smart and will update only if needed.
+    return false;
   }
 
   render() {
@@ -217,7 +231,7 @@ export class AceEditorComponent<
           }
         }}
       >
-        <div id={this.props.id} ref={(e) => this._initialLoad(e)}></div>
+        <div id={this.props.id} ref={(e) => this.initialLoad(e)}></div>
       </div>
     );
   }

@@ -214,7 +214,7 @@ class PixiAlignmentTiled extends React.Component<IAlignmentCanvasProps> {
         " :: " +
         toReturn
     );*/
-    console.log("CANVAS rerender??");
+    //console.log("CANVAS rerender??");
     return toReturn;
   }
 
