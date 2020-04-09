@@ -15,6 +15,29 @@ The Alignment Viewer 2.0 component ffeatures:
 - View can be customized, removing or adding only the pieces needed.
 - Support for interaction events (clicking on, mousing over the alignments, logos, etc)
 
+## Embedding Alignment Viewer 2.0
+
+Coming soon!
+
+We're on [NPM](https://www.npmjs.com/) ([repository link](https://https://www.npmjs.com/package/alignment-viewer-2/)) so you can install using your favorite package manager, e.g.,:
+
+```sh
+yarn install alignment-viewer-2
+```
+
+Once installed, adding to your website is as simple as:
+
+```JSX
+import * as React from 'react';
+import { AlignmentViewer, Alignment } from "AlignmentViewer";;
+
+const alignment = await fetch("my_alignment.fasta")
+
+<AlignmentViewer
+    alignment={Alignment.fromFileContents("my alignment name", alignment.text) }
+></AlignmentViewer>
+```
+
 ## Building Alignment Viewer 2.0
 
 ```sh
@@ -46,7 +69,7 @@ Our strategy for dealing with peformance issues boils down to two main approache
 
 2. **Use the graphics card ([WebGL](https://get.webgl.org/) with [PixiJS](https://www.pixijs.com/))**: In order to view the entire MSA in the same viewed windoow, we have also implemented the _MiniMap MSA Viewer_ using the [PixiJS](https://www.pixijs.com/) 2D WebGL framework. This viewer avoids having many DOM elements by representing the MSA as a series of tiled images (avoiding browser image size limits) which can be zoomed, scaled, interacted with, etc. using the [pixi-viewport](https://github.com/davidfig/pixi-viewport) project.
 
-## Other JavaScript Multiple Sequence Alignment Viewers
+## Other Web-based Multiple Sequence Alignment Viewers
 
 - Alignment Viewer ([webpage](https://alignmentviewer.org/), [github](https://github.com/sanderlab/alignmentviewer)): The predecessor to Alignment Viewer 2.0, this project and website provide a means to view MSAs, for viewing of MSAs as well as perform additional sequence analysis like viewing sequence space with a UMAP component.
 - MView
