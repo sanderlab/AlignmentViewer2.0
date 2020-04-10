@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/AlignmentViewer2.0/static/css/main.ed68c356.chunk.css",
-    "main.js": "/AlignmentViewer2.0/static/js/main.5cb10c3d.chunk.js",
-    "main.js.map": "/AlignmentViewer2.0/static/js/main.5cb10c3d.chunk.js.map",
+    "main.js": "/AlignmentViewer2.0/static/js/main.e6e0332e.chunk.js",
+    "main.js.map": "/AlignmentViewer2.0/static/js/main.e6e0332e.chunk.js.map",
     "runtime-main.js": "/AlignmentViewer2.0/static/js/runtime-main.0d7d16c4.js",
     "runtime-main.js.map": "/AlignmentViewer2.0/static/js/runtime-main.0d7d16c4.js.map",
     "static/js/2.b58f7d89.chunk.js": "/AlignmentViewer2.0/static/js/2.b58f7d89.chunk.js",
     "static/js/2.b58f7d89.chunk.js.map": "/AlignmentViewer2.0/static/js/2.b58f7d89.chunk.js.map",
     "index.html": "/AlignmentViewer2.0/index.html",
-    "precache-manifest.9b61a0889879ec0eb4478cc50740ee4a.js": "/AlignmentViewer2.0/precache-manifest.9b61a0889879ec0eb4478cc50740ee4a.js",
+    "precache-manifest.cd2fc2be73938681086797e1ec1ea626.js": "/AlignmentViewer2.0/precache-manifest.cd2fc2be73938681086797e1ec1ea626.js",
     "service-worker.js": "/AlignmentViewer2.0/service-worker.js",
     "static/css/main.ed68c356.chunk.css.map": "/AlignmentViewer2.0/static/css/main.ed68c356.chunk.css.map",
     "static/js/2.b58f7d89.chunk.js.LICENSE": "/AlignmentViewer2.0/static/js/2.b58f7d89.chunk.js.LICENSE"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.0d7d16c4.js",
     "static/js/2.b58f7d89.chunk.js",
     "static/css/main.ed68c356.chunk.css",
-    "static/js/main.5cb10c3d.chunk.js"
+    "static/js/main.e6e0332e.chunk.js"
   ]
 }
