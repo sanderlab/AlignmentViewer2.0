@@ -411,6 +411,9 @@ export default class App extends React.Component<AppProps, AppState> {
             type="button"
             className="button-link"
             onClick={async (e) => {
+              this.setState({
+                loading: true,
+              });
               const f = new File(
                 [
                   await (
