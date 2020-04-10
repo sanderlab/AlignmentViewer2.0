@@ -43,6 +43,7 @@ exports[`App Should render within 2 minutes. 1`] = `
         style={
           Object {
             "display": "block",
+            "position": "relative",
           }
         }
       >
@@ -285,6 +286,14 @@ exports[`App Should render within 2 minutes. 1`] = `
             </button>
           </label>
         </div>
+        <div
+          className="loader"
+          style={
+            Object {
+              "display": "none",
+            }
+          }
+        />
       </div>
     </form>
   </div>

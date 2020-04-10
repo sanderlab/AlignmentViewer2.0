@@ -24,6 +24,7 @@ export interface AppState {
   showMiniMap: boolean;
   showAnnotations: boolean;
   showSettings: boolean;
+  loading?: boolean;
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -146,6 +147,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <div
             style={{
               display: this.state.showSettings ? "block" : "none",
+              position: "relative",
             }}
           >
             {this.renderAlignmentTypeLabel(style)}
@@ -160,6 +162,12 @@ export default class App extends React.Component<AppProps, AppState> {
             <br></br>
             {this.renderFileUpload()}
             {this.renderExampleLinks()}
+            <div
+              className="loader"
+              style={{
+                display: this.state.loading ? "block" : "none",
+              }}
+            ></div>
           </div>
         </form>
       </div>
@@ -469,12 +477,16 @@ export default class App extends React.Component<AppProps, AppState> {
 
   protected onFileUpload = async (file: File) => {
     //const fileText = await file.text(); //doesn't work in modern safari or even slightly older firefox
+    this.setState({
+      loading: true,
+    });
     var reader = new FileReader();
     reader.onload = (e) => {
       const fileText = reader.result as string;
-
+      const alignment = Alignment.fromFileContents(file.name, fileText);
       this.setState({
-        alignment: Alignment.fromFileContents(file.name, fileText),
+        alignment: alignment,
+        loading: false,
       });
     };
     reader.readAsText(file);
