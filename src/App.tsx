@@ -468,9 +468,15 @@ export default class App extends React.Component<AppProps, AppState> {
   };
 
   protected onFileUpload = async (file: File) => {
-    const fileText = await file.text();
-    this.setState({
-      alignment: Alignment.fromFileContents(file.name, fileText),
-    });
+    //const fileText = await file.text(); //doesn't work in modern safari or even slightly older firefox
+    var reader = new FileReader();
+    reader.onload = (e) => {
+      const fileText = reader.result as string;
+
+      this.setState({
+        alignment: Alignment.fromFileContents(file.name, fileText),
+      });
+    };
+    reader.readAsText(file);
   };
 }

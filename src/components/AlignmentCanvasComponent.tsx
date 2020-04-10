@@ -110,6 +110,7 @@ export class AlignmentCanvasComponent extends React.Component<
     const numSequences = alignment.getSequences().length;
     const maxSeqLength = alignment.getMaxSequenceLength();
 
+    PIXI.utils.skipHello();
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST; //
     //TODO: still anti-aliases on retina devices. probably requires
     //      writing 4x the pixels and telling pixi that it is a retina
