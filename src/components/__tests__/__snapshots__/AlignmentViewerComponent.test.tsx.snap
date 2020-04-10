@@ -9,7 +9,6 @@ exports[`AlignmentViewer Should render 1`] = `
   >
     <MiniMapComponent
       alignHorizontal="right"
-      alignVertical="top"
       alignment={
         Alignment {
           "aceEditorMode": undefined,

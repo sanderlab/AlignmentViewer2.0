@@ -1,17 +1,11 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import MiniMapComponent from "../MiniMapComponent";
+import { shallow } from "enzyme";
 
-import { mount, shallow, default as Enzyme } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+import MiniMapComponent from "../MiniMapComponent";
 import Alignment, { SequenceSortOptions } from "../../common/Alignment";
-import {
-  PositionsToStyle,
-  AlignmentStyle,
-  AlignmentTypes,
-} from "../../common/MolecularStyles";
-Enzyme.configure({ adapter: new Adapter() });
+import { AlignmentStyle, AlignmentTypes } from "../../common/MolecularStyles";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094

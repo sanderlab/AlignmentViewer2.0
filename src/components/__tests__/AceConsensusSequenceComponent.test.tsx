@@ -1,9 +1,7 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import { shallow, default as Enzyme, mount } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
-Enzyme.configure({ adapter: new Adapter() });
+import { shallow, mount } from "enzyme";
 
 import AceConsensusSequenceComponent from "../AceConsensusSequenceComponent";
 import Alignment, { SequenceSortOptions } from "../../common/Alignment";

@@ -7,6 +7,11 @@
   padding: 15px;
 }
 .settings_box h3 {
+  margin-bottom: 0;
+  text-align: center;
+}
+.settings_box h4 {
+  margin-top: 0;
   text-align: center;
 }
 .settings_box h2 {
@@ -50,6 +55,31 @@ button.button-link {
   cursor: pointer;
 }
 
+.hide {
+  display: none;
+}
+
 .av_holder {
   padding-top: 20px;
+}
+
+.loader {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border: 3px solid #f3f3f3; /* Light grey */
+  border-top: 3px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

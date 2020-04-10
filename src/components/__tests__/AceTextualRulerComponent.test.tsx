@@ -2,12 +2,10 @@ import { Ace, default as ace } from "ace-builds";
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
+import { mount, shallow } from "enzyme";
+
 import Alignment, { SequenceSortOptions } from "../../common/Alignment";
 import AceTextualRulerComponent from "../AceTextualRulerComponent";
-
-import { mount, shallow, default as Enzyme } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
-Enzyme.configure({ adapter: new Adapter() });
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094

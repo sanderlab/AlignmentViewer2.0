@@ -20,14 +20,14 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
       transform="translate(0,0)"
     >
       <rect
-        className="acePrefixE"
+        className="acePrefixE aceLetterObjClass"
         height="100"
         key="idxrect_0"
         transform="translate(0, 50) scale(0.6666666666666666,0.5)"
         width="100"
       />
       <rect
-        className="acePrefixC"
+        className="acePrefixC aceLetterObjClass"
         height="100"
         key="idxrect_1"
         transform="translate(0, 0) scale(0.6666666666666666,0.5)"
@@ -39,7 +39,7 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
       transform="translate(1,0)"
     >
       <rect
-        className="acePrefixD"
+        className="acePrefixD aceLetterObjClass"
         height="100"
         key="idxrect_0"
         transform="translate(0, 0) scale(0.6666666666666666,1)"
@@ -51,14 +51,14 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
       transform="translate(2,0)"
     >
       <rect
-        className="acePrefixE"
+        className="acePrefixE aceLetterObjClass"
         height="100"
         key="idxrect_0"
         transform="translate(0, 50) scale(0.6666666666666666,0.5)"
         width="100"
       />
       <rect
-        className="acePrefixC"
+        className="acePrefixC aceLetterObjClass"
         height="100"
         key="idxrect_1"
         transform="translate(0, 0) scale(0.6666666666666666,0.5)"

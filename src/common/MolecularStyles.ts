@@ -55,7 +55,7 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
         ),
         colors: Object.fromEntries(
           colorOrder.map((_, i) => [colorOrder[i], hexValues[i]])
-        )
+        ),
       });
     }
     return acc;
@@ -86,7 +86,7 @@ export class AlignmentTypes {
   static list = [AlignmentTypes.AMINOACID, AlignmentTypes.NUCLEOTIDE];
 
   static fromKey(key: string) {
-    return AlignmentTypes.list.find(at => {
+    return AlignmentTypes.list.find((at) => {
       return at.key === key;
     });
   }
@@ -137,11 +137,11 @@ export class PositionsToStyle {
     PositionsToStyle.QUERY,
     PositionsToStyle.QUERY_DIFF,
     PositionsToStyle.CONSENSUS,
-    PositionsToStyle.CONSENSUS_DIFF
+    PositionsToStyle.CONSENSUS_DIFF,
   ];
 
   static fromKey(key: string) {
-    return PositionsToStyle.list.find(at => {
+    return PositionsToStyle.list.find((at) => {
       return at.key === key;
     });
   }
@@ -174,11 +174,11 @@ export class ResidueDetailTypes {
   static list = [
     ResidueDetailTypes.BOTH,
     ResidueDetailTypes.LETTER_ONLY,
-    ResidueDetailTypes.BACKGROUND_ONLY
+    ResidueDetailTypes.BACKGROUND_ONLY,
   ];
 
   static fromKey(key: string) {
-    return ResidueDetailTypes.list.find(at => {
+    return ResidueDetailTypes.list.find((at) => {
       return at.key === key;
     });
   }
@@ -258,16 +258,44 @@ export { transparentBackgroundClass, transparentLetterClass };
 /**
  * Export ace helper parameters and functions.
  */
-const acePrefix = styles.acePrefix;
-export { acePrefix };
-
-export function getClassNamesForAce(
+/**
+ * Export a class name array that is used by the ace editor
+ * mode to fill class names for each letter. The structure
+ * of this string is just the list of class names, separated
+ * by a period. Ace subsequently prepends ace_ to each value
+ * when adding the classes to the editor.
+ * @param letter
+ * @param isConsensus
+ * @param isQuery
+ */
+export function getLetterClassNamesForAce(
   letter: string,
   isConsensus: boolean,
   isQuery: boolean
 ) {
+  const all = "." + styles.preAceLetterObjClass;
   const consensus = isConsensus ? "." + styles.preAceConsensusClass : "";
   const query = isQuery ? "." + styles.preAceQueryClass : "";
 
-  return letter + consensus + query;
+  return letter + all + consensus + query;
+}
+
+const acePrefix = styles.acePrefix;
+/**
+ * Get letter class names that have the final ace_ prepended
+ * classnames.
+ * @param letter
+ * @param isConsensus
+ * @param isQuery
+ */
+export function getFinalLetterClassNames(
+  letter: string,
+  isConsensus: boolean,
+  isQuery: boolean
+) {
+  const all = " " + styles.aceLetterObjClass;
+  const consensus = isConsensus ? " " + styles.aceConsensusClass : "";
+  const query = isQuery ? " " + styles.aceQueryClass : "";
+
+  return styles.acePrefix + letter + all + consensus + query;
 }
