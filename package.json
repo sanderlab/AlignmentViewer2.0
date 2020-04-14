@@ -1,11 +1,11 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "0.2.3",
+  "version": "0.2.31",
   "private": false,
   "author": "Nicholas Gauthier",
-  "main": "dist/js/components/index.js",
-  "types": "dist/js/components/index.d.ts",
+  "main": "dist/js/index.js",
+  "types": "dist/js/index.d.ts",
   "contributors": [
     "Andrew Diamantoukos",
     "Chris Sander"
