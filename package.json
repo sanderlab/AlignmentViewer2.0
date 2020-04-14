@@ -1,7 +1,7 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": false,
   "author": "Nicholas Gauthier",
   "main": "dist/js/components/index.js",
@@ -55,11 +55,11 @@
     "cover": "react-scripts test --env=jsdom-fifteen --coverage --watchAll=false",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "distribute": "rimraf dist && yarn distribute:babel && yarn tsc -p tsconfig.gen-dts.json && node ./scripts/copyStyles.js",
-    "distribute:babel": "yarn distribute:babel:esm && yarn distribute:babel:umd && yarn distribute:babel:cjs",
-    "distribute:babel:cjs": "BABEL_ENV=cjs babel --source-maps --extensions \".js,.ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/js --presets=@babel/env",
-    "distribute:babel:esm": "BABEL_ENV=esm babel --source-maps --extensions \".js,.ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/esm",
-    "distribute:babel:umd": "BABEL_ENV=umd babel --source-maps --extensions \".js\" dist/esm --ignore \"**/__tests__\" --out-dir dist/umd --plugins=transform-es2015-modules-umd"
+    "testsomething": "rimraf dist && yarn testsomething:babel && yarn tsc -p tsconfig.gen-dts.json && node ./scripts/copyStyles.js",
+    "testsomething:babel": "yarn babel:cjs && yarn babel:esm && yarn babel:umd",
+    "babel:cjs": "BABEL_ENV=cjs babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/js --presets=@babel/env",
+    "babel:esm": "BABEL_ENV=esm babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/esm",
+    "babel:umd": "BABEL_ENV=umd babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/umd --plugins=transform-es2015-modules-umd"
   },
   "files": [
     "dist"
