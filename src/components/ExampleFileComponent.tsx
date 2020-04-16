@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export interface IFileInputProps {
+export interface IExampleFileProps {
   labelText: string;
   fileURL: string;
   fileName: string;
@@ -8,7 +8,7 @@ export interface IFileInputProps {
   onStartLoading?: () => void;
 }
 
-export class ExampleFileComponent extends React.Component<IFileInputProps> {
+export class ExampleFileComponent extends React.Component<IExampleFileProps> {
   render() {
     const {
       fileURL,

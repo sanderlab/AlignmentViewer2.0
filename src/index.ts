@@ -5,6 +5,7 @@ export * from "./components/AceTargetSequenceComponent";
 export * from "./components/AceTextualRulerComponent";
 export * from "./components/AlignmentCanvasComponent";
 export * from "./components/AlignmentViewerComponent";
+export * from "./components/ExampleFileComponent";
 export * from "./components/FileInputComponent";
 export * from "./components/MiniMapComponent";
 export * from "./components/SequenceConsensusComponent";
