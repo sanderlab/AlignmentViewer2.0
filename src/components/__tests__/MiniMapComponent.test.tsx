@@ -3,8 +3,8 @@ import * as React from "react";
 
 import { shallow } from "enzyme";
 
-import MiniMapComponent from "../MiniMapComponent";
-import Alignment, { SequenceSortOptions } from "../../common/Alignment";
+import { MiniMapComponent } from "../MiniMapComponent";
+import { Alignment, SequenceSortOptions } from "../../common/Alignment";
 import { AlignmentStyle, AlignmentTypes } from "../../common/MolecularStyles";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.

@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { mount, shallow } from "enzyme";
 
-import Alignment, { SequenceSortOptions } from "../../common/Alignment";
+import { Alignment, SequenceSortOptions } from "../../common/Alignment";
 import AceTextualRulerComponent from "../AceTextualRulerComponent";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.

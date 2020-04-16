@@ -1,7 +1,7 @@
 import "jest-webgl-canvas-mock";
 import * as React from "react";
 
-import ScrollSync, { ScrollType } from "../ScrollSync";
+import { ScrollSync, ScrollType } from "../ScrollSync";
 
 import { mount, default as Enzyme } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
@@ -16,7 +16,7 @@ describe("ScrollSync", () => {
 
   it.each([ScrollType.both, ScrollType.horizontal, ScrollType.vertical])(
     "Should allow registering a scroller of type %s to a scroll group.",
-    scrollType => {
+    (scrollType) => {
       const wrapper = mount(<div />);
       const scrollSyncInstance = ScrollSync.getInstance();
       scrollSyncInstance.setScrollerGroup("cool-kids", scrollType);
@@ -34,7 +34,7 @@ describe("ScrollSync", () => {
 
   it.each([ScrollType.both, ScrollType.horizontal, ScrollType.vertical])(
     "Should allow setting a scroller of type %s to a scroll group.",
-    scrollType => {
+    (scrollType) => {
       const scrollSyncInstance = ScrollSync.getInstance();
       scrollSyncInstance.setScrollerGroup("cooler-kids", scrollType);
     }

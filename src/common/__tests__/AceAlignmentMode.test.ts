@@ -1,5 +1,5 @@
 import "jest-webgl-canvas-mock";
-import { default as Alignment } from "../Alignment";
+import { Alignment } from "../Alignment";
 import { defineNewAlignmentMode } from "../AceAlignmentMode";
 
 describe("defineNewAlignmentMode", () => {
@@ -13,7 +13,7 @@ describe("defineNewAlignmentMode", () => {
 
   it.each(["ace/mode", "ace/mode/name/", "/ace/mode/name/"])(
     "Should throw an error for malformed mode '%s'",
-    mode => {
+    (mode) => {
       const expectedError =
         "ace mode name must be of the form '/ace/mode/MODENAME'";
       expect(() =>

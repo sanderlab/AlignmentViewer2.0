@@ -1,8 +1,8 @@
 {
-  "exclude": ["**/__tests__/**"],
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
+    "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
@@ -11,10 +11,12 @@
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,
+    "outDir": "dist/js",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "es6"
+    "target": "es5"
   },
-  "include": ["src", "types"]
+  "exclude": ["**/__tests__/**"],
+  "include": ["src/components", "src/common", "src/index.ts", "types"]
 }

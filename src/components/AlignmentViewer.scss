@@ -40,7 +40,7 @@ $rowHeight: 25px;
   .av-annotation,
   .av-content {
     display: flex;
-    overflow: scroll;
+    overflow: auto;
   }
   .av-annotation {
     flex: 0 1 20%;
@@ -73,7 +73,7 @@ $rowHeight: 25px;
     left: 0px;
     right: 0px;
     bottom: 0px;
-    overflow: scroll;
+    overflow: auto;
     overflow-x: hidden;
     overflow-y: hidden;
   }

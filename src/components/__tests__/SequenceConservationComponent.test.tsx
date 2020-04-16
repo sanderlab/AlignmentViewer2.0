@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { shallow } from "enzyme";
 
-import Alignment from "../../common/Alignment";
+import { Alignment } from "../../common/Alignment";
 import { SequenceConservationComponent } from "../SequenceConservationComponent";
 
 describe("SequenceConservationComponent", () => {

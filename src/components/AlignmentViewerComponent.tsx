@@ -1,8 +1,8 @@
 import React from "react";
 import "./AlignmentViewer.scss";
 import { Ace } from "ace-builds";
-import Alignment, { SequenceSortOptions } from "../common/Alignment";
-import ScrollSync, { ScrollType } from "../common/ScrollSync";
+import { Alignment, SequenceSortOptions } from "../common/Alignment";
+import { ScrollSync, ScrollType } from "../common/ScrollSync";
 import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
 import { SequenceConservationComponent } from "./SequenceConservationComponent";
 import {
@@ -10,10 +10,10 @@ import {
   NucleotideAlignmentStyle,
   PositionsToStyle,
 } from "../common/MolecularStyles";
-import MiniMapComponent from "./MiniMapComponent";
-import AceMultipleSequenceAlignmentComponent from "./AceMultipleSequenceAlignmentComponent";
-import AceConsensusSequenceComponent from "./AceConsensusSequenceComponent";
-import AceTargetSequenceComponent from "./AceTargetSequenceComponent";
+import { MiniMapComponent } from "./MiniMapComponent";
+import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
+import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
+import { AceTargetSequenceComponent } from "./AceTargetSequenceComponent";
 import AceTextualRulerComponent from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
 

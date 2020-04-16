@@ -50,7 +50,7 @@ export class SequenceSortOptions {
  * The class should be instantiated using the static methods:
  *     fromFileContents: accepts a fasta file-like string
  */
-export default class Alignment {
+export class Alignment {
   private uuid: string;
   private aceEditorMode: string | undefined;
   private name: string;

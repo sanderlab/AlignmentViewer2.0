@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.scss";
-import Alignment, { SequenceSortOptions } from "./common/Alignment";
+import { Alignment, SequenceSortOptions } from "./common/Alignment";
 import { AlignmentViewer } from "./components/AlignmentViewerComponent";
 import {
   AminoAcidAlignmentStyle,
@@ -13,9 +13,10 @@ import {
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { FileInputComponent } from "./components/FileInputComponent";
+import { ExampleFileComponent } from "./components/ExampleFileComponent";
 
-export interface AppProps {}
-export interface AppState {
+interface AppProps {}
+interface AppState {
   alignment?: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   sortBy: SequenceSortOptions;
@@ -407,28 +408,37 @@ export default class App extends React.Component<AppProps, AppState> {
       <div className="examples">
         <label>
           <strong>Example Alignments:</strong>
-          <button
-            type="button"
-            className="button-link"
-            onClick={async (e) => {
-              this.setState({
-                loading: true,
-              });
-              const f = new File(
-                [
-                  await (
-                    await fetch(
-                      `${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`
-                    )
-                  ).blob(),
-                ],
-                "beta_lactamase_example.fasta"
-              );
-              this.onFileUpload(f);
-            }}
-          >
-            β-lactamase
-          </button>
+
+          <ExampleFileComponent
+            labelText="β-lactamase"
+            fileURL={`${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`}
+            fileName="7fa1c5691376beab198788a726917d48_b0.4.a2m"
+            onFileLoaded={this.onFileUpload}
+            onStartLoading={() => this.setState({ loading: true })}
+          />
+          <ExampleFileComponent
+            labelText="small"
+            fileURL={`${process.env.PUBLIC_URL}/small_alignment.a2m`}
+            fileName="small_alignment.a2m"
+            onFileLoaded={this.onFileUpload}
+            onStartLoading={() => this.setState({ loading: true })}
+          />
+
+          <ExampleFileComponent
+            labelText="small2"
+            fileURL={`${process.env.PUBLIC_URL}/small_alignment2.a2m`}
+            fileName="small_alignment2.a2m"
+            onFileLoaded={this.onFileUpload}
+            onStartLoading={() => this.setState({ loading: true })}
+          />
+
+          <ExampleFileComponent
+            labelText="small3"
+            fileURL={`${process.env.PUBLIC_URL}/small_alignment3.a2m`}
+            fileName="small_alignment3.a2m"
+            onFileLoaded={this.onFileUpload}
+            onStartLoading={() => this.setState({ loading: true })}
+          />
         </label>
       </div>
     );

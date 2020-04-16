@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
-import Alignment, { SequenceSortOptions } from "../common/Alignment";
+import { Alignment, SequenceSortOptions } from "../common/Alignment";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -23,7 +23,7 @@ export interface IMiniMapState {
   zoomPercent: number;
 }
 
-export default class MiniMapComponent extends React.Component<
+export class MiniMapComponent extends React.Component<
   IMiniMapProps,
   IMiniMapState
 > {

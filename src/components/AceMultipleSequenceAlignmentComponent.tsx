@@ -1,4 +1,4 @@
-import Alignment, { SequenceSortOptions } from "../common/Alignment";
+import { Alignment, SequenceSortOptions } from "../common/Alignment";
 import { AceEditorComponent, IAceEditorProps } from "./AceEditorComponent";
 
 export interface IAceMultipleSequenceAlignmentProps extends IAceEditorProps {
@@ -6,7 +6,7 @@ export interface IAceMultipleSequenceAlignmentProps extends IAceEditorProps {
   sortBy: SequenceSortOptions;
 }
 
-export default class AceMultipleSequenceAlignmentComponent extends AceEditorComponent<
+export class AceMultipleSequenceAlignmentComponent extends AceEditorComponent<
   IAceMultipleSequenceAlignmentProps,
   {}
 > {

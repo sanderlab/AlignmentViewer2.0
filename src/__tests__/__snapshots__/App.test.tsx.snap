@@ -277,13 +277,34 @@ exports[`App Should render within 2 minutes. 1`] = `
             <strong>
               Example Alignments:
             </strong>
-            <button
-              className="button-link"
-              onClick={[Function]}
-              type="button"
-            >
-              β-lactamase
-            </button>
+            <ExampleFileComponent
+              fileName="7fa1c5691376beab198788a726917d48_b0.4.a2m"
+              fileURL="/7fa1c5691376beab198788a726917d48_b0.4.a2m"
+              labelText="β-lactamase"
+              onFileLoaded={[Function]}
+              onStartLoading={[Function]}
+            />
+            <ExampleFileComponent
+              fileName="small_alignment.a2m"
+              fileURL="/small_alignment.a2m"
+              labelText="small"
+              onFileLoaded={[Function]}
+              onStartLoading={[Function]}
+            />
+            <ExampleFileComponent
+              fileName="small_alignment2.a2m"
+              fileURL="/small_alignment2.a2m"
+              labelText="small2"
+              onFileLoaded={[Function]}
+              onStartLoading={[Function]}
+            />
+            <ExampleFileComponent
+              fileName="small_alignment3.a2m"
+              fileURL="/small_alignment3.a2m"
+              labelText="small3"
+              onFileLoaded={[Function]}
+              onStartLoading={[Function]}
+            />
           </label>
         </div>
         <div

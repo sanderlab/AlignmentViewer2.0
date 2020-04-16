@@ -1,5 +1,5 @@
 import React from "react";
-import Alignment, { SequenceSortOptions, ISequence } from "../common/Alignment";
+import { Alignment, SequenceSortOptions, ISequence } from "../common/Alignment";
 import { Nucleotide, AminoAcid } from "../common/Residues";
 import * as PIXI from "pixi.js";
 import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";

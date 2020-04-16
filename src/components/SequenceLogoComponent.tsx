@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import Alignment from "../common/Alignment";
+import { Alignment } from "../common/Alignment";
 import { GlyphFactory } from "../common/SequenceLogoGlyphs";
 import { getFinalLetterClassNames } from "../common/MolecularStyles";
 
@@ -124,11 +124,11 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
     const generateStack = (positionalFrequencies: IGlyphStack) => {
       let dy = 100;
 
-      const xscale = 2 / logoData.length; // not exact, but works.
       return positionalFrequencies.map((freq, idx) => {
         dy = dy - freq.frequency * 100;
 
         if (this.props.logoType === LOGO_TYPES.BARS) {
+          const xscale = 2 / logoData.length; // not exact, but works.
           return (
             <rect
               width="100"
@@ -140,6 +140,7 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
           );
         }
 
+        const xscale = 0.009; // invariant scaling
         const selectedGlyph = GlyphFactory.glyphFromChar(freq.letter.letter)({
           className: freq.letter.classNames,
           transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
@@ -148,6 +149,8 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
         return selectedGlyph;
       });
     };
+
+    console.log(logoData);
 
     return (
       <div id={this.props.id} ref={(e) => this.divLoaded(e)}>
