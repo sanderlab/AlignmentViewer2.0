@@ -1,10 +1,10 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "0.2.32",
+  "version": "0.2.33",
   "private": false,
   "author": "Nicholas Gauthier",
-  "main": "dist/js/index.js",
+  "module": "dist/js/index.js",
   "types": "dist/js/index.d.ts",
   "contributors": [
     "Andrew Diamantoukos",
@@ -55,8 +55,8 @@
     "cover": "react-scripts test --env=jsdom-fifteen --coverage --watchAll=false",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "testsomething": "rimraf dist && yarn testsomething:babel && yarn tsc -p tsconfig.gen-dts.json && node ./scripts/copyStyles.js",
-    "testsomething:babel": "yarn babel:cjs && yarn babel:esm && yarn babel:umd",
+    "pub2npm": "rimraf dist && yarn pub2npm:babel && yarn tsc -p tsconfig.gen-dts.json && node ./scripts/copyStyles.js",
+    "pub2npm:babel": "yarn babel:cjs && yarn babel:esm && yarn babel:umd",
     "babel:cjs": "BABEL_ENV=cjs babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/js --presets=@babel/env",
     "babel:esm": "BABEL_ENV=esm babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/esm",
     "babel:umd": "BABEL_ENV=umd babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/umd --plugins=transform-es2015-modules-umd"
