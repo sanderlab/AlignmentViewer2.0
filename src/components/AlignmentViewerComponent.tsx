@@ -17,16 +17,24 @@ import { AceTargetSequenceComponent } from "./AceTargetSequenceComponent";
 import AceTextualRulerComponent from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
 
-export interface IAlignmentViewerProps {
+export type IAlignmentViewerProps = {
   alignment: Alignment;
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  logoPlotStyle: LOGO_TYPES;
-  zoomLevel: number;
-  sortBy: SequenceSortOptions;
-  showMiniMap?: boolean;
-  showAnnotations?: boolean;
-}
-export interface IAlignmentViewerState {
+} & Partial<DefaultPropsTypes>;
+
+type DefaultPropsTypes = Readonly<typeof defaultProps>;
+
+const defaultProps = {
+  style: new AminoAcidAlignmentStyle() as
+    | AminoAcidAlignmentStyle
+    | NucleotideAlignmentStyle,
+  logoPlotStyle: LOGO_TYPES.LETTERS as LOGO_TYPES,
+  zoomLevel: 13 as number,
+  sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
+  showMiniMap: false as boolean,
+  showAnnotations: true as boolean,
+};
+
+interface IAlignmentViewerState {
   aceCharacterWidth: number;
   aceEditors: Ace.Editor[];
   alignmentEditorVisibleFirstRow?: number;
@@ -40,8 +48,11 @@ export class AlignmentViewer extends React.Component<
   IAlignmentViewerProps,
   IAlignmentViewerState
 > {
+  static defaultProps = defaultProps;
+
   constructor(props: IAlignmentViewerProps) {
     super(props);
+
     this.state = {
       aceEditors: [],
       aceCharacterWidth: 0,
@@ -212,8 +223,8 @@ export class AlignmentViewer extends React.Component<
   protected renderSequenceLogo = () => (
     <div
       className={
-        `logo_box ${this.props.style.alignmentType.className} ` +
-        `${this.props.style.colorScheme.className} ` +
+        `logo_box ${this.props.style!.alignmentType.className} ` +
+        `${this.props.style!.colorScheme.className} ` +
         `${PositionsToStyle.ALL.className}`
       }
     >
@@ -242,12 +253,11 @@ export class AlignmentViewer extends React.Component<
         id="ace-consensusseq"
         alignment={this.props.alignment}
         fontSize={this.props.zoomLevel}
-        sortBy={this.props.sortBy}
         classNames={[
-          this.props.style.residueDetail.className,
-          this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
-          this.props.style.colorScheme.className,
+          this.props.style!.residueDetail.className,
+          this.props.style!.alignmentType.className,
+          this.props.style!.positionsToStyle.className,
+          this.props.style!.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor) => {
           this.aceEditorLoaded(
@@ -268,10 +278,10 @@ export class AlignmentViewer extends React.Component<
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
-          this.props.style.residueDetail.className,
-          this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
-          this.props.style.colorScheme.className,
+          this.props.style!.residueDetail.className,
+          this.props.style!.alignmentType.className,
+          this.props.style!.positionsToStyle.className,
+          this.props.style!.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor) => {
           this.aceEditorLoaded("ace-queryseq", editor, ScrollType.horizontal);
@@ -319,10 +329,10 @@ export class AlignmentViewer extends React.Component<
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
-          this.props.style.residueDetail.className,
-          this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
-          this.props.style.colorScheme.className,
+          this.props.style!.residueDetail.className,
+          this.props.style!.alignmentType.className,
+          this.props.style!.positionsToStyle.className,
+          this.props.style!.colorScheme.className,
         ].join(" ")}
         characterSizeChanged={this.handleCharacterSizeChanged}
         editorLoaded={(editor) => {
@@ -353,8 +363,19 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderMiniMap() {
-    const { alignment, sortBy, style, showMiniMap } = this.props;
+    const {
+      alignment,
+      sortBy,
+      showMiniMap,
+      style,
+      //minimapOptions,
+    } = this.props;
     const { windowWidth, windowHeight } = this.state;
+
+    let width, height;
+    //if (minimapOptions) {
+    //width = minimapOptions.width ?
+    //}
 
     const mmClassName = showMiniMap ? "mini-map" : "mini-map hidden";
     return (
@@ -367,7 +388,7 @@ export class AlignmentViewer extends React.Component<
             alignHorizontal={"right"}
             alignment={alignment}
             style={style}
-            sortBy={sortBy}
+            sortBy={sortBy!}
             highlightRows={
               this.state.alignmentEditorVisibleFirstRow !== undefined &&
               this.state.alignmentEditorVisibleLastRow !== undefined

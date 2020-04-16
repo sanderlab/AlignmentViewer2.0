@@ -42,15 +42,6 @@ export default class App extends React.Component<AppProps, AppState> {
     };
   }
 
-  async componentDidMount() {
-    /*this.setState({
-      alignment: await this.getAlignmentForFile(
-        "7fa1c5691376beab198788a726917d48_b0.4.a2m"
-      ),
-      style: new AminoAcidAlignmentStyle()
-    });*/
-  }
-
   render() {
     const {
       alignment,
@@ -499,6 +490,10 @@ export default class App extends React.Component<AppProps, AppState> {
       const alignment = Alignment.fromFileContents(file.name, fileText);
       this.setState({
         alignment: alignment,
+        style:
+          alignment.getPredictedType() === AlignmentTypes.NUCLEOTIDE
+            ? new NucleotideAlignmentStyle()
+            : new AminoAcidAlignmentStyle(),
         loading: false,
       });
     };

@@ -3,13 +3,18 @@ import { AceEditorComponent, IAceEditorProps } from "./AceEditorComponent";
 
 export interface IAceMultipleSequenceAlignmentProps extends IAceEditorProps {
   alignment: Alignment;
-  sortBy: SequenceSortOptions;
+  sortBy?: SequenceSortOptions;
 }
 
 export class AceMultipleSequenceAlignmentComponent extends AceEditorComponent<
   IAceMultipleSequenceAlignmentProps,
   {}
 > {
+  static defaultProps = {
+    sortBy: SequenceSortOptions.INPUT,
+    fontSize: 14,
+  };
+
   getText(): string {
     return this.props.alignment
       .getSequences(this.props.sortBy)

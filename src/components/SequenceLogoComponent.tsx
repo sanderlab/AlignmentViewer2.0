@@ -27,7 +27,7 @@ interface IGlyphStack extends Array<IGlyphFrequency> {}
 export interface ISequenceLogoProps {
   alignment: Alignment;
   glyphWidth: number;
-  logoType: LOGO_TYPES;
+  logoType?: LOGO_TYPES;
 
   logoLoaded?(node: HTMLDivElement): void;
 
@@ -37,6 +37,10 @@ export interface ISequenceLogoProps {
 export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
   private scrollerDiv?: HTMLDivElement | null;
   private loaded: boolean = false;
+
+  static defaultProps = {
+    logoType: LOGO_TYPES.LETTERS,
+  };
 
   divLoaded(e: HTMLDivElement | null) {
     if (e && !this.scrollerDiv) {
