@@ -154,8 +154,6 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
       });
     };
 
-    console.log(logoData);
-
     return (
       <div id={this.props.id} ref={(e) => this.divLoaded(e)}>
         <svg

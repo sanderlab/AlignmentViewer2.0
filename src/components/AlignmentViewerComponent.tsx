@@ -370,7 +370,7 @@ export class AlignmentViewer extends React.Component<
       style,
       //minimapOptions,
     } = this.props;
-    const { windowWidth, windowHeight } = this.state;
+    const { windowHeight } = this.state;
 
     //let width, height;
     //if (minimapOptions) {

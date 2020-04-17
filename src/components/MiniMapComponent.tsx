@@ -52,7 +52,7 @@ export class MiniMapComponent extends React.Component<
   }
 
   public render() {
-    const { alignHorizontal, width } = this.props;
+    const { alignHorizontal } = this.props;
     const size = this.getSizing();
     return (
       <div
@@ -79,7 +79,7 @@ export class MiniMapComponent extends React.Component<
   }
 
   protected renderCanvasComponent = () => {
-    const { alignment, highlightRows, sortBy, style, width } = this.props;
+    const { alignment, highlightRows, sortBy, style } = this.props;
     const { zoomPercent } = this.state;
     const size = this.getSizing();
     return (

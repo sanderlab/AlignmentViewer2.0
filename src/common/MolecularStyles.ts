@@ -280,7 +280,6 @@ export function getLetterClassNamesForAce(
   return letter + all + consensus + query;
 }
 
-const acePrefix = styles.acePrefix;
 /**
  * Get letter class names that have the final ace_ prepended
  * classnames.
