@@ -3,7 +3,6 @@ import "jest-webgl-canvas-mock";
 import * as React from "react";
 
 import { mount, shallow } from "enzyme";
-
 import { Alignment, SequenceSortOptions } from "../../common/Alignment";
 import AceTextualRulerComponent from "../AceTextualRulerComponent";
 
