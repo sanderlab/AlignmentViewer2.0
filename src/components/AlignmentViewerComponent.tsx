@@ -372,10 +372,14 @@ export class AlignmentViewer extends React.Component<
     } = this.props;
     const { windowWidth, windowHeight } = this.state;
 
-    let width, height;
+    //let width, height;
     //if (minimapOptions) {
     //width = minimapOptions.width ?
     //}
+    const width = Math.max(
+      300,
+      Math.min(450, alignment.getMaxSequenceLength())
+    );
 
     const mmClassName = showMiniMap ? "mini-map" : "mini-map hidden";
     return (
@@ -383,7 +387,7 @@ export class AlignmentViewer extends React.Component<
       style && (
         <div className={mmClassName}>
           <MiniMapComponent
-            width={Math.min(400, alignment.getMaxSequenceLength())}
+            width={width}
             height={windowHeight}
             alignHorizontal={"right"}
             alignment={alignment}
