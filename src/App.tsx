@@ -399,7 +399,6 @@ export default class App extends React.Component<AppProps, AppState> {
       <div className="examples">
         <label>
           <strong>Example Alignments:</strong>
-
           <ExampleFileComponent
             labelText="β-lactamase"
             fileURL={`${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`}
