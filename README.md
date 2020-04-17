@@ -41,7 +41,7 @@ const alignmentObj = Alignment.fromFileContents(
     "ALIGNMENT_NAME", fastaFileText
 );
 
-<AlignmentViewer alignment={ alignmentObj } />
+<AlignmentViewer alignment={ alignmentObj } style={ alignmentObj.getDefaultStyle() } />
 ```
 
 ## Building Alignment Viewer 2.0

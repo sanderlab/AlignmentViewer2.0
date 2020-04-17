@@ -466,10 +466,7 @@ export default class App extends React.Component<AppProps, AppState> {
       const alignment = Alignment.fromFileContents(file.name, fileText);
       this.setState({
         alignment: alignment,
-        style:
-          alignment.getPredictedType() === AlignmentTypes.NUCLEOTIDE
-            ? new NucleotideAlignmentStyle()
-            : new AminoAcidAlignmentStyle(),
+        style: alignment.getDefaultStyle(),
         loading: false,
       });
     };

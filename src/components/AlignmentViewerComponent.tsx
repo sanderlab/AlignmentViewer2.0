@@ -9,6 +9,7 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   PositionsToStyle,
+  AlignmentTypes,
 } from "../common/MolecularStyles";
 import { MiniMapComponent } from "./MiniMapComponent";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
@@ -19,14 +20,12 @@ import { AceEditorComponent } from "./AceEditorComponent";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
 
 const defaultProps = {
-  style: new AminoAcidAlignmentStyle() as
-    | AminoAcidAlignmentStyle
-    | NucleotideAlignmentStyle,
   logoPlotStyle: LOGO_TYPES.LETTERS as LOGO_TYPES,
   zoomLevel: 13 as number,
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
@@ -223,8 +222,8 @@ export class AlignmentViewer extends React.Component<
   protected renderSequenceLogo = () => (
     <div
       className={
-        `logo_box ${this.props.style!.alignmentType.className} ` +
-        `${this.props.style!.colorScheme.className} ` +
+        `logo_box ${this.props.style.alignmentType.className} ` +
+        `${this.props.style.colorScheme.className} ` +
         `${PositionsToStyle.ALL.className}`
       }
     >
@@ -254,10 +253,10 @@ export class AlignmentViewer extends React.Component<
         alignment={this.props.alignment}
         fontSize={this.props.zoomLevel}
         classNames={[
-          this.props.style!.residueDetail.className,
-          this.props.style!.alignmentType.className,
-          this.props.style!.positionsToStyle.className,
-          this.props.style!.colorScheme.className,
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor) => {
           this.aceEditorLoaded(
@@ -278,10 +277,10 @@ export class AlignmentViewer extends React.Component<
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
-          this.props.style!.residueDetail.className,
-          this.props.style!.alignmentType.className,
-          this.props.style!.positionsToStyle.className,
-          this.props.style!.colorScheme.className,
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor) => {
           this.aceEditorLoaded("ace-queryseq", editor, ScrollType.horizontal);
@@ -329,10 +328,10 @@ export class AlignmentViewer extends React.Component<
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
-          this.props.style!.residueDetail.className,
-          this.props.style!.alignmentType.className,
-          this.props.style!.positionsToStyle.className,
-          this.props.style!.colorScheme.className,
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
         ].join(" ")}
         characterSizeChanged={this.handleCharacterSizeChanged}
         editorLoaded={(editor) => {

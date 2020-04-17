@@ -1,7 +1,11 @@
 import { generateUUIDv4 } from "./Utils";
 import { defineNewAlignmentMode } from "./AceAlignmentMode";
 import { Nucleotide } from "./Residues";
-import { AlignmentTypes } from "./MolecularStyles";
+import {
+  AlignmentTypes,
+  AminoAcidAlignmentStyle,
+  NucleotideAlignmentStyle,
+} from "./MolecularStyles";
 
 export interface ISequence {
   id: string;
@@ -256,6 +260,16 @@ export class Alignment {
     return this.predictedNT
       ? AlignmentTypes.NUCLEOTIDE
       : AlignmentTypes.AMINOACID;
+  }
+
+  /**
+   * Returns a default nucleotide or amino acid style for this alignment,
+   * predicted from the sequence itself.
+   */
+  getDefaultStyle(): AminoAcidAlignmentStyle | NucleotideAlignmentStyle {
+    return this.predictedNT
+      ? new NucleotideAlignmentStyle()
+      : new AminoAcidAlignmentStyle();
   }
 
   /**
