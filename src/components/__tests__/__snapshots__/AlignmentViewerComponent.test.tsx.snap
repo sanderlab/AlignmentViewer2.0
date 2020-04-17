@@ -2,7 +2,7 @@
 
 exports[`AlignmentViewer Should render 1`] = `
 <div
-  className="alignment_viewer annotation-closed"
+  className="alignment_viewer"
 >
   <div
     className="mini-map hidden"
@@ -17,6 +17,7 @@ exports[`AlignmentViewer Should render 1`] = `
           "globalAlphaLetterCounts": Object {},
           "name": "",
           "positionalLetterCounts": Map {},
+          "predictedNT": true,
           "sequences": Map {
             SequenceSortOptions {
               "description": "As input",
@@ -89,7 +90,7 @@ exports[`AlignmentViewer Should render 1`] = `
           },
         }
       }
-      width={-1}
+      width={300}
     />
   </div>
   <div
@@ -112,6 +113,7 @@ exports[`AlignmentViewer Should render 1`] = `
             "globalAlphaLetterCounts": Object {},
             "name": "",
             "positionalLetterCounts": Map {},
+            "predictedNT": true,
             "sequences": Map {
               SequenceSortOptions {
                 "description": "As input",
@@ -152,6 +154,7 @@ exports[`AlignmentViewer Should render 1`] = `
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
+              "predictedNT": true,
               "sequences": Map {
                 SequenceSortOptions {
                   "description": "As input",
@@ -194,6 +197,7 @@ exports[`AlignmentViewer Should render 1`] = `
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
+              "predictedNT": true,
               "sequences": Map {
                 SequenceSortOptions {
                   "description": "As input",
@@ -245,6 +249,7 @@ exports[`AlignmentViewer Should render 1`] = `
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
+              "predictedNT": true,
               "sequences": Map {
                 SequenceSortOptions {
                   "description": "As input",
@@ -296,6 +301,7 @@ exports[`AlignmentViewer Should render 1`] = `
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
+              "predictedNT": true,
               "sequences": Map {
                 SequenceSortOptions {
                   "description": "As input",
@@ -351,6 +357,7 @@ exports[`AlignmentViewer Should render 1`] = `
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
+              "predictedNT": true,
               "sequences": Map {
                 SequenceSortOptions {
                   "description": "As input",
