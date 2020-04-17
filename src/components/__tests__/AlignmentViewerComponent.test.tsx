@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { shallow } from "enzyme";
 
-import Alignment, { SequenceSortOptions } from "../../common/Alignment";
+import { Alignment, SequenceSortOptions } from "../../common/Alignment";
 import { AlignmentViewer } from "../AlignmentViewerComponent";
 import { AlignmentStyle, AlignmentTypes } from "../../common/MolecularStyles";
 import { LOGO_TYPES } from "../SequenceLogoComponent";

@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.scss";
-import Alignment, { SequenceSortOptions } from "./common/Alignment";
+import { Alignment, SequenceSortOptions } from "./common/Alignment";
 import { AlignmentViewer } from "./components/AlignmentViewerComponent";
 import {
   AminoAcidAlignmentStyle,
@@ -13,9 +13,10 @@ import {
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { FileInputComponent } from "./components/FileInputComponent";
+import { ExampleFileComponent } from "./components/ExampleFileComponent";
 
-export interface AppProps {}
-export interface AppState {
+interface AppProps {}
+interface AppState {
   alignment?: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   sortBy: SequenceSortOptions;
@@ -39,15 +40,6 @@ export default class App extends React.Component<AppProps, AppState> {
       showAnnotations: true,
       showSettings: true,
     };
-  }
-
-  async componentDidMount() {
-    /*this.setState({
-      alignment: await this.getAlignmentForFile(
-        "7fa1c5691376beab198788a726917d48_b0.4.a2m"
-      ),
-      style: new AminoAcidAlignmentStyle()
-    });*/
   }
 
   render() {
@@ -407,28 +399,13 @@ export default class App extends React.Component<AppProps, AppState> {
       <div className="examples">
         <label>
           <strong>Example Alignments:</strong>
-          <button
-            type="button"
-            className="button-link"
-            onClick={async (e) => {
-              this.setState({
-                loading: true,
-              });
-              const f = new File(
-                [
-                  await (
-                    await fetch(
-                      `${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`
-                    )
-                  ).blob(),
-                ],
-                "beta_lactamase_example.fasta"
-              );
-              this.onFileUpload(f);
-            }}
-          >
-            β-lactamase
-          </button>
+          <ExampleFileComponent
+            labelText="β-lactamase"
+            fileURL={`${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`}
+            fileName="7fa1c5691376beab198788a726917d48_b0.4.a2m"
+            onFileLoaded={this.onFileUpload}
+            onStartLoading={() => this.setState({ loading: true })}
+          />
         </label>
       </div>
     );
@@ -489,6 +466,10 @@ export default class App extends React.Component<AppProps, AppState> {
       const alignment = Alignment.fromFileContents(file.name, fileText);
       this.setState({
         alignment: alignment,
+        style:
+          alignment.getPredictedType() === AlignmentTypes.NUCLEOTIDE
+            ? new NucleotideAlignmentStyle()
+            : new AminoAcidAlignmentStyle(),
         loading: false,
       });
     };

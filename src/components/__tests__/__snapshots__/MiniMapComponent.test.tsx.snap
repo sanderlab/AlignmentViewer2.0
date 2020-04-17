@@ -29,6 +29,7 @@ exports[`MiniMap Should render with default props. 1`] = `
           "globalAlphaLetterCounts": Object {},
           "name": "",
           "positionalLetterCounts": Map {},
+          "predictedNT": true,
           "sequences": Map {
             SequenceSortOptions {
               "description": "As input",

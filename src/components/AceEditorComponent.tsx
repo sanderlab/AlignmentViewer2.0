@@ -7,9 +7,9 @@ import { Ace } from "ace-builds";
 
 export interface IAceEditorProps {
   readonly id: string;
-  fontSize: number;
 
   text?: string;
+  fontSize?: number;
   editorMode?: string;
   classNames?: string;
 
@@ -48,6 +48,9 @@ export class AceEditorComponent<
   private element?: HTMLElement;
   private lastElementWidth?: number;
   private lastElementHeight?: number;
+  static defaultProps = {
+    fontSize: 14,
+  };
 
   /**************************
    *

@@ -1,4 +1,4 @@
-import Alignment from "../common/Alignment";
+import { Alignment } from "../common/Alignment";
 import { AceEditorComponent, IAceEditorProps } from "./AceEditorComponent";
 
 export interface IAceTextualRulerComponentProps extends IAceEditorProps {

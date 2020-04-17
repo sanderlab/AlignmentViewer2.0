@@ -274,6 +274,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
           "Z": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -690,6 +691,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
           "Z": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -842,6 +844,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
       "globalAlphaLetterCounts": Object {},
       "name": "My-Alignment",
       "positionalLetterCounts": Map {},
+      "predictedNT": true,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -1008,6 +1011,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -1188,6 +1192,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -1368,6 +1373,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -1548,6 +1554,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -1728,6 +1735,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -1908,6 +1916,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -2088,6 +2097,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -2268,6 +2278,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -2448,6 +2459,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",
@@ -2628,6 +2640,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
           "B": 10,
         },
       },
+      "predictedNT": false,
       "sequences": Map {
         SequenceSortOptions {
           "description": "As input",

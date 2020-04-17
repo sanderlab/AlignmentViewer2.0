@@ -1,5 +1,7 @@
 import { generateUUIDv4 } from "./Utils";
 import { defineNewAlignmentMode } from "./AceAlignmentMode";
+import { Nucleotide } from "./Residues";
+import { AlignmentTypes } from "./MolecularStyles";
 
 export interface ISequence {
   id: string;
@@ -50,10 +52,11 @@ export class SequenceSortOptions {
  * The class should be instantiated using the static methods:
  *     fromFileContents: accepts a fasta file-like string
  */
-export default class Alignment {
+export class Alignment {
   private uuid: string;
   private aceEditorMode: string | undefined;
   private name: string;
+  private predictedNT: boolean;
   private sequences: Map<SequenceSortOptions, ISequence[]>;
   private targetSequence: ISequence;
   private positionalLetterCounts = new Map<
@@ -159,6 +162,7 @@ export default class Alignment {
     this.sequences = new Map<SequenceSortOptions, ISequence[]>();
     this.sequences.set(SequenceSortOptions.INPUT, sequencesAsInput);
     this.targetSequence = sequencesAsInput[0];
+    this.predictedNT = true;
 
     //
     //generate statistics
@@ -176,6 +180,13 @@ export default class Alignment {
       for (let positionIdx = 0; positionIdx < seq.length; positionIdx++) {
         const letter = seq[positionIdx].toUpperCase();
         const letterIsAlpha = letter.match(/[a-z]/i) ? true : false;
+        if (
+          letterIsAlpha &&
+          this.predictedNT &&
+          Nucleotide.fromSingleLetterCode(letter) === Nucleotide.UNKNOWN
+        ) {
+          this.predictedNT = false;
+        }
 
         const position = positionIdx; // zero based
         allLetters[letter] = 1;
@@ -235,6 +246,16 @@ export default class Alignment {
         (new Date().getTime() - start.getTime()) +
         "ms"
     );
+  }
+
+  /**
+   * Is this alignment predicted to be nucleotides?
+   * @returns true if it is predicted to be nucleotide sequences.
+   */
+  getPredictedType(): AlignmentTypes {
+    return this.predictedNT
+      ? AlignmentTypes.NUCLEOTIDE
+      : AlignmentTypes.AMINOACID;
   }
 
   /**

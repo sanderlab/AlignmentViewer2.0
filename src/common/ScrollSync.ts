@@ -19,7 +19,7 @@ import { Ace } from "ace-builds";
 export enum ScrollType {
   vertical,
   horizontal,
-  both
+  both,
 }
 
 interface ScrollProps {
@@ -27,7 +27,7 @@ interface ScrollProps {
   scrollers: (HTMLElement | Ace.Editor)[];
 }
 
-export default class ScrollSync {
+export class ScrollSync {
   static singleton: undefined | ScrollSync = undefined;
 
   private _groupScrollpropsHM: { [key: string]: ScrollProps } = {};
@@ -82,7 +82,7 @@ export default class ScrollSync {
       this._setScrollerLastOffsets(scrolledScroller);
       //update other nodes in the group
       const group = this._groupScrollpropsHM[groupName];
-      group.scrollers.forEach(siblingScroller => {
+      group.scrollers.forEach((siblingScroller) => {
         if (siblingScroller !== scrolledScroller) {
           if ("renderer" in siblingScroller) {
             //the siblingScroller is an ace editor
@@ -197,7 +197,7 @@ export default class ScrollSync {
       scrolltype: scrollType,
       scrollers: this._groupScrollpropsHM[groupName]
         ? this._groupScrollpropsHM[groupName].scrollers
-        : []
+        : [],
     };
   }
 
@@ -236,7 +236,7 @@ export default class ScrollSync {
         group.scrolltype === ScrollType.both ||
         group.scrolltype === ScrollType.horizontal
       ) {
-        scroller.session.on("changeScrollLeft", newScrollLeft => {
+        scroller.session.on("changeScrollLeft", (newScrollLeft) => {
           this._handleScrollEvent(
             scroller,
             groupName,
@@ -250,7 +250,7 @@ export default class ScrollSync {
         group.scrolltype === ScrollType.both ||
         group.scrolltype === ScrollType.vertical
       ) {
-        scroller.session.on("changeScrollTop", e => {
+        scroller.session.on("changeScrollTop", (e) => {
           this._handleScrollEvent(
             scroller,
             groupName,
@@ -261,7 +261,7 @@ export default class ScrollSync {
       }
     } else {
       //the scroller is an html element
-      scroller.onscroll = e => {
+      scroller.onscroll = (e) => {
         //determine direction - if the last scroll left !== to the new left
         //then it is horizontal otherwise it is vertical
         const direction =

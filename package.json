@@ -1,15 +1,35 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "0.2.0",
+  "version": "0.2.43",
   "private": false,
   "author": "Nicholas Gauthier",
+  "module": "dist/js/index.js",
+  "types": "dist/js/index.d.ts",
   "contributors": [
     "Andrew Diamantoukos",
     "Chris Sander"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanderlab/AlignmentViewer2.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/react"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-typescript",
+      "babel-plugin-typescript-to-proptypes",
+      "@babel/plugin-proposal-export-default-from",
+      "@babel/proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      "@babel/plugin-proposal-optional-chaining"
+    ]
+  },
   "license": "MIT",
   "dependencies": {
+    "@babel/cli": "^7.8.4",
     "@inlet/react-pixi": "^1.2.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
@@ -34,8 +54,16 @@
     "eject": "react-scripts eject",
     "cover": "react-scripts test --env=jsdom-fifteen --coverage --watchAll=false",
     "predeploy": "yarn build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "pub2npm": "rimraf dist && yarn pub2npm:babel && yarn tsc -p tsconfig.dist.json && node ./scripts/copyStyles.js",
+    "pub2npm:babel": "yarn babel:cjs && yarn babel:esm && yarn babel:umd",
+    "babel:cjs": "BABEL_ENV=cjs babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/js --presets=@babel/env",
+    "babel:esm": "BABEL_ENV=esm babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/esm",
+    "babel:umd": "BABEL_ENV=umd babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/umd --plugins=transform-es2015-modules-umd"
   },
+  "files": [
+    "dist"
+  ],
   "eslintConfig": {
     "extends": "react-app"
   },
@@ -52,9 +80,12 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-export-default-from": "^7.8.3",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jest": "^25.1.3",
+    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
+    "babel-plugin-typescript-to-proptypes": "^1.3.2",
     "canvas": "^2.6.1",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",

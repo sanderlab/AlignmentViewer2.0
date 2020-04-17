@@ -3,8 +3,8 @@ import * as React from "react";
 
 import { shallow, mount } from "enzyme";
 
-import AceTargetSequenceComponent from "../AceTargetSequenceComponent";
-import Alignment, { SequenceSortOptions } from "../../common/Alignment";
+import { AceTargetSequenceComponent } from "../AceTargetSequenceComponent";
+import { Alignment, SequenceSortOptions } from "../../common/Alignment";
 import { Ace, default as ace } from "ace-builds";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.

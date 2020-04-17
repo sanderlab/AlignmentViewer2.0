@@ -4,7 +4,7 @@
  */
 
 import { default as ace } from "ace-builds";
-import Alignment from "./Alignment";
+import { Alignment } from "./Alignment";
 import { getLetterClassNamesForAce } from "./MolecularStyles";
 
 interface IAceType {

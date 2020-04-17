@@ -1,5 +1,5 @@
 import "jest-webgl-canvas-mock";
-import Alignment, { ISequence } from "../Alignment";
+import { Alignment, ISequence } from "../Alignment";
 import * as fs from "fs";
 
 import { enableFetchMocks, default as fetchMock } from "jest-fetch-mock";
@@ -29,7 +29,7 @@ describe("Alignment", () => {
 
   it("Should allow sorting.", () => {
     const alignment = new Alignment("Test-Sequence", [
-      { id: "id-1", sequence: "ZMA" }
+      { id: "id-1", sequence: "ZMA" },
     ]);
     expect(alignment.getSortedAlphaLetters()).toEqual(["A", "M", "Z"]);
   });
@@ -37,7 +37,7 @@ describe("Alignment", () => {
   it("Should allow getting normalized position counts.", () => {
     const alignment = new Alignment("Test-Sequence", [
       { id: "id-1", sequence: "ABC" },
-      { id: "id-2", sequence: "CBA" }
+      { id: "id-2", sequence: "CBA" },
     ]);
     const expected = new Map();
     expected.set(0, { A: 0.5, C: 0.5 });
@@ -49,7 +49,7 @@ describe("Alignment", () => {
   it("Should allow getting non-normalized position counts.", () => {
     const alignment = new Alignment("Test-Sequence", [
       { id: "id-1", sequence: "ABC" },
-      { id: "id-2", sequence: "CBA" }
+      { id: "id-2", sequence: "CBA" },
     ]);
     const expected = new Map();
     expected.set(0, { A: 1, C: 1 });
@@ -62,7 +62,7 @@ describe("Alignment", () => {
     const seq1 = { id: "id-1", sequence: "ABC" };
     const alignment = new Alignment("Test-Sequence", [
       seq1,
-      { id: "id-2", sequence: "CBA" }
+      { id: "id-2", sequence: "CBA" },
     ]);
     expect(alignment.getTargetSequence()).toEqual(seq1);
   });

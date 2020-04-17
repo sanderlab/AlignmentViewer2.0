@@ -1,5 +1,5 @@
 import React from "react";
-import Alignment from "../common/Alignment";
+import { Alignment } from "../common/Alignment";
 
 export interface ISequenceConsensusProps {
   alignment: Alignment;

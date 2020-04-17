@@ -1,5 +1,5 @@
 import React from "react";
-import Alignment, { SequenceSortOptions, ISequence } from "../common/Alignment";
+import { Alignment, SequenceSortOptions, ISequence } from "../common/Alignment";
 import { Nucleotide, AminoAcid } from "../common/Residues";
 import * as PIXI from "pixi.js";
 import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";
@@ -120,6 +120,7 @@ export class AlignmentCanvasComponent extends React.Component<
     const height = highlightRows
       ? highlightRows[1] - highlightRows[0]
       : undefined;
+
     return (
       <div
         id={id}
@@ -446,8 +447,6 @@ export interface IViewportProps {
   zoomPercent?: number;
 }
 
-let viewport: Viewport;
-
 const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
   create(props: IViewportProps) {
     const {
@@ -519,19 +518,32 @@ const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
 
     //start the component zoomed such that the entire alignment width
     //is visible in the frame.
-    vp = vp.setZoom(app.renderer.width / numColumns, true);
-    viewport = vp;
+    //vp = vp.setZoom(app.renderer.width / numColumns, true);
+    //vp = vp.fitWorld(true);
     return vp;
   },
-  /*
+
   applyProps(
-    ins: PIXI.Graphics,
+    vp: Viewport, //PIXI.Graphics,
     oldProps: IViewportProps,
     newProps: IViewportProps
   ) {
-    if (oldProps.zoomPercent !== newProps.zoomPercent && newProps.zoomPercent) {
-      viewport = viewport.setZoom(newProps.zoomPercent, false);
+    //if (oldProps.zoomPercent !== newProps.zoomPercent && newProps.zoomPercent) {
+    //  viewport = viewport.setZoom(newProps.zoomPercent, false);
+    // }
+    //vp = vp.fitWorld(true);
+    //vp = vp.setZoom(50, false);
+    if (
+      oldProps.numColumns !== newProps.numColumns ||
+      oldProps.numRows !== newProps.numRows
+    ) {
+      vp.screenWidth = newProps.app.renderer.width;
+      vp.screenHeight = newProps.app.renderer.height;
+      vp.worldWidth = newProps.numColumns;
+      vp.worldHeight = newProps.numRows;
+      vp = vp.fitWorld(true);
+      vp = vp.setZoom(newProps.app.renderer.width / newProps.numColumns, false);
     }
-    return viewport;
-  },*/
+    return vp;
+  },
 });
