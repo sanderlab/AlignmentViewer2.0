@@ -407,29 +407,6 @@ export default class App extends React.Component<AppProps, AppState> {
             onFileLoaded={this.onFileUpload}
             onStartLoading={() => this.setState({ loading: true })}
           />
-          <ExampleFileComponent
-            labelText="small"
-            fileURL={`${process.env.PUBLIC_URL}/small_alignment.a2m`}
-            fileName="small_alignment.a2m"
-            onFileLoaded={this.onFileUpload}
-            onStartLoading={() => this.setState({ loading: true })}
-          />
-
-          <ExampleFileComponent
-            labelText="small2"
-            fileURL={`${process.env.PUBLIC_URL}/small_alignment2.a2m`}
-            fileName="small_alignment2.a2m"
-            onFileLoaded={this.onFileUpload}
-            onStartLoading={() => this.setState({ loading: true })}
-          />
-
-          <ExampleFileComponent
-            labelText="small3"
-            fileURL={`${process.env.PUBLIC_URL}/small_alignment3.a2m`}
-            fileName="small_alignment3.a2m"
-            onFileLoaded={this.onFileUpload}
-            onStartLoading={() => this.setState({ loading: true })}
-          />
         </label>
       </div>
     );

@@ -14,8 +14,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "es6",
-    "noEmit": true
+    "target": "es6"
   },
   "exclude": ["**/__tests__/**"],
   "include": ["src/components", "src/common", "src/index.ts", "types"]
