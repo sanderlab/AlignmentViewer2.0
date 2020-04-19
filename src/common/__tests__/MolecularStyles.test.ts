@@ -5,23 +5,36 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   PositionsToStyle,
-  getLetterClassNamesForAce,
+  getLetterClassNames,
 } from "../MolecularStyles";
 
 describe("MolecularStyles", () => {
-  it("Should get class names for Ace.", () => {
-    let expected =
-      "prefix.preAceLetterObjClass.preAceConsensusClass.preAceQueryClass";
-    expect(getLetterClassNamesForAce("prefix", true, true)).toEqual(expected);
+  it("Should get class names for Ace itself.", () => {
+    let expected = "A preAceConsensusClass preAceQueryClass";
+    expect(getLetterClassNames("A", true, true, true)).toEqual(expected);
 
-    expected = "prefix.preAceLetterObjClass.preAceQueryClass";
-    expect(getLetterClassNamesForAce("prefix", false, true)).toEqual(expected);
+    expected = "A preAceConsensusClass";
+    expect(getLetterClassNames("A", true, false, true)).toEqual(expected);
 
-    expected = "prefix.preAceLetterObjClass";
-    expect(getLetterClassNamesForAce("prefix", false, false)).toEqual(expected);
+    expected = "A";
+    expect(getLetterClassNames("A", false, false, true)).toEqual(expected);
 
-    expected = "prefix.preAceLetterObjClass.preAceQueryClass";
-    expect(getLetterClassNamesForAce("prefix", false, true)).toEqual(expected);
+    expected = "A preAceQueryClass";
+    expect(getLetterClassNames("A", false, true, true)).toEqual(expected);
+  });
+
+  it("Should get ace class names for non-ace request.", () => {
+    let expected = "acePrefixA preAceConsensusClass preAceQueryClass";
+    expect(getLetterClassNames("A", true, true, false)).toEqual(expected);
+
+    expected = "acePrefixA preAceConsensusClass";
+    expect(getLetterClassNames("A", true, false, false)).toEqual(expected);
+
+    expected = "acePrefixA";
+    expect(getLetterClassNames("A", false, false, false)).toEqual(expected);
+
+    expected = "acePrefixA preAceQueryClass";
+    expect(getLetterClassNames("A", false, true, false)).toEqual(expected);
   });
 
   it("Should handle different Alignment types.", () => {
