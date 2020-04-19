@@ -253,48 +253,97 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
  */
 const transparentLetterClass = styles.transparentLetterClass;
 const transparentBackgroundClass = styles.transparentBackgroundClass;
-export { transparentBackgroundClass, transparentLetterClass };
+const aceResidueParentClass = styles.aceResidueParentClass;
+export {
+  transparentBackgroundClass,
+  transparentLetterClass,
+  aceResidueParentClass, // place above any residue (e.g., ace_A) to get default coloring
+};
 
 /**
  * Export ace helper parameters and functions.
  */
+
+/**
+ * fast lookup of the query, consensus classes
+ * @param isForAceItself If it is for ace, do not include the ace_ prefix
+ *                       as this is added automatically by ace itself.
+ */
+function generateFastClassLookup(isForAceItself?: boolean) {
+  let ALL_POSSIBLE_CHARS = "";
+  for (var i = 32; i <= 126; i++) {
+    ALL_POSSIBLE_CHARS += String.fromCharCode(i);
+  }
+
+  return ALL_POSSIBLE_CHARS.split("") //".-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    .reduce((acc, letter) => {
+      const letterInClass = letter === "." ? "dot" : letter;
+      const prefix = isForAceItself
+        ? letterInClass
+        : styles.acePrefix + letterInClass;
+      acc.set(
+        letter,
+        new Map([
+          [
+            true,
+            new Map([
+              [
+                true,
+                prefix +
+                  " " +
+                  styles.preAceConsensusClass +
+                  " " +
+                  styles.preAceQueryClass,
+              ], //is consensus and query
+              [false, prefix + " " + styles.preAceConsensusClass], //is consensus, not query
+            ]),
+          ],
+          [
+            false,
+            new Map([
+              [true, prefix + " " + styles.preAceQueryClass], //is query, not consensus
+              [false, prefix], //not query and not consensus
+            ]),
+          ],
+        ])
+      );
+      return acc;
+    }, new Map<string, Map<boolean, Map<boolean, string>>>());
+}
+
+const LETTER_CLASS_NAMES = generateFastClassLookup(false);
+const LETTER_CLASS_NAMES_FOR_ACE = generateFastClassLookup(true);
+
 /**
  * Export a class name array that is used by the ace editor
  * mode to fill class names for each letter. The structure
  * of this string is just the list of class names, separated
  * by a period. Ace subsequently prepends ace_ to each value
  * when adding the classes to the editor.
+ *
+ * Update: I only use a single class name separated by a space.
+ *         I think this helps with performance:(1) ace no
+ *         longer needs to split the returned value by periods
+ *         and apply any multi-class logic, and (2) the dom has
+ *         shorter classnames. I did rough tests and this seems
+ *         to help with performance, but admittedly they were not
+ *         rigerous or scientific and it doesn't seem to make a
+ *         large impact.
+ *
  * @param letter
  * @param isConsensus
  * @param isQuery
+ * @param forAceItself if set to true, the first returned class will
+ *                     not have ace_ prepended as the ace editor will
+ *                     do the prepending on its own.
  */
-export function getLetterClassNamesForAce(
+export function getLetterClassNames(
   letter: string,
   isConsensus: boolean,
-  isQuery: boolean
+  isQuery: boolean,
+  forAceItself?: boolean
 ) {
-  const all = "." + styles.preAceLetterObjClass;
-  const consensus = isConsensus ? "." + styles.preAceConsensusClass : "";
-  const query = isQuery ? "." + styles.preAceQueryClass : "";
-
-  return letter + all + consensus + query;
-}
-
-/**
- * Get letter class names that have the final ace_ prepended
- * classnames.
- * @param letter
- * @param isConsensus
- * @param isQuery
- */
-export function getFinalLetterClassNames(
-  letter: string,
-  isConsensus: boolean,
-  isQuery: boolean
-) {
-  const all = " " + styles.aceLetterObjClass;
-  const consensus = isConsensus ? " " + styles.aceConsensusClass : "";
-  const query = isQuery ? " " + styles.aceQueryClass : "";
-
-  return styles.acePrefix + letter + all + consensus + query;
+  return forAceItself
+    ? LETTER_CLASS_NAMES_FOR_ACE.get(letter)!.get(isConsensus)!.get(isQuery)!
+    : LETTER_CLASS_NAMES.get(letter)!.get(isConsensus)!.get(isQuery)!;
 }

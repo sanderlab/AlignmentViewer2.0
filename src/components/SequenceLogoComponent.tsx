@@ -8,7 +8,10 @@
 import React from "react";
 import { Alignment } from "../common/Alignment";
 import { GlyphFactory } from "../common/SequenceLogoGlyphs";
-import { getFinalLetterClassNames } from "../common/MolecularStyles";
+import {
+  aceResidueParentClass,
+  getLetterClassNames,
+} from "../common/MolecularStyles";
 
 export enum LOGO_TYPES {
   LETTERS = "letter stack",
@@ -98,7 +101,7 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
     const sortedAlphabet = lettersSorted.map((letter) => {
       return {
         letter: letter,
-        classNames: getFinalLetterClassNames(letter, false, false),
+        classNames: getLetterClassNames(letter, false, false, false),
       };
     });
 
@@ -167,6 +170,7 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
               <g
                 transform={`translate(${positionIdx},0)`}
                 key={"p_" + positionIdx}
+                className={aceResidueParentClass} //required for default coloring
               >
                 {generateStack(singlePositionData)}
               </g>

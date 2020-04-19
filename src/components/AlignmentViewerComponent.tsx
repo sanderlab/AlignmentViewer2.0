@@ -9,7 +9,6 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   PositionsToStyle,
-  AlignmentTypes,
 } from "../common/MolecularStyles";
 import { MiniMapComponent } from "./MiniMapComponent";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
@@ -207,14 +206,6 @@ export class AlignmentViewer extends React.Component<
           this.renderAlignmentAnnotationBox(),
           this.renderAlignmentBox()
         )}
-
-        {/*
-        //this is where we would add the webgl msa ..
-        this.generateWidget(
-          "av-webgl-msa",
-          "",
-          this.renderDatatableBox()
-        )*/}
       </div>
     );
   }

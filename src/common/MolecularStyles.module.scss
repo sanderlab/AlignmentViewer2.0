@@ -54,12 +54,11 @@
 
 //ace specific props
 $acePrefix: ace_;
-$preAceLetterObjClass: obj;
-$preAceQueryClass: query;
-$preAceConsensusClass: consensus;
-$aceLetterObjClass: $acePrefix + $preAceLetterObjClass;
-$aceQueryClass: $acePrefix + $preAceQueryClass;
-$aceConsensusClass: $acePrefix + $preAceConsensusClass;
+$preAceQueryClass: q;
+$preAceConsensusClass: c;
+$aceQueryClass: $preAceQueryClass;
+$aceConsensusClass: $preAceConsensusClass;
+$aceResidueParentClass: $acePrefix + line; //directly above ace residues
 
 //general global props
 $transparentLetterClass: transparent-letters;
@@ -196,12 +195,11 @@ $ntProps: (
 
 :export {
   acePrefix: $acePrefix;
-  preAceLetterObjClass: $preAceLetterObjClass;
   preAceQueryClass: $preAceQueryClass;
   preAceConsensusClass: $preAceConsensusClass;
-  aceLetterObjClass: $aceLetterObjClass;
   aceQueryClass: $aceQueryClass;
   aceConsensusClass: $aceConsensusClass;
+  aceResidueParentClass: $aceResidueParentClass;
   transparentLetterClass: $transparentLetterClass;
   transparentBackgroundClass: $transparentBackgroundClass;
 
@@ -261,7 +259,7 @@ $ntProps: (
 
   //set default letter color
   $defaultColor: map-get($styleObj, defaultLetterColor);
-  :global .#{$alignmentClass} .#{$aceLetterObjClass} {
+  :global .#{$alignmentClass} .#{$aceResidueParentClass} [class^="ace_"] {
     color: $defaultColor;
     fill: $defaultColor;
   }
@@ -339,12 +337,12 @@ $ntProps: (
 
   //set default letter color
   $defaultColor: map-get($styleObj, defaultLetterColor);
-  :global .#{$alignmentClass} .#{$aceLetterObjClass} {
+  :global .#{$alignmentClass} .#{$aceResidueParentClass} [class^="ace_"] {
     color: $defaultColor;
     fill: $defaultColor;
   }
   //S is special
-  :global .#{$alignmentClass} .#{$acePrefix + S}.#{$aceLetterObjClass} {
+  :global .#{$alignmentClass} .#{$aceResidueParentClass} .#{$acePrefix + S} {
     color: $defaultColor;
     stroke: $defaultColor;
     fill: #ffffff;
