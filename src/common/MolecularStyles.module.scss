@@ -246,6 +246,16 @@ $ntProps: (
 }
 
 //
+// FUNCTIONS
+//
+
+//see https://stackoverflow.com/questions/11867545
+@function brightness($color) {
+  @return ((red($color) * 299) + (green($color) * 587) + (blue($color) * 114)) /
+    1000;
+}
+
+//
 // AMINO ACID CLASS DEFINITIONS
 //
 // Programmatically combine into one big set of selectors. Export
@@ -291,9 +301,14 @@ $ntProps: (
     :global
       .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQueryDiff}
       .#{$aceAAClass}:not(.#{$aceQueryClass}) {
-      //opacity: 1 !important;
       background-color: rgba($color, 1) !important;
       color: rgba($color, 0) !important;
+      //EXAMPLE of color based on brightness
+      //$tmpcolor: white;
+      //@if brightness($color) > 125 {
+      //  $tmpcolor: black;
+      //}
+      //color: $tmpcolor !important;
     }
 
     //"default" style - slightly transparent colored background and fully colored letters
