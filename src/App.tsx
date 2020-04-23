@@ -387,7 +387,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <FileInputComponent
-          labelText={"Upload Sequence File:"}
+          labelText={"Upload Alignment File:"}
           onFileLoadCb={this.onFileUpload}
         />
       </div>
@@ -457,19 +457,21 @@ export default class App extends React.Component<AppProps, AppState> {
 
   protected onFileUpload = async (file: File) => {
     //const fileText = await file.text(); //doesn't work in modern safari or even slightly older firefox
-    this.setState({
-      loading: true,
-    });
-    var reader = new FileReader();
-    reader.onload = (e) => {
-      const fileText = reader.result as string;
-      const alignment = Alignment.fromFileContents(file.name, fileText);
+    if (file) {
       this.setState({
-        alignment: alignment,
-        style: alignment.getDefaultStyle(),
-        loading: false,
+        loading: true,
       });
-    };
-    reader.readAsText(file);
+      var reader = new FileReader();
+      reader.onload = (e) => {
+        const fileText = reader.result as string;
+        const alignment = Alignment.fromFileContents(file.name, fileText);
+        this.setState({
+          alignment: alignment,
+          style: alignment.getDefaultStyle(),
+          loading: false,
+        });
+      };
+      reader.readAsText(file);
+    }
   };
 }

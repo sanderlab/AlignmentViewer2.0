@@ -6,6 +6,7 @@ exports[`FileInputComponent Should render with no props. 1`] = `
     Upload:
   </strong>
   <input
+    id="files"
     onInput={[Function]}
     type="file"
   />

@@ -8,7 +8,7 @@ export interface IFileInputProps {
 // Shamelessly based on from https://reactjs.org/docs/uncontrolled-components.html
 export class FileInputComponent extends React.Component<IFileInputProps> {
   public static defaultProps = {
-    labelText: "Upload:"
+    labelText: "Upload:",
   };
 
   protected fileInput: React.RefObject<HTMLInputElement>;
@@ -18,7 +18,7 @@ export class FileInputComponent extends React.Component<IFileInputProps> {
     this.fileInput = React.createRef();
   }
 
-  handleSubmit(event: React.FormEvent) {
+  handleSubmit(event: React.FormEvent<HTMLInputElement>) {
     const { onFileLoadCb } = this.props;
     event.preventDefault();
     if (
@@ -28,6 +28,7 @@ export class FileInputComponent extends React.Component<IFileInputProps> {
     ) {
       onFileLoadCb(this.fileInput.current.files[0], event);
     }
+    (event.target as HTMLInputElement).value = ""; //reset form
   }
 
   render() {
@@ -35,7 +36,12 @@ export class FileInputComponent extends React.Component<IFileInputProps> {
     return (
       <label>
         <strong>{labelText}</strong>
-        <input type="file" ref={this.fileInput} onInput={this.handleSubmit} />
+        <input
+          type="file"
+          id="files"
+          ref={this.fileInput}
+          onInput={this.handleSubmit}
+        />
       </label>
     );
   }

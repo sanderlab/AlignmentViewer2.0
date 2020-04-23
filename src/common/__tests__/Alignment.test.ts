@@ -31,7 +31,7 @@ describe("Alignment", () => {
     const alignment = new Alignment("Test-Sequence", [
       { id: "id-1", sequence: "ZMA" },
     ]);
-    expect(alignment.getSortedAlphaLetters()).toEqual(["A", "M", "Z"]);
+    expect(alignment.getSortedUpperAlphaLetters()).toEqual(["A", "M", "Z"]);
   });
 
   it("Should allow getting normalized position counts.", () => {

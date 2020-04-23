@@ -69,7 +69,7 @@ export class SequenceConservationComponent extends React.Component<
    */
   createConservationCountGs() {
     const toReturn: JSX.Element[] = [];
-    const allLetters = this.props.alignment.getSortedAlphaLetters();
+    const allLetters = this.props.alignment.getSortedUpperAlphaLetters();
     const positionalLetterCounts = this.props.alignment.getPositionalLetterCounts(
       true,
       allLetters

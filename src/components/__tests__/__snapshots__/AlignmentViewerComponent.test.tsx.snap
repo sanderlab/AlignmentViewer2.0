@@ -12,7 +12,7 @@ exports[`AlignmentViewer Should render 1`] = `
       alignment={
         Alignment {
           "aceEditorMode": undefined,
-          "allAlphaLettersSorted": Array [],
+          "allUpperAlphaLettersSorted": Array [],
           "consensus": Array [],
           "globalAlphaLetterCounts": Object {},
           "name": "",
@@ -104,11 +104,11 @@ exports[`AlignmentViewer Should render 1`] = `
     <div
       className="av-content"
     >
-      <SequenceConservationComponent
+      <SequenceBarplotComponent
         alignment={
           Alignment {
             "aceEditorMode": undefined,
-            "allAlphaLettersSorted": Array [],
+            "allUpperAlphaLettersSorted": Array [],
             "consensus": Array [],
             "globalAlphaLetterCounts": Object {},
             "name": "",
@@ -126,8 +126,27 @@ exports[`AlignmentViewer Should render 1`] = `
             "uuid": "10000000-1000-4000-8000-100000000000",
           }
         }
-        characterWidth={0}
+        dataSeries={
+          Array [
+            Object {
+              "cssClass": "barplot-entropy",
+              "getPositionalInfo": [Function],
+              "id": "entropy",
+              "name": "Entropy",
+            },
+            Object {
+              "cssClass": "barplot-gaps",
+              "getPositionalInfo": [Function],
+              "id": "gaps",
+              "name": "Gaps",
+              "plotOptions": Object {
+                "fixYMax": [Function],
+              },
+            },
+          ]
+        }
         id="sequence_conservation"
+        positionWidth={0}
       />
     </div>
   </div>
@@ -149,7 +168,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -192,7 +211,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -244,7 +263,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -296,7 +315,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -352,7 +371,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",

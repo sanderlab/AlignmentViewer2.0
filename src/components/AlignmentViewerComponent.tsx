@@ -4,7 +4,10 @@ import { Ace } from "ace-builds";
 import { Alignment, SequenceSortOptions } from "../common/Alignment";
 import { ScrollSync, ScrollType } from "../common/ScrollSync";
 import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
-import { SequenceConservationComponent } from "./SequenceConservationComponent";
+import {
+  ISequenceBarplotDataSeries,
+  SequenceBarplotComponent,
+} from "./SequenceBarplotComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -38,6 +41,8 @@ interface IAlignmentViewerState {
   alignmentEditorVisibleFirstRow?: number;
   alignmentEditorVisibleLastRow?: number;
 
+  defaultBarplotData: ISequenceBarplotDataSeries[];
+
   windowWidth: number;
   windowHeight: number;
 }
@@ -56,6 +61,40 @@ export class AlignmentViewer extends React.Component<
       aceCharacterWidth: 0,
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
+      defaultBarplotData: [
+        {
+          id: "entropy",
+          name: "Entropy",
+          cssClass: "barplot-entropy",
+          getPositionalInfo: (pos, al) => {
+            const plc = al
+              .getPositionalLetterCounts(true, al.getSortedUpperAlphaLetters())
+              .get(pos);
+            return {
+              height:
+                !plc || Object.keys(plc).length === 0
+                  ? 0
+                  : -1 *
+                    Object.values(plc).reduce((acc, frac) => {
+                      return acc + frac * Math.log2(frac);
+                    }, 0),
+            };
+          },
+        },
+        {
+          id: "gaps",
+          name: "Gaps",
+          cssClass: "barplot-gaps",
+          plotOptions: {
+            fixYMax: (alignment) => alignment.getSequences().length,
+          },
+          getPositionalInfo: (pos, al) => {
+            return {
+              height: al.getGapCountAtColumn(pos),
+            };
+          },
+        },
+      ],
     };
 
     //setup scroll groups
@@ -229,13 +268,17 @@ export class AlignmentViewer extends React.Component<
     </div>
   );
 
-  protected renderConservationBox = () => (
-    <SequenceConservationComponent
-      id="sequence_conservation"
-      alignment={this.props.alignment}
-      characterWidth={this.state.aceCharacterWidth}
-    />
-  );
+  protected renderConservationBox = () => {
+    const { defaultBarplotData } = this.state;
+    return (
+      <SequenceBarplotComponent
+        id="sequence_conservation"
+        alignment={this.props.alignment}
+        dataSeries={defaultBarplotData}
+        positionWidth={this.state.aceCharacterWidth}
+      ></SequenceBarplotComponent>
+    );
+  };
 
   protected renderConsensusQueryBox = () => (
     <div className="consensusseq_box">

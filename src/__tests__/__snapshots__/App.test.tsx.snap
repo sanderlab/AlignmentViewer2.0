@@ -266,7 +266,7 @@ exports[`App Should render within 2 minutes. 1`] = `
         <br />
         <div>
           <FileInputComponent
-            labelText="Upload Sequence File:"
+            labelText="Upload Alignment File:"
             onFileLoadCb={[Function]}
           />
         </div>
