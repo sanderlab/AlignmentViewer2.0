@@ -55,13 +55,55 @@ export class SequenceBarplotComponent extends React.Component<
     this.handleBarHover = this.handleBarHover.bind(this);
   }
 
-  handleSvgHover(isHovered: boolean) {
+  public static ENTROPY_BARPLOT: ISequenceBarplotDataSeries = {
+    id: "entropy",
+    name: "Entropy",
+    cssClass: "barplot-entropy",
+    getPositionalInfo: (pos, al) => {
+      const plc = al
+        .getPositionalLetterCounts(true, al.getSortedUpperAlphaLetters())
+        .get(pos);
+      return {
+        height:
+          !plc || Object.keys(plc).length === 0
+            ? 0
+            : -1 *
+              Object.values(plc).reduce((acc, frac) => {
+                return acc + frac * Math.log2(frac);
+              }, 0),
+      };
+    },
+  };
+
+  public static GAPS_BARPLOT: ISequenceBarplotDataSeries = {
+    id: "gaps",
+    name: "Gaps",
+    cssClass: "barplot-gaps",
+    plotOptions: {
+      fixYMax: (alignment) => alignment.getSequences().length,
+    },
+    getPositionalInfo: (pos, al) => {
+      return {
+        height: al.getGapCountAtColumn(pos),
+      };
+    },
+  };
+
+  /**
+   *
+   *
+   * HELPER FUNCTIONS
+   *
+   *
+   */
+
+  private handleSvgHover(isHovered: boolean) {
     this.setState({
       svgHovered: isHovered,
     });
   }
 
-  handleBarHover(
+  private handleBarHover(
     event: React.MouseEvent<SVGRectElement, MouseEvent>,
     bar: ISingleBarDetailsFull,
     isHovered: boolean
@@ -73,21 +115,16 @@ export class SequenceBarplotComponent extends React.Component<
     });
   }
 
-  handleToggleBarSelected(bar: ISingleBarDetailsFull, event: React.MouseEvent) {
+  private handleToggleBarSelected(
+    bar: ISingleBarDetailsFull,
+    event: React.MouseEvent
+  ) {
     this.setState({
       barsSelected: this.state.barsSelected.includes(bar)
         ? this.state.barsSelected.filter((elem) => elem !== bar)
         : [...this.state.barsSelected, bar],
     });
   }
-
-  /**
-   *
-   *
-   * HELPER FUNCTIONS
-   *
-   *
-   */
 
   /**
    * Normalize bars to fall between 0 and 100 in svg space. Obey the
@@ -104,11 +141,6 @@ export class SequenceBarplotComponent extends React.Component<
     const overallMaxHeight = Math.max(...allHeights);
     return bars.map((bar) => {
       const minHeight = overallMinHeight;
-      //const maxHeight = overallMaxHeight;
-      //const minHeight =
-      //  bar.dataSeries.plotOptions && bar.dataSeries.plotOptions.fixYMin
-      //    ? bar.dataSeries.plotOptions.fixYMin
-      //    : overallMinHeight;
       const maxHeight =
         bar.dataSeries.plotOptions && bar.dataSeries.plotOptions.fixYMax
           ? bar.dataSeries.plotOptions.fixYMax(alignment)

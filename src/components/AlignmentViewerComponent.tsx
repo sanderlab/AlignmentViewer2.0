@@ -65,38 +65,8 @@ export class AlignmentViewer extends React.Component<
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
       defaultBarplotData: [
-        {
-          id: "entropy",
-          name: "Entropy",
-          cssClass: "barplot-entropy",
-          getPositionalInfo: (pos, al) => {
-            const plc = al
-              .getPositionalLetterCounts(true, al.getSortedUpperAlphaLetters())
-              .get(pos);
-            return {
-              height:
-                !plc || Object.keys(plc).length === 0
-                  ? 0
-                  : -1 *
-                    Object.values(plc).reduce((acc, frac) => {
-                      return acc + frac * Math.log2(frac);
-                    }, 0),
-            };
-          },
-        },
-        {
-          id: "gaps",
-          name: "Gaps",
-          cssClass: "barplot-gaps",
-          plotOptions: {
-            fixYMax: (alignment) => alignment.getSequences().length,
-          },
-          getPositionalInfo: (pos, al) => {
-            return {
-              height: al.getGapCountAtColumn(pos),
-            };
-          },
-        },
+        SequenceBarplotComponent.ENTROPY_BARPLOT,
+        SequenceBarplotComponent.GAPS_BARPLOT,
       ],
     };
 
