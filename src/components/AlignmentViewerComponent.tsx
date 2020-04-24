@@ -51,6 +51,9 @@ export class AlignmentViewer extends React.Component<
   IAlignmentViewerProps,
   IAlignmentViewerState
 > {
+  private verticalScrollSync: ScrollSync;
+  private horizontalScrollSync: ScrollSync;
+
   static defaultProps = defaultProps;
 
   constructor(props: IAlignmentViewerProps) {
@@ -97,12 +100,15 @@ export class AlignmentViewer extends React.Component<
       ],
     };
 
+    this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
+    this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
+
     //setup scroll groups
-    ScrollSync.getInstance().setScrollerGroup(
-      "horizontal",
-      ScrollType.horizontal
-    );
-    ScrollSync.getInstance().setScrollerGroup("vertical", ScrollType.vertical);
+    //ScrollSync.getInstance().setScrollerGroup(
+    //  "horizontal",
+    //  ScrollType.horizontal
+    //);
+    //ScrollSync.getInstance().setScrollerGroup("vertical", ScrollType.vertical);
   }
 
   private handleCharacterSizeChanged = (newCharSize: number) => {
@@ -116,23 +122,23 @@ export class AlignmentViewer extends React.Component<
   private aceEditorLoaded = (
     id: string,
     editor: Ace.Editor,
+    parentElem: HTMLDivElement,
     scrollSyncDirection: ScrollType
   ) => {
     //console.log("_aceEditorLoaded id =" + id);
-
-    let scrollSync = ScrollSync.getInstance();
     if (
       scrollSyncDirection === ScrollType.horizontal ||
       scrollSyncDirection === ScrollType.both
     ) {
-      scrollSync.registerScroller(editor, "horizontal");
+      this.horizontalScrollSync.registerAceScroller(editor, parentElem);
     }
     if (
       scrollSyncDirection === ScrollType.vertical ||
       scrollSyncDirection === ScrollType.both
     ) {
-      scrollSync.registerScroller(editor, "vertical");
+      this.verticalScrollSync.registerAceScroller(editor, parentElem);
     }
+
     this.setState({
       aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
       aceEditors: [editor].concat(this.state.aceEditors),
@@ -168,8 +174,7 @@ export class AlignmentViewer extends React.Component<
               //TODO: move into separate component .. Ref can be null here and
               //      also good to keep track of removal / addition for scroll sync
               //console.log("the ref is:", e);
-              let scrollSync = ScrollSync.getInstance();
-              scrollSync.registerScroller(e, "horizontal", true);
+              this.horizontalScrollSync.registerElementScroller(e);
             }
           }}
         >
@@ -272,7 +277,6 @@ export class AlignmentViewer extends React.Component<
     const { defaultBarplotData } = this.state;
     return (
       <SequenceBarplotComponent
-        id="sequence_conservation"
         alignment={this.props.alignment}
         dataSeries={defaultBarplotData}
         positionWidth={this.state.aceCharacterWidth}
@@ -292,10 +296,11 @@ export class AlignmentViewer extends React.Component<
           this.props.style.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
-        editorLoaded={(editor) => {
+        editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             "ace-consensusseq",
             editor,
+            parentElem,
             ScrollType.horizontal
           );
         }}
@@ -316,8 +321,13 @@ export class AlignmentViewer extends React.Component<
           this.props.style.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
-        editorLoaded={(editor) => {
-          this.aceEditorLoaded("ace-queryseq", editor, ScrollType.horizontal);
+        editorLoaded={(editor, parentElem) => {
+          this.aceEditorLoaded(
+            "ace-queryseq",
+            editor,
+            parentElem,
+            ScrollType.horizontal
+          );
         }}
       ></AceTargetSequenceComponent>
     </div>
@@ -330,10 +340,11 @@ export class AlignmentViewer extends React.Component<
           id="ace-positions"
           alignment={this.props.alignment}
           fontSize={this.props.zoomLevel}
-          editorLoaded={(editor) => {
+          editorLoaded={(editor, parentElem) => {
             this.aceEditorLoaded(
               "ace-positions",
               editor,
+              parentElem,
               ScrollType.horizontal
             );
           }}
@@ -368,8 +379,13 @@ export class AlignmentViewer extends React.Component<
           this.props.style.colorScheme.className,
         ].join(" ")}
         characterSizeChanged={this.handleCharacterSizeChanged}
-        editorLoaded={(editor) => {
-          this.aceEditorLoaded("ace-alignment", editor, ScrollType.both);
+        editorLoaded={(editor, parentElem) => {
+          this.aceEditorLoaded(
+            "ace-alignment",
+            editor,
+            parentElem,
+            ScrollType.both
+          );
         }}
       ></AceMultipleSequenceAlignmentComponent>
     </div>
@@ -384,10 +400,11 @@ export class AlignmentViewer extends React.Component<
           .map((x) => x.id)
           .join("\n")}
         fontSize={this.props.zoomLevel}
-        editorLoaded={(editor) => {
+        editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             "ace-alignment-metadata",
             editor,
+            parentElem,
             ScrollType.vertical
           );
         }}

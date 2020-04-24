@@ -15,8 +15,6 @@ export interface ISequenceBarplotDataSeries {
   getPositionalInfo(pos: number, alignment: Alignment): ISingleBarDetails;
 }
 export interface ISequenceBarplotProps {
-  readonly id: string;
-
   alignment: Alignment;
   dataSeries: ISequenceBarplotDataSeries[];
   positionWidth: number;
@@ -312,7 +310,7 @@ export class SequenceBarplotComponent extends React.Component<
     const className = this.state.svgHovered ? "barplot hovered" : "barplot";
 
     return !this.props.alignment ? null : (
-      <div className={className} id={this.props.id}>
+      <div className={className}>
         {this.renderTooltip()}
         {this.renderBarplotLegend()}
         {this.renderBarPlot()}

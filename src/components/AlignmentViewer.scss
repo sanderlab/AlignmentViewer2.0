@@ -56,6 +56,9 @@ $rowHeight: 25px;
     position: relative;
     align-items: center;
   }
+  .av-content::-webkit-scrollbar {
+    background: transparent; /* make scrollbar transparent */
+  }
 
   .av-widget.av-consensus-seq #ace-consensusseq,
   .av-widget.av-target-seq #ace-queryseq,
@@ -76,13 +79,6 @@ $rowHeight: 25px;
     overflow: auto;
     overflow-x: hidden;
     overflow-y: hidden;
-  }
-
-  svg.conservation .gapCount rect {
-    fill: #b7b7b7;
-  }
-  svg.conservation .entropy rect {
-    fill: #000000;
   }
 
   .mini-map.hidden {

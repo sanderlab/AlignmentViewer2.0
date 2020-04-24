@@ -13,7 +13,7 @@ export interface IAceEditorProps {
   editorMode?: string;
   classNames?: string;
 
-  editorLoaded?(editor: Ace.Editor): void;
+  editorLoaded?(editor: Ace.Editor, parentElem: HTMLDivElement): void;
   characterSizeChanged?(newCharacterWidth: number): void;
 
   mouseDown?(e: {
@@ -189,7 +189,7 @@ export class AceEditorComponent<
       this.addMouseEventListeners();
       this.setText();
       if (this.props.editorLoaded) {
-        this.props.editorLoaded(this.editor!); //inform parent of loading.
+        this.props.editorLoaded(this.editor!, e); //inform parent of loading.
       }
     }
   }

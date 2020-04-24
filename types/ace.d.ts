@@ -11,6 +11,10 @@ declare module "ace-builds" {
       on(name: "mousedown", callback: (e: AceEvent) => void): Function;
     }
 
+    interface EditSession {
+      on(name: "changeScrollLeft" | "changeScrollTop", callback: Function);
+    }
+
     interface VirtualRenderer extends Ace.OptionsProvider, EventEmitter {
       $cursorLayer: any;
       $padding: number;

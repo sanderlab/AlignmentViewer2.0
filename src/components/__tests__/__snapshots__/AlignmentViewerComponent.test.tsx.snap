@@ -145,7 +145,6 @@ exports[`AlignmentViewer Should render 1`] = `
             },
           ]
         }
-        id="sequence_conservation"
         positionWidth={0}
       />
     </div>
