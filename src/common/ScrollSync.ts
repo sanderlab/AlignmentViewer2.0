@@ -1,5 +1,4 @@
 import { Ace } from "ace-builds";
-import _ from "lodash";
 
 /**
  * ScrollSync.ts

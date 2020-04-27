@@ -145,6 +145,7 @@ exports[`AlignmentViewer Should render 1`] = `
             },
           ]
         }
+        height={100}
         positionWidth={0}
       />
     </div>

@@ -1,0 +1,57 @@
+/** SequenceBarplot.scss */
+
+.barplot .barplot-tooltip-container {
+  margin: 0;
+
+  .bar-position-textblock {
+    h1 {
+      text-decoration: underline;
+      padding-bottom: 4px;
+      margin: 0;
+      font-size: 14px;
+    }
+    .dataseries-line {
+      line-height: 16px;
+      font-size: 13px;
+    }
+    .legend-square {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin-right: 6px;
+    }
+  }
+}
+
+.barplot {
+  svg {
+    .position-container rect.interaction-placeholder {
+      fill-opacity: 0;
+      stroke: none;
+    }
+    .position-container.selected rect.interaction-placeholder {
+      //stroke: red;
+      //stroke-width: 5;
+    }
+  }
+}
+
+//
+//users should override what is below to change bar colors
+//
+
+.barplot svg rect.barplot-entropy {
+  fill: #000000;
+  color: #000000;
+}
+.bar-position-textblock .barplot-entropy .legend-square {
+  background-color: #000000;
+}
+
+.barplot svg rect.barplot-gaps {
+  fill: #b7b7b7;
+  color: #b7b7b7;
+}
+.bar-position-textblock .barplot-gaps .legend-square {
+  background-color: #b7b7b7;
+}
