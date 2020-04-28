@@ -19,6 +19,7 @@ import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
 import { AceTargetSequenceComponent } from "./AceTargetSequenceComponent";
 import AceTextualRulerComponent from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
+import { ArrayOneOrMore } from "../common/Utils";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -33,6 +34,10 @@ const defaultProps = {
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
   showMiniMap: false as boolean,
   showAnnotations: true as boolean,
+  barplotDataseries: [
+    SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
+    SequenceBarplotComponent.GAPS_BARPLOT,
+  ] as ArrayOneOrMore<ISequenceBarplotDataSeries>,
 };
 
 interface IAlignmentViewerState {
@@ -40,8 +45,6 @@ interface IAlignmentViewerState {
   aceEditors: Ace.Editor[];
   alignmentEditorVisibleFirstRow?: number;
   alignmentEditorVisibleLastRow?: number;
-
-  defaultBarplotData: ISequenceBarplotDataSeries[];
 
   windowWidth: number;
   windowHeight: number;
@@ -64,10 +67,6 @@ export class AlignmentViewer extends React.Component<
       aceCharacterWidth: 0,
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
-      defaultBarplotData: [
-        SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
-        SequenceBarplotComponent.GAPS_BARPLOT,
-      ],
     };
 
     this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
@@ -131,7 +130,7 @@ export class AlignmentViewer extends React.Component<
   private generateWidget(
     className: string,
     annotation: string | JSX.Element,
-    content: JSX.Element,
+    content: JSX.Element | null,
     addAsElementToScrollSync?: boolean
   ) {
     return (
@@ -244,11 +243,11 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderConservationBox = () => {
-    const { defaultBarplotData } = this.state;
-    return (
+    const { barplotDataseries } = this.props;
+    return !barplotDataseries || barplotDataseries.length < 1 ? null : (
       <SequenceBarplotComponent
         alignment={this.props.alignment}
-        dataSeries={defaultBarplotData}
+        dataSeries={barplotDataseries}
         positionWidth={this.state.aceCharacterWidth}
       ></SequenceBarplotComponent>
     );
