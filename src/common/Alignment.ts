@@ -68,7 +68,7 @@ export class Alignment {
     { [letter: string]: number }
   >();
   private globalAlphaLetterCounts: { [letter: string]: number } = {};
-  private allUpperAlphaLettersSorted: string[];
+  private allUpperAlphaLettersInAlignmentSorted: string[];
   private consensus: {
     letter: string;
     position: number;
@@ -172,7 +172,7 @@ export class Alignment {
     //generate statistics
     //
     const start = new Date();
-    const allLetters: { [key: string]: number } = {}; //all letters in the alignment
+    const allLettersInAlignment: { [key: string]: number } = {}; //all letters in the alignment
 
     //this for loop takes the bulk of the time
     for (
@@ -193,7 +193,7 @@ export class Alignment {
         }
 
         const position = positionIdx; // zero based
-        allLetters[letter] = 1;
+        allLettersInAlignment[letter] = 1;
 
         let letterCounts = this.positionalLetterCounts.get(position);
         if (!letterCounts) {
@@ -214,7 +214,9 @@ export class Alignment {
       }
     }
 
-    this.allUpperAlphaLettersSorted = Object.keys(allLetters)
+    this.allUpperAlphaLettersInAlignmentSorted = Object.keys(
+      allLettersInAlignment
+    )
       .sort()
       .reduce((arr: string[], value: string) => {
         if (value.match(/[A-Z]/)) {
@@ -347,7 +349,15 @@ export class Alignment {
         validLetters
       );
     }
-    return this.globalAlphaLetterCounts;
+    return !validLetters
+      ? this.globalAlphaLetterCounts
+      : Object.keys(this.globalAlphaLetterCounts).reduce((acc, letter) => {
+          //don't normalize, but remove invalid letters
+          if (validLetters.includes(letter)) {
+            acc[letter] = this.globalAlphaLetterCounts[letter];
+          }
+          return acc;
+        }, {} as { [letter: string]: number });
   }
 
   /**
@@ -435,11 +445,11 @@ export class Alignment {
   }
 
   /**
-   * Get a sorted list of all of the letters in the alignment.
+   * Get a sorted list of all of the upper case letters in the alignment.
    * @returns a list of all letters in the alignment sorted alphabetically.
    */
-  getSortedUpperAlphaLetters(): string[] {
-    return this.allUpperAlphaLettersSorted;
+  getAllUpperAlphaLettersInAlignmentSorted(): string[] {
+    return this.allUpperAlphaLettersInAlignmentSorted;
   }
 
   /**

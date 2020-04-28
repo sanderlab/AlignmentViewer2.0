@@ -40,11 +40,11 @@
 //users should override what is below to change bar colors
 //
 
-.barplot svg rect.barplot-entropy {
+.barplot svg rect.barplot-shannon-entropy {
   fill: #000000;
   color: #000000;
 }
-.bar-position-textblock .barplot-entropy .legend-square {
+.bar-position-textblock .barplot-shannon-entropy .legend-square {
   background-color: #000000;
 }
 
@@ -54,4 +54,12 @@
 }
 .bar-position-textblock .barplot-gaps .legend-square {
   background-color: #b7b7b7;
+}
+
+.barplot svg rect.barplot-kullback-leibler-divergence {
+  fill: darkred;
+  color: darkred;
+}
+.bar-position-textblock .barplot-kullback-leibler-divergence .legend-square {
+  background-color: darkred;
 }

@@ -94,26 +94,89 @@ export class SequenceBarplotComponent extends React.Component<
     this.handlePositionClicked = this.handlePositionClicked.bind(this);
   }
 
+  /*
+   *
+   *
+   * PRE-CONFIGURED BARPLOTS
+   *
+   *
+   */
+  /**
+   * Plot the shannon entropy at each position -sum(p * log p)
+   *   - p is the fraction of each upper case letter at the position
+   *   - ymax is set to the maximum entropy, which is an equal number
+   *     of all upper case letters in the alignment.
+   */
   public static SHANNON_ENTROPY_BARPLOT: ISequenceBarplotDataSeries = {
     id: "entropy",
     name: "Entropy",
-    cssClass: "barplot-entropy",
+    cssClass: "barplot-shannon-entropy",
+    plotOptions: {
+      fixYMax: (al) => {
+        const allLettersInAlignment = al.getAllUpperAlphaLettersInAlignmentSorted();
+        const p = 1 / allLettersInAlignment.length;
+        return (
+          -1 *
+          allLettersInAlignment.reduce((acc) => {
+            return acc + p * Math.log2(p);
+          }, 0)
+        );
+      },
+    },
     getPositionalInfo: (pos, al) => {
       const plc = al
-        .getPositionalLetterCounts(true, al.getSortedUpperAlphaLetters())
+        .getPositionalLetterCounts(
+          true,
+          al.getAllUpperAlphaLettersInAlignmentSorted()
+        )
         .get(pos);
       return {
         height:
           !plc || Object.keys(plc).length === 0
             ? 0
             : -1 *
-              Object.values(plc).reduce((acc, frac) => {
-                return acc + frac * Math.log2(frac);
+              Object.values(plc).reduce((acc, p) => {
+                return acc + p * Math.log2(p);
               }, 0),
       };
     },
   };
 
+  /**
+   * Plot the Kullback-Leibler (KL) divergence for individual columns in the alignment
+   *        S = sum(pk * log(pk / qk)
+   *   also see scipy docs:
+   *     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html
+   *
+   * No maximum is explicitly set (so it because the max value)
+   */
+  public static KULLBAC_LEIBLER_DIVERGENCE_BARPLOT: ISequenceBarplotDataSeries = {
+    id: "kullback-leibler-divergence",
+    name: "KL Divergence",
+    cssClass: "barplot-kullback-leibler-divergence",
+    getPositionalInfo: (pos, al) => {
+      const allLetters = al.getAllUpperAlphaLettersInAlignmentSorted();
+      const pk = al.getPositionalLetterCounts(true, allLetters).get(pos);
+      const qk = al.getGlobalAlphaLetterCounts(true, allLetters);
+      return {
+        height:
+          !pk || Object.keys(pk).length == 0
+            ? 0
+            : allLetters.reduce((acc, letter) => {
+                if (letter in pk) {
+                  acc += pk[letter] * Math.log(pk[letter] / qk[letter]);
+                }
+                return acc;
+              }, 0),
+      };
+    },
+  };
+
+  /**
+   * Plot the number of gaps at each position. The y max is set to
+   * the total length of the alignment and not the largest number of
+   * gaps.
+   */
   public static GAPS_BARPLOT: ISequenceBarplotDataSeries = {
     id: "gaps",
     name: "Gaps",
@@ -135,7 +198,6 @@ export class SequenceBarplotComponent extends React.Component<
    *
    *
    */
-
   private handleSvgHover(isHovered: boolean) {
     this.setState({
       svgHovered: isHovered,
@@ -368,11 +430,17 @@ export class SequenceBarplotComponent extends React.Component<
               ...bars.map((bar) => bar.normalizedHeight)
             );
 
+            const numDataSeries = barsObj.barsGroupedByDataseries.size;
+            const barWidth =
+              (numDataSeries === 1 ? 0.9 : 1 / numDataSeries) *
+              SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH;
+            const firstBarOffset =
+              (numDataSeries === 1 ? pos + 0.05 : pos) *
+              SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH;
+
             return (
               <g
-                transform={`translate(${
-                  pos * SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
-                },0)`}
+                transform={`translate(${firstBarOffset},0)`}
                 className={
                   this.state.positionsSelected.some((p) => p.position === pos)
                     ? "position-container selected"
@@ -403,10 +471,7 @@ export class SequenceBarplotComponent extends React.Component<
                         SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT -
                         bar.normalizedHeight
                       })`}
-                      width={
-                        (1 / barsObj.barsGroupedByDataseries.size) *
-                        SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
-                      }
+                      width={barWidth}
                       height={bar.normalizedHeight}
                       key={`${bar.position}_${bar.dataSeries.id}`}
                     ></rect>

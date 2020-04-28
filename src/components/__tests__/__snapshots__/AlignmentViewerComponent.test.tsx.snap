@@ -12,7 +12,7 @@ exports[`AlignmentViewer Should render 1`] = `
       alignment={
         Alignment {
           "aceEditorMode": undefined,
-          "allUpperAlphaLettersSorted": Array [],
+          "allUpperAlphaLettersInAlignmentSorted": Array [],
           "consensus": Array [],
           "globalAlphaLetterCounts": Object {},
           "name": "",
@@ -108,7 +108,7 @@ exports[`AlignmentViewer Should render 1`] = `
         alignment={
           Alignment {
             "aceEditorMode": undefined,
-            "allUpperAlphaLettersSorted": Array [],
+            "allUpperAlphaLettersInAlignmentSorted": Array [],
             "consensus": Array [],
             "globalAlphaLetterCounts": Object {},
             "name": "",
@@ -129,10 +129,13 @@ exports[`AlignmentViewer Should render 1`] = `
         dataSeries={
           Array [
             Object {
-              "cssClass": "barplot-entropy",
+              "cssClass": "barplot-shannon-entropy",
               "getPositionalInfo": [Function],
               "id": "entropy",
               "name": "Entropy",
+              "plotOptions": Object {
+                "fixYMax": [Function],
+              },
             },
             Object {
               "cssClass": "barplot-gaps",
@@ -168,7 +171,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allUpperAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -211,7 +214,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allUpperAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -263,7 +266,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allUpperAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -315,7 +318,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allUpperAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -371,7 +374,7 @@ exports[`AlignmentViewer Should render 1`] = `
           alignment={
             Alignment {
               "aceEditorMode": undefined,
-              "allUpperAlphaLettersSorted": Array [],
+              "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Array [],
               "globalAlphaLetterCounts": Object {},
               "name": "",

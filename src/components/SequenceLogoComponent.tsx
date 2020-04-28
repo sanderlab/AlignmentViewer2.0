@@ -73,7 +73,7 @@ export class SequenceLogoComponent extends React.Component<ISequenceLogoProps> {
     }
 
     const positionalLetterCounts = this.props.alignment.getPositionalLetterCounts();
-    const lettersSorted = this.props.alignment.getSortedUpperAlphaLetters();
+    const lettersSorted = this.props.alignment.getAllUpperAlphaLettersInAlignmentSorted();
 
     //calculate the frequencies of all letters in each column
     const frequencies: number[][] = [];

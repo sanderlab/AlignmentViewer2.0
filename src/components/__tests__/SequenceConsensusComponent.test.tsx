@@ -5,7 +5,7 @@ import { shallow } from "enzyme";
 import { Alignment } from "../../common/Alignment";
 import { SequenceBarplotComponent } from "../SequenceBarplotComponent";
 
-describe("SequenceConsensusComponent", () => {
+describe("SequenceBarplotComponent", () => {
   it("Should render when given default props.", () => {
     const wrapper = shallow(
       <SequenceBarplotComponent

@@ -24,7 +24,7 @@ exports[`MiniMap Should render with default props. 1`] = `
       alignment={
         Alignment {
           "aceEditorMode": undefined,
-          "allUpperAlphaLettersSorted": Array [],
+          "allUpperAlphaLettersInAlignmentSorted": Array [],
           "consensus": Array [],
           "globalAlphaLetterCounts": Object {},
           "name": "",

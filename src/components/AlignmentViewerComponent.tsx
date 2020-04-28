@@ -36,6 +36,7 @@ const defaultProps = {
   showAnnotations: true as boolean,
   barplotDataseries: [
     SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
+    //SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
     SequenceBarplotComponent.GAPS_BARPLOT,
   ] as ArrayOneOrMore<ISequenceBarplotDataSeries>,
 };
