@@ -61,14 +61,16 @@ $aceConsensusClass: $preAceConsensusClass;
 $aceResidueParentClass: $acePrefix + line; //directly above ace residues
 
 //general global props
-$transparentLetterClass: transparent-letters;
-$transparentBackgroundClass: transparent-background;
 $aaStyleClassPrefix: aa-alignment-style-;
 $ntStyleClassPrefix: nt-alignment-style-;
 $styPosClassPrefix: alignment-positions-tostyle-;
 $defaultBackgroundAlpha: 0.25;
 
-//both nucleotide and amino acid have the same options for position coloring
+//residue style
+$darkHueClass: dark-residues;
+$lightHueClass: light-residues;
+
+//which positions should get styled?
 $styPosAll: $styPosClassPrefix + all;
 $styPosQuery: $styPosClassPrefix + query;
 $styPosQueryDiff: $styPosClassPrefix + query-diff;
@@ -200,8 +202,8 @@ $ntProps: (
   aceQueryClass: $aceQueryClass;
   aceConsensusClass: $aceConsensusClass;
   aceResidueParentClass: $aceResidueParentClass;
-  transparentLetterClass: $transparentLetterClass;
-  transparentBackgroundClass: $transparentBackgroundClass;
+  darkHueClass: $darkHueClass;
+  lightHueClass: $lightHueClass;
 
   aaAlignTypeClass: map-get($aaProps, topLevelAlignmentClass);
   ntAlignTypeClass: map-get($ntProps, topLevelAlignmentClass);
@@ -256,200 +258,120 @@ $ntProps: (
 }
 
 //
-// AMINO ACID CLASS DEFINITIONS
+//Output all selectors for nt and aa props.
 //
-// Programmatically combine into one big set of selectors. Export
-// as global selector to avoid distinct naming from css modules.
-//
+@mixin outputMajorSelectors($propsObj) {
+  $alignmentClass: map-get($propsObj, topLevelAlignmentClass);
 
-@each $styleName, $styleObj in map-get($aaProps, styles) {
-  $alignmentClass: map-get($aaProps, topLevelAlignmentClass);
-  $styleClass: map-get($styleObj, topLevelClass);
-  $backgroundAlpha: map-get($styleObj, backgroundAlpha);
+  @each $styleName, $styleObj in map-get($propsObj, styles) {
+    $styleClass: map-get($styleObj, topLevelClass);
+    $backgroundAlpha: map-get($styleObj, backgroundAlpha);
 
-  //set default letter color
-  $defaultColor: map-get($styleObj, defaultLetterColor);
-  :global .#{$alignmentClass} .#{$aceResidueParentClass} [class^="ace_"] {
-    color: $defaultColor;
-    fill: $defaultColor;
-  }
-
-  @each $aa, $color in map-get($styleObj, colors) {
-    $aceAAClass: $acePrefix + $aa;
-
-    //set background color to white if the "no background color" class is added
+    //set default letter color for letters - used for unstyled residues
+    // (i.e., dashes, dots, unrecognized letters, lowercase letters)
+    $defaultColor: map-get($styleObj, defaultLetterColor);
     :global
-      .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
-      .#{$aceAAClass} {
-      background-color: transparent !important;
+      .#{$alignmentClass}
+      .#{$aceResidueParentClass}
+      [class^="#{$acePrefix}"] {
+      color: $defaultColor;
+      fill: $defaultColor;
     }
 
-    //remove alpha on background color and hide letter coloring
-    //"no letter color" class is added
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosAll}
-      .#{$aceAAClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceAAClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceAAClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceAAClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceAAClass}:not(.#{$aceQueryClass}) {
-      background-color: rgba($color, 1) !important;
-      color: rgba($color, 0) !important;
-      //EXAMPLE of color based on brightness
-      //$tmpcolor: white;
-      //@if brightness($color) > 125 {
-      //  $tmpcolor: black;
-      //}
-      //color: $tmpcolor !important;
+    //SPECIAL CASE 1
+    //the glyph for "S" needs to have a fill and stroke
+    //this selector captures an special case - when user selects
+    //nucleotide alignment and there is an S in the alignment
+    //it would disappear in the logo plot without this class.
+    :global .#{$alignmentClass} .#{$aceResidueParentClass} .#{$acePrefix}S {
+      color: $defaultColor;
+      stroke: $defaultColor;
+      fill: #ffffff;
     }
 
-    //"default" style - slightly transparent colored background and fully colored letters
-    :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceAAClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceAAClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceAAClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+    //SPECIAL CASE 2.1
+    //logo plot fo "S" when rectangles are shown needs to have
+    //fill with the color, not white as required for the glyph
+    //NOTE: this for amino acids, this is handled by on a per-style
+    //      basis (see SPECIAL CASE 2.2 below)
+    :global .#{$alignmentClass} .#{$aceResidueParentClass} rect.#{$acePrefix}S {
+      fill: $defaultColor;
+    }
+
+    @each $aa, $color in map-get($styleObj, colors) {
+      $aceAAClass: $acePrefix + $aa;
+
+      //
+      //dark hues
+      //
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosAll}
+        .#{$aceAAClass},
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosConsensus}
+        .#{$aceAAClass}.#{$aceConsensusClass},
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosConsensusDiff}
+        .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosQuery}
+        .#{$aceAAClass}.#{$aceQueryClass},
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosQueryDiff}
+        .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+        background-color: rgba($color, 1) !important;
+
+        //set letter color based on brightness of background color
+        $tmpcolor: white;
+        @if brightness($color) > 125 {
+          $tmpcolor: black;
+        }
+        color: $tmpcolor !important;
+      }
+
+      //
+      // light hues - default of no class is added and also for logo
+      //
+      :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
+        .#{$aceAAClass}.#{$aceConsensusClass},
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
+        .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
+        .#{$aceAAClass}.#{$aceQueryClass},
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
+        .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+        @if $aa == S {
+          //serine glyph needs stoke coloring also
+          color: $color;
+          stroke: $color;
+          fill: #ffffff;
+          background-color: rgba($color, $backgroundAlpha);
+        } @else {
+          color: $color;
+          fill: $color;
+          background-color: rgba($color, $backgroundAlpha);
+        }
+      }
+
+      //SPECIAL CASE 2.2
+      //logo plot fo "S" when rectangles are shown needs to have
+      //fill with the color, not white as required for the glyph
       @if $aa == S {
-        //serine glyph needs stoke coloring also
-        color: $color;
-        stroke: $color;
-        fill: #ffffff;
-        background-color: rgba($color, $backgroundAlpha);
-      } @else {
-        color: $color;
-        fill: $color;
-        background-color: rgba($color, $backgroundAlpha);
+        :global
+          .#{$alignmentClass}.#{$styleClass}.#{$styPosAll}
+          svg
+          rect.#{$aceAAClass} {
+          fill: $color;
+        }
       }
     }
   }
 }
 
-//
-// NUCLEOTIDE CLASS DEFINITIONS
-// Programmatically combine into one big set of selectors. Export
-// as global selector to avoid distinct naming from css modules.
-//
-@each $styleName, $styleObj in map-get($ntProps, styles) {
-  $alignmentClass: map-get($ntProps, topLevelAlignmentClass);
-  $styleClass: map-get($styleObj, topLevelClass);
-  $backgroundAlpha: map-get($styleObj, backgroundAlpha);
-
-  //set default letter color
-  $defaultColor: map-get($styleObj, defaultLetterColor);
-  :global .#{$alignmentClass} .#{$aceResidueParentClass} [class^="ace_"] {
-    color: $defaultColor;
-    fill: $defaultColor;
-  }
-  //S is special
-  :global .#{$alignmentClass} .#{$aceResidueParentClass} .#{$acePrefix + S} {
-    color: $defaultColor;
-    stroke: $defaultColor;
-    fill: #ffffff;
-  }
-
-  @each $nt, $color in map-get($styleObj, colors) {
-    $aceNTClass: $acePrefix + $nt;
-
-    //set background color to white if the "no background color" class is added
-    :global
-      .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
-      .#{$aceNTClass} {
-      background-color: transparent !important;
-    }
-    //remove alpha on background color and hide letter coloring
-    //"no letter color" class is added
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosAll}
-      .#{$aceNTClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceNTClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceNTClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceNTClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceNTClass}:not(.#{$aceQueryClass}) {
-      background-color: rgba($color, 1) !important;
-      color: rgba($color, 0) !important;
-    }
-
-    //"default" style - slightly transparent colored background and fully colored letters
-    :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceNTClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceNTClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceNTClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceNTClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceNTClass}:not(.#{$aceQueryClass}) {
-      color: $color;
-      fill: $color; //for logo
-      background-color: rgba($color, $backgroundAlpha);
-    }
-  }
-}
-
-/**
- *
- *
- * SPECIAL CASES
- *
- *
- */
-
-//SPECIAL CASE 1
-//
-//the glyph for "S" needs to have a fill and stroke
-//this selector captures an odd case - when user selects
-//nucleotide alignment and there is an S in the alignment
-//it would disappear in the logo plot without this class.
-:global .#{$acePrefix}S {
-  stroke: #000000;
-}
-
-//SPECIAL CASE 2
-//
-//logo plot fo "S" when rectangles are shown needs to have
-//fill with the color, not white as required for the glyph
-@each $styleName, $styleObj in map-get($aaProps, styles) {
-  $alignmentClass: map-get($aaProps, topLevelAlignmentClass);
-  $styleClass: map-get($styleObj, topLevelClass);
-
-  @each $aa, $color in map-get($styleObj, colors) {
-    $aceAAClass: $acePrefix + $aa;
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosAll}
-      svg
-      rect.#{$aceAAClass} {
-      @if $aa == S {
-        //serine glyph needs stoke coloring also
-        fill: $color;
-      }
-    }
-  }
-}
+@include outputMajorSelectors($aaProps);
+@include outputMajorSelectors($ntProps);

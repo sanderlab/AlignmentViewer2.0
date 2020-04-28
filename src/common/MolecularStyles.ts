@@ -154,31 +154,18 @@ export class PositionsToStyle {
   ) {}
 }
 
-export class ResidueDetailTypes {
-  static readonly BOTH = new ResidueDetailTypes(
-    "both",
-    "Style Background and Letters",
-    ""
+export class ResidueHue {
+  static readonly LIGHT = new ResidueHue(
+    "light",
+    "Light",
+    styles.lightHueClass
   );
-  static readonly LETTER_ONLY = new ResidueDetailTypes(
-    "letter-only",
-    "Only Style Letters",
-    styles.transparentBackgroundClass
-  );
-  static readonly BACKGROUND_ONLY = new ResidueDetailTypes(
-    "background-only",
-    "Only Style Background",
-    styles.transparentLetterClass
-  );
+  static readonly DARK = new ResidueHue("dark", "Dark", styles.darkHueClass);
 
-  static list = [
-    ResidueDetailTypes.BOTH,
-    ResidueDetailTypes.LETTER_ONLY,
-    ResidueDetailTypes.BACKGROUND_ONLY,
-  ];
+  static list = [ResidueHue.DARK, ResidueHue.LIGHT];
 
   static fromKey(key: string) {
-    return ResidueDetailTypes.list.find((at) => {
+    return ResidueHue.list.find((at) => {
       return at.key === key;
     });
   }
@@ -205,7 +192,7 @@ export abstract class AlignmentStyle {
   abstract readonly alignmentType: AlignmentTypes;
   abstract colorScheme: IColorScheme;
   abstract positionsToStyle: PositionsToStyle;
-  abstract residueDetail: ResidueDetailTypes;
+  abstract residueDetail: ResidueHue;
 
   static fromAlignmentType(alignmentType: AlignmentTypes) {
     if (alignmentType === AlignmentTypes.AMINOACID)
@@ -226,7 +213,7 @@ export class AminoAcidAlignmentStyle implements AlignmentStyle {
   constructor(
     public colorScheme: IColorScheme = ALL_AMINOACID_COLORSCHEMES[0],
     public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
-    public residueDetail: ResidueDetailTypes = ResidueDetailTypes.BOTH
+    public residueDetail: ResidueHue = ResidueHue.LIGHT
   ) {}
 }
 
@@ -244,19 +231,19 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
   constructor(
     public colorScheme: IColorScheme = ALL_NUCLEOTIDE_COLORSCHEMES[0],
     public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
-    public residueDetail: ResidueDetailTypes = ResidueDetailTypes.BOTH
+    public residueDetail: ResidueHue = ResidueHue.LIGHT
   ) {}
 }
 
 /**
  * Export globals
  */
-const transparentLetterClass = styles.transparentLetterClass;
-const transparentBackgroundClass = styles.transparentBackgroundClass;
+const darkHueClass = styles.darkHueClass;
+const lightHueClass = styles.lightHueClass;
 const aceResidueParentClass = styles.aceResidueParentClass;
 export {
-  transparentBackgroundClass,
-  transparentLetterClass,
+  lightHueClass,
+  darkHueClass,
   aceResidueParentClass, // place above any residue (e.g., ace_A) to get default coloring
 };
 

@@ -14,8 +14,8 @@ import {
 } from "../common/MolecularStyles";
 
 export enum LOGO_TYPES {
-  LETTERS = "letter stack",
-  BARS = "bar plot",
+  LETTERS = "Letter Stack",
+  BARS = "Bar Plot",
 }
 
 interface IGlyphFrequency {
