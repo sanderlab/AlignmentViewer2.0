@@ -83,10 +83,10 @@ exports[`AlignmentViewer Should render 1`] = `
             "description": "All",
             "key": "all",
           },
-          "residueDetail": ResidueDetailTypes {
-            "className": "",
-            "description": "Style Background and Letters",
-            "key": "both",
+          "residueDetail": ResidueHue {
+            "className": undefined,
+            "description": "Light",
+            "key": "light",
           },
         }
       }
@@ -188,7 +188,7 @@ exports[`AlignmentViewer Should render 1`] = `
           }
           glyphWidth={0}
           id="sequence_logo"
-          logoType="bar plot"
+          logoType="Bar Plot"
         />
       </div>
     </div>

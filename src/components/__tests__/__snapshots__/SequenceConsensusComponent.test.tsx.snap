@@ -2,6 +2,31 @@
 
 exports[`SequenceConsensusComponent Should render when given default props. 1`] = `
 <div
-  id="test-sequence-logo-component"
-/>
+  className="barplot"
+>
+  <ReactTooltip
+    border={true}
+    clickable={false}
+    effect="solid"
+    getContent={[Function]}
+    id="getBarContent"
+    insecure={true}
+    resizeHide={true}
+    type="light"
+    wrapper="div"
+  />
+  <svg
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    preserveAspectRatio="none"
+    style={
+      Object {
+        "height": 100,
+        "width": -3,
+      }
+    }
+    viewBox="0 0 -20 100"
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
 `;

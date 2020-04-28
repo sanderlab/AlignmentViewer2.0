@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash";
 import "./SequenceBarplot.scss";
 import { Alignment } from "../common/Alignment";
-import { mapGroupBy } from "../common/Utils";
+import { mapGroupBy, ArrayOneOrMore } from "../common/Utils";
 import ReactTooltip from "react-tooltip";
 
 export interface ISequenceBarplotDataSeries {
@@ -18,7 +18,7 @@ export interface ISequenceBarplotDataSeries {
 
 export interface ISequenceBarplotProps {
   alignment: Alignment;
-  dataSeries: ISequenceBarplotDataSeries[];
+  dataSeries: ArrayOneOrMore<ISequenceBarplotDataSeries>;
   positionWidth: number;
 
   height?: number;
@@ -94,7 +94,7 @@ export class SequenceBarplotComponent extends React.Component<
     this.handlePositionClicked = this.handlePositionClicked.bind(this);
   }
 
-  public static ENTROPY_BARPLOT: ISequenceBarplotDataSeries = {
+  public static SHANNON_ENTROPY_BARPLOT: ISequenceBarplotDataSeries = {
     id: "entropy",
     name: "Entropy",
     cssClass: "barplot-entropy",

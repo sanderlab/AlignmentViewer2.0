@@ -65,7 +65,7 @@ export class AlignmentViewer extends React.Component<
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
       defaultBarplotData: [
-        SequenceBarplotComponent.ENTROPY_BARPLOT,
+        SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
         SequenceBarplotComponent.GAPS_BARPLOT,
       ],
     };

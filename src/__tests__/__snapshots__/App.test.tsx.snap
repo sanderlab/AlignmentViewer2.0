@@ -114,29 +114,23 @@ exports[`App Should render within 2 minutes. 1`] = `
         <div>
           <label>
             <strong>
-              Residue Detail:
+              Residue Hue:
             </strong>
             <select
               onChange={[Function]}
-              value="both"
+              value="light"
             >
               <option
-                key="both"
-                value="both"
+                key="dark"
+                value="dark"
               >
-                Style Background and Letters
+                Dark
               </option>
               <option
-                key="letter-only"
-                value="letter-only"
+                key="light"
+                value="light"
               >
-                Only Style Letters
-              </option>
-              <option
-                key="background-only"
-                value="background-only"
-              >
-                Only Style Background
+                Light
               </option>
             </select>
           </label>
@@ -190,19 +184,19 @@ exports[`App Should render within 2 minutes. 1`] = `
             </strong>
             <select
               onChange={[Function]}
-              value="letter stack"
+              value="Letter Stack"
             >
               <option
-                key="letter stack"
-                value="letter stack"
+                key="Letter Stack"
+                value="Letter Stack"
               >
-                letter stack
+                Letter Stack
               </option>
               <option
-                key="bar plot"
-                value="bar plot"
+                key="Bar Plot"
+                value="Bar Plot"
               >
-                bar plot
+                Bar Plot
               </option>
             </select>
           </label>
@@ -210,7 +204,7 @@ exports[`App Should render within 2 minutes. 1`] = `
         <div>
           <label>
             <strong>
-              Character size:
+              Zoom Level:
             </strong>
             <div
               className="zoom-level"
