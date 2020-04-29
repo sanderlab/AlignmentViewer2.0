@@ -9,7 +9,7 @@ import {
   AlignmentTypes,
   PositionsToStyle,
   IColorScheme,
-  ResidueDetailTypes,
+  ResidueHue,
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { FileInputComponent } from "./components/FileInputComponent";
@@ -264,19 +264,19 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <label>
-          <strong>Residue Detail:</strong>
+          <strong>Residue Hue:</strong>
           <select
             value={style.residueDetail.key}
             onChange={(e) => {
               this.setState({
                 style: {
                   ...style,
-                  residueDetail: ResidueDetailTypes.fromKey(e.target.value)!,
+                  residueDetail: ResidueHue.fromKey(e.target.value)!,
                 },
               });
             }}
           >
-            {ResidueDetailTypes.list.map((rd) => {
+            {ResidueHue.list.map((rd) => {
               return (
                 <option key={rd.key} value={rd.key}>
                   {rd.description}
@@ -352,7 +352,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <label>
-          <strong>Character size:</strong>
+          <strong>Zoom Level:</strong>
           <div className="zoom-level">
             <button
               type="button"
@@ -387,7 +387,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <FileInputComponent
-          labelText={"Upload Sequence File:"}
+          labelText={"Upload Alignment File:"}
           onFileLoadCb={this.onFileUpload}
         />
       </div>
@@ -457,22 +457,21 @@ export default class App extends React.Component<AppProps, AppState> {
 
   protected onFileUpload = async (file: File) => {
     //const fileText = await file.text(); //doesn't work in modern safari or even slightly older firefox
-    this.setState({
-      loading: true,
-    });
-    var reader = new FileReader();
-    reader.onload = (e) => {
-      const fileText = reader.result as string;
-      const alignment = Alignment.fromFileContents(file.name, fileText);
+    if (file) {
       this.setState({
-        alignment: alignment,
-        style:
-          alignment.getPredictedType() === AlignmentTypes.NUCLEOTIDE
-            ? new NucleotideAlignmentStyle()
-            : new AminoAcidAlignmentStyle(),
-        loading: false,
+        loading: true,
       });
-    };
-    reader.readAsText(file);
+      var reader = new FileReader();
+      reader.onload = (e) => {
+        const fileText = reader.result as string;
+        const alignment = Alignment.fromFileContents(file.name, fileText);
+        this.setState({
+          alignment: alignment,
+          style: alignment.getDefaultStyle(),
+          loading: false,
+        });
+      };
+      reader.readAsText(file);
+    }
   };
 }

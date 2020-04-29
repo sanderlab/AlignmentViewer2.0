@@ -4,7 +4,10 @@ import { Ace } from "ace-builds";
 import { Alignment, SequenceSortOptions } from "../common/Alignment";
 import { ScrollSync, ScrollType } from "../common/ScrollSync";
 import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
-import { SequenceConservationComponent } from "./SequenceConservationComponent";
+import {
+  ISequenceBarplotDataSeries,
+  SequenceBarplotComponent,
+} from "./SequenceBarplotComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -16,22 +19,27 @@ import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
 import { AceTargetSequenceComponent } from "./AceTargetSequenceComponent";
 import AceTextualRulerComponent from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
+import { ArrayOneOrMore } from "../common/Utils";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  barplotDataseries?: ArrayOneOrMore<ISequenceBarplotDataSeries>;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
 
 const defaultProps = {
-  style: new AminoAcidAlignmentStyle() as
-    | AminoAcidAlignmentStyle
-    | NucleotideAlignmentStyle,
   logoPlotStyle: LOGO_TYPES.LETTERS as LOGO_TYPES,
   zoomLevel: 13 as number,
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
   showMiniMap: false as boolean,
   showAnnotations: true as boolean,
+  barplotDataseries: [
+    SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
+    //SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
+    SequenceBarplotComponent.GAPS_BARPLOT,
+  ],
 };
 
 interface IAlignmentViewerState {
@@ -48,6 +56,9 @@ export class AlignmentViewer extends React.Component<
   IAlignmentViewerProps,
   IAlignmentViewerState
 > {
+  private verticalScrollSync: ScrollSync;
+  private horizontalScrollSync: ScrollSync;
+
   static defaultProps = defaultProps;
 
   constructor(props: IAlignmentViewerProps) {
@@ -60,12 +71,15 @@ export class AlignmentViewer extends React.Component<
       windowHeight: window.innerHeight,
     };
 
+    this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
+    this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
+
     //setup scroll groups
-    ScrollSync.getInstance().setScrollerGroup(
-      "horizontal",
-      ScrollType.horizontal
-    );
-    ScrollSync.getInstance().setScrollerGroup("vertical", ScrollType.vertical);
+    //ScrollSync.getInstance().setScrollerGroup(
+    //  "horizontal",
+    //  ScrollType.horizontal
+    //);
+    //ScrollSync.getInstance().setScrollerGroup("vertical", ScrollType.vertical);
   }
 
   private handleCharacterSizeChanged = (newCharSize: number) => {
@@ -79,23 +93,23 @@ export class AlignmentViewer extends React.Component<
   private aceEditorLoaded = (
     id: string,
     editor: Ace.Editor,
+    parentElem: HTMLDivElement,
     scrollSyncDirection: ScrollType
   ) => {
     //console.log("_aceEditorLoaded id =" + id);
-
-    let scrollSync = ScrollSync.getInstance();
     if (
       scrollSyncDirection === ScrollType.horizontal ||
       scrollSyncDirection === ScrollType.both
     ) {
-      scrollSync.registerScroller(editor, "horizontal");
+      this.horizontalScrollSync.registerAceScroller(editor, parentElem);
     }
     if (
       scrollSyncDirection === ScrollType.vertical ||
       scrollSyncDirection === ScrollType.both
     ) {
-      scrollSync.registerScroller(editor, "vertical");
+      this.verticalScrollSync.registerAceScroller(editor, parentElem);
     }
+
     this.setState({
       aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
       aceEditors: [editor].concat(this.state.aceEditors),
@@ -118,7 +132,7 @@ export class AlignmentViewer extends React.Component<
   private generateWidget(
     className: string,
     annotation: string | JSX.Element,
-    content: JSX.Element,
+    content: JSX.Element | null,
     addAsElementToScrollSync?: boolean
   ) {
     return (
@@ -131,8 +145,7 @@ export class AlignmentViewer extends React.Component<
               //TODO: move into separate component .. Ref can be null here and
               //      also good to keep track of removal / addition for scroll sync
               //console.log("the ref is:", e);
-              let scrollSync = ScrollSync.getInstance();
-              scrollSync.registerScroller(e, "horizontal", true);
+              this.horizontalScrollSync.registerElementScroller(e);
             }
           }}
         >
@@ -158,25 +171,26 @@ export class AlignmentViewer extends React.Component<
   }
 
   render() {
-    if (!this.props.alignment) {
+    const { alignment, barplotDataseries, showAnnotations } = this.props;
+    if (!alignment) {
       return null;
     }
 
-    const annotationClass = this.props.showAnnotations
-      ? ""
-      : " annotation-closed";
+    const annotationClass = showAnnotations ? "" : " annotation-closed";
 
     return (
       <div className={`alignment_viewer${annotationClass}`}>
         {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
 
-        {this.generateWidget(
-          "av-conservation-gaps",
-          "Conservation / gaps:",
-          this.renderConservationBox(),
-          true
-        )}
+        {!barplotDataseries
+          ? null
+          : this.generateWidget(
+              "av-conservation-gaps",
+              barplotDataseries.map((series) => series.name).join(" / "),
+              this.renderConservationBox(),
+              true
+            )}
 
         {this.generateWidget(
           "av-sequence-logo",
@@ -208,44 +222,42 @@ export class AlignmentViewer extends React.Component<
           this.renderAlignmentAnnotationBox(),
           this.renderAlignmentBox()
         )}
-
-        {/*
-        //this is where we would add the webgl msa ..
-        this.generateWidget(
-          "av-webgl-msa",
-          "",
-          this.renderDatatableBox()
-        )*/}
       </div>
     );
   }
 
-  protected renderSequenceLogo = () => (
-    <div
-      className={
-        `logo_box ${this.props.style!.alignmentType.className} ` +
-        `${this.props.style!.colorScheme.className} ` +
-        `${PositionsToStyle.ALL.className}`
-      }
-    >
-      {
-        <SequenceLogoComponent
-          id="sequence_logo"
-          alignment={this.props.alignment}
-          glyphWidth={this.state.aceCharacterWidth}
-          logoType={this.props.logoPlotStyle}
-        />
-      }
-    </div>
-  );
+  protected renderSequenceLogo = () => {
+    const { alignment, logoPlotStyle, style } = this.props;
+    return (
+      <div
+        className={
+          `${style.alignmentType.className} ` +
+          `${style.colorScheme.className} ` +
+          `${PositionsToStyle.ALL.className}`
+        }
+      >
+        {
+          <SequenceLogoComponent
+            alignment={alignment}
+            glyphWidth={this.state.aceCharacterWidth}
+            logoType={logoPlotStyle}
+            alignmentType={style.alignmentType}
+          />
+        }
+      </div>
+    );
+  };
 
-  protected renderConservationBox = () => (
-    <SequenceConservationComponent
-      id="sequence_conservation"
-      alignment={this.props.alignment}
-      characterWidth={this.state.aceCharacterWidth}
-    />
-  );
+  protected renderConservationBox = () => {
+    const { barplotDataseries } = this.props;
+    return !barplotDataseries || barplotDataseries.length < 1 ? null : (
+      <SequenceBarplotComponent
+        alignment={this.props.alignment}
+        dataSeries={barplotDataseries}
+        positionWidth={this.state.aceCharacterWidth}
+      ></SequenceBarplotComponent>
+    );
+  };
 
   protected renderConsensusQueryBox = () => (
     <div className="consensusseq_box">
@@ -254,15 +266,16 @@ export class AlignmentViewer extends React.Component<
         alignment={this.props.alignment}
         fontSize={this.props.zoomLevel}
         classNames={[
-          this.props.style!.residueDetail.className,
-          this.props.style!.alignmentType.className,
-          this.props.style!.positionsToStyle.className,
-          this.props.style!.colorScheme.className,
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
         ].join(" ")}
-        editorLoaded={(editor) => {
+        editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             "ace-consensusseq",
             editor,
+            parentElem,
             ScrollType.horizontal
           );
         }}
@@ -278,13 +291,18 @@ export class AlignmentViewer extends React.Component<
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
-          this.props.style!.residueDetail.className,
-          this.props.style!.alignmentType.className,
-          this.props.style!.positionsToStyle.className,
-          this.props.style!.colorScheme.className,
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
         ].join(" ")}
-        editorLoaded={(editor) => {
-          this.aceEditorLoaded("ace-queryseq", editor, ScrollType.horizontal);
+        editorLoaded={(editor, parentElem) => {
+          this.aceEditorLoaded(
+            "ace-queryseq",
+            editor,
+            parentElem,
+            ScrollType.horizontal
+          );
         }}
       ></AceTargetSequenceComponent>
     </div>
@@ -297,10 +315,11 @@ export class AlignmentViewer extends React.Component<
           id="ace-positions"
           alignment={this.props.alignment}
           fontSize={this.props.zoomLevel}
-          editorLoaded={(editor) => {
+          editorLoaded={(editor, parentElem) => {
             this.aceEditorLoaded(
               "ace-positions",
               editor,
+              parentElem,
               ScrollType.horizontal
             );
           }}
@@ -329,14 +348,19 @@ export class AlignmentViewer extends React.Component<
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
-          this.props.style!.residueDetail.className,
-          this.props.style!.alignmentType.className,
-          this.props.style!.positionsToStyle.className,
-          this.props.style!.colorScheme.className,
+          this.props.style.residueDetail.className,
+          this.props.style.alignmentType.className,
+          this.props.style.positionsToStyle.className,
+          this.props.style.colorScheme.className,
         ].join(" ")}
         characterSizeChanged={this.handleCharacterSizeChanged}
-        editorLoaded={(editor) => {
-          this.aceEditorLoaded("ace-alignment", editor, ScrollType.both);
+        editorLoaded={(editor, parentElem) => {
+          this.aceEditorLoaded(
+            "ace-alignment",
+            editor,
+            parentElem,
+            ScrollType.both
+          );
         }}
       ></AceMultipleSequenceAlignmentComponent>
     </div>
@@ -351,10 +375,11 @@ export class AlignmentViewer extends React.Component<
           .map((x) => x.id)
           .join("\n")}
         fontSize={this.props.zoomLevel}
-        editorLoaded={(editor) => {
+        editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             "ace-alignment-metadata",
             editor,
+            parentElem,
             ScrollType.vertical
           );
         }}

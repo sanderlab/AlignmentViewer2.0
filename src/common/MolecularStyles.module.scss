@@ -54,27 +54,36 @@
 
 //ace specific props
 $acePrefix: ace_;
-$preAceLetterObjClass: obj;
-$preAceQueryClass: query;
-$preAceConsensusClass: consensus;
-$aceLetterObjClass: $acePrefix + $preAceLetterObjClass;
-$aceQueryClass: $acePrefix + $preAceQueryClass;
-$aceConsensusClass: $acePrefix + $preAceConsensusClass;
+$preAceQueryClass: q;
+$preAceConsensusClass: c;
+$aceQueryClass: $preAceQueryClass;
+$aceConsensusClass: $preAceConsensusClass;
+$aceResidueParentClass: $acePrefix + line; //directly above ace residues
 
 //general global props
-$transparentLetterClass: transparent-letters;
-$transparentBackgroundClass: transparent-background;
 $aaStyleClassPrefix: aa-alignment-style-;
 $ntStyleClassPrefix: nt-alignment-style-;
 $styPosClassPrefix: alignment-positions-tostyle-;
 $defaultBackgroundAlpha: 0.25;
+$defaultLetterColor: #cccccc;
 
-//both nucleotide and amino acid have the same options for position coloring
+//residue style
+$darkHueClass: dark-residues;
+$lightHueClass: light-residues;
+
+//which positions should get styled?
 $styPosAll: $styPosClassPrefix + all;
 $styPosQuery: $styPosClassPrefix + query;
 $styPosQueryDiff: $styPosClassPrefix + query-diff;
 $styPosConsensus: $styPosClassPrefix + consensus;
 $styPosConsensusDiff: $styPosClassPrefix + consensus-diff;
+
+/*
+ *
+ * COLOR SCHEMES
+ * most colors taken from / inspired by https://github.com/wilzbach/msa-colorschemes
+ *
+ */
 
 //amino acid props
 $aaProps: (
@@ -84,7 +93,7 @@ $aaProps: (
       description: "Default",
       topLevelClass: $aaStyleClassPrefix + default,
       backgroundAlpha: $defaultBackgroundAlpha,
-      defaultLetterColor: #cccccc,
+      defaultLetterColor: $defaultLetterColor,
       colors: (
         A: #33cc00,
         R: #cc0000,
@@ -108,12 +117,172 @@ $aaProps: (
         V: #33cc00,
       ),
     ),
+    Buried: (
+      description: "Buried",
+      topLevelClass: $aaStyleClassPrefix + buried,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #00a35c,
+        R: #00fc03,
+        N: #00eb14,
+        D: #00eb14,
+        C: #0000ff,
+        Q: #00f10e,
+        E: #00f10e,
+        G: #009d62,
+        H: #00d52a,
+        I: #0054ab,
+        L: #007b84,
+        K: #00ff00,
+        M: #009768,
+        F: #008778,
+        P: #00e01f,
+        S: #00d52a,
+        T: #00db24,
+        W: #00a857,
+        Y: #00e619,
+        V: #005fa0,
+        B: #00eb14,
+        X: #00b649,
+        Z: #00f10e,
+      ),
+    ),
+    Cinema: (
+      description: "Cinema",
+      topLevelClass: $aaStyleClassPrefix + cinema,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #bbbbbb,
+        B: grey,
+        C: yellow,
+        D: red,
+        E: red,
+        F: magenta,
+        G: brown,
+        H: #00ffff,
+        I: #bbbbbb,
+        J: #fff,
+        K: #00ffff,
+        L: #bbbbbb,
+        M: #bbbbbb,
+        N: green,
+        O: #fff,
+        P: brown,
+        Q: green,
+        R: #00ffff,
+        S: green,
+        T: green,
+        U: #fff,
+        V: #bbbbbb,
+        W: magenta,
+        X: grey,
+        Y: magenta,
+        Z: grey,
+      ),
+    ),
+    Clustal: (
+      description: "Clustal",
+      topLevelClass: $aaStyleClassPrefix + clustal,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: orange,
+        B: #fff,
+        C: green,
+        D: red,
+        E: red,
+        F: blue,
+        G: orange,
+        H: red,
+        I: green,
+        J: #fff,
+        K: red,
+        L: green,
+        M: green,
+        N: #fff,
+        O: #fff,
+        P: orange,
+        Q: #fff,
+        R: red,
+        S: orange,
+        T: orange,
+        U: #fff,
+        V: green,
+        W: blue,
+        X: #fff,
+        Y: blue,
+        Z: #fff,
+      ),
+    ),
+    Clustal2: (
+      description: "Clustal2",
+      topLevelClass: $aaStyleClassPrefix + clustal2,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #80a0f0,
+        R: #f01505,
+        N: #00ff00,
+        D: #c048c0,
+        C: #f08080,
+        Q: #00ff00,
+        E: #c048c0,
+        G: #f09048,
+        H: #15a4a4,
+        I: #80a0f0,
+        L: #80a0f0,
+        K: #f01505,
+        M: #80a0f0,
+        F: #80a0f0,
+        P: #ffff00,
+        S: #00ff00,
+        T: #00ff00,
+        W: #80a0f0,
+        Y: #15a4a4,
+        V: #80a0f0,
+        B: #fff,
+        X: #fff,
+        Z: #fff,
+      ),
+    ),
+    Helix: (
+      description: "Helix",
+      topLevelClass: $aaStyleClassPrefix + helix,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #e718e7,
+        R: #6f906f,
+        N: #1be41b,
+        D: #778877,
+        C: #23dc23,
+        Q: #926d92,
+        E: #ff00ff,
+        G: #00ff00,
+        H: #758a75,
+        I: #8a758a,
+        L: #ae51ae,
+        K: #a05fa0,
+        M: #ef10ef,
+        F: #986798,
+        P: #00ff00,
+        S: #36c936,
+        T: #47b847,
+        W: #8a758a,
+        Y: #21de21,
+        V: #857a85,
+        B: #49b649,
+        X: #758a75,
+        Z: #c936c9,
+      ),
+    ),
     Hydrophobicity: (
       description: "Hydrophobicity",
-      //(red = hydrophilic, blue = hydrophobic)
-        topLevelClass: $aaStyleClassPrefix + hydrophobicity,
+      topLevelClass: $aaStyleClassPrefix + hydrophobicity,
       backgroundAlpha: $defaultBackgroundAlpha,
-      defaultLetterColor: #cccccc,
+      defaultLetterColor: $defaultLetterColor,
       /*
       colors based on: https://www.sigmaaldrich.com/life-science/metabolomics/learning-center/amino-acid-reference-chart.html
       to get hex in python:
@@ -163,6 +332,198 @@ $aaProps: (
           D: #0000ff,
         ),
     ),
+    Lesk: (
+      description: "Lesk",
+      topLevelClass: $aaStyleClassPrefix + lesk,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: orange,
+        B: #fff,
+        C: green,
+        D: red,
+        E: red,
+        F: green,
+        G: orange,
+        H: magenta,
+        I: green,
+        J: #fff,
+        K: red,
+        L: green,
+        M: green,
+        N: magenta,
+        O: #fff,
+        P: green,
+        Q: magenta,
+        R: red,
+        S: orange,
+        T: orange,
+        U: #fff,
+        V: green,
+        W: green,
+        X: #fff,
+        Y: green,
+        Z: #fff,
+      ),
+    ),
+    MAE: (
+      description: "MAE",
+      topLevelClass: $aaStyleClassPrefix + mae,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #77dd88,
+        B: #fff,
+        C: #99ee66,
+        D: #55bb33,
+        E: #55bb33,
+        F: #9999ff,
+        G: #77dd88,
+        H: #5555ff,
+        I: #66bbff,
+        J: #fff,
+        K: #ffcc77,
+        L: #66bbff,
+        M: #66bbff,
+        N: #55bb33,
+        O: #fff,
+        P: #eeaaaa,
+        Q: #55bb33,
+        R: #ffcc77,
+        S: #ff4455,
+        T: #ff4455,
+        U: #fff,
+        V: #66bbff,
+        W: #9999ff,
+        X: #fff,
+        Y: #9999ff,
+        Z: #fff,
+      ),
+    ),
+    Strand: (
+      description: "Strand",
+      topLevelClass: $aaStyleClassPrefix + strand,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #5858a7,
+        R: #6b6b94,
+        N: #64649b,
+        D: #2121de,
+        C: #9d9d62,
+        Q: #8c8c73,
+        E: #0000ff,
+        G: #4949b6,
+        H: #60609f,
+        I: #ecec13,
+        L: #b2b24d,
+        K: #4747b8,
+        M: #82827d,
+        F: #c2c23d,
+        P: #2323dc,
+        S: #4949b6,
+        T: #9d9d62,
+        W: #c0c03f,
+        Y: #d3d32c,
+        V: #ffff00,
+        B: #4343bc,
+        X: #797986,
+        Z: #4747b8,
+      ),
+    ),
+    Taylor: (
+      description: "Taylor",
+      topLevelClass: $aaStyleClassPrefix + taylor,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #ccff00,
+        R: #0000ff,
+        N: #cc00ff,
+        D: #ff0000,
+        C: #ffff00,
+        Q: #ff00cc,
+        E: #ff0066,
+        G: #ff9900,
+        H: #0066ff,
+        I: #66ff00,
+        L: #33ff00,
+        K: #6600ff,
+        M: #00ff00,
+        F: #00ff66,
+        P: #ffcc00,
+        S: #ff3300,
+        T: #ff6600,
+        W: #00ccff,
+        Y: #00ffcc,
+        V: #99ff00,
+        B: #fff,
+        X: #fff,
+        Z: #fff,
+      ),
+    ),
+    Turn: (
+      description: "Turn",
+      topLevelClass: $aaStyleClassPrefix + turn,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #2cd3d3,
+        R: #708f8f,
+        N: #ff0000,
+        D: #e81717,
+        C: #a85757,
+        Q: #3fc0c0,
+        E: #778888,
+        G: #ff0000,
+        H: #708f8f,
+        I: #00ffff,
+        L: #1ce3e3,
+        K: #7e8181,
+        M: #1ee1e1,
+        F: #1ee1e1,
+        P: #f60909,
+        S: #e11e1e,
+        T: #738c8c,
+        W: #738c8c,
+        Y: #9d6262,
+        V: #07f8f8,
+        B: #f30c0c,
+        X: #7c8383,
+        Z: #5ba4a4,
+      ),
+    ),
+    Zappo: (
+      description: "Zappo",
+      topLevelClass: $aaStyleClassPrefix + zappo,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #ffafaf,
+        R: #6464ff,
+        N: #00ff00,
+        D: #ff0000,
+        C: #ffff00,
+        Q: #00ff00,
+        E: #ff0000,
+        G: #ff00ff,
+        H: #6464ff,
+        I: #ffafaf,
+        L: #ffafaf,
+        K: #6464ff,
+        M: #ffafaf,
+        F: #ffc800,
+        P: #ff00ff,
+        S: #00ff00,
+        T: #00ff00,
+        W: #ffc800,
+        Y: #ffc800,
+        V: #ffafaf,
+        B: #fff,
+        X: #fff,
+        Z: #fff,
+      ),
+    ),
   ),
 );
 
@@ -174,7 +535,7 @@ $ntProps: (
       description: "Default",
       topLevelClass: $ntStyleClassPrefix + default,
       backgroundAlpha: $defaultBackgroundAlpha,
-      defaultLetterColor: #cccccc,
+      defaultLetterColor: $defaultLetterColor,
       colors: (
         A: #5050ff,
         C: #e00000,
@@ -185,25 +546,54 @@ $ntProps: (
         Y: #ff8c00,
       ),
     ),
+    Nucleotide: (
+      description: "Nucleotide",
+      topLevelClass: $ntStyleClassPrefix + nucleotide,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #64f73f,
+        C: #ffb340,
+        G: #eb413c,
+        T: #3c88ee,
+        U: #3c88ee,
+      ),
+    ),
+    Purine: (
+      description: "Purine",
+      topLevelClass: $ntStyleClassPrefix + purine,
+      backgroundAlpha: $defaultBackgroundAlpha,
+      defaultLetterColor: $defaultLetterColor,
+      colors: (
+        A: #ff83fa,
+        C: #40e0d0,
+        G: #ff83fa,
+        R: #ff83fa,
+        T: #40e0d0,
+        U: #40e0d0,
+        Y: #40e0d0,
+      ),
+    ),
   ),
 );
 
-//
-// EXPORT
-// export alignment type classes, color scheme classes, position coloring classes,
-// and then individual colors for use in javascript.
-//
+/*
+ *
+ * EXPORT
+ * export alignment type classes, color scheme classes, position coloring classes,
+ * and then individual colors for use in javascript.
+ *
+ */
 
 :export {
   acePrefix: $acePrefix;
-  preAceLetterObjClass: $preAceLetterObjClass;
   preAceQueryClass: $preAceQueryClass;
   preAceConsensusClass: $preAceConsensusClass;
-  aceLetterObjClass: $aceLetterObjClass;
   aceQueryClass: $aceQueryClass;
   aceConsensusClass: $aceConsensusClass;
-  transparentLetterClass: $transparentLetterClass;
-  transparentBackgroundClass: $transparentBackgroundClass;
+  aceResidueParentClass: $aceResidueParentClass;
+  darkHueClass: $darkHueClass;
+  lightHueClass: $lightHueClass;
 
   aaAlignTypeClass: map-get($aaProps, topLevelAlignmentClass);
   ntAlignTypeClass: map-get($ntProps, topLevelAlignmentClass);
@@ -248,195 +638,130 @@ $ntProps: (
 }
 
 //
-// AMINO ACID CLASS DEFINITIONS
-//
-// Programmatically combine into one big set of selectors. Export
-// as global selector to avoid distinct naming from css modules.
+// FUNCTIONS
 //
 
-@each $styleName, $styleObj in map-get($aaProps, styles) {
-  $alignmentClass: map-get($aaProps, topLevelAlignmentClass);
-  $styleClass: map-get($styleObj, topLevelClass);
-  $backgroundAlpha: map-get($styleObj, backgroundAlpha);
+//see https://stackoverflow.com/questions/11867545
+@function brightness($color) {
+  @return ((red($color) * 299) + (green($color) * 587) + (blue($color) * 114)) /
+    1000;
+}
 
-  //set default letter color
-  $defaultColor: map-get($styleObj, defaultLetterColor);
-  :global .#{$alignmentClass} .#{$aceLetterObjClass} {
-    color: $defaultColor;
-    fill: $defaultColor;
-  }
+//
+//Output all selectors for nt and aa props.
+//
+@mixin outputMajorSelectors($propsObj) {
+  $alignmentClass: map-get($propsObj, topLevelAlignmentClass);
 
-  @each $aa, $color in map-get($styleObj, colors) {
-    $aceAAClass: $acePrefix + $aa;
+  @each $styleName, $styleObj in map-get($propsObj, styles) {
+    $styleClass: map-get($styleObj, topLevelClass);
+    $backgroundAlpha: map-get($styleObj, backgroundAlpha);
 
-    //set background color to white if the "no background color" class is added
+    //set default letter color for letters - used for unstyled residues
+    // (i.e., dashes, dots, unrecognized letters, lowercase letters)
+    $defaultColor: map-get($styleObj, defaultLetterColor);
     :global
-      .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
-      .#{$aceAAClass} {
-      background-color: transparent !important;
+      .#{$alignmentClass}
+      .#{$aceResidueParentClass}
+      [class^="#{$acePrefix}"] {
+      color: $defaultColor;
+      fill: $defaultColor;
     }
 
-    //remove alpha on background color and hide letter coloring
-    //"no letter color" class is added
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosAll}
-      .#{$aceAAClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceAAClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceAAClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceAAClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceAAClass}:not(.#{$aceQueryClass}) {
-      //opacity: 1 !important;
-      background-color: rgba($color, 1) !important;
-      color: rgba($color, 0) !important;
+    //SPECIAL CASE 1
+    //the glyph for "S" needs to have a fill and stroke
+    //this selector captures an special case - when user selects
+    //nucleotide alignment and there is an S in the alignment
+    //it would disappear in the logo plot without this class.
+    :global .#{$alignmentClass} .#{$aceResidueParentClass} .#{$acePrefix}S {
+      color: $defaultColor;
+      stroke: $defaultColor;
+      fill: #ffffff;
     }
 
-    //"default" style - slightly transparent colored background and fully colored letters
-    :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceAAClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceAAClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceAAClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+    //SPECIAL CASE 2.1
+    //logo plot fo "S" when rectangles are shown needs to have
+    //fill with the color, not white as required for the glyph
+    //NOTE: this for amino acids, this is handled by on a per-style
+    //      basis (see SPECIAL CASE 2.2 below)
+    :global .#{$alignmentClass} .#{$aceResidueParentClass} rect.#{$acePrefix}S {
+      fill: $defaultColor;
+    }
+
+    @each $aa, $color in map-get($styleObj, colors) {
+      $aceAAClass: $acePrefix + $aa;
+
+      //
+      //dark hues
+      //
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosAll}
+        .#{$aceAAClass},
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosConsensus}
+        .#{$aceAAClass}.#{$aceConsensusClass},
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosConsensusDiff}
+        .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosQuery}
+        .#{$aceAAClass}.#{$aceQueryClass},
+      :global
+        .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosQueryDiff}
+        .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+        background-color: rgba($color, 1) !important;
+
+        //set letter color based on brightness of background color
+        $tmpcolor: white;
+        @if brightness($color) > 125 {
+          $tmpcolor: black;
+        }
+        color: $tmpcolor !important;
+      }
+
+      //
+      // light hues - default of no class is added and also for logo
+      //
+      :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
+        .#{$aceAAClass}.#{$aceConsensusClass},
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
+        .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
+        .#{$aceAAClass}.#{$aceQueryClass},
+      :global
+        .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
+        .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+        @if $aa == S {
+          //serine glyph needs stoke coloring also
+          color: $color;
+          stroke: $color;
+          fill: #ffffff;
+          background-color: rgba($color, $backgroundAlpha);
+        } @else {
+          color: $color;
+          fill: $color;
+          background-color: rgba($color, $backgroundAlpha);
+        }
+      }
+
+      //SPECIAL CASE 2.2
+      //logo plot fo "S" when rectangles are shown needs to have
+      //fill with the color, not white as required for the glyph
       @if $aa == S {
-        //serine glyph needs stoke coloring also
-        color: $color;
-        stroke: $color;
-        fill: #ffffff;
-        background-color: rgba($color, $backgroundAlpha);
-      } @else {
-        color: $color;
-        fill: $color;
-        background-color: rgba($color, $backgroundAlpha);
+        :global
+          .#{$alignmentClass}.#{$styleClass}.#{$styPosAll}
+          svg
+          rect.#{$aceAAClass} {
+          fill: $color;
+        }
       }
     }
   }
 }
 
-//
-// NUCLEOTIDE CLASS DEFINITIONS
-// Programmatically combine into one big set of selectors. Export
-// as global selector to avoid distinct naming from css modules.
-//
-@each $styleName, $styleObj in map-get($ntProps, styles) {
-  $alignmentClass: map-get($ntProps, topLevelAlignmentClass);
-  $styleClass: map-get($styleObj, topLevelClass);
-  $backgroundAlpha: map-get($styleObj, backgroundAlpha);
-
-  //set default letter color
-  $defaultColor: map-get($styleObj, defaultLetterColor);
-  :global .#{$alignmentClass} .#{$aceLetterObjClass} {
-    color: $defaultColor;
-    fill: $defaultColor;
-  }
-  //S is special
-  :global .#{$alignmentClass} .#{$acePrefix + S}.#{$aceLetterObjClass} {
-    color: $defaultColor;
-    stroke: $defaultColor;
-    fill: #ffffff;
-  }
-
-  @each $nt, $color in map-get($styleObj, colors) {
-    $aceNTClass: $acePrefix + $nt;
-
-    //set background color to white if the "no background color" class is added
-    :global
-      .#{$alignmentClass}.#{$transparentBackgroundClass}.#{$styleClass}
-      .#{$aceNTClass} {
-      background-color: transparent !important;
-    }
-    //remove alpha on background color and hide letter coloring
-    //"no letter color" class is added
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosAll}
-      .#{$aceNTClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceNTClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceNTClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceNTClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$transparentLetterClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceNTClass}:not(.#{$aceQueryClass}) {
-      background-color: rgba($color, 1) !important;
-      color: rgba($color, 0) !important;
-    }
-
-    //"default" style - slightly transparent colored background and fully colored letters
-    :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceNTClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
-      .#{$aceNTClass}.#{$aceConsensusClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
-      .#{$aceNTClass}:not(.#{$aceConsensusClass}),
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
-      .#{$aceNTClass}.#{$aceQueryClass},
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
-      .#{$aceNTClass}:not(.#{$aceQueryClass}) {
-      color: $color;
-      fill: $color; //for logo
-      background-color: rgba($color, $backgroundAlpha);
-    }
-  }
-}
-
-/**
- *
- *
- * SPECIAL CASES
- *
- *
- */
-
-//SPECIAL CASE 1
-//
-//the glyph for "S" needs to have a fill and stroke
-//this selector captures an odd case - when user selects
-//nucleotide alignment and there is an S in the alignment
-//it would disappear in the logo plot without this class.
-:global .#{$acePrefix}S {
-  stroke: #000000;
-}
-
-//SPECIAL CASE 2
-//
-//logo plot fo "S" when rectangles are shown needs to have
-//fill with the color, not white as required for the glyph
-@each $styleName, $styleObj in map-get($aaProps, styles) {
-  $alignmentClass: map-get($aaProps, topLevelAlignmentClass);
-  $styleClass: map-get($styleObj, topLevelClass);
-
-  @each $aa, $color in map-get($styleObj, colors) {
-    $aceAAClass: $acePrefix + $aa;
-    :global
-      .#{$alignmentClass}.#{$styleClass}.#{$styPosAll}
-      svg
-      rect.#{$aceAAClass} {
-      @if $aa == S {
-        //serine glyph needs stoke coloring also
-        fill: $color;
-      }
-    }
-  }
-}
+@include outputMajorSelectors($aaProps);
+@include outputMajorSelectors($ntProps);

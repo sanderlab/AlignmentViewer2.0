@@ -52,3 +52,37 @@ export function generateUUIDv4() {
     ).toString(16);
   });
 }
+
+/**
+ * Creates an object composed of keys generated from the results of
+ * running each element of collection through fn. The corresponding
+ * value of each key is an array of the elements responsible for
+ * generating the key. (description taken from lodash documentation)
+ *
+ * The difference between this function and the lodash "groupBy",
+ * function is that this returns a Map object, allowing for more complex
+ * keys.
+ *
+ * @param items
+ * @param fn
+ */
+export function mapGroupBy<T1, T2>(
+  items: T1[],
+  fn: (item: T1) => T2
+): Map<T2, T1[]> {
+  //{ [key: string]: T[] } {
+  return items.reduce((acc, item) => {
+    const key = fn(item);
+    const existing = acc.get(key) ? acc.get(key)! : [];
+    acc.set(key, [...existing, item]);
+    return acc;
+  }, new Map<T2, T1[]>());
+}
+
+/**
+ * Array type that requires at least one array element.
+ * https://stackoverflow.com/questions/49910889
+ */
+export type ArrayOneOrMore<T> = {
+  0: T;
+} & Array<T>;

@@ -1,7 +1,11 @@
 import { generateUUIDv4 } from "./Utils";
 import { defineNewAlignmentMode } from "./AceAlignmentMode";
 import { Nucleotide } from "./Residues";
-import { AlignmentTypes } from "./MolecularStyles";
+import {
+  AlignmentTypes,
+  AminoAcidAlignmentStyle,
+  NucleotideAlignmentStyle,
+} from "./MolecularStyles";
 
 export interface ISequence {
   id: string;
@@ -64,7 +68,7 @@ export class Alignment {
     { [letter: string]: number }
   >();
   private globalAlphaLetterCounts: { [letter: string]: number } = {};
-  private allAlphaLettersSorted: string[];
+  private allUpperAlphaLettersInAlignmentSorted: string[];
   private consensus: {
     letter: string;
     position: number;
@@ -168,7 +172,7 @@ export class Alignment {
     //generate statistics
     //
     const start = new Date();
-    const allLetters: { [key: string]: number } = {}; //all letters in the alignment
+    const allLettersInAlignment: { [key: string]: number } = {}; //all letters in the alignment
 
     //this for loop takes the bulk of the time
     for (
@@ -178,7 +182,7 @@ export class Alignment {
     ) {
       const seq = sequencesAsInput[sequenceIdx].sequence;
       for (let positionIdx = 0; positionIdx < seq.length; positionIdx++) {
-        const letter = seq[positionIdx].toUpperCase();
+        const letter = seq[positionIdx];
         const letterIsAlpha = letter.match(/[a-z]/i) ? true : false;
         if (
           letterIsAlpha &&
@@ -189,7 +193,7 @@ export class Alignment {
         }
 
         const position = positionIdx; // zero based
-        allLetters[letter] = 1;
+        allLettersInAlignment[letter] = 1;
 
         let letterCounts = this.positionalLetterCounts.get(position);
         if (!letterCounts) {
@@ -210,10 +214,12 @@ export class Alignment {
       }
     }
 
-    this.allAlphaLettersSorted = Object.keys(allLetters)
+    this.allUpperAlphaLettersInAlignmentSorted = Object.keys(
+      allLettersInAlignment
+    )
       .sort()
       .reduce((arr: string[], value: string) => {
-        if (value.match(/[a-z]/i)) {
+        if (value.match(/[A-Z]/)) {
           // only keep letters
           arr.push(value);
         }
@@ -222,18 +228,17 @@ export class Alignment {
 
     this.consensus = Array.from(this.positionalLetterCounts).map(
       ([position, letterCounts]) => {
-        const topLetter = this.allAlphaLettersSorted.reduce(
-          (acc, currentLetter) => {
-            if (
-              acc in letterCounts === false ||
-              letterCounts[acc] < letterCounts[currentLetter]
-            ) {
-              return currentLetter;
-            }
-            return acc;
+        const topLetter = Object.keys(letterCounts).reduce((a, b) => {
+          const aIsLetter = a.match(/[a-z]/i);
+          const bIsLetter = b.match(/[a-z]/i);
+          if (aIsLetter && !bIsLetter) {
+            return a;
           }
-        );
-
+          if (bIsLetter && !aIsLetter) {
+            return b;
+          }
+          return letterCounts[a] > letterCounts[b] ? a : b;
+        });
         return {
           position: position,
           letter: topLetter,
@@ -256,6 +261,16 @@ export class Alignment {
     return this.predictedNT
       ? AlignmentTypes.NUCLEOTIDE
       : AlignmentTypes.AMINOACID;
+  }
+
+  /**
+   * Returns a default nucleotide or amino acid style for this alignment,
+   * predicted from the sequence itself.
+   */
+  getDefaultStyle(): AminoAcidAlignmentStyle | NucleotideAlignmentStyle {
+    return this.predictedNT
+      ? new NucleotideAlignmentStyle()
+      : new AminoAcidAlignmentStyle();
   }
 
   /**
@@ -309,6 +324,18 @@ export class Alignment {
   }
 
   /**
+   * Get the number of gaps at a specific position
+   * @returns the gap counts at the specified position
+   */
+  getGapCountAtColumn(position: number): number {
+    const letterCounts = this.positionalLetterCounts.get(position);
+    if (!letterCounts || !letterCounts["-"]) {
+      return 0;
+    }
+    return letterCounts["-"];
+  }
+
+  /**
    * Get the total number of times each letter appears in the alignment.
    * @param normalize if true, will normalize the returned array such that
    *                  it sums to 1.
@@ -322,7 +349,15 @@ export class Alignment {
         validLetters
       );
     }
-    return this.globalAlphaLetterCounts;
+    return !validLetters
+      ? this.globalAlphaLetterCounts
+      : Object.keys(this.globalAlphaLetterCounts).reduce((acc, letter) => {
+          //don't normalize, but remove invalid letters
+          if (validLetters.includes(letter)) {
+            acc[letter] = this.globalAlphaLetterCounts[letter];
+          }
+          return acc;
+        }, {} as { [letter: string]: number });
   }
 
   /**
@@ -346,21 +381,29 @@ export class Alignment {
    *                     in the resulting counts
    * @returns a Map whose keys are position (ordered) and values are a dictionary
    *          with [key = letter (e.g., amino acid code)] and [value = # occurrences].
+   * TODO: Test parameter use cases.
    */
   getPositionalLetterCounts(normalize?: boolean, validLetters?: string[]) {
-    if (normalize) {
+    if (normalize || validLetters) {
       return Array.from(this.positionalLetterCounts).reduce(
         (acc, [position, letterCounts]) => {
           acc.set(
             position,
-            Alignment.normalizeLetterCounts(letterCounts, validLetters)
+            normalize
+              ? Alignment.normalizeLetterCounts(letterCounts, validLetters) // normalize + remove invalid letters
+              : Object.keys(letterCounts).reduce((acc2, letter) => {
+                  //don't normalize, but remove invalid letters
+                  if (validLetters!.includes(letter)) {
+                    acc2[letter] = letterCounts[letter];
+                  }
+                  return acc2;
+                }, {} as { [letter: string]: number })
           );
           return acc;
         },
         new Map<Number, { [letter: string]: number }>()
       );
     }
-
     return this.positionalLetterCounts;
   }
 
@@ -402,11 +445,11 @@ export class Alignment {
   }
 
   /**
-   * Get a sorted list of all of the letters in the alignment.
+   * Get a sorted list of all of the upper case letters in the alignment.
    * @returns a list of all letters in the alignment sorted alphabetically.
    */
-  getSortedAlphaLetters(): string[] {
-    return this.allAlphaLettersSorted;
+  getAllUpperAlphaLettersInAlignmentSorted(): string[] {
+    return this.allUpperAlphaLettersInAlignmentSorted;
   }
 
   /**

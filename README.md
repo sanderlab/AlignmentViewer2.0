@@ -41,7 +41,7 @@ const alignmentObj = Alignment.fromFileContents(
     "ALIGNMENT_NAME", fastaFileText
 );
 
-<AlignmentViewer alignment={ alignmentObj } />
+<AlignmentViewer alignment={ alignmentObj } style={ alignmentObj.getDefaultStyle() } />
 ```
 
 ## Building Alignment Viewer 2.0
@@ -77,14 +77,17 @@ Our strategy for dealing with peformance issues boils down to two main approache
 
 ## Other Web-based Multiple Sequence Alignment Viewers
 
-(descriptions coming soon!)
+- Alignment Viewer<sup>1</sup> ([webpage](https://alignmentviewer.org/), [github](https://github.com/sanderlab/alignmentviewer)): The predecessor to Alignment Viewer 2.0, this project and website provide a means to view MSAs as perform additional sequence analysis like viewing sequence space with a UMAP component. Alignment Viewer was written in javascript.
+- MSAViewer<sup>2</sup> ([webpage](http://msa.biojs.net), [github](https://github.com/wilzbach/msa)): A popular MSA viewer that provides a bunch of functionality such as sorting, filtering, changing color schemes, etc. MSAViewer can also be easily imported and embedded into other projects. Alignment Viewer was written in javascript.
+- Jalview<sup>3</sup> ([webpage](https://www.jalview.org/)): an MSA viewer that provides primary, secondary, and tertiary visualizations and analyses that include sequence alignment, conservation and clustering, secondary structure and disorder prediction, etc.
+- MView <sup>4</sup> ([webpage](https://www.ebi.ac.uk/Tools/msa/mview/)): Although not built specifically for the web, the MView command line utility can be executed from an EBI tool service. This tool can be used to reformats multiple sequence alignments files into html markup.
+- Wasabi<sup>5</sup> ([webpage](http://wasabiapp.org/), [github](https://github.com/veidenberg/wasabi)): In addition to providing an MSA viewer, the Wasabi project provides a bunch of tools for evolutionary sequence analysis. Wasabi was written in python and javascript.
+- AliView<sup>6</sup> ([webpage](https://ormbunkar.se/aliview/), [github](https://github.com/AliView/AliView)): Although aliview isn't web-based, it is one of the fastest and most useful MSA viewers so I thought it important to include.
 
-- Alignment Viewer ([webpage](https://alignmentviewer.org/), [github](https://github.com/sanderlab/alignmentviewer)): The predecessor to Alignment Viewer 2.0, this project and website provide a means to view MSAs, for viewing of MSAs as well as perform additional sequence analysis like viewing sequence space with a UMAP component.
-- MView
-- Wasabi
-- AliView
-- MSAViewer
-- Jalview
+## Color Schemes
+
+Alignment Viewer 2.0 provides a bunch of different color schemes for both amino acid and nucleotide sequences. Scheme definitions were taken from the msa-colorschemes repository ([github](https://github.com/wilzbach/msa-colorschemes), a part of the
+[MSAViewer project](https://github.com/wilzbach/msa)<sup>2</sup>), which in turn derived many of the schemes from[JalView](https://www.jalview.org/help/html/colourSchemes/)<sup>3</sup>.
 
 ## About Us
 
@@ -95,3 +98,19 @@ Alignment Viewer 2.0 was developed at the Dana-Farber Cancer Institute and Harva
 Alignment Viewer 2.0 is meant to be a community open source project. We actively encourage and support contributions. Alignment Viewer 2.0 is licensed under the MIT license.
 
 Please fork and improve/enhance Alignment Viewer 2.0 any way you want. If you believe that your work will be of benifit to the entire community, please open a pull request.
+
+## Citations
+
+(1) Reguant R, Antipin Y, Sheridan R et al. AlignmentViewer: Sequence Analysis of Large Protein Families [version 1; peer review: 1 approved, 1 approved with reservations]. F1000Research 2020, 9:213
+
+(2) Guy Yachdav and Sebastian Wilzbach and Benedikt Rauscher and Robert Sheridan and Ian Sillitoe and James Procter and Suzanna Lewis and Burkhard Rost and Tatyana Goldberg. "MSAViewer: interactive JavaScript visualization of multiple sequence alignments." Bioinformatics (2016)
+
+(3) Waterhouse, A.M., Procter, J.B., Martin, D.M.A, Clamp, M. and Barton, G. J. (2009)
+"Jalview Version 2 - a multiple sequence alignment editor and analysis workbench"
+Bioinformatics25 (9) 1189-1191 doi: 10.1093/bioinformatics/btp033
+
+(4) Brown, N.P., Leroy C., Sander C. (1998). MView: A Web compatible database search or multiple alignment viewer. Bioinformatics. 14 (4):380-381.
+
+(5) Veidenberg, A., Medlar, A. and Löytynoja, A. (2015) Wasabi: an integrated platform for evolutionary sequence analysis and data visualisation. Mol. Biol. Evol.
+
+(6) Larsson, A. (2014). AliView: a fast and lightweight alignment viewer and editor for large data sets. Bioinformatics30(22): 3276-3278. http://dx.doi.org/10.1093/bioinformatics/btu531

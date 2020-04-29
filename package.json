@@ -1,7 +1,7 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.3",
   "private": false,
   "author": "Nicholas Gauthier",
   "module": "dist/js/index.js",
@@ -29,23 +29,14 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@babel/cli": "^7.8.4",
     "@inlet/react-pixi": "^1.2.0",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
-    "@types/react-leaflet": "^2.5.0",
     "ace-builds": "^1.4.8",
-    "leaflet": "^1.6.0",
-    "logojs-react": "^2.0.9",
-    "node-sass": "^4.13.1",
+    "lodash": "^4.17.15",
     "pixi-viewport": "^4.8.0",
     "pixi.js": "^5.2.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-leaflet": "^2.6.1",
-    "react-scripts": "3.3.0",
-    "typescript": "^3.7.5"
+    "react-tooltip": "^4.2.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -55,7 +46,7 @@
     "cover": "react-scripts test --env=jsdom-fifteen --coverage --watchAll=false",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "pub2npm": "rimraf dist && yarn pub2npm:babel && yarn tsc -p tsconfig.dist.json && node ./scripts/copyStyles.js",
+    "pub2npm": "rimraf dist && yarn pub2npm:babel && yarn tsc -p tsconfig.dist.json && node ./scripts/copyStyles.js && yarn publish",
     "pub2npm:babel": "yarn babel:cjs && yarn babel:esm && yarn babel:umd",
     "babel:cjs": "BABEL_ENV=cjs babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/js --presets=@babel/env",
     "babel:esm": "BABEL_ENV=esm babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/esm",
@@ -80,10 +71,15 @@
     ]
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
     "@babel/plugin-proposal-export-default-from": "^7.8.3",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jest": "^25.1.3",
+    "@types/lodash": "^4.14.150",
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
     "babel-plugin-typescript-to-proptypes": "^1.3.2",
     "canvas": "^2.6.1",
@@ -97,7 +93,11 @@
     "jest-fetch-mock": "^3.0.2",
     "jest-transform-css": "^2.0.0",
     "jest-webgl-canvas-mock": "^0.2.3",
-    "ts-jest": "^25.2.1"
+    "node-sass": "^4.13.1",
+    "react-scripts": "3.4.0",
+    "ts-jest": "^25.2.1",
+    "ts-node": "^8.9.0",
+    "typescript": "^3.7.5"
   },
   "jest": {
     "collectCoverageFrom": [

@@ -5,7 +5,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
         "C",
@@ -422,7 +422,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
         "C",
@@ -839,7 +839,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Array [],
       "globalAlphaLetterCounts": Object {},
       "name": "My-Alignment",
@@ -982,7 +982,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -1163,7 +1163,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -1344,7 +1344,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -1525,7 +1525,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -1706,7 +1706,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -1887,7 +1887,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -2068,7 +2068,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -2249,7 +2249,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -2430,7 +2430,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],
@@ -2611,7 +2611,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allAlphaLettersSorted": Array [
+      "allUpperAlphaLettersInAlignmentSorted": Array [
         "A",
         "B",
       ],

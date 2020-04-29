@@ -5,7 +5,7 @@
 
 import { default as ace } from "ace-builds";
 import { Alignment } from "./Alignment";
-import { getLetterClassNamesForAce } from "./MolecularStyles";
+import { getLetterClassNames } from "./MolecularStyles";
 
 interface IAceType {
   [key: string]: any;
@@ -31,38 +31,48 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
 
       /**
        * Rules parse individual characters in the editor and assign classes
-       * to each character. Note that characters may be grouped together
+       * to each character. Note that characters will be grouped together
        * if they match the same rule and are side by side.
        */
       var AlignmentHighlightRules = function (this: any) {
         //We define an alignment-specific set of rules that will
-        //add other tags such as whether a character matches the
-        //consensus sequence.
+        //add classes including whether a character matches the
+        //consensus sequence, matches the query etc.
         let rules: {
           [key: string]: {
             token: (letter: string) => void;
-            regex: string;
+            regex: RegExp;
             next: string;
           }[];
         } = {};
 
+        //note: this is by far the thing that kills performance the most
+        //      I'm not sure whether it is due to how it parses (state machine)
+        //      slowing things down, or whether it is an issue with attaching
+        //      ~4 classes to every single residue -- either way, removing parsing
+        //      all together makes it much more snappy and also decreases the
+        //      memory footprint drastically.
+        const re = /./;
+        const statePrefix = "p";
         for (let i = 0; i < alignment.getMaxSequenceLength(); i++) {
-          const stateName = i === 0 ? "start" : "pos" + i;
+          const stateName = i === 0 ? "start" : statePrefix + i;
           const nextStateName =
             i === alignment.getMaxSequenceLength() - 1
               ? "start"
-              : "pos" + (i + 1);
+              : statePrefix + (i + 1);
 
           rules[stateName] = [
             {
               token: function (letter: string) {
-                return getLetterClassNamesForAce(
+                const toreturn = getLetterClassNames(
                   letter,
                   letter === alignment.getConsensus()[i].letter,
-                  letter === alignment.getTargetSequence().sequence[i]
+                  letter === alignment.getTargetSequence().sequence[i],
+                  true
                 );
+                return toreturn;
               },
-              regex: ".",
+              regex: re,
               next: nextStateName,
             },
           ];

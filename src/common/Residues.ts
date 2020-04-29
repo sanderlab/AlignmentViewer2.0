@@ -2,7 +2,7 @@ import { GlyphFactory } from "./SequenceLogoGlyphs";
 import { stringToColor } from "./Utils";
 import {
   ALL_AMINOACID_COLORSCHEMES,
-  ALL_NUCLEOTIDE_COLORSCHEMES
+  ALL_NUCLEOTIDE_COLORSCHEMES,
 } from "./MolecularStyles";
 
 interface IResidueColor {
@@ -58,7 +58,7 @@ export class AminoAcid implements IAminoAcid {
     new AminoAcid("Y", "TYR", "Tyrosine"),
     new AminoAcid("V", "VAL", "Valine"),
 
-    new AminoAcid("X", "UKN", "Unknown Amino Acid")
+    new AminoAcid("X", "UKN", "Unknown"),
   ];
 
   private static bySingleLetterCode = AminoAcid.canonicalAminoAcids.reduce(
@@ -118,7 +118,7 @@ export class AminoAcid implements IAminoAcid {
       acc[cs.commonName] = {
         hexString: colorInfo.hex,
         rgb: colorInfo.rgb,
-        backgroundAlpha: cs.backgroundAlpha
+        backgroundAlpha: cs.backgroundAlpha,
       };
       return acc;
     }, {} as IResidueColor);
@@ -139,7 +139,7 @@ export class Nucleotide implements INucleotide {
     new Nucleotide("R", "Purine"),
     new Nucleotide("Y", "Pyrimidine"),
 
-    new Nucleotide("X", "Unknown Nucleotide")
+    new Nucleotide("X", "Unknown"),
   ];
 
   private static bySingleLetterCode = Nucleotide.allNucleotides.reduce(
@@ -153,7 +153,8 @@ export class Nucleotide implements INucleotide {
   public static UNKNOWN = Nucleotide.bySingleLetterCode["X"];
 
   static fromSingleLetterCode(singleLetterCode: string): Nucleotide {
-    if (singleLetterCode in this.bySingleLetterCode) {
+    singleLetterCode = singleLetterCode.toUpperCase();
+    if (this.bySingleLetterCode[singleLetterCode]) {
       return Nucleotide.bySingleLetterCode[singleLetterCode];
     }
     return Nucleotide.UNKNOWN;
@@ -179,7 +180,7 @@ export class Nucleotide implements INucleotide {
       acc[cs.commonName] = {
         hexString: colorInfo.hex,
         rgb: colorInfo.rgb,
-        backgroundAlpha: cs.backgroundAlpha
+        backgroundAlpha: cs.backgroundAlpha,
       };
       return acc;
     }, {} as IResidueColor);

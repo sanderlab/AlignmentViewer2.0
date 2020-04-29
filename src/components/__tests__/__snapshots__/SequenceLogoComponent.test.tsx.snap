@@ -2,7 +2,7 @@
 
 exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] = `
 <div
-  id="test-sequence-logo-component"
+  className="sequence-logo"
 >
   <svg
     preserveAspectRatio="none"
@@ -16,62 +16,100 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
     xmlns="http://www.w3.org/2000/svg"
   >
     <g
+      className="aceResidueParentClass"
       key="p_0"
       transform="translate(0,0)"
     >
       <rect
-        className="acePrefixE aceLetterObjClass"
+        className="acePrefixE"
         height="100"
         key="idxrect_0"
         transform="translate(0, 50) scale(0.6666666666666666,0.5)"
         width="100"
       />
       <rect
-        className="acePrefixC aceLetterObjClass"
+        className="acePrefixC"
         height="100"
         key="idxrect_1"
         transform="translate(0, 0) scale(0.6666666666666666,0.5)"
         width="100"
       />
+      <rect
+        className="interaction-placeholder"
+        data-class="sequence-logo-tooltip-container"
+        data-for="getLogoTooltip"
+        data-tip={0}
+        height="100"
+        width="1"
+      />
     </g>
     <g
+      className="aceResidueParentClass"
       key="p_1"
       transform="translate(1,0)"
     >
       <rect
-        className="acePrefixD aceLetterObjClass"
+        className="acePrefixD"
         height="100"
         key="idxrect_0"
         transform="translate(0, 0) scale(0.6666666666666666,1)"
         width="100"
       />
+      <rect
+        className="interaction-placeholder"
+        data-class="sequence-logo-tooltip-container"
+        data-for="getLogoTooltip"
+        data-tip={1}
+        height="100"
+        width="1"
+      />
     </g>
     <g
+      className="aceResidueParentClass"
       key="p_2"
       transform="translate(2,0)"
     >
       <rect
-        className="acePrefixE aceLetterObjClass"
+        className="acePrefixC"
         height="100"
         key="idxrect_0"
         transform="translate(0, 50) scale(0.6666666666666666,0.5)"
         width="100"
       />
       <rect
-        className="acePrefixC aceLetterObjClass"
+        className="acePrefixE"
         height="100"
         key="idxrect_1"
         transform="translate(0, 0) scale(0.6666666666666666,0.5)"
         width="100"
       />
+      <rect
+        className="interaction-placeholder"
+        data-class="sequence-logo-tooltip-container"
+        data-for="getLogoTooltip"
+        data-tip={2}
+        height="100"
+        width="1"
+      />
     </g>
   </svg>
+  <ReactTooltip
+    border={true}
+    clickable={false}
+    effect="solid"
+    getContent={[Function]}
+    id="getLogoTooltip"
+    insecure={true}
+    resizeHide={true}
+    type="light"
+    wrapper="div"
+  />
 </div>
 `;
 
 exports[`SequenceLogoComponent Should render when given default props. 1`] = `
 <div
-  id="test-sequence-logo-component"
+  className="sequence-logo"
 >
   <svg
     preserveAspectRatio="none"
@@ -83,6 +121,17 @@ exports[`SequenceLogoComponent Should render when given default props. 1`] = `
     }
     viewBox="0 0 0 100"
     xmlns="http://www.w3.org/2000/svg"
+  />
+  <ReactTooltip
+    border={true}
+    clickable={false}
+    effect="solid"
+    getContent={[Function]}
+    id="getLogoTooltip"
+    insecure={true}
+    resizeHide={true}
+    type="light"
+    wrapper="div"
   />
 </div>
 `;

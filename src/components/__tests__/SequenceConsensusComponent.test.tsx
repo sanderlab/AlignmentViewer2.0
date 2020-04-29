@@ -3,16 +3,15 @@ import * as React from "react";
 
 import { shallow } from "enzyme";
 import { Alignment } from "../../common/Alignment";
-import { SequenceConsensusComponent } from "../SequenceConsensusComponent";
+import { SequenceBarplotComponent } from "../SequenceBarplotComponent";
 
-describe("SequenceConsensusComponent", () => {
+describe("SequenceBarplotComponent", () => {
   it("Should render when given default props.", () => {
     const wrapper = shallow(
-      <SequenceConsensusComponent
-        characterWidth={3}
-        consensusPlotLoaded={jest.fn()}
+      <SequenceBarplotComponent
+        positionWidth={3}
         alignment={new Alignment("", [])}
-        id={"test-sequence-logo-component"}
+        dataSeries={[SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT]}
       />
     );
     expect(wrapper).toMatchSnapshot();
