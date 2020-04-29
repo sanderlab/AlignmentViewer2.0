@@ -11,7 +11,7 @@ jobs:
           steps:
             - run: yarn install
             - run: rm -rf node_modules/canvas
-            - run: yarn
+            - run: yarn add canvas
             - run: yarn test
 workflows:
   build-and-test:
