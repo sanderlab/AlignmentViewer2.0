@@ -10,8 +10,9 @@ jobs:
       - node/with-cache:
           steps:
             - run: yarn install
+            - run: npm rebuild
             - run: yarn test
 workflows:
-    build-and-test:
-      jobs:
-        - build-and-test
+  build-and-test:
+    jobs:
+      - build-and-test
