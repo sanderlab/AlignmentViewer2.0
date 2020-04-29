@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  node: circleci/node@1.1.6
+  node: circleci/node@2.0.3
 jobs:
   build-and-test:
     executor:
@@ -10,7 +10,6 @@ jobs:
       - node/with-cache:
           steps:
             - run: yarn install
-            - run: npm rebuild
             - run: yarn test
 workflows:
   build-and-test:
