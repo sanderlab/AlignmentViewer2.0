@@ -7,8 +7,10 @@ jobs:
       name: node/default
     steps:
       - checkout
-      - run: yarn install
-      - run: yarn test
+      - node/with-cache:
+          steps:
+            - run: yarn install
+            - run: yarn test
 workflows:
   build-and-test:
     jobs:
