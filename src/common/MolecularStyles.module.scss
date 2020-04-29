@@ -118,7 +118,7 @@ $aaProps: (
       ),
     ),
     Buried: (
-      description: "Buried",
+      description: "Buried Index",
       topLevelClass: $aaStyleClassPrefix + buried,
       backgroundAlpha: $defaultBackgroundAlpha,
       defaultLetterColor: $defaultLetterColor,
@@ -248,7 +248,7 @@ $aaProps: (
       ),
     ),
     Helix: (
-      description: "Helix",
+      description: "Helix Propensity",
       topLevelClass: $aaStyleClassPrefix + helix,
       backgroundAlpha: $defaultBackgroundAlpha,
       defaultLetterColor: $defaultLetterColor,
@@ -401,7 +401,7 @@ $aaProps: (
       ),
     ),
     Strand: (
-      description: "Strand",
+      description: "Strand Propensity",
       topLevelClass: $aaStyleClassPrefix + strand,
       backgroundAlpha: $defaultBackgroundAlpha,
       defaultLetterColor: $defaultLetterColor,
@@ -463,7 +463,7 @@ $aaProps: (
       ),
     ),
     Turn: (
-      description: "Turn",
+      description: "Turn Propensity",
       topLevelClass: $aaStyleClassPrefix + turn,
       backgroundAlpha: $defaultBackgroundAlpha,
       defaultLetterColor: $defaultLetterColor,
@@ -560,7 +560,7 @@ $ntProps: (
       ),
     ),
     Purine: (
-      description: "Purine",
+      description: "Purine/Pyrimidine",
       topLevelClass: $ntStyleClassPrefix + purine,
       backgroundAlpha: $defaultBackgroundAlpha,
       defaultLetterColor: $defaultLetterColor,
