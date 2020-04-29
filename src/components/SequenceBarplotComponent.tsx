@@ -1,6 +1,6 @@
 import React from "react";
-import _ from "lodash";
 import "./SequenceBarplot.scss";
+import _ from "lodash";
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore } from "../common/Utils";
 import ReactTooltip from "react-tooltip";
@@ -160,7 +160,7 @@ export class SequenceBarplotComponent extends React.Component<
       const qk = al.getGlobalAlphaLetterCounts(true, allLetters);
       return {
         height:
-          !pk || Object.keys(pk).length == 0
+          !pk || Object.keys(pk).length === 0
             ? 0
             : allLetters.reduce((acc, letter) => {
                 if (letter in pk) {
@@ -358,7 +358,7 @@ export class SequenceBarplotComponent extends React.Component<
     const barsObj = this.getBars();
     return (
       <ReactTooltip
-        id="getBarContent"
+        id="getBarTooltip"
         effect="solid"
         type="light"
         border={true}
@@ -455,7 +455,7 @@ export class SequenceBarplotComponent extends React.Component<
                 onMouseLeave={(event) => {
                   this.handlePositionHover(event, pos, false);
                 }}
-                data-for="getBarContent"
+                data-for="getBarTooltip"
                 data-tip={pos}
                 data-class={"barplot-tooltip-container"}
                 key={`pos_${pos}`}

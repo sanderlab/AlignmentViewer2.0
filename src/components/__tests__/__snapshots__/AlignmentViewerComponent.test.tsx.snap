@@ -165,7 +165,7 @@ exports[`AlignmentViewer Should render 1`] = `
       className="av-content"
     >
       <div
-        className="logo_box undefined  undefined"
+        className="undefined  undefined"
       >
         <SequenceLogoComponent
           alignment={
@@ -189,8 +189,26 @@ exports[`AlignmentViewer Should render 1`] = `
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
+          alignmentType={
+            AlignmentTypes {
+              "allColorSchemes": Array [
+                Object {
+                  "backgroundAlpha": NaN,
+                  "className": "",
+                  "colors": Object {
+                    "": "",
+                  },
+                  "commonName": "Default",
+                  "description": "",
+                },
+              ],
+              "className": undefined,
+              "description": "Nucleotide Sequences",
+              "key": "nucleotide-alignment",
+            }
+          }
           glyphWidth={0}
-          id="sequence_logo"
+          height={100}
           logoType="Bar Plot"
         />
       </div>

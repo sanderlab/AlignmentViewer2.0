@@ -1,0 +1,59 @@
+/** SequenceLogo.scss */
+
+.sequence-logo {
+  rect.interaction-placeholder {
+    opacity: 0;
+  }
+
+  .sequence-logo-tooltip-container {
+    margin: 0;
+
+    .logo-tooltip {
+      display: table;
+      width: auto;
+      line-height: 16px;
+      font-size: 12px;
+
+      h1 {
+        text-align: center;
+        text-decoration: underline;
+        padding-bottom: 4px;
+        margin: 0;
+        font-size: 13px;
+      }
+
+      .row {
+        display: table-row;
+        width: auto;
+        clear: both;
+      }
+
+      .col {
+        float: left;
+        display: table-column;
+        text-align: center;
+        width: 60px;
+        line-height: 16px;
+      }
+
+      .col.header {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .legend-square {
+        width: 12px;
+        height: 12px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+      }
+      .name {
+        width: 100px;
+      }
+      .frequency {
+      }
+      .count {
+      }
+    }
+  }
+}

@@ -383,13 +383,13 @@ export class Alignment {
    *          with [key = letter (e.g., amino acid code)] and [value = # occurrences].
    * TODO: Test parameter use cases.
    */
-  getPositionalLetterCounts(asFraction?: boolean, validLetters?: string[]) {
-    if (asFraction || validLetters) {
+  getPositionalLetterCounts(normalize?: boolean, validLetters?: string[]) {
+    if (normalize || validLetters) {
       return Array.from(this.positionalLetterCounts).reduce(
         (acc, [position, letterCounts]) => {
           acc.set(
             position,
-            asFraction
+            normalize
               ? Alignment.normalizeLetterCounts(letterCounts, validLetters) // normalize + remove invalid letters
               : Object.keys(letterCounts).reduce((acc2, letter) => {
                   //don't normalize, but remove invalid letters

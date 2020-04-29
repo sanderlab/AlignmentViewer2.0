@@ -58,7 +58,7 @@ export class AminoAcid implements IAminoAcid {
     new AminoAcid("Y", "TYR", "Tyrosine"),
     new AminoAcid("V", "VAL", "Valine"),
 
-    new AminoAcid("X", "UKN", "Unknown Amino Acid"),
+    new AminoAcid("X", "UKN", "Unknown"),
   ];
 
   private static bySingleLetterCode = AminoAcid.canonicalAminoAcids.reduce(
@@ -139,7 +139,7 @@ export class Nucleotide implements INucleotide {
     new Nucleotide("R", "Purine"),
     new Nucleotide("Y", "Pyrimidine"),
 
-    new Nucleotide("X", "Unknown Nucleotide"),
+    new Nucleotide("X", "Unknown"),
   ];
 
   private static bySingleLetterCode = Nucleotide.allNucleotides.reduce(

@@ -224,24 +224,27 @@ export class AlignmentViewer extends React.Component<
     );
   }
 
-  protected renderSequenceLogo = () => (
-    <div
-      className={
-        `logo_box ${this.props.style.alignmentType.className} ` +
-        `${this.props.style.colorScheme.className} ` +
-        `${PositionsToStyle.ALL.className}`
-      }
-    >
-      {
-        <SequenceLogoComponent
-          id="sequence_logo"
-          alignment={this.props.alignment}
-          glyphWidth={this.state.aceCharacterWidth}
-          logoType={this.props.logoPlotStyle}
-        />
-      }
-    </div>
-  );
+  protected renderSequenceLogo = () => {
+    const { alignment, logoPlotStyle, style } = this.props;
+    return (
+      <div
+        className={
+          `${style.alignmentType.className} ` +
+          `${style.colorScheme.className} ` +
+          `${PositionsToStyle.ALL.className}`
+        }
+      >
+        {
+          <SequenceLogoComponent
+            alignment={alignment}
+            glyphWidth={this.state.aceCharacterWidth}
+            logoType={logoPlotStyle}
+            alignmentType={style.alignmentType}
+          />
+        }
+      </div>
+    );
+  };
 
   protected renderConservationBox = () => {
     const { barplotDataseries } = this.props;
