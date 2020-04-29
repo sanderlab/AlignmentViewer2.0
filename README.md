@@ -71,7 +71,7 @@ sequences of length ~250 amino acids ([link to beta-lactamase MSA](https://raw.g
 
 Our strategy for dealing with peformance issues boils down to two main approaches:
 
-1. **Don't load what isn't visible ([Ace Editor](https://ace.c9.io/))**: Inserting many elements into the HTML DOM at one time absolutely kills performance. For example, insertion of roughly 100,000 elements (think an alignment of 1000 sequences of length 100) can drastically decreease performance. In order to allow for larger alignments in the _Detailed MSA Viewer_, we only insert the portion of the MSA that is visible at any given time. Smart loading decreases the number of elements in the DOM significantly and drastically improves performance. To accomplish this, we make use of the [Ace Editor](https://ace.c9.io/)) project, and use a custom mode / highlighter to parse and style multiple sequence alignments.
+1. **Don't load what isn't visible ([Ace Editor](https://ace.c9.io/))**: Inserting many elements into the HTML DOM at one time absolutely kills performance. For example, insertion of roughly 100,000 elements (think an alignment of 1000 sequences of length 100) can drastically decreease performance. In order to allow for larger alignments in the _Detailed MSA Viewer_, we only insert the portion of the MSA that is visible at any given time. Smart loading decreases the number of elements in the DOM significantly and drastically improves performance. To accomplish this, we make use of the [Ace Editor](https://ace.c9.io/) project, and use a custom mode / highlighter to parse and style multiple sequence alignments.
 
 2. **Use the graphics card ([WebGL](https://get.webgl.org/) with [PixiJS](https://www.pixijs.com/))**: In order to view the entire MSA in the same viewed windoow, we have also implemented the _MiniMap MSA Viewer_ using the [PixiJS](https://www.pixijs.com/) 2D WebGL framework. This viewer avoids having many DOM elements by representing the MSA as a series of tiled images (avoiding browser image size limits) which can be zoomed, scaled, interacted with, etc. using the [pixi-viewport](https://github.com/davidfig/pixi-viewport) project.
 
@@ -86,8 +86,8 @@ Our strategy for dealing with peformance issues boils down to two main approache
 
 ## Color Schemes
 
-Alignment Viewer 2.0 provides a bunch of different color schemes for both amino acid and nucleotide sequences. Scheme definitions were taken from the msa-colorschemes repository ([github](https://github.com/wilzbach/msa-colorschemes), a part of the
-[MSAViewer project](https://github.com/wilzbach/msa)<sup>2</sup>), which in turn derived many of the schemes from[JalView](https://www.jalview.org/help/html/colourSchemes/)<sup>3</sup>.
+Alignment Viewer 2.0 provides a bunch of different color schemes for both amino acid and nucleotide sequences. Scheme definitions were taken from the [msa-colorschemes](https://github.com/wilzbach/msa-colorschemes) repository, a part of the
+[MSAViewer project](https://github.com/wilzbach/msa)<sup>2</sup>, which derived many of the schemes from [JalView](https://www.jalview.org/help/html/colourSchemes/)<sup>3</sup>.
 
 ## About Us
 

@@ -377,7 +377,7 @@ export class SequenceBarplotComponent extends React.Component<
                   >
                     <span className="legend-square"></span>
                     <span className="legend-text">
-                      {bar.dataSeries.name}: {+bar.height.toFixed(2)}
+                      {bar.dataSeries.name}: {+bar.height.toFixed(1)}
                     </span>
                   </div>
                 );
