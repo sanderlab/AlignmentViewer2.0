@@ -68,7 +68,7 @@ export class SequenceBarplotComponent extends React.Component<
   ISequenceBarplotState
 > {
   private static POSITION_VIEWBOX_HEIGHT = 100;
-  private static POSITION_VIEWBOX_WIDTH = 20;
+  private static POSITION_VIEWBOX_WIDTH = 1;
 
   private cache: Partial<ISequenceBarplotProps> & {
     bars?: ISingleBarDetailsFull[];

@@ -24,6 +24,7 @@ import { ArrayOneOrMore } from "../common/Utils";
 export type IAlignmentViewerProps = {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  barplotDataseries?: ArrayOneOrMore<ISequenceBarplotDataSeries>;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
@@ -38,7 +39,7 @@ const defaultProps = {
     SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
     //SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
     SequenceBarplotComponent.GAPS_BARPLOT,
-  ] as ArrayOneOrMore<ISequenceBarplotDataSeries>,
+  ],
 };
 
 interface IAlignmentViewerState {
@@ -170,25 +171,26 @@ export class AlignmentViewer extends React.Component<
   }
 
   render() {
-    if (!this.props.alignment) {
+    const { alignment, barplotDataseries, showAnnotations } = this.props;
+    if (!alignment) {
       return null;
     }
 
-    const annotationClass = this.props.showAnnotations
-      ? ""
-      : " annotation-closed";
+    const annotationClass = showAnnotations ? "" : " annotation-closed";
 
     return (
       <div className={`alignment_viewer${annotationClass}`}>
         {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
 
-        {this.generateWidget(
-          "av-conservation-gaps",
-          "Conservation / gaps:",
-          this.renderConservationBox(),
-          true
-        )}
+        {!barplotDataseries
+          ? null
+          : this.generateWidget(
+              "av-conservation-gaps",
+              barplotDataseries.map((series) => series.name).join(" / "),
+              this.renderConservationBox(),
+              true
+            )}
 
         {this.generateWidget(
           "av-sequence-logo",

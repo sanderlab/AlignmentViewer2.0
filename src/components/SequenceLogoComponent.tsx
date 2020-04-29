@@ -78,7 +78,7 @@ export class SequenceLogoComponent extends React.Component<
 
           const position = parseInt(idx) + 1;
           const glyphData = this.logoData![parseInt(idx)];
-          return (
+          return glyphData.length === 0 ? null : (
             <div className="logo-tooltip">
               <h1>Position: {position}</h1>
               <div className="row">
