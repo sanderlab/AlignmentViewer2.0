@@ -25,7 +25,7 @@ exports[`SequenceBarplotComponent Should render when given default props. 1`] = 
         "width": -3,
       }
     }
-    viewBox="0 0 -20 100"
+    viewBox="0 0 -1 100"
     xmlns="http://www.w3.org/2000/svg"
   />
 </div>

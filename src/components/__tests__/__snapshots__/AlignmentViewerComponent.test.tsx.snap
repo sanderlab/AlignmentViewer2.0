@@ -99,7 +99,7 @@ exports[`AlignmentViewer Should render 1`] = `
     <div
       className="av-annotation"
     >
-      Conservation / gaps:
+      Entropy / Gaps
     </div>
     <div
       className="av-content"
