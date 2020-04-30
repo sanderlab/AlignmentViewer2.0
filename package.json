@@ -1,7 +1,7 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.7",
   "private": false,
   "author": "Nicholas Gauthier",
   "module": "dist/js/index.js",
