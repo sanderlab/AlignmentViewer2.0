@@ -363,6 +363,7 @@ export class SequenceBarplotComponent extends React.Component<
         type="light"
         border={true}
         getContent={(pos: string) => {
+          console.log("BAR TOOLTIP:" + pos);
           const posInt = parseInt(pos);
           const barsAtPostion = barsObj.barsGroupedByPosition.get(posInt)!;
           const posPlusOne = posInt + 1; // positions should be 1 based, not zero based
@@ -493,6 +494,31 @@ export class SequenceBarplotComponent extends React.Component<
         )}
       </svg>
     );
+  }
+
+  /*
+   *
+   *
+   * REACT METHODS
+   *
+   *
+   */
+  shouldComponentUpdate(nextProps: ISequenceBarplotProps) {
+    const { alignment, dataSeries, positionWidth, height } = this.props;
+    if (
+      !this.cache ||
+      alignment !== nextProps.alignment ||
+      dataSeries !== nextProps.dataSeries ||
+      positionWidth !== nextProps.positionWidth ||
+      height !== nextProps.height
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  componentDidUpdate() {
+    ReactTooltip.rebuild();
   }
 
   render() {

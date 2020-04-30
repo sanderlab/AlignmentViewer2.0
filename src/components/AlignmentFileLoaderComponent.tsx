@@ -1,6 +1,8 @@
 import * as React from "react";
 import "./FileInput.scss";
 import { Alignment } from "../common/Alignment";
+import { FastaAlignment } from "../common/FastaAlignment";
+import { StockholmAlignment } from "../common/StockholmAlignment";
 
 export interface IExampleFileProps {
   labelText: string;
@@ -54,8 +56,14 @@ export class AlignmentFileLoaderComponent extends React.Component<
     var reader = new FileReader();
     reader.onload = (e) => {
       const fileText = reader.result as string;
+      let alignment: Alignment;
+      try {
+        alignment = StockholmAlignment.fromFileContents(file.name, fileText);
+      } catch (e) {
+        alignment = FastaAlignment.fromFileContents(file.name, fileText);
+      }
 
-      onAlignmentLoaded(Alignment.fromFileContents(file.name, fileText));
+      onAlignmentLoaded(alignment);
       if (this.fileInput.current) {
         this.fileInput.current.value = ""; //reset the input box
       }
