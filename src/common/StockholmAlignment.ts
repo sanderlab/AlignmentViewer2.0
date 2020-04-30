@@ -100,7 +100,7 @@ export class StockholmAlignment extends Alignment {
         line = line.trim();
         if (!line.startsWith("#")) {
           //sequence line
-          const split = line.split(/(?<=^\S+)\s/);
+          const split = line.match(/^(\S+)\s(.*)/)!.slice(1);
           sequences.push({ id: split[0].trim(), sequence: split[1].trim() });
         } else {
           //metadata line
@@ -113,10 +113,16 @@ export class StockholmAlignment extends Alignment {
             );
           } else {
             const metadataGroup = line.substr(2, 2);
+
+            //match/slice splits on first whitespace. Taken from:
+            //       https://stackoverflow.com/questions/10272773
+            //Used multiple times and should reassess if it is the fastest. note
+            //that safari had problems with str.split(/(?<=^\S+)\s/)
             const keyVal = line
               .substr(5)
               .trim()
-              .split(/(?<=^\S+)\s/);
+              .match(/^(\S+)\s(.*)/)!
+              .slice(1);
             keyVal[1] = keyVal[1].trim();
 
             if (metadataGroup === "GF") {
@@ -127,7 +133,10 @@ export class StockholmAlignment extends Alignment {
               }
             } else if (metadataGroup === "GS") {
               const seqId = keyVal[0];
-              const featureVal = keyVal[1].trim().split(/(?<=^\S+)\s/);
+              const featureVal = keyVal[1]
+                .trim()
+                .match(/^(\S+)\s(.*)/)!
+                .slice(1);
               if (seqId in metadata.GS === false) {
                 metadata.GS[seqId] = {};
               }
@@ -137,7 +146,10 @@ export class StockholmAlignment extends Alignment {
               metadata.GS[seqId][featureVal[0]].push(featureVal[1]);
             } else if (metadataGroup === "GR") {
               const seqId = keyVal[0];
-              const featureVal = keyVal[1].trim().split(/(?<=^\S+)\s/);
+              const featureVal = keyVal[1]
+                .trim()
+                .match(/^(\S+)\s(.*)/)!
+                .slice(1);
               if (seqId in metadata.GR === false) {
                 metadata.GR[seqId] = {};
               }
