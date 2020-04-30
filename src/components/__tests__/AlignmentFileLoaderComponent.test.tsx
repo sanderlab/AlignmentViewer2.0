@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { shallow } from "enzyme";
 
-import { FileInputComponent } from "../FileInputComponent";
+import { AlignmentFileLoaderComponent } from "../AlignmentFileLoaderComponent";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -22,9 +22,14 @@ jest.mock("../MolecularStyles.module.scss", () => {
   };
 });
 
-describe("FileInputComponent", () => {
-  it("Should render with no props.", () => {
-    const wrapper = shallow(<FileInputComponent />);
+describe("AlignmentFileLoaderComponent", () => {
+  it("Should render with minimal props.", () => {
+    const wrapper = shallow(
+      <AlignmentFileLoaderComponent
+        fileSelectorLabelText="text"
+        onAlignmentLoaded={() => {}}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

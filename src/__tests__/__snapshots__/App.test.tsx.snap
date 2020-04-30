@@ -98,7 +98,7 @@ exports[`App Should render within 2 minutes. 1`] = `
         <div>
           <label>
             <strong>
-              Style:
+              Color Scheme:
             </strong>
             <select
               onChange={[Function]}
@@ -114,7 +114,7 @@ exports[`App Should render within 2 minutes. 1`] = `
         <div>
           <label>
             <strong>
-              Residue Hue:
+              Residue Style:
             </strong>
             <select
               onChange={[Function]}
@@ -131,6 +131,12 @@ exports[`App Should render within 2 minutes. 1`] = `
                 value="light"
               >
                 Light
+              </option>
+              <option
+                key="lettersonly"
+                value="lettersonly"
+              >
+                Letters Only
               </option>
             </select>
           </label>
@@ -259,26 +265,20 @@ exports[`App Should render within 2 minutes. 1`] = `
         </div>
         <br />
         <div>
-          <FileInputComponent
-            labelText="Upload Alignment File:"
-            onFileLoadCb={[Function]}
+          <AlignmentFileLoaderComponent
+            exampleFiles={
+              Array [
+                Object {
+                  "fileName": "7fa1c5691376beab198788a726917d48_b0.4.a2m",
+                  "fileURL": "/7fa1c5691376beab198788a726917d48_b0.4.a2m",
+                  "labelText": "β-lactamase",
+                },
+              ]
+            }
+            fileSelectorLabelText="Upload Alignment File:"
+            onAlignmentLoaded={[Function]}
+            onFileLoadStart={[Function]}
           />
-        </div>
-        <div
-          className="examples"
-        >
-          <label>
-            <strong>
-              Example Alignments:
-            </strong>
-            <ExampleFileComponent
-              fileName="7fa1c5691376beab198788a726917d48_b0.4.a2m"
-              fileURL="/7fa1c5691376beab198788a726917d48_b0.4.a2m"
-              labelText="β-lactamase"
-              onFileLoaded={[Function]}
-              onStartLoading={[Function]}
-            />
-          </label>
         </div>
         <div
           className="loader"

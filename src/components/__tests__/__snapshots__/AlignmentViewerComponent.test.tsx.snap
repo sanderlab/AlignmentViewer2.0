@@ -83,7 +83,7 @@ exports[`AlignmentViewer Should render 1`] = `
             "description": "All",
             "key": "all",
           },
-          "residueDetail": ResidueHue {
+          "residueDetail": ResidueStyle {
             "className": undefined,
             "description": "Light",
             "key": "light",

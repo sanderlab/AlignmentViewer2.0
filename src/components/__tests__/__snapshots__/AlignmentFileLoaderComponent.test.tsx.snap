@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlignmentFileLoaderComponent Should render with minimal props. 1`] = `
+<div
+  className="alignment-file-loader"
+>
+  <div
+    className="file-upload-input"
+  >
+    <label>
+      <strong>
+        text
+      </strong>
+      <input
+        className="hidden-file-input"
+        onChange={[Function]}
+        type="file"
+      />
+      <button
+        onClick={[Function]}
+        type="button"
+      >
+        Choose File
+      </button>
+    </label>
+  </div>
+  <div
+    className="example-files"
+  />
+</div>
+`;
