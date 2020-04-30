@@ -70,6 +70,7 @@ $defaultLetterColor: #cccccc;
 //residue style
 $darkHueClass: dark-residues;
 $lightHueClass: light-residues;
+$lettersOnlyHueClass: letters-only-residues;
 
 //which positions should get styled?
 $styPosAll: $styPosClassPrefix + all;
@@ -594,6 +595,7 @@ $ntProps: (
   aceResidueParentClass: $aceResidueParentClass;
   darkHueClass: $darkHueClass;
   lightHueClass: $lightHueClass;
+  lettersOnlyHueClass: $lettersOnlyHueClass;
 
   aaAlignTypeClass: map-get($aaProps, topLevelAlignmentClass);
   ntAlignTypeClass: map-get($ntProps, topLevelAlignmentClass);
@@ -666,6 +668,17 @@ $ntProps: (
       [class^="#{$acePrefix}"] {
       color: $defaultColor;
       fill: $defaultColor;
+    }
+
+    //
+    // letters only class - this is a trick that relies on the the
+    // default "light hue" class to actually color the residues, then
+    // using lettersOnlyHueClass only  removes the background
+    //
+    :global
+      .#{$alignmentClass}.#{$lettersOnlyHueClass}
+      [class^="#{$acePrefix}"] {
+      background-color: transparent !important;
     }
 
     //SPECIAL CASE 1

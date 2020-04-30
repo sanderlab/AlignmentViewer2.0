@@ -9,11 +9,10 @@ import {
   AlignmentTypes,
   PositionsToStyle,
   IColorScheme,
-  ResidueHue,
+  ResidueStyle,
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
-import { FileInputComponent } from "./components/FileInputComponent";
-import { ExampleFileComponent } from "./components/ExampleFileComponent";
+import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
 
 interface AppProps {}
 interface AppState {
@@ -40,6 +39,7 @@ export default class App extends React.Component<AppProps, AppState> {
       showAnnotations: true,
       showSettings: true,
     };
+    this.onAlignmentReceived = this.onAlignmentReceived.bind(this);
   }
 
   render() {
@@ -76,13 +76,6 @@ export default class App extends React.Component<AppProps, AppState> {
       </div>
     );
   }
-
-  /*
-  protected getAlignmentForFile = async (filename: string) => {
-    const result = await fetch(`${process.env.PUBLIC_URL}/${filename}`);
-
-    return Alignment.fromFileContents(filename, await result.text());
-  };*/
 
   protected renderSettingsBox = (
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
@@ -153,7 +146,6 @@ export default class App extends React.Component<AppProps, AppState> {
             {this.renderAnnotationToggle()}
             <br></br>
             {this.renderFileUpload()}
-            {this.renderExampleLinks()}
             <div
               className="loader"
               style={{
@@ -227,7 +219,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <label>
-          <strong>Style:</strong>
+          <strong>Color Scheme:</strong>
           <select
             value={style.alignmentType.allColorSchemes.indexOf(
               style.colorScheme
@@ -264,19 +256,19 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <label>
-          <strong>Residue Hue:</strong>
+          <strong>Residue Style:</strong>
           <select
             value={style.residueDetail.key}
             onChange={(e) => {
               this.setState({
                 style: {
                   ...style,
-                  residueDetail: ResidueHue.fromKey(e.target.value)!,
+                  residueDetail: ResidueStyle.fromKey(e.target.value)!,
                 },
               });
             }}
           >
-            {ResidueHue.list.map((rd) => {
+            {ResidueStyle.list.map((rd) => {
               return (
                 <option key={rd.key} value={rd.key}>
                   {rd.description}
@@ -386,27 +378,24 @@ export default class App extends React.Component<AppProps, AppState> {
   protected renderFileUpload = () => {
     return (
       <div>
-        <FileInputComponent
-          labelText={"Upload Alignment File:"}
-          onFileLoadCb={this.onFileUpload}
+        <AlignmentFileLoaderComponent
+          fileSelectorLabelText={"Upload Alignment File:"}
+          exampleFiles={[
+            {
+              labelText: "β-lactamase",
+              fileURL:
+                process.env.PUBLIC_URL +
+                "/7fa1c5691376beab198788a726917d48_b0.4.a2m",
+              fileName: "7fa1c5691376beab198788a726917d48_b0.4.a2m",
+            },
+          ]}
+          onFileLoadStart={() => {
+            this.setState({
+              loading: true,
+            });
+          }}
+          onAlignmentLoaded={this.onAlignmentReceived}
         />
-      </div>
-    );
-  };
-
-  protected renderExampleLinks = () => {
-    return (
-      <div className="examples">
-        <label>
-          <strong>Example Alignments:</strong>
-          <ExampleFileComponent
-            labelText="β-lactamase"
-            fileURL={`${process.env.PUBLIC_URL}/7fa1c5691376beab198788a726917d48_b0.4.a2m`}
-            fileName="7fa1c5691376beab198788a726917d48_b0.4.a2m"
-            onFileLoaded={this.onFileUpload}
-            onStartLoading={() => this.setState({ loading: true })}
-          />
-        </label>
       </div>
     );
   };
@@ -455,23 +444,11 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
 
-  protected onFileUpload = async (file: File) => {
-    //const fileText = await file.text(); //doesn't work in modern safari or even slightly older firefox
-    if (file) {
-      this.setState({
-        loading: true,
-      });
-      var reader = new FileReader();
-      reader.onload = (e) => {
-        const fileText = reader.result as string;
-        const alignment = Alignment.fromFileContents(file.name, fileText);
-        this.setState({
-          alignment: alignment,
-          style: alignment.getDefaultStyle(),
-          loading: false,
-        });
-      };
-      reader.readAsText(file);
-    }
-  };
+  protected onAlignmentReceived(alignment: Alignment) {
+    this.setState({
+      alignment: alignment,
+      style: alignment.getDefaultStyle(),
+      loading: false,
+    });
+  }
 }

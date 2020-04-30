@@ -154,18 +154,27 @@ export class PositionsToStyle {
   ) {}
 }
 
-export class ResidueHue {
-  static readonly LIGHT = new ResidueHue(
+export class ResidueStyle {
+  static readonly LIGHT = new ResidueStyle(
     "light",
     "Light",
     styles.lightHueClass
   );
-  static readonly DARK = new ResidueHue("dark", "Dark", styles.darkHueClass);
+  static readonly DARK = new ResidueStyle("dark", "Dark", styles.darkHueClass);
+  static readonly NO_BACKGROUND = new ResidueStyle(
+    "lettersonly",
+    "Letters Only",
+    styles.lettersOnlyHueClass
+  );
 
-  static list = [ResidueHue.DARK, ResidueHue.LIGHT];
+  static list = [
+    ResidueStyle.DARK,
+    ResidueStyle.LIGHT,
+    ResidueStyle.NO_BACKGROUND,
+  ];
 
   static fromKey(key: string) {
-    return ResidueHue.list.find((at) => {
+    return ResidueStyle.list.find((at) => {
       return at.key === key;
     });
   }
@@ -192,7 +201,7 @@ export abstract class AlignmentStyle {
   abstract readonly alignmentType: AlignmentTypes;
   abstract colorScheme: IColorScheme;
   abstract positionsToStyle: PositionsToStyle;
-  abstract residueDetail: ResidueHue;
+  abstract residueDetail: ResidueStyle;
 
   static fromAlignmentType(alignmentType: AlignmentTypes) {
     if (alignmentType === AlignmentTypes.AMINOACID)
@@ -213,7 +222,7 @@ export class AminoAcidAlignmentStyle implements AlignmentStyle {
   constructor(
     public colorScheme: IColorScheme = ALL_AMINOACID_COLORSCHEMES[0],
     public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
-    public residueDetail: ResidueHue = ResidueHue.LIGHT
+    public residueDetail: ResidueStyle = ResidueStyle.LIGHT
   ) {}
 }
 
@@ -231,7 +240,7 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
   constructor(
     public colorScheme: IColorScheme = ALL_NUCLEOTIDE_COLORSCHEMES[0],
     public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
-    public residueDetail: ResidueHue = ResidueHue.LIGHT
+    public residueDetail: ResidueStyle = ResidueStyle.LIGHT
   ) {}
 }
 
