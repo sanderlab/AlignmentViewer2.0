@@ -24,7 +24,6 @@ import { ArrayOneOrMore } from "../common/Utils";
 export type IAlignmentViewerProps = {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  barplotDataseries?: ArrayOneOrMore<ISequenceBarplotDataSeries>;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
@@ -35,11 +34,15 @@ const defaultProps = {
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
   showMiniMap: false as boolean,
   showAnnotations: true as boolean,
+  showConsensus: true as boolean,
+  showQuery: true as boolean,
+  showRuler: true as boolean,
+  showLogo: true as boolean,
   barplotDataseries: [
     SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
     //SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
     SequenceBarplotComponent.GAPS_BARPLOT,
-  ],
+  ] as undefined | ArrayOneOrMore<ISequenceBarplotDataSeries>,
 };
 
 interface IAlignmentViewerState {
@@ -171,7 +174,15 @@ export class AlignmentViewer extends React.Component<
   }
 
   render() {
-    const { alignment, barplotDataseries, showAnnotations } = this.props;
+    const {
+      alignment,
+      barplotDataseries,
+      showAnnotations,
+      showConsensus,
+      showLogo,
+      showQuery,
+      showRuler,
+    } = this.props;
     if (!alignment) {
       return null;
     }
@@ -192,30 +203,38 @@ export class AlignmentViewer extends React.Component<
               true
             )}
 
-        {this.generateWidget(
-          "av-sequence-logo",
-          "Logo:",
-          this.renderSequenceLogo(),
-          true
-        )}
+        {!showLogo
+          ? null
+          : this.generateWidget(
+              "av-sequence-logo",
+              "Logo:",
+              this.renderSequenceLogo(),
+              true
+            )}
 
-        {this.generateWidget(
-          "av-consensus-seq",
-          "Consensus sequence:",
-          this.renderConsensusQueryBox()
-        )}
+        {!showConsensus
+          ? null
+          : this.generateWidget(
+              "av-consensus-seq",
+              "Consensus sequence:",
+              this.renderConsensusQueryBox()
+            )}
 
-        {this.generateWidget(
-          "av-target-seq",
-          "Query sequence:",
-          this.renderQuerySeqBox()
-        )}
+        {!showQuery
+          ? null
+          : this.generateWidget(
+              "av-target-seq",
+              "Query sequence:",
+              this.renderQuerySeqBox()
+            )}
 
-        {this.generateWidget(
-          "av-position-indicator",
-          "Position:",
-          this.renderPositionBox()
-        )}
+        {!showRuler
+          ? null
+          : this.generateWidget(
+              "av-position-indicator",
+              "Position:",
+              this.renderPositionBox()
+            )}
 
         {this.generateWidget(
           "av-ace-msa",
