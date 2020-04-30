@@ -76,26 +76,6 @@ export class Alignment {
   }[] = [];
 
   /**
-   * Create and return a new Alignment object from a fasta-type file
-   * @param fileContents the multiple sequence alignment fasta file as a string
-   */
-  static fromFileContents(fileName: string, fileContents: string): Alignment {
-    const fastaSplitCaret = fileContents.split(">");
-    var sequences: ISequence[] = [];
-    for (var i = 0; i < fastaSplitCaret.length; i++) {
-      const seqArr = fastaSplitCaret[i].split(/\r?\n/);
-      if (seqArr.length > 1) {
-        var seqObj = {
-          id: seqArr[0],
-          sequence: seqArr.slice(1).join(""),
-        };
-        sequences.push(seqObj);
-      }
-    }
-    return new Alignment(fileName, sequences);
-  }
-
-  /**
    * Determine the distance between two sequences
    * @param seq1
    * @param seq2
