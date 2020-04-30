@@ -1,5 +1,6 @@
 import "jest-webgl-canvas-mock";
 import { Alignment, ISequence } from "../Alignment";
+import { FastaAlignment } from "../FastaAlignment";
 import * as fs from "fs";
 
 import { enableFetchMocks, default as fetchMock } from "jest-fetch-mock";
@@ -7,7 +8,7 @@ enableFetchMocks();
 
 describe("Alignment", () => {
   let pse1TargetSequence: ISequence;
-  let pse1Alignment: Alignment;
+  let pse1Alignment: FastaAlignment;
 
   beforeAll(async () => {
     const sequenceFile = fs
@@ -17,7 +18,7 @@ describe("Alignment", () => {
     fetchMock.mockResponse(sequenceFile);
 
     const result = await fetch(`http://localhost:11037/api/file.a2m`);
-    pse1Alignment = Alignment.fromFileContents(
+    pse1Alignment = FastaAlignment.fromFileContents(
       "7fa1c5691376beab198788a726917d48_b0.4.a2m",
       await result.text()
     );
