@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/AlignmentViewer2.0/precache-manifest.4964afc602d2a77ec97651767cd22547.js"
+  "/AlignmentViewer2.0/precache-manifest.53d5d6455cf8ba48248096747b7e0f94.js"
 );
 
 self.addEventListener('message', (event) => {
