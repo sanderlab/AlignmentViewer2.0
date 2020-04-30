@@ -217,6 +217,10 @@ export class SequenceLogoComponent extends React.Component<
     return false;
   }
 
+  componentDidUpdate() {
+    ReactTooltip.rebuild();
+  }
+
   render() {
     const { alignment, glyphWidth, height } = this.props;
     if (!alignment || !glyphWidth) {
