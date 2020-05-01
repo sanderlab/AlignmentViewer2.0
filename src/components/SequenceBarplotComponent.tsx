@@ -363,7 +363,6 @@ export class SequenceBarplotComponent extends React.Component<
         type="light"
         border={true}
         getContent={(pos: string) => {
-          console.log("BAR TOOLTIP:" + pos);
           const posInt = parseInt(pos);
           const barsAtPostion = barsObj.barsGroupedByPosition.get(posInt)!;
           const posPlusOne = posInt + 1; // positions should be 1 based, not zero based

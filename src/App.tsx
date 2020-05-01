@@ -56,7 +56,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const alignmentElement = !alignment ? (
       <></>
     ) : (
-      <div className="av_holder">
+      <div className="av-holder">
         <AlignmentViewer
           alignment={alignment}
           style={style}
@@ -93,67 +93,64 @@ export default class App extends React.Component<AppProps, AppState> {
     );
 
     return (
-      <div className="settings_box">
-        <form>
-          <div className="settings-header">
-            <button
-              style={{
-                display: this.state.showSettings ? "none" : "block",
-              }}
-              type="button"
-              className="button-link"
-              onClick={(e) => {
-                this.setState({
-                  showSettings: true,
-                });
-              }}
-            >
-              Expand
-            </button>
-            <button
+      <div className="app-header">
+        <div className="settings-box">
+          <form>
+            <div className="settings-header">
+              <button
+                className={`button-link${
+                  this.state.showSettings ? " hide" : ""
+                }`}
+                type="button"
+                onClick={(e) => {
+                  this.setState({
+                    showSettings: true,
+                  });
+                }}
+              >
+                Expand
+              </button>
+              <button
+                className={`button-link${
+                  this.state.showSettings ? "" : " hide"
+                }`}
+                type="button"
+                onClick={(e) => {
+                  this.setState({
+                    showSettings: false,
+                  });
+                }}
+              >
+                Hide
+              </button>
+              <div>
+                <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
+                {alignmentDescription}
+              </div>
+            </div>
+            <div
               style={{
                 display: this.state.showSettings ? "block" : "none",
-              }}
-              type="button"
-              className="button-link"
-              onClick={(e) => {
-                this.setState({
-                  showSettings: false,
-                });
+                position: "relative",
               }}
             >
-              Hide
-            </button>
-            <div>
-              <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
-              {alignmentDescription}
+              {this.renderAlignmentTypeLabel(style)}
+              {this.renderSortControl()}
+              {this.renderColorScheme(style)}
+              {this.renderResidueDetail(style)}
+              {this.renderPositionStyling(style)}
+              {this.renderSequenceLogo()}
+              {this.renderZoomButtons()}
+              {this.renderMiniMapToggle()}
+              {this.renderAnnotationToggle()}
+              <br></br>
+              {this.renderFileUpload()}
+              <div
+                className={`loader${this.state.loading ? "" : " hide"}`}
+              ></div>
             </div>
-          </div>
-          <div
-            style={{
-              display: this.state.showSettings ? "block" : "none",
-              position: "relative",
-            }}
-          >
-            {this.renderAlignmentTypeLabel(style)}
-            {this.renderSortControl()}
-            {this.renderColorScheme(style)}
-            {this.renderResidueDetail(style)}
-            {this.renderPositionStyling(style)}
-            {this.renderSequenceLogo()}
-            {this.renderZoomButtons()}
-            {this.renderMiniMapToggle()}
-            {this.renderAnnotationToggle()}
-            <br></br>
-            {this.renderFileUpload()}
-            <div
-              className="loader"
-              style={{
-                display: this.state.loading ? "block" : "none",
-              }}
-            ></div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     );
   };
@@ -447,6 +444,7 @@ export default class App extends React.Component<AppProps, AppState> {
   protected onAlignmentReceived(alignment: Alignment) {
     this.setState({
       alignment: alignment,
+      showSettings: false,
       style: alignment.getDefaultStyle(),
       loading: false,
     });

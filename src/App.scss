@@ -1,40 +1,52 @@
 /** App.scss */
-.settings_box {
+
+.app-header {
+  height: 100px;
+  position: relative;
+
+  display: flex; // make us of Flexbox
+  justify-content: center; // horizontally centers single line items
+}
+
+.settings-box {
   font-size: 11px;
   margin: auto;
   width: 450px;
   border: 2px solid black;
   padding: 15px;
+  position: absolute;
+  z-index: 10;
+  background-color: white;
 }
-.settings_box h3 {
+.settings-box h3 {
   margin-bottom: 0;
   text-align: center;
 }
-.settings_box h4 {
+.settings-box h4 {
   margin-top: 0;
   text-align: center;
 }
-.settings_box h2 {
+.settings-box h2 {
   padding-top: 0;
   margin-top: 0;
   text-align: center;
 }
 
-.settings_box .settings-header {
+.settings-box .settings-header {
   position: relative;
 }
-.settings_box .settings-header button {
+.settings-box .settings-header button {
   position: absolute;
   right: 0;
   top: 0;
 }
 
-.settings_box label strong {
+.settings-box label strong {
   width: 200px;
   display: inline-block;
 }
-.settings_box label select,
-.settings_box label .zoom-level {
+.settings-box label select,
+.settings-box label .zoom-level {
   width: 200px;
   display: inline-block;
 }
@@ -59,7 +71,7 @@ button.button-link {
   display: none;
 }
 
-.av_holder {
+.av-holder {
   padding-top: 20px;
 }
 
