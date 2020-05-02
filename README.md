@@ -27,17 +27,17 @@ Once installed, adding to your website is as simple as:
 
 ```JSX
 import * as React from 'react';
-import { AlignmentViewer, Alignment } from "alignment-viewer-2";
+import { AlignmentViewer, FastaAlignment } from "alignment-viewer-2";
 
 const fastaFileText = ">target\n" +
                       "ATGCATGC\n" +
                       ">seq1\n" +
-                      "ATGCATG\n" +
+                      "AAAACCCC\n" +
                       ">seq2\n" +
                       "ATGCATTT\n" +
                       ">seq3\n" +
                       "ATGCAAAA\n"
-const alignmentObj = Alignment.fromFileContents(
+const alignmentObj = FastaAlignment.fromFileContents(
     "ALIGNMENT_NAME", fastaFileText
 );
 
