@@ -52,6 +52,12 @@ cd AlignmentViewer2.0
 yarn
 ```
 
+For some reason node-sass needs to be installed separately even though it is in devDependencies (?!?)
+
+```sh
+yarn add node-sass
+```
+
 To startup the local demo site:
 
 ```sh

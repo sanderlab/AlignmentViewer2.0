@@ -190,7 +190,7 @@ export class AlignmentViewer extends React.Component<
     const annotationClass = showAnnotations ? "" : " annotation-closed";
 
     return (
-      <div className={`alignment_viewer${annotationClass}`}>
+      <div className={`alignment-viewer${annotationClass}`}>
         {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
 

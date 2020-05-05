@@ -2,7 +2,7 @@
 
 exports[`AlignmentViewer Should render 1`] = `
 <div
-  className="alignment_viewer"
+  className="alignment-viewer"
 >
   <div
     className="mini-map hidden"

@@ -4,15 +4,21 @@ $layoutGapSize: 5px;
 $annotationContentGapSize: 20px;
 $rowHeight: 25px;
 
-.alignment_viewer.annotation-closed .av-annotation {
+.alignment-viewer.annotation-closed .av-annotation {
   display: none;
 }
 
-.alignment_viewer {
+.alignment-viewer {
   display: grid;
   grid-template-columns: 10px repeat(auto-fill, minmax(200px, 1fr)) 10px;
   grid-auto-rows: minmax($rowHeight, auto);
   grid-gap: $layoutGapSize;
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 
   .av-widget {
     grid-column: 2 / -2;

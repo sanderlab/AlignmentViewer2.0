@@ -38,6 +38,12 @@ export interface IAceEditorProps {
   mouseLeave?(): void;
 }
 
+interface IChangeCharacterSizeEvent {
+  data: { height: number; width: number };
+  preventDefault(): void;
+  stopPropagation(): void;
+}
+
 export class AceEditorComponent<
   P extends IAceEditorProps,
   S = {}
@@ -82,7 +88,7 @@ export class AceEditorComponent<
    * Load and setup the ace editor
    * @param el the element that will hold the ace editor.
    */
-  protected setupEditorAndEventListeners(el: HTMLElement) {
+  protected setupEditor(el: HTMLElement) {
     this.editor = ace.edit(el);
     this.editor.setShowPrintMargin(false);
     this.editor.setReadOnly(true);
@@ -97,10 +103,11 @@ export class AceEditorComponent<
   /**
    * listen to mouse events and report them to instantiator
    */
-  protected addMouseEventListeners() {
+  protected addEventListeners() {
     if (!this.editor) {
-      throw Error("Editor must be defined before adding mouse listeners.");
+      throw Error("Editor must be defined before adding listeners.");
     }
+    const { characterSizeChanged, mouseDown, mouseMove } = this.props;
 
     function getMousePosition(editor: Ace.Editor, event: Ace.AceEvent) {
       var pos = event.getDocumentPosition();
@@ -120,20 +127,25 @@ export class AceEditorComponent<
     }
 
     this.editor!.on("mousemove", (e) => {
-      if (!this.props.mouseMove) {
-        return;
+      if (mouseMove) {
+        mouseMove(getMousePosition(this.editor!, e));
       }
-      this.props.mouseMove(getMousePosition(this.editor!, e));
     });
 
     this.editor!.on("mousedown", (e) => {
-      if (!this.props.mouseDown) {
-        return;
+      if (mouseDown) {
+        mouseDown(getMousePosition(this.editor!, e));
       }
-      this.props.mouseDown(getMousePosition(this.editor!, e));
     });
 
-    return this.editor;
+    this.editor.renderer.on(
+      "changeCharacterSize",
+      (e: IChangeCharacterSizeEvent) => {
+        if (characterSizeChanged) {
+          characterSizeChanged(e.data.width);
+        }
+      }
+    );
   }
 
   /**
@@ -154,12 +166,6 @@ export class AceEditorComponent<
     //only update if needed
     if (this.props.fontSize + "px" !== this.editor.getFontSize()) {
       this.editor.setFontSize(this.props.fontSize + "px");
-      if (
-        this.props.characterSizeChanged &&
-        this.editor.renderer.characterWidth
-      ) {
-        this.props.characterSizeChanged(this.editor.renderer.characterWidth);
-      }
     }
     if (this.lastMode !== this.getEditorMode()) {
       const newMode = this.getEditorMode();
@@ -185,8 +191,8 @@ export class AceEditorComponent<
       this.element = e;
       this.lastElementWidth = e.clientWidth;
       this.lastElementHeight = e.clientHeight;
-      this.setupEditorAndEventListeners(e);
-      this.addMouseEventListeners();
+      this.setupEditor(e);
+      this.addEventListeners();
       this.setText();
       if (this.props.editorLoaded) {
         this.props.editorLoaded(this.editor!, e); //inform parent of loading.

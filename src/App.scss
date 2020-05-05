@@ -1,67 +1,69 @@
 /** App.scss */
 
 .app-header {
-  height: 100px;
+  padding: 5px;
+  height: 120px;
   position: relative;
 
   display: flex; // make us of Flexbox
   justify-content: center; // horizontally centers single line items
+
+  .settings-box {
+    font-size: 11px;
+    margin: auto;
+    width: 450px;
+    border: 2px solid black;
+    padding: 15px;
+    position: absolute;
+    z-index: 10;
+    background-color: white;
+  }
+  .settings-box h3 {
+    margin-bottom: 0;
+    text-align: center;
+  }
+  .settings-box h4 {
+    margin-top: 0;
+    text-align: center;
+  }
+  .settings-box h2 {
+    padding-top: 0;
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .settings-box .settings-header {
+    position: relative;
+  }
+  .settings-box .settings-header button {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .settings-box label strong {
+    width: 200px;
+    display: inline-block;
+  }
+  .settings-box label select,
+  .settings-box label .zoom-level {
+    width: 200px;
+    display: inline-block;
+  }
+
+  .examples button.button-link {
+    border: 1px solid transparent;
+  }
 }
 
-.settings-box {
-  font-size: 11px;
-  margin: auto;
-  width: 450px;
-  border: 2px solid black;
-  padding: 15px;
-  position: absolute;
-  z-index: 10;
-  background-color: white;
-}
-.settings-box h3 {
-  margin-bottom: 0;
-  text-align: center;
-}
-.settings-box h4 {
-  margin-top: 0;
-  text-align: center;
-}
-.settings-box h2 {
-  padding-top: 0;
-  margin-top: 0;
-  text-align: center;
-}
-
-.settings-box .settings-header {
+.av-holder {
   position: relative;
-}
-.settings-box .settings-header button {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-
-.settings-box label strong {
-  width: 200px;
-  display: inline-block;
-}
-.settings-box label select,
-.settings-box label .zoom-level {
-  width: 200px;
-  display: inline-block;
-}
-
-.examples button.button-link {
-  border: 1px solid transparent;
+  padding-top: 10px;
 }
 
 button.button-link {
   background: none !important;
   border: none;
-  //padding: 0 !important;
-  /*optional*/
-  //font-family: arial, sans-serif;
-  /*input has OS specific font-family*/
   color: #069;
   text-decoration: underline;
   cursor: pointer;
@@ -69,10 +71,6 @@ button.button-link {
 
 .hide {
   display: none;
-}
-
-.av-holder {
-  padding-top: 20px;
 }
 
 .loader {
