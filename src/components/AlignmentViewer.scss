@@ -1,7 +1,7 @@
 /** AlignmentViewer.scss */
 
-$layoutGapSize: 5px;
-$annotationContentGapSize: 20px;
+$layoutGapSize: 2px;
+$annotationContentRightGapSize: 20px;
 $rowHeight: 25px;
 
 .alignment-viewer.annotation-closed .av-annotation {
@@ -29,17 +29,23 @@ $rowHeight: 25px;
 
     position: relative;
   }
-  .av-widget.av-webgl-msa {
+  .av-widget.av-webgl-msa-holder {
     display: none;
   }
-  .av-widget.av-conservation-gaps {
-    grid-row-end: span 3;
-  }
-  .av-widget.av-sequence-logo {
+  .av-widget.av-barplot-holder {
     grid-row-end: span 4;
+    .barplot svg {
+      height: 100px; // must be <= (grid-row-end span * $rowHeight)
+    }
   }
-  .av-widget.av-ace-msa {
-    grid-row-end: span 23;
+  .av-widget.av-sequence-logo-holder {
+    grid-row-end: span 4;
+    .sequence-logo svg {
+      height: 100px; // must be <= (grid-row-end span * $rowHeight)
+    }
+  }
+  .av-widget.av-ace-msa-holder {
+    grid-row-end: span 16;
   }
 
   .av-annotation,
@@ -52,30 +58,31 @@ $rowHeight: 25px;
     justify-content: flex-end;
     align-items: center;
     /* bit of a hack to put space between annotation and content */
-    margin-right: $annotationContentGapSize;
+    margin-right: $annotationContentRightGapSize;
     font-weight: bold;
     text-align: right;
   }
   .av-content {
-    flex: 1 0 80%;
+    flex: 1 0 80%; //annotations take up 20%
     position: relative;
     align-items: center;
   }
   .av-content::-webkit-scrollbar {
     background: transparent; /* make scrollbar transparent */
+    height: 0;
   }
 
-  .av-widget.av-consensus-seq #ace-consensusseq,
-  .av-widget.av-target-seq #ace-queryseq,
-  .av-widget.av-position-indicator #ace-positions {
+  .av-widget.av-consensus-seq-holder .ace-consensusseq .ace_editor,
+  .av-widget.av-target-seq-holder .ace-queryseq .ace_editor,
+  .av-widget.av-position-indicator-holder .ace-positions .ace_editor {
     line-height: $rowHeight;
   }
 
-  .av-widget.av-consensus-seq #ace-consensusseq,
-  .av-widget.av-target-seq #ace-queryseq,
-  .av-widget.av-position-indicator #ace-positions,
-  .av-widget.av-ace-msa #ace-alignment,
-  .av-widget.av-ace-msa #ace-alignment-metadata {
+  .av-widget.av-consensus-seq-holder .ace-consensusseq .ace_editor,
+  .av-widget.av-target-seq-holder .ace-queryseq .ace_editor,
+  .av-widget.av-position-indicator-holder .ace-positions .ace_editor,
+  .av-widget.av-ace-msa-holder .ace-alignment .ace_editor,
+  .av-widget.av-ace-msa-holder .ace-alignment-metadata .ace_editor {
     position: absolute;
     top: 0px;
     left: 0px;

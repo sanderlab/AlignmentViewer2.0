@@ -1,4 +1,5 @@
 import * as React from "react";
+import "./MiniMap.scss";
 
 import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
 import { Alignment, SequenceSortOptions } from "../common/Alignment";
@@ -56,18 +57,12 @@ export class MiniMapComponent extends React.Component<
     const size = this.getSizing();
     return (
       <div
+        className="minimap-holder"
         style={{
-          zIndex: 100000,
           ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
           //...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
-          top: 0,
-          bottom: 0,
           height: size.frameHeight,
           width: size.frameWidth,
-          position: "fixed",
-          backgroundColor: "white",
-          borderColor: "#333333",
-          borderStyle: "solid",
           borderWidth: `${size.borderWidth}px`,
           margin: `${size.margin}px`,
         }}
@@ -83,28 +78,25 @@ export class MiniMapComponent extends React.Component<
     const { zoomPercent } = this.state;
     const size = this.getSizing();
     return (
-      <div>
-        <AlignmentCanvasComponent
-          id="alignment_canvas"
-          alignment={alignment}
-          alignmentType={style.alignmentType}
-          positionsToStyle={style.positionsToStyle}
-          colorScheme={style.colorScheme}
-          sortBy={sortBy}
-          stageResolution={{
-            width: size.frameWidth,
-            height: size.frameHeight,
-          }}
-          highlightRows={highlightRows}
-          viewportProps={{
-            useDrag: true,
-            usePinch: true,
-            useWheel: true,
-            zoomPercent,
-          }}
-          mouseDown={this.onMouseDown}
-        />
-      </div>
+      <AlignmentCanvasComponent
+        alignment={alignment}
+        alignmentType={style.alignmentType}
+        positionsToStyle={style.positionsToStyle}
+        colorScheme={style.colorScheme}
+        sortBy={sortBy}
+        stageResolution={{
+          width: size.frameWidth,
+          height: size.frameHeight,
+        }}
+        highlightRows={highlightRows}
+        viewportProps={{
+          useDrag: true,
+          usePinch: true,
+          useWheel: true,
+          zoomPercent,
+        }}
+        mouseDown={this.onMouseDown}
+      />
     );
   };
   protected onMouseDown = (x: number, y: number) => {

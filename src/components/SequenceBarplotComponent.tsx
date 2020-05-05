@@ -21,7 +21,7 @@ export interface ISequenceBarplotProps {
   dataSeries: ArrayOneOrMore<ISequenceBarplotDataSeries>;
   positionWidth: number;
 
-  height?: number;
+  //height?: number;
   onPositionSelectionChanged?(
     positionsSelected: {
       position: number;
@@ -406,7 +406,7 @@ export class SequenceBarplotComponent extends React.Component<
    *   </svg>
    */
   private renderBarPlot() {
-    const { alignment, positionWidth, height } = this.props;
+    const { alignment, positionWidth } = this.props;
 
     const maxSeqLength = alignment.getMaxSequenceLength();
     const totalWidth = positionWidth * maxSeqLength;
@@ -419,7 +419,7 @@ export class SequenceBarplotComponent extends React.Component<
         viewBox={`0 0 ${
           maxSeqLength * SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
         } ${SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT}`}
-        style={{ width: totalWidth, height: height }}
+        style={{ width: totalWidth }}
         xmlns="http://www.w3.org/2000/svg"
         onMouseEnter={() => this.handleSvgHover(true)}
         onMouseLeave={() => this.handleSvgHover(false)}
@@ -503,13 +503,12 @@ export class SequenceBarplotComponent extends React.Component<
    *
    */
   shouldComponentUpdate(nextProps: ISequenceBarplotProps) {
-    const { alignment, dataSeries, positionWidth, height } = this.props;
+    const { alignment, dataSeries, positionWidth } = this.props;
     if (
       !this.cache ||
       alignment !== nextProps.alignment ||
       dataSeries !== nextProps.dataSeries ||
-      positionWidth !== nextProps.positionWidth ||
-      height !== nextProps.height
+      positionWidth !== nextProps.positionWidth
     ) {
       return true;
     }

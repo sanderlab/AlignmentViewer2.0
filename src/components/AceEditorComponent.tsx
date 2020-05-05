@@ -6,7 +6,7 @@ import ace from "ace-builds";
 import { Ace } from "ace-builds";
 
 export interface IAceEditorProps {
-  readonly id: string;
+  readonly id?: string;
 
   text?: string;
   fontSize?: number;

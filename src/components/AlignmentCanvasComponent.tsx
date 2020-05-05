@@ -26,8 +26,6 @@ export interface IAlignmentCanvasProps {
   viewportProps?: Partial<IViewportProps>;
 
   mouseDown?(x: number, y: number): void;
-
-  readonly id: string;
 }
 
 interface ITiledImages {
@@ -98,7 +96,6 @@ export class AlignmentCanvasComponent extends React.Component<
       alignmentType,
       colorScheme,
       highlightRows,
-      id,
       positionsToStyle,
       sortBy,
       stageResolution,
@@ -123,7 +120,7 @@ export class AlignmentCanvasComponent extends React.Component<
 
     return (
       <div
-        id={id}
+        className="alignment-canvas"
         onWheel={this.onWheel}
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
@@ -149,7 +146,6 @@ export class AlignmentCanvasComponent extends React.Component<
                 {...viewportProps}
               >
                 <PixiAlignmentTiled
-                  id="tiled-alignment"
                   alignment={alignment}
                   alignmentType={alignmentType}
                   sortBy={sortBy}

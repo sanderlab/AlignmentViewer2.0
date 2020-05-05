@@ -393,7 +393,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
   }
 >
   <div
-    id="My-Alignment-ID"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -810,7 +810,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
   }
 >
   <div
-    id="My-Alignment-ID"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -919,7 +919,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
   }
 >
   <div
-    id="My-Alignment-ID"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -945,7 +945,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
 
 exports[`AlignmentCanvasComponent Should match the shallow snapshot. 1`] = `
 <div
-  id="My-Alignment-ID"
+  className="alignment-canvas"
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
   onWheel={[Function]}
@@ -1130,7 +1130,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1311,7 +1311,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1492,7 +1492,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1673,7 +1673,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1854,7 +1854,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2035,7 +2035,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2216,7 +2216,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2397,7 +2397,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2578,7 +2578,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2759,7 +2759,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
