@@ -1,4 +1,3 @@
-import React from "react";
 import * as PIXI from "pixi.js";
 import { PixiComponent } from "@inlet/react-pixi";
 import { Viewport } from "pixi-viewport";

@@ -467,7 +467,7 @@ export class AlignmentViewer extends React.Component<
     }
 
     if (aceEditors.length >= 1) {
-      aceEditors[0].scrollToRow(Math.floor(y - rowCount / 2));
+      aceEditors[0].scrollToRow(Math.floor(y));
     }
   };
 }

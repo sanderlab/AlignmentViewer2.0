@@ -1,4 +1,3 @@
-import React from "react";
 import * as PIXI from "pixi.js";
 import { PixiComponent } from "@inlet/react-pixi";
 import { Graphics } from "pixi.js";
@@ -11,7 +10,10 @@ interface IAlignmentHighlighterProps {
   fillColor: number;
   fillAlpha: number;
   dragFunctions?: {
-    onDragStart(event: PIXI.interaction.InteractionEvent): void;
+    onDragStart(
+      event: PIXI.interaction.InteractionEvent,
+      parent: PIXI.DisplayObject
+    ): void;
     onDragEnd(
       event: PIXI.interaction.InteractionEvent,
       parent: PIXI.DisplayObject
@@ -47,46 +49,29 @@ export const CanvasAlignmentHighlighter = PixiComponent(
             e.stopPropagation(); //keep entire viewport from moving
           });
 
+          const dragStart = (e: PIXI.interaction.InteractionEvent) => {
+            newProps.dragFunctions?.onDragStart(e, instance.parent);
+          };
+          const dragEnd = (e: PIXI.interaction.InteractionEvent) => {
+            newProps.dragFunctions?.onDragEnd(e, instance.parent);
+          };
+          const dragMove = (e: PIXI.interaction.InteractionEvent) => {
+            newProps.dragFunctions?.onDragMove(e, instance.parent);
+          };
+
           //events for drag start
-          instance.addListener("mousedown", newProps.dragFunctions.onDragStart);
-          instance.addListener(
-            "touchstart",
-            newProps.dragFunctions.onDragStart
-          );
+          instance.addListener("mousedown", dragStart);
+          instance.addListener("touchstart", dragStart);
 
           // events for drag end
-          instance.addListener("mouseup", (e) => {
-            if (newProps.dragFunctions) {
-              newProps.dragFunctions.onDragEnd(e, instance.parent);
-            }
-          });
-          instance.addListener("mouseupoutside", (e) => {
-            if (newProps.dragFunctions) {
-              newProps.dragFunctions.onDragEnd(e, instance.parent);
-            }
-          });
-          instance.addListener("touchend", (e) => {
-            if (newProps.dragFunctions) {
-              newProps.dragFunctions.onDragEnd(e, instance.parent);
-            }
-          });
-          instance.addListener("touchendoutside", (e) => {
-            if (newProps.dragFunctions) {
-              newProps.dragFunctions.onDragEnd(e, instance.parent);
-            }
-          });
+          instance.addListener("mouseup", dragEnd);
+          instance.addListener("mouseupoutside", dragEnd);
+          instance.addListener("touchend", dragEnd);
+          instance.addListener("touchendoutside", dragEnd);
 
           // events for drag move
-          instance.addListener("mousemove", (e) => {
-            if (newProps.dragFunctions) {
-              newProps.dragFunctions.onDragMove(e, instance.parent);
-            }
-          });
-          instance.addListener("touchmove", (e) => {
-            if (newProps.dragFunctions) {
-              newProps.dragFunctions.onDragMove(e, instance.parent);
-            }
-          });
+          instance.addListener("mousemove", dragMove);
+          instance.addListener("touchmove", dragMove);
         }
       }
     },
