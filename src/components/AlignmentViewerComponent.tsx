@@ -445,7 +445,7 @@ export class AlignmentViewer extends React.Component<
                   ]
                 : undefined
             }
-            onClick={this.onMinimapClick}
+            onClickOrDrag={this.onMinimapClick}
           />
         </div>
       )

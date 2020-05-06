@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./MiniMap.scss";
 
-import { AlignmentCanvasComponent } from "./AlignmentCanvasComponent";
+import { CanvasAlignmentComponent } from "./CanvasAlignmentComponent";
 import { Alignment, SequenceSortOptions } from "../common/Alignment";
 import {
   AminoAcidAlignmentStyle,
@@ -14,7 +14,7 @@ export interface IMiniMapProps {
   alignment: Alignment;
   height: number;
   highlightRows?: [number, number];
-  onClick?: (x: number, y: number) => void;
+  onClickOrDrag?: (x: number, y: number) => void;
   sortBy: SequenceSortOptions;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   width: number;
@@ -78,7 +78,7 @@ export class MiniMapComponent extends React.Component<
     const { zoomPercent } = this.state;
     const size = this.getSizing();
     return (
-      <AlignmentCanvasComponent
+      <CanvasAlignmentComponent
         alignment={alignment}
         alignmentType={style.alignmentType}
         positionsToStyle={style.positionsToStyle}
@@ -95,19 +95,19 @@ export class MiniMapComponent extends React.Component<
           useWheel: true,
           zoomPercent,
         }}
-        mouseDown={this.onMouseDown}
+        onClickOrDrag={this.onMouseDown}
       />
     );
   };
+
   protected onMouseDown = (x: number, y: number) => {
-    const { onClick } = this.props;
+    const { onClickOrDrag: onClick } = this.props;
     if (onClick) {
       onClick(x, y);
     }
   };
 
   /*
-
   protected renderZoomControls = () => (
     <div style={{ textAlign: "center", opacity: 1 }}>
       <button onClick={this.onZoomOut}>-</button>

@@ -31,7 +31,7 @@ exports[`AlignmentViewer Should render 1`] = `
         }
       }
       height={768}
-      onClick={[Function]}
+      onClickOrDrag={[Function]}
       sortBy={
         SequenceSortOptions {
           "description": "As input",

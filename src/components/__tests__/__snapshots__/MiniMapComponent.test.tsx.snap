@@ -13,7 +13,7 @@ exports[`MiniMap Should render with default props. 1`] = `
     }
   }
 >
-  <AlignmentCanvasComponent
+  <CanvasAlignmentComponent
     alignment={
       Alignment {
         "aceEditorMode": undefined,
@@ -65,6 +65,7 @@ exports[`MiniMap Should render with default props. 1`] = `
       }
     }
     mouseDown={[Function]}
+    onClickOrDrag={[Function]}
     positionsToStyle={
       PositionsToStyle {
         "className": undefined,
