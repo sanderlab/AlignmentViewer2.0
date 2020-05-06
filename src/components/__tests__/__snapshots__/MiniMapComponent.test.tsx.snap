@@ -64,7 +64,6 @@ exports[`MiniMap Should render with default props. 1`] = `
         "description": "mock-aa-style-desc",
       }
     }
-    mouseDown={[Function]}
     onClickOrDrag={[Function]}
     positionsToStyle={
       PositionsToStyle {

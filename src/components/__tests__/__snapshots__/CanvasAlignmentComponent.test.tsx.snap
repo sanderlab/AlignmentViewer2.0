@@ -360,7 +360,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
       "description": "mock-aa-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -776,7 +775,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
       "description": "mock-nt-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -884,7 +882,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
       "description": "mock-aa-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -1094,7 +1091,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -1274,7 +1270,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -1454,7 +1449,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -1634,7 +1628,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -1814,7 +1807,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -1994,7 +1986,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -2174,7 +2165,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -2354,7 +2344,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -2534,7 +2523,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
@@ -2714,7 +2702,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
       "className": undefined,
