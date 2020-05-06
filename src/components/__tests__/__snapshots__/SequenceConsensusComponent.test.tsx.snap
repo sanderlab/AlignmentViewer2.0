@@ -21,7 +21,6 @@ exports[`SequenceBarplotComponent Should render when given default props. 1`] = 
     preserveAspectRatio="none"
     style={
       Object {
-        "height": 100,
         "width": -3,
       }
     }

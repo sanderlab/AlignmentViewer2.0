@@ -2,17 +2,25 @@ import React from "react";
 import { Alignment, SequenceSortOptions, ISequence } from "../common/Alignment";
 import { Nucleotide, AminoAcid } from "../common/Residues";
 import * as PIXI from "pixi.js";
-import { PixiComponent, Stage, Sprite, AppContext } from "@inlet/react-pixi";
-import { Viewport } from "pixi-viewport";
-import { Graphics } from "pixi.js";
+import { Stage, Sprite, AppContext } from "@inlet/react-pixi";
+import {
+  CanvasAlignmentViewport,
+  ICanvasAlignmentViewportProps,
+} from "./CanvasAlignmentViewportComponent";
+import { CanvasAlignmentHighlighter } from "./CanvasAlignmentHighlighterComponent";
+import {
+  CanvasAlignmentTiled,
+  ITiledImages,
+} from "./CanvasAlignmentTiledComponent";
 
 import {
   IColorScheme,
   PositionsToStyle,
   AlignmentTypes,
 } from "../common/MolecularStyles";
+import _ from "lodash";
 
-export interface IAlignmentCanvasProps {
+export interface ICanvasAlignmentProps {
   alignment: Alignment;
   alignmentType: AlignmentTypes;
   sortBy: SequenceSortOptions;
@@ -23,44 +31,20 @@ export interface IAlignmentCanvasProps {
     width: number;
     height: number;
   };
-  viewportProps?: Partial<IViewportProps>;
+  viewportProps?: Partial<ICanvasAlignmentViewportProps>;
 
-  mouseDown?(x: number, y: number): void;
-
-  readonly id: string;
+  onClickOrDrag?(x: number, y: number): void;
 }
 
-interface ITiledImages {
-  targetTileWidth: number;
-  targetTileHeight: number;
-  lastTileWidth: number;
-  lastTileHeight: number;
-  numXTiles: number;
-  numYTiles: number;
-  tiles: {
-    tileX: number;
-    tileY: number;
-    pixelX: number;
-    pixelY: number;
-    width: number;
-    height: number;
-    image: HTMLCanvasElement;
-  }[];
+interface ICanvasAlignmentState {
+  dragging: boolean;
+
+  dragPosition?: { x: number; y: number };
 }
 
-const AlignmentHighlighter = PixiComponent("AlignmentHighlighter", {
-  create: (props: any) => new Graphics(),
-  applyProps: (instance, _, props) => {
-    const { x, y, width, height, fillColor, fillAlpha } = props;
-    instance.clear();
-    instance.beginFill(fillColor, fillAlpha);
-    instance.drawRect(x, y, width, height);
-    instance.endFill();
-  },
-});
-
-export class AlignmentCanvasComponent extends React.Component<
-  IAlignmentCanvasProps
+export class CanvasAlignmentComponent extends React.Component<
+  ICanvasAlignmentProps,
+  ICanvasAlignmentState
 > {
   app?: PIXI.Application;
   scaleX: number = 1;
@@ -80,7 +64,14 @@ export class AlignmentCanvasComponent extends React.Component<
     },
   };
 
-  sliderChanged(newValue: number, xy: "x" | "y") {
+  constructor(props: ICanvasAlignmentProps) {
+    super(props);
+    this.state = {
+      dragging: false,
+    };
+  }
+
+  protected sliderChanged(newValue: number, xy: "x" | "y") {
     if (this.app) {
       this.app.stage.children.forEach((sprite) => {
         if (xy === "x") {
@@ -93,20 +84,23 @@ export class AlignmentCanvasComponent extends React.Component<
   }
 
   render() {
+    if (!this.props.alignment) {
+      return null;
+    }
+
     const {
       alignment,
       alignmentType,
       colorScheme,
       highlightRows,
-      id,
+      onClickOrDrag: mouseDown,
       positionsToStyle,
       sortBy,
       stageResolution,
       viewportProps,
     } = this.props;
-    if (!alignment) {
-      return null;
-    }
+    const { dragging, dragPosition } = this.state;
+
     const numSequences = alignment.getSequences().length;
     const maxSeqLength = alignment.getMaxSequenceLength();
 
@@ -117,13 +111,22 @@ export class AlignmentCanvasComponent extends React.Component<
     //      image
     //PIXI.settings.RESOLUTION = 2;
     //PIXI.settings.ROUND_PIXELS = true; //
-    const height = highlightRows
-      ? highlightRows[1] - highlightRows[0]
-      : undefined;
+
+    let rowHighlightStart: number | undefined;
+    let rowHighlighterHeight: number | undefined;
+
+    if (highlightRows) {
+      rowHighlighterHeight = highlightRows[1] - highlightRows[0];
+      rowHighlightStart =
+        dragging && dragPosition
+          ? dragPosition.y - rowHighlighterHeight / 2
+          : highlightRows[0];
+      rowHighlightStart = rowHighlightStart > 0 ? rowHighlightStart : 0;
+    }
 
     return (
       <div
-        id={id}
+        className="alignment-canvas"
         onWheel={this.onWheel}
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
@@ -141,53 +144,69 @@ export class AlignmentCanvasComponent extends React.Component<
           </AppContext.Consumer>
           <AppContext.Consumer>
             {(app) => (
-              <PixiViewport
+              <CanvasAlignmentViewport
                 app={app}
                 numColumns={maxSeqLength}
                 numRows={numSequences}
-                mouseDown={this.props.mouseDown}
+                mouseClick={mouseDown}
                 {...viewportProps}
               >
-                <PixiAlignmentTiled
-                  id="tiled-alignment"
+                <CanvasAlignmentTiled
                   alignment={alignment}
                   alignmentType={alignmentType}
                   sortBy={sortBy}
                   colorScheme={colorScheme}
                   positionsToStyle={positionsToStyle}
                 />
-                {height ? (
-                  <>
-                    {this.renderAlignmentHighlighter({
-                      x: 0,
-                      y: this.props.highlightRows![0],
-                      width: maxSeqLength,
-                      height,
-                    })}
-                  </>
+                {rowHighlightStart !== undefined &&
+                rowHighlighterHeight !== undefined ? (
+                  <CanvasAlignmentHighlighter
+                    fillColor={0xff0000}
+                    fillAlpha={0.25}
+                    x={0}
+                    y={rowHighlightStart}
+                    width={maxSeqLength}
+                    height={rowHighlighterHeight}
+                    dragFunctions={{
+                      onDragStart: (e) => {
+                        this.setState({ dragging: true });
+                      },
+                      onDragEnd: (e, parent) => {
+                        this.setState({ dragging: false });
+                        const newPosition = e.data.getLocalPosition(parent);
+                        newPosition.x = Math.round(newPosition.x);
+                        newPosition.y = Math.round(newPosition.y);
+
+                        if (mouseDown) {
+                          mouseDown(newPosition.x, newPosition.y); //final release position
+                        }
+                      },
+                      onDragMove: (e, parent) => {
+                        if (dragging) {
+                          const newPosition = e.data.getLocalPosition(parent);
+                          newPosition.x = Math.round(newPosition.x);
+                          newPosition.y = Math.round(newPosition.y);
+
+                          this.setState({
+                            dragPosition: newPosition,
+                          });
+                          if (mouseDown) {
+                            mouseDown(newPosition.x, newPosition.y);
+                          }
+                        }
+                      },
+                    }}
+                  />
                 ) : (
                   <></>
                 )}
-              </PixiViewport>
+              </CanvasAlignmentViewport>
             )}
           </AppContext.Consumer>
         </Stage>
       </div>
     );
   }
-
-  protected renderAlignmentHighlighter = (props: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    fillColor?: number;
-    fillAlpha?: number;
-  }) => (
-    <AlignmentHighlighter
-      {...{ fillColor: 0xff0000, fillAlpha: 0.25, ...props }}
-    />
-  );
 
   protected onMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
     document.body.style.overflow = "hidden";
@@ -201,23 +220,15 @@ export class AlignmentCanvasComponent extends React.Component<
     //e.preventDefault(); //TODO Drew is this necessary?
   };
 }
-class PixiAlignmentTiled extends React.Component<IAlignmentCanvasProps> {
-  shouldComponentUpdate(nextProps: IAlignmentCanvasProps) {
-    const toReturn =
+
+class PixiAlignmentTiled extends React.Component<ICanvasAlignmentProps> {
+  shouldComponentUpdate(nextProps: ICanvasAlignmentProps) {
+    return (
       nextProps.alignment !== this.props.alignment ||
       nextProps.colorScheme !== this.props.colorScheme ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
-      nextProps.sortBy !== this.props.sortBy;
-    /*console.log(
-      "UPDATING Canvas Tiling: " +
-        (nextProps.colorScheme !== this.currentColorScheme) +
-        ":" +
-        (nextProps.positionsToStyle !== this.currentPositionsStyled) +
-        " :: " +
-        toReturn
-    );*/
-    //console.log("CANVAS rerender??");
-    return toReturn;
+      nextProps.sortBy !== this.props.sortBy
+    );
   }
 
   render() {
@@ -435,115 +446,3 @@ class PixiAlignmentTiled extends React.Component<IAlignmentCanvasProps> {
     };
   }
 }
-
-export interface IViewportProps {
-  useDrag?: boolean; // Allows the user to drag the viewport around.
-  usePinch?: boolean; // Allows the user to pinch to zoom; e.g. on a trackpad.
-  useWheel?: boolean; // Allows the user to use a mouse wheel to zoom.
-  numColumns: number;
-  numRows: number;
-  app: PIXI.Application;
-  mouseDown?: (x: number, y: number) => void;
-  zoomPercent?: number;
-}
-
-const PixiViewport = PixiComponent<IViewportProps, any>("PixiViewport", {
-  create(props: IViewportProps) {
-    const {
-      app,
-      numColumns,
-      numRows,
-      useDrag,
-      usePinch,
-      useWheel,
-      zoomPercent,
-    } = props;
-    app.renderer.backgroundColor = 0xffffff;
-
-    let vp = new Viewport({
-      screenWidth: app.renderer.width,
-      screenHeight: app.renderer.height,
-      worldWidth: numColumns,
-      worldHeight: numRows,
-      interaction: app.renderer.plugins.interaction,
-    })
-      .decelerate()
-      .clamp({
-        direction: "all",
-      })
-      .bounce({ friction: 0.1, time: 150, underflow: "center" })
-      .clampZoom({
-        maxHeight: app.renderer.height,
-        maxWidth: app.renderer.width,
-      });
-    /*
-      .drag()
-      .pinch()
-      .wheel()
-      .decelerate()
-      .clamp({
-        direction: "all"
-      })
-      .bounce({ friction: 0.1, time: 500, underflow: "center" })
-      .clampZoom({
-        maxHeight: app.renderer.height,
-        maxWidth: app.renderer.width
-      });*/
-
-    // !IMPORTANT
-    // Two-finger drag on trackpad is also enabled by this.
-    // Issue currently open: https://github.com/davidfig/pixi-viewport/issues/143
-    if (useDrag) {
-      vp = vp.drag({
-        direction: "all", //this is the line that kills pinch
-      });
-    }
-
-    if (usePinch) {
-      vp = vp.pinch();
-    }
-
-    if (useWheel) {
-      vp = vp.wheel();
-    }
-
-    if (zoomPercent) {
-      vp = vp.zoomPercent(zoomPercent);
-    }
-    vp.on("clicked", (e) => {
-      if (props.mouseDown) {
-        props.mouseDown(e.world.x, e.world.y);
-      }
-    });
-
-    //start the component zoomed such that the entire alignment width
-    //is visible in the frame.
-    //vp = vp.setZoom(app.renderer.width / numColumns, true);
-    //vp = vp.fitWorld(true);
-    return vp;
-  },
-
-  applyProps(
-    vp: Viewport, //PIXI.Graphics,
-    oldProps: IViewportProps,
-    newProps: IViewportProps
-  ) {
-    //if (oldProps.zoomPercent !== newProps.zoomPercent && newProps.zoomPercent) {
-    //  viewport = viewport.setZoom(newProps.zoomPercent, false);
-    // }
-    //vp = vp.fitWorld(true);
-    //vp = vp.setZoom(50, false);
-    if (
-      oldProps.numColumns !== newProps.numColumns ||
-      oldProps.numRows !== newProps.numRows
-    ) {
-      vp.screenWidth = newProps.app.renderer.width;
-      vp.screenHeight = newProps.app.renderer.height;
-      vp.worldWidth = newProps.numColumns;
-      vp.worldHeight = newProps.numRows;
-      vp = vp.fitWorld(true);
-      vp = vp.setZoom(newProps.app.renderer.width / newProps.numColumns, false);
-    }
-    return vp;
-  },
-});

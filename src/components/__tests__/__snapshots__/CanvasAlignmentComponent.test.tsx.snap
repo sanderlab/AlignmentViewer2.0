@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large sequence. 1`] = `
-<AlignmentCanvasComponent
+exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large sequence. 1`] = `
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -360,7 +360,6 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
       "description": "mock-aa-style-desc",
     }
   }
-  id="My-Alignment-ID"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -393,7 +392,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
   }
 >
   <div
-    id="My-Alignment-ID"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -414,11 +413,11 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot for a large 
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a nucleotide alignment. 1`] = `
-<AlignmentCanvasComponent
+exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a nucleotide alignment. 1`] = `
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -777,7 +776,6 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
       "description": "mock-nt-style-desc",
     }
   }
-  id="My-Alignment-ID"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -810,7 +808,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
   }
 >
   <div
-    id="My-Alignment-ID"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -831,11 +829,11 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot when doing a
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
-<AlignmentCanvasComponent
+exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -886,7 +884,6 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
       "description": "mock-aa-style-desc",
     }
   }
-  id="My-Alignment-ID"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -919,7 +916,7 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
   }
 >
   <div
-    id="My-Alignment-ID"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -940,12 +937,12 @@ exports[`AlignmentCanvasComponent Should match the mounted snapshot. 1`] = `
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the shallow snapshot. 1`] = `
+exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
 <div
-  id="My-Alignment-ID"
+  className="alignment-canvas"
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
   onWheel={[Function]}
@@ -973,12 +970,12 @@ exports[`AlignmentCanvasComponent Should match the shallow snapshot. 1`] = `
 </div>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'all',
   description: 'All',
   className: undefined
 } position. 1`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -1097,7 +1094,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  id="Amino Acids"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -1130,7 +1126,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1151,15 +1147,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'all',
   description: 'All',
   className: undefined
 } position. 2`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -1278,7 +1274,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  id="Nucleotides"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -1311,7 +1306,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1332,15 +1327,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'consensus',
   description: 'Same as Consensus',
   className: undefined
 } position. 1`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -1459,7 +1454,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  id="Amino Acids"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -1492,7 +1486,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1513,15 +1507,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'consensus',
   description: 'Same as Consensus',
   className: undefined
 } position. 2`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -1640,7 +1634,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  id="Nucleotides"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -1673,7 +1666,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1694,15 +1687,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'consensus-diff',
   description: 'Different from Consensus',
   className: undefined
 } position. 1`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -1821,7 +1814,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  id="Amino Acids"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -1854,7 +1846,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -1875,15 +1867,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'consensus-diff',
   description: 'Different from Consensus',
   className: undefined
 } position. 2`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -2002,7 +1994,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  id="Nucleotides"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -2035,7 +2026,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2056,15 +2047,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'query',
   description: 'Same as Query',
   className: undefined
 } position. 1`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -2183,7 +2174,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  id="Amino Acids"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -2216,7 +2206,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2237,15 +2227,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'query',
   description: 'Same as Query',
   className: undefined
 } position. 2`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -2364,7 +2354,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  id="Nucleotides"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -2397,7 +2386,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2418,15 +2407,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'query-diff',
   description: 'Different from Query',
   className: undefined
 } position. 1`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -2545,7 +2534,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-aa-style-desc",
     }
   }
-  id="Amino Acids"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -2578,7 +2566,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Amino Acids"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2599,15 +2587,15 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;
 
-exports[`AlignmentCanvasComponent Should match the snapshot when styling the PositionsToStyle {
+exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
   key: 'query-diff',
   description: 'Different from Query',
   className: undefined
 } position. 2`] = `
-<AlignmentCanvasComponent
+<CanvasAlignmentComponent
   alignment={
     Alignment {
       "aceEditorMode": undefined,
@@ -2726,7 +2714,6 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       "description": "mock-nt-style-desc",
     }
   }
-  id="Nucleotides"
   mouseDown={[Function]}
   positionsToStyle={
     PositionsToStyle {
@@ -2759,7 +2746,7 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
   }
 >
   <div
-    id="Nucleotides"
+    className="alignment-canvas"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
@@ -2780,5 +2767,5 @@ exports[`AlignmentCanvasComponent Should match the snapshot when styling the Pos
       <canvas />
     </t>
   </div>
-</AlignmentCanvasComponent>
+</CanvasAlignmentComponent>
 `;

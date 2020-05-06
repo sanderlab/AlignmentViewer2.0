@@ -193,11 +193,10 @@ export class AlignmentViewer extends React.Component<
       <div className={`alignment-viewer${annotationClass}`}>
         {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
-
         {!barplotDataseries
           ? null
           : this.generateWidget(
-              "av-conservation-gaps",
+              "av-barplot-holder",
               barplotDataseries.map((series) => series.name).join(" / "),
               this.renderConservationBox(),
               true
@@ -206,7 +205,7 @@ export class AlignmentViewer extends React.Component<
         {!showLogo
           ? null
           : this.generateWidget(
-              "av-sequence-logo",
+              "av-sequence-logo-holder",
               "Logo:",
               this.renderSequenceLogo(),
               true
@@ -215,7 +214,7 @@ export class AlignmentViewer extends React.Component<
         {!showConsensus
           ? null
           : this.generateWidget(
-              "av-consensus-seq",
+              "av-consensus-seq-holder",
               "Consensus sequence:",
               this.renderConsensusQueryBox()
             )}
@@ -223,7 +222,7 @@ export class AlignmentViewer extends React.Component<
         {!showQuery
           ? null
           : this.generateWidget(
-              "av-target-seq",
+              "av-target-seq-holder",
               "Query sequence:",
               this.renderQuerySeqBox()
             )}
@@ -231,13 +230,13 @@ export class AlignmentViewer extends React.Component<
         {!showRuler
           ? null
           : this.generateWidget(
-              "av-position-indicator",
+              "av-position-indicator-holder",
               "Position:",
               this.renderPositionBox()
             )}
 
         {this.generateWidget(
-          "av-ace-msa",
+          "av-ace-msa-holder",
           this.renderAlignmentAnnotationBox(),
           this.renderAlignmentBox()
         )}
@@ -279,12 +278,12 @@ export class AlignmentViewer extends React.Component<
   };
 
   protected renderConsensusQueryBox = () => (
-    <div className="consensusseq_box">
+    <div className="consensusseq-box">
       <AceConsensusSequenceComponent
-        id="ace-consensusseq"
         alignment={this.props.alignment}
         fontSize={this.props.zoomLevel}
         classNames={[
+          "ace-consensusseq",
           this.props.style.residueDetail.className,
           this.props.style.alignmentType.className,
           this.props.style.positionsToStyle.className,
@@ -303,13 +302,13 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderQuerySeqBox = () => (
-    <div className="queryseq_box">
+    <div className="queryseq-box">
       <AceTargetSequenceComponent
-        id="ace-queryseq"
         alignment={this.props.alignment}
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
+          "ace-queryseq",
           this.props.style.residueDetail.className,
           this.props.style.alignmentType.className,
           this.props.style.positionsToStyle.className,
@@ -328,10 +327,10 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderPositionBox = () => (
-    <div className="position_box">
+    <div className="position-box">
       {
         <AceTextualRulerComponent
-          id="ace-positions"
+          classNames="ace-positions"
           alignment={this.props.alignment}
           fontSize={this.props.zoomLevel}
           editorLoaded={(editor, parentElem) => {
@@ -360,13 +359,13 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderAlignmentBox = () => (
-    <div className="alignment_box">
+    <div className="alignment-box">
       <AceMultipleSequenceAlignmentComponent
-        id="ace-alignment"
         alignment={this.props.alignment}
         fontSize={this.props.zoomLevel}
         sortBy={this.props.sortBy}
         classNames={[
+          "ace-alignment",
           this.props.style.residueDetail.className,
           this.props.style.alignmentType.className,
           this.props.style.positionsToStyle.className,
@@ -386,9 +385,9 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderAlignmentAnnotationBox = () => (
-    <div className="alignment_metadata_box">
+    <div className="alignment-metadata-box">
       <AceEditorComponent
-        id="ace-alignment-metadata"
+        classNames="ace-alignment-metadata"
         text={this.props.alignment
           .getSequences(this.props.sortBy)
           .map((x) => x.id)
@@ -446,7 +445,7 @@ export class AlignmentViewer extends React.Component<
                   ]
                 : undefined
             }
-            onClick={this.onMinimapClick}
+            onClickOrDrag={this.onMinimapClick}
           />
         </div>
       )

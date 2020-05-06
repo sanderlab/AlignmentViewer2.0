@@ -8,7 +8,6 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
     preserveAspectRatio="none"
     style={
       Object {
-        "height": 100,
         "width": 9,
       }
     }
@@ -115,7 +114,6 @@ exports[`SequenceLogoComponent Should render when given default props. 1`] = `
     preserveAspectRatio="none"
     style={
       Object {
-        "height": 100,
         "width": 0,
       }
     }

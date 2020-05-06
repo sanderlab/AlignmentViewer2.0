@@ -31,7 +31,7 @@ exports[`AlignmentViewer Should render 1`] = `
         }
       }
       height={768}
-      onClick={[Function]}
+      onClickOrDrag={[Function]}
       sortBy={
         SequenceSortOptions {
           "description": "As input",
@@ -94,7 +94,7 @@ exports[`AlignmentViewer Should render 1`] = `
     />
   </div>
   <div
-    className="av-widget av-conservation-gaps"
+    className="av-widget av-barplot-holder"
   >
     <div
       className="av-annotation"
@@ -154,7 +154,7 @@ exports[`AlignmentViewer Should render 1`] = `
     </div>
   </div>
   <div
-    className="av-widget av-sequence-logo"
+    className="av-widget av-sequence-logo-holder"
   >
     <div
       className="av-annotation"
@@ -215,7 +215,7 @@ exports[`AlignmentViewer Should render 1`] = `
     </div>
   </div>
   <div
-    className="av-widget av-consensus-seq"
+    className="av-widget av-consensus-seq-holder"
   >
     <div
       className="av-annotation"
@@ -226,7 +226,7 @@ exports[`AlignmentViewer Should render 1`] = `
       className="av-content"
     >
       <div
-        className="consensusseq_box"
+        className="consensusseq-box"
       >
         <AceConsensusSequenceComponent
           alignment={
@@ -250,10 +250,9 @@ exports[`AlignmentViewer Should render 1`] = `
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
-          classNames="   "
+          classNames="ace-consensusseq    "
           editorLoaded={[Function]}
           fontSize={0}
-          id="ace-consensusseq"
           sortBy={
             SequenceSortOptions {
               "description": "As input",
@@ -267,7 +266,7 @@ exports[`AlignmentViewer Should render 1`] = `
     </div>
   </div>
   <div
-    className="av-widget av-target-seq"
+    className="av-widget av-target-seq-holder"
   >
     <div
       className="av-annotation"
@@ -278,7 +277,7 @@ exports[`AlignmentViewer Should render 1`] = `
       className="av-content"
     >
       <div
-        className="queryseq_box"
+        className="queryseq-box"
       >
         <AceTargetSequenceComponent
           alignment={
@@ -302,10 +301,9 @@ exports[`AlignmentViewer Should render 1`] = `
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
-          classNames="   "
+          classNames="ace-queryseq    "
           editorLoaded={[Function]}
           fontSize={0}
-          id="ace-queryseq"
           sortBy={
             SequenceSortOptions {
               "description": "As input",
@@ -319,7 +317,7 @@ exports[`AlignmentViewer Should render 1`] = `
     </div>
   </div>
   <div
-    className="av-widget av-position-indicator"
+    className="av-widget av-position-indicator-holder"
   >
     <div
       className="av-annotation"
@@ -330,7 +328,7 @@ exports[`AlignmentViewer Should render 1`] = `
       className="av-content"
     >
       <div
-        className="position_box"
+        className="position-box"
       >
         <AceTextualRulerComponent
           alignment={
@@ -354,9 +352,9 @@ exports[`AlignmentViewer Should render 1`] = `
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
+          classNames="ace-positions"
           editorLoaded={[Function]}
           fontSize={0}
-          id="ace-positions"
           mouseDown={[Function]}
           mouseEnter={[Function]}
           mouseLeave={[Function]}
@@ -366,18 +364,18 @@ exports[`AlignmentViewer Should render 1`] = `
     </div>
   </div>
   <div
-    className="av-widget av-ace-msa"
+    className="av-widget av-ace-msa-holder"
   >
     <div
       className="av-annotation"
     >
       <div
-        className="alignment_metadata_box"
+        className="alignment-metadata-box"
       >
         <AceEditorComponent
+          classNames="ace-alignment-metadata"
           editorLoaded={[Function]}
           fontSize={0}
-          id="ace-alignment-metadata"
           text=""
         />
       </div>
@@ -386,7 +384,7 @@ exports[`AlignmentViewer Should render 1`] = `
       className="av-content"
     >
       <div
-        className="alignment_box"
+        className="alignment-box"
       >
         <AceMultipleSequenceAlignmentComponent
           alignment={
@@ -411,10 +409,9 @@ exports[`AlignmentViewer Should render 1`] = `
             }
           }
           characterSizeChanged={[Function]}
-          classNames="   "
+          classNames="ace-alignment    "
           editorLoaded={[Function]}
           fontSize={0}
-          id="ace-alignment"
           sortBy={
             SequenceSortOptions {
               "description": "As input",

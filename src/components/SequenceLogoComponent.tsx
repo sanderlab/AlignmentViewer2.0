@@ -36,7 +36,6 @@ interface IGlyphStackData extends Array<IGlyphFrequency> {}
 export interface ISequenceLogoProps {
   alignment: Alignment;
   glyphWidth: number;
-  height: number;
   logoType: LOGO_TYPES;
   alignmentType?: AlignmentTypes;
 }
@@ -120,8 +119,8 @@ export class SequenceLogoComponent extends React.Component<
     positionalFrequencies: IGlyphStackData,
     numGlyphStacks: number
   ) {
-    const { logoType, height } = this.props;
-    let dy = height;
+    const { logoType } = this.props;
+    let dy = 100;
 
     return positionalFrequencies.map((freq, idx) => {
       dy = dy - freq.frequency * 100;
@@ -222,7 +221,7 @@ export class SequenceLogoComponent extends React.Component<
   }
 
   render() {
-    const { alignment, glyphWidth, height } = this.props;
+    const { alignment, glyphWidth } = this.props;
     if (!alignment || !glyphWidth) {
       return null;
     }
@@ -230,14 +229,13 @@ export class SequenceLogoComponent extends React.Component<
     //perform a bunch of data munging
     this.logoData = this.mungeLogoData();
     const totalWidth = this.logoData.length * glyphWidth;
-    const totalHeight = height;
 
     return (
       <div className="sequence-logo">
         <svg
           preserveAspectRatio="none"
           viewBox={`0 0 ${this.logoData.length} 100`}
-          style={{ width: totalWidth, height: totalHeight }}
+          style={{ width: totalWidth }}
           xmlns="http://www.w3.org/2000/svg"
         >
           {this.logoData.map((singlePositionData, positionIdx) => {

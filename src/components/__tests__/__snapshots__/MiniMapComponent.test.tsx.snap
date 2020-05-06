@@ -2,107 +2,99 @@
 
 exports[`MiniMap Should render with default props. 1`] = `
 <div
+  className="minimap-holder"
   style={
     Object {
-      "backgroundColor": "white",
-      "borderColor": "#333333",
-      "borderStyle": "solid",
       "borderWidth": "1px",
-      "bottom": 0,
       "height": 595,
       "margin": "2px",
-      "position": "fixed",
       "right": 0,
-      "top": 0,
       "width": 295,
-      "zIndex": 100000,
     }
   }
 >
-  <div>
-    <AlignmentCanvasComponent
-      alignment={
-        Alignment {
-          "aceEditorMode": undefined,
-          "allUpperAlphaLettersInAlignmentSorted": Array [],
-          "consensus": Array [],
-          "globalAlphaLetterCounts": Object {},
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "predictedNT": true,
-          "sequences": Map {
-            SequenceSortOptions {
-              "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
-              "key": "as-input",
-            } => Array [],
-          },
-          "targetSequence": undefined,
-          "uuid": "10000000-1000-4000-8000-100000000000",
-        }
+  <CanvasAlignmentComponent
+    alignment={
+      Alignment {
+        "aceEditorMode": undefined,
+        "allUpperAlphaLettersInAlignmentSorted": Array [],
+        "consensus": Array [],
+        "globalAlphaLetterCounts": Object {},
+        "name": "",
+        "positionalLetterCounts": Map {},
+        "predictedNT": true,
+        "sequences": Map {
+          SequenceSortOptions {
+            "description": "As input",
+            "distanceFn": undefined,
+            "isTargetSequenceDependent": false,
+            "key": "as-input",
+          } => Array [],
+        },
+        "targetSequence": undefined,
+        "uuid": "10000000-1000-4000-8000-100000000000",
       }
-      alignmentType={
-        AlignmentTypes {
-          "allColorSchemes": Array [
-            Object {
-              "backgroundAlpha": 0,
-              "className": "mock-aa-class",
-              "colors": Object {
-                "": "",
-              },
-              "commonName": "Default",
-              "description": "mock-aa-style-desc",
+    }
+    alignmentType={
+      AlignmentTypes {
+        "allColorSchemes": Array [
+          Object {
+            "backgroundAlpha": 0,
+            "className": "mock-aa-class",
+            "colors": Object {
+              "": "",
             },
-          ],
-          "className": undefined,
-          "description": "Amino Acid Sequences",
-          "key": "aminoacid-alignment",
-        }
-      }
-      colorScheme={
-        Object {
-          "backgroundAlpha": 0,
-          "className": "mock-aa-class",
-          "colors": Object {
-            "": "",
+            "commonName": "Default",
+            "description": "mock-aa-style-desc",
           },
-          "commonName": "Default",
-          "description": "mock-aa-style-desc",
-        }
+        ],
+        "className": undefined,
+        "description": "Amino Acid Sequences",
+        "key": "aminoacid-alignment",
       }
-      id="alignment_canvas"
-      mouseDown={[Function]}
-      positionsToStyle={
-        PositionsToStyle {
-          "className": undefined,
-          "description": "All",
-          "key": "all",
-        }
+    }
+    colorScheme={
+      Object {
+        "backgroundAlpha": 0,
+        "className": "mock-aa-class",
+        "colors": Object {
+          "": "",
+        },
+        "commonName": "Default",
+        "description": "mock-aa-style-desc",
       }
-      sortBy={
-        SequenceSortOptions {
-          "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
-          "key": "as-input",
-        }
+    }
+    mouseDown={[Function]}
+    onClickOrDrag={[Function]}
+    positionsToStyle={
+      PositionsToStyle {
+        "className": undefined,
+        "description": "All",
+        "key": "all",
       }
-      stageResolution={
-        Object {
-          "height": 595,
-          "width": 295,
-        }
+    }
+    sortBy={
+      SequenceSortOptions {
+        "description": "As input",
+        "distanceFn": undefined,
+        "isTargetSequenceDependent": false,
+        "key": "as-input",
       }
-      viewportProps={
-        Object {
-          "useDrag": true,
-          "usePinch": true,
-          "useWheel": true,
-          "zoomPercent": 1,
-        }
+    }
+    stageResolution={
+      Object {
+        "height": 595,
+        "width": 295,
       }
-    />
-  </div>
+    }
+    viewportProps={
+      Object {
+        "useDrag": true,
+        "usePinch": true,
+        "useWheel": true,
+        "zoomPercent": 1,
+      }
+    }
+  />
 </div>
 `;
