@@ -21,14 +21,18 @@ export interface ICanvasAlignmentProps {
   sortBy: SequenceSortOptions;
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
-  highlightRows?: [number, number]; //[startRowNum, endRowNum]
+  highlightRows?: {
+    rowStart: number;
+    rowEnd: number;
+  };
   stageResolution?: {
     width: number;
     height: number;
   };
   viewportProps?: Partial<ICanvasAlignmentViewportProps>;
 
-  onClickOrDrag?(x: number, y: number): void;
+  onClick?(mousePosition: IPosition): void;
+  onIndicatorDrag?(indicatorBounds: IRectangle, mousePosition: IPosition): void;
 }
 
 interface ICanvasAlignmentState {
@@ -56,12 +60,6 @@ export class CanvasAlignmentComponent extends React.Component<
       width: 485,
       height: 650,
     },
-    viewportProps: {
-      useDrag: true,
-      usePinch: true,
-      useWheel: true,
-      zoomPercent: 0,
-    },
   };
 
   constructor(props: ICanvasAlignmentProps) {
@@ -83,6 +81,27 @@ export class CanvasAlignmentComponent extends React.Component<
     }
   }
 
+  /**
+   * Inform parent of the end of a drag event
+   * @param newMousePosition
+   */
+  protected informParentOfIndicatorDragged(newMousePosition: PIXI.Point) {
+    const { alignment, onIndicatorDrag } = this.props;
+    const { dragPositions } = this.state;
+
+    if (onIndicatorDrag && dragPositions) {
+      onIndicatorDrag(
+        {
+          x: 0,
+          y: Math.round(newMousePosition.y - dragPositions!.startOffset.top),
+          width: alignment.getMaxSequenceLength(),
+          height: 0,
+        },
+        newMousePosition
+      );
+    }
+  }
+
   render() {
     if (!this.props.alignment) {
       return null;
@@ -93,7 +112,7 @@ export class CanvasAlignmentComponent extends React.Component<
       alignmentType,
       colorScheme,
       highlightRows,
-      onClickOrDrag,
+      onClick,
       positionsToStyle,
       sortBy,
       stageResolution,
@@ -116,11 +135,11 @@ export class CanvasAlignmentComponent extends React.Component<
     let rowHighlighterHeight: number | undefined;
 
     if (highlightRows) {
-      rowHighlighterHeight = highlightRows[1] - highlightRows[0] + 1; //why +1? start/end inclusive
+      rowHighlighterHeight = highlightRows.rowEnd - highlightRows.rowStart + 1; //why +1? start/end inclusive
       rowHighlightStart =
         dragging && dragPositions
           ? Math.round(dragPositions.current.y - dragPositions.startOffset.top)
-          : highlightRows[0];
+          : highlightRows.rowStart;
       rowHighlightStart = rowHighlightStart > 0 ? rowHighlightStart : 0;
     }
 
@@ -148,7 +167,8 @@ export class CanvasAlignmentComponent extends React.Component<
                 app={app}
                 numColumns={maxSeqLength}
                 numRows={numSequences}
-                mouseClick={onClickOrDrag}
+                mouseClick={onClick}
+                stageResolution={stageResolution!}
                 {...viewportProps}
               >
                 <CanvasAlignmentTiled
@@ -184,17 +204,9 @@ export class CanvasAlignmentComponent extends React.Component<
                       },
                       onDragEnd: (e, parent) => {
                         this.setState({ dragging: false });
-                        const finalPosition = e.data.getLocalPosition(parent);
-
-                        if (onClickOrDrag) {
-                          //final release position
-                          onClickOrDrag(
-                            Math.round(finalPosition.x),
-                            Math.round(
-                              finalPosition.y - dragPositions!.startOffset.top
-                            )
-                          );
-                        }
+                        this.informParentOfIndicatorDragged(
+                          e.data.getLocalPosition(parent)
+                        );
                       },
                       onDragMove: (e, parent) => {
                         if (dragging) {
@@ -206,14 +218,7 @@ export class CanvasAlignmentComponent extends React.Component<
                               current: newPosition,
                             },
                           });
-                          if (onClickOrDrag) {
-                            onClickOrDrag(
-                              Math.round(newPosition.x),
-                              Math.round(
-                                newPosition.y - dragPositions!.startOffset.top
-                              )
-                            );
-                          }
+                          this.informParentOfIndicatorDragged(newPosition);
                         }
                       },
                     }}

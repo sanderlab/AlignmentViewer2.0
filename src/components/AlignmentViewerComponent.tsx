@@ -56,8 +56,11 @@ enum ACE_EDITOR_IDS {
 interface IAlignmentViewerState {
   aceCharacterWidth: number;
   aceEditors: { [editorId: string]: Ace.Editor };
-  alignmentEditorVisibleFirstRow?: number;
-  alignmentEditorVisibleLastRow?: number;
+  msaEditorVewport?: {
+    numberVisibleRows: number;
+    firstFullyVisibleRow: number;
+    lastFullyVisibleRow: number;
+  };
 
   windowWidth: number;
   windowHeight: number;
@@ -84,6 +87,9 @@ export class AlignmentViewer extends React.Component<
 
     this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
     this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
+
+    this.minimapClicked = this.minimapClicked.bind(this);
+    this.minimapRectHighlightMoved = this.minimapRectHighlightMoved.bind(this);
   }
 
   private handleCharacterSizeChanged(newCharSize: number) {
@@ -135,9 +141,16 @@ export class AlignmentViewer extends React.Component<
       editor.renderer.on("afterRender", () => {
         // BREAKS LOGO, rerenders everything below and kills performance. React lifecycle stuff.
         //setTimeout(() => {
+
         this.setState({
-          alignmentEditorVisibleFirstRow: editor.renderer.getFirstFullyVisibleRow(),
-          alignmentEditorVisibleLastRow: editor.renderer.getLastFullyVisibleRow(),
+          msaEditorVewport: {
+            numberVisibleRows:
+              editor.renderer.getLastFullyVisibleRow() -
+              editor.renderer.getFirstFullyVisibleRow() +
+              1,
+            firstFullyVisibleRow: editor.renderer.getFirstFullyVisibleRow(),
+            lastFullyVisibleRow: editor.renderer.getLastFullyVisibleRow(),
+          },
         });
         //});
       });
@@ -155,8 +168,38 @@ export class AlignmentViewer extends React.Component<
   };
 
   /**
+   * scroll the aceEditors to a specific position when user clicks on the minimap
+   * the editor should center around the click, which will be calculated here.
+   *
+   * TODO: this might be better delt with in the scroll sync class and only have
+   *       one of the editors deal with the rectangles. It works fine right now
+   *       when there is only one vertical scroll sync and the minimap widget
+   *       spans the entire row, but it will be trickier if e.g., we have
+   *       the rectangle take up only the visible horizontal space also.
+   *
+   * @param mousePosition
+   */
+  protected minimapClicked(mousePosition: IPosition) {
+    const { aceEditors, msaEditorVewport } = this.state;
+
+    //the ace editor should center around the click. calculate height
+    const numRowsVisibleInAceEditor = msaEditorVewport
+      ? msaEditorVewport.numberVisibleRows
+      : 0;
+    let newY = Math.round(mousePosition.y - numRowsVisibleInAceEditor / 2);
+    newY = newY < 0 ? 0 : newY;
+
+    if (aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES] !== undefined) {
+      aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES]!.scrollToRow(newY);
+    }
+    if (aceEditors[ACE_EDITOR_IDS.MSA_IDS] !== undefined) {
+      aceEditors[ACE_EDITOR_IDS.MSA_IDS]!.scrollToRow(newY);
+    }
+  }
+
+  /**
    * scroll to specific position when user moves the highlight indicator on minimap
-   * either by clicking and moving the rectangle or dragging the rectangle itself.
+   * by dragging the rectangle itself.
    *
    * TODO: this might be better delt with in the scroll sync class and only have
    *       one of the editors deal with the rectangles. It works fine right now
@@ -164,14 +207,17 @@ export class AlignmentViewer extends React.Component<
    *       spans the entire row, but it will be trickier if e.g., we have
    *       the rectangle take up only the visible horizontal space also.
    */
-  protected onMinimapHighlightChange = (x: number, y: number) => {
+  protected minimapRectHighlightMoved = (
+    rectBounds: IRectangle,
+    mousePosition: IPosition
+  ) => {
     const { aceEditors } = this.state;
 
     if (aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES] !== undefined) {
-      aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES]!.scrollToRow(Math.round(y));
+      aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES]!.scrollToRow(rectBounds.y);
     }
     if (aceEditors[ACE_EDITOR_IDS.MSA_IDS] !== undefined) {
-      aceEditors[ACE_EDITOR_IDS.MSA_IDS]!.scrollToRow(Math.round(y));
+      aceEditors[ACE_EDITOR_IDS.MSA_IDS]!.scrollToRow(rectBounds.y);
     }
   };
 
@@ -385,19 +431,16 @@ export class AlignmentViewer extends React.Component<
       style,
       //minimapOptions,
     } = this.props;
-    const {
-      alignmentEditorVisibleFirstRow,
-      alignmentEditorVisibleLastRow,
-      windowHeight,
-    } = this.state;
+
+    const { msaEditorVewport, windowHeight } = this.state;
 
     //let width, height;
     //if (minimapOptions) {
     //width = minimapOptions.width ?
     //}
     const width = Math.max(
-      300,
-      Math.min(450, alignment.getMaxSequenceLength())
+      150,
+      Math.min(250, alignment.getMaxSequenceLength())
     );
 
     const mmClassName = showMiniMap ? "mini-map" : "mini-map hidden";
@@ -406,22 +449,23 @@ export class AlignmentViewer extends React.Component<
       style && (
         <div className={mmClassName}>
           <MiniMapComponent
-            width={width}
+            startingWidth={width}
             height={windowHeight}
             alignHorizontal={"right"}
             alignment={alignment}
             style={style}
             sortBy={sortBy!}
+            resizable={"horizontal"}
             highlightRows={
-              alignmentEditorVisibleFirstRow !== undefined &&
-              alignmentEditorVisibleLastRow !== undefined
-                ? [
-                    alignmentEditorVisibleFirstRow,
-                    alignmentEditorVisibleLastRow,
-                  ]
-                : undefined
+              !msaEditorVewport
+                ? undefined
+                : {
+                    rowStart: msaEditorVewport.firstFullyVisibleRow,
+                    rowEnd: msaEditorVewport.lastFullyVisibleRow,
+                  }
             }
-            onClickOrDrag={this.onMinimapHighlightChange}
+            onClick={this.minimapClicked}
+            onIndicatorDrag={this.minimapRectHighlightMoved}
           />
         </div>
       )

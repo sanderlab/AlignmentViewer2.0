@@ -8,4 +8,13 @@
   background-color: white;
   border-color: #333333;
   border-style: solid;
+
+  overflow: hidden; //needed for resize handle (set as style in react)
+  min-width: 100px;
+
+  /*.alignment-canvas {
+    canvas {
+      padding-left: 10px;
+    }
+  }*/
 }

@@ -6,10 +6,12 @@ exports[`MiniMap Should render with default props. 1`] = `
   style={
     Object {
       "borderWidth": "1px",
+      "direction": "rtl",
       "height": 595,
       "margin": "2px",
+      "resize": "none",
       "right": 0,
-      "width": 295,
+      "width": 305,
     }
   }
 >
@@ -64,7 +66,6 @@ exports[`MiniMap Should render with default props. 1`] = `
         "description": "mock-aa-style-desc",
       }
     }
-    onClickOrDrag={[Function]}
     positionsToStyle={
       PositionsToStyle {
         "className": undefined,
@@ -86,14 +87,7 @@ exports[`MiniMap Should render with default props. 1`] = `
         "width": 295,
       }
     }
-    viewportProps={
-      Object {
-        "useDrag": true,
-        "usePinch": true,
-        "useWheel": true,
-        "zoomPercent": 1,
-      }
-    }
+    viewportProps={Object {}}
   />
 </div>
 `;

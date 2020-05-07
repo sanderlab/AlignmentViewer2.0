@@ -381,14 +381,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -796,14 +788,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -901,14 +885,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     Object {
       "height": 650,
       "width": 485,
-    }
-  }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
     }
   }
 >
@@ -1112,14 +1088,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -1291,14 +1259,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -1468,14 +1428,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     Object {
       "height": 650,
       "width": 485,
-    }
-  }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
     }
   }
 >
@@ -1649,14 +1601,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -1826,14 +1770,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     Object {
       "height": 650,
       "width": 485,
-    }
-  }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
     }
   }
 >
@@ -2007,14 +1943,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -2184,14 +2112,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     Object {
       "height": 650,
       "width": 485,
-    }
-  }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
     }
   }
 >
@@ -2365,14 +2285,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -2544,14 +2456,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
-    }
-  }
 >
   <div
     className="alignment-canvas"
@@ -2721,14 +2625,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     Object {
       "height": 650,
       "width": 485,
-    }
-  }
-  viewportProps={
-    Object {
-      "useDrag": true,
-      "usePinch": true,
-      "useWheel": true,
-      "zoomPercent": 0,
     }
   }
 >
