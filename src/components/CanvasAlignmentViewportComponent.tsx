@@ -41,11 +41,7 @@ export const CanvasAlignmentViewport = PixiComponent<
       .clamp({
         direction: "all",
       })
-      .bounce({ friction: 0.1, time: 150, underflow: "center" })
-      .clampZoom({
-        maxHeight: numRows + 0.1 * numRows,
-        //maxWidth: numColumns//app.renderer.width,
-      });
+      .bounce({ friction: 0.1, time: 150, underflow: "center" });
 
     // !IMPORTANT
     // Two-finger drag on trackpad is also enabled by this.
@@ -84,12 +80,22 @@ export const CanvasAlignmentViewport = PixiComponent<
       oldProps.numColumns !== newProps.numColumns ||
       oldProps.numRows !== newProps.numRows
     ) {
-      vp.screenWidth = newProps.app.renderer.width;
-      vp.screenHeight = newProps.app.renderer.height;
-      vp.worldWidth = newProps.numColumns;
-      vp.worldHeight = newProps.numRows;
+      const { app, numRows, numColumns } = newProps;
+      vp.resize(app.renderer.width, app.renderer.height, numColumns, numRows);
+
+      if (numRows > numColumns) {
+        vp = vp.clampZoom({
+          maxHeight: numRows + 0.1 * numRows,
+          //maxWidth: numColumns//app.renderer.width,
+        });
+      } else {
+        vp = vp.clampZoom({
+          maxWidth: numColumns + 0.1 * numColumns, //app.renderer.width,
+        });
+      }
+
       vp = vp.fitWorld(true);
-      vp = vp.setZoom(newProps.app.renderer.width / newProps.numColumns, false);
+      vp = vp.setZoom(app.renderer.width / numColumns, false);
     }
     return vp;
   },

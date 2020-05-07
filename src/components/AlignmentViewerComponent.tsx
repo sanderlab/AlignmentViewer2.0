@@ -45,9 +45,17 @@ const defaultProps = {
   ] as undefined | ArrayOneOrMore<ISequenceBarplotDataSeries>,
 };
 
+enum ACE_EDITOR_IDS {
+  QUERY = "QUERY",
+  CONSENSUS = "CONSENSUS",
+  POSITIONAL_RULER = "POSITIONAL_RULER",
+  MSA_SEQUENCES = "MSA_SEQUENCES",
+  MSA_IDS = "MSA_IDS",
+}
+
 interface IAlignmentViewerState {
   aceCharacterWidth: number;
-  aceEditors: Ace.Editor[];
+  aceEditors: { [editorId: string]: Ace.Editor };
   alignmentEditorVisibleFirstRow?: number;
   alignmentEditorVisibleLastRow?: number;
 
@@ -68,7 +76,7 @@ export class AlignmentViewer extends React.Component<
     super(props);
 
     this.state = {
-      aceEditors: [],
+      aceEditors: {},
       aceCharacterWidth: 0,
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
@@ -76,30 +84,29 @@ export class AlignmentViewer extends React.Component<
 
     this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
     this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
-
-    //setup scroll groups
-    //ScrollSync.getInstance().setScrollerGroup(
-    //  "horizontal",
-    //  ScrollType.horizontal
-    //);
-    //ScrollSync.getInstance().setScrollerGroup("vertical", ScrollType.vertical);
   }
 
-  private handleCharacterSizeChanged = (newCharSize: number) => {
+  private handleCharacterSizeChanged(newCharSize: number) {
     if (this.state.aceCharacterWidth !== newCharSize) {
       this.setState({
         aceCharacterWidth: newCharSize,
       });
     }
-  };
+  }
 
-  private aceEditorLoaded = (
-    id: string,
+  /**
+   * Handle new ace editor. Add it to scroll sync.
+   * @param id
+   * @param editor
+   * @param parentElem
+   * @param scrollSyncDirection
+   */
+  private aceEditorLoaded(
+    id: ACE_EDITOR_IDS,
     editor: Ace.Editor,
     parentElem: HTMLDivElement,
     scrollSyncDirection: ScrollType
-  ) => {
-    //console.log("_aceEditorLoaded id =" + id);
+  ) {
     if (
       scrollSyncDirection === ScrollType.horizontal ||
       scrollSyncDirection === ScrollType.both
@@ -113,26 +120,77 @@ export class AlignmentViewer extends React.Component<
       this.verticalScrollSync.registerAceScroller(editor, parentElem);
     }
 
-    this.setState({
-      aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
-      aceEditors: [editor].concat(this.state.aceEditors),
+    this.setState((startState) => {
+      const newAceEditors = { ...startState.aceEditors };
+      newAceEditors[id] = editor;
+
+      return {
+        aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
+        aceEditors: newAceEditors,
+      };
     });
 
     //track visible rows to show in canvas MSA
-    if (id === "ace-alignment") {
+    if (id === ACE_EDITOR_IDS.MSA_SEQUENCES) {
       editor.renderer.on("afterRender", () => {
         // BREAKS LOGO, rerenders everything below and kills performance. React lifecycle stuff.
-        setTimeout(() => {
-          this.setState({
-            alignmentEditorVisibleFirstRow: editor.renderer.getFirstFullyVisibleRow(),
-            alignmentEditorVisibleLastRow: editor.renderer.getLastFullyVisibleRow(),
-          });
+        //setTimeout(() => {
+        this.setState({
+          alignmentEditorVisibleFirstRow: editor.renderer.getFirstFullyVisibleRow(),
+          alignmentEditorVisibleLastRow: editor.renderer.getLastFullyVisibleRow(),
         });
+        //});
       });
+    }
+  }
+
+  /**
+   * React to window dimension changes
+   */
+  protected windowDimensionsUpdated = () => {
+    this.setState({
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+    });
+  };
+
+  /**
+   * scroll to specific position when user moves the highlight indicator on minimap
+   * either by clicking and moving the rectangle or dragging the rectangle itself.
+   *
+   * TODO: this might be better delt with in the scroll sync class and only have
+   *       one of the editors deal with the rectangles. It works fine right now
+   *       when there is only one vertical scroll sync and the minimap widget
+   *       spans the entire row, but it will be trickier if e.g., we have
+   *       the rectangle take up only the visible horizontal space also.
+   */
+  protected onMinimapHighlightChange = (x: number, y: number) => {
+    const { aceEditors } = this.state;
+
+    if (aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES] !== undefined) {
+      aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES]!.scrollToRow(Math.round(y));
+    }
+    if (aceEditors[ACE_EDITOR_IDS.MSA_IDS] !== undefined) {
+      aceEditors[ACE_EDITOR_IDS.MSA_IDS]!.scrollToRow(Math.round(y));
     }
   };
 
-  private generateWidget(
+  /*
+   *
+   *
+   * RENDER DIFFERENT COMPONENTS
+   *
+   *
+   */
+
+  /**
+   * Generate a single widget that contains an annotation and content
+   * @param className
+   * @param annotation
+   * @param content
+   * @param addAsElementToScrollSync
+   */
+  protected renderWidget(
     className: string,
     annotation: string | JSX.Element,
     content: JSX.Element | null,
@@ -154,92 +212,6 @@ export class AlignmentViewer extends React.Component<
         >
           {content}
         </div>
-      </div>
-    );
-  }
-
-  protected windowDimensionsUpdated = () => {
-    this.setState({
-      windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight,
-    });
-  };
-
-  componentDidMount() {
-    window.addEventListener("resize", this.windowDimensionsUpdated);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.windowDimensionsUpdated);
-  }
-
-  render() {
-    const {
-      alignment,
-      barplotDataseries,
-      showAnnotations,
-      showConsensus,
-      showLogo,
-      showQuery,
-      showRuler,
-    } = this.props;
-    if (!alignment) {
-      return null;
-    }
-
-    const annotationClass = showAnnotations ? "" : " annotation-closed";
-
-    return (
-      <div className={`alignment-viewer${annotationClass}`}>
-        {this.renderMiniMap()}
-        {/*<div id="column_mouseover"></div>*/}
-        {!barplotDataseries
-          ? null
-          : this.generateWidget(
-              "av-barplot-holder",
-              barplotDataseries.map((series) => series.name).join(" / "),
-              this.renderConservationBox(),
-              true
-            )}
-
-        {!showLogo
-          ? null
-          : this.generateWidget(
-              "av-sequence-logo-holder",
-              "Logo:",
-              this.renderSequenceLogo(),
-              true
-            )}
-
-        {!showConsensus
-          ? null
-          : this.generateWidget(
-              "av-consensus-seq-holder",
-              "Consensus sequence:",
-              this.renderConsensusQueryBox()
-            )}
-
-        {!showQuery
-          ? null
-          : this.generateWidget(
-              "av-target-seq-holder",
-              "Query sequence:",
-              this.renderQuerySeqBox()
-            )}
-
-        {!showRuler
-          ? null
-          : this.generateWidget(
-              "av-position-indicator-holder",
-              "Position:",
-              this.renderPositionBox()
-            )}
-
-        {this.generateWidget(
-          "av-ace-msa-holder",
-          this.renderAlignmentAnnotationBox(),
-          this.renderAlignmentBox()
-        )}
       </div>
     );
   }
@@ -291,7 +263,7 @@ export class AlignmentViewer extends React.Component<
         ].join(" ")}
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
-            "ace-consensusseq",
+            ACE_EDITOR_IDS.CONSENSUS,
             editor,
             parentElem,
             ScrollType.horizontal
@@ -316,7 +288,7 @@ export class AlignmentViewer extends React.Component<
         ].join(" ")}
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
-            "ace-queryseq",
+            ACE_EDITOR_IDS.QUERY,
             editor,
             parentElem,
             ScrollType.horizontal
@@ -335,7 +307,7 @@ export class AlignmentViewer extends React.Component<
           fontSize={this.props.zoomLevel}
           editorLoaded={(editor, parentElem) => {
             this.aceEditorLoaded(
-              "ace-positions",
+              ACE_EDITOR_IDS.POSITIONAL_RULER,
               editor,
               parentElem,
               ScrollType.horizontal
@@ -374,7 +346,7 @@ export class AlignmentViewer extends React.Component<
         characterSizeChanged={this.handleCharacterSizeChanged}
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
-            "ace-alignment",
+            ACE_EDITOR_IDS.MSA_SEQUENCES,
             editor,
             parentElem,
             ScrollType.both
@@ -395,7 +367,7 @@ export class AlignmentViewer extends React.Component<
         fontSize={this.props.zoomLevel}
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
-            "ace-alignment-metadata",
+            ACE_EDITOR_IDS.MSA_IDS,
             editor,
             parentElem,
             ScrollType.vertical
@@ -413,7 +385,11 @@ export class AlignmentViewer extends React.Component<
       style,
       //minimapOptions,
     } = this.props;
-    const { windowHeight } = this.state;
+    const {
+      alignmentEditorVisibleFirstRow,
+      alignmentEditorVisibleLastRow,
+      windowHeight,
+    } = this.state;
 
     //let width, height;
     //if (minimapOptions) {
@@ -437,37 +413,105 @@ export class AlignmentViewer extends React.Component<
             style={style}
             sortBy={sortBy!}
             highlightRows={
-              this.state.alignmentEditorVisibleFirstRow !== undefined &&
-              this.state.alignmentEditorVisibleLastRow !== undefined
+              alignmentEditorVisibleFirstRow !== undefined &&
+              alignmentEditorVisibleLastRow !== undefined
                 ? [
-                    this.state.alignmentEditorVisibleFirstRow,
-                    this.state.alignmentEditorVisibleLastRow,
+                    alignmentEditorVisibleFirstRow,
+                    alignmentEditorVisibleLastRow,
                   ]
                 : undefined
             }
-            onClickOrDrag={this.onMinimapClick}
+            onClickOrDrag={this.onMinimapHighlightChange}
           />
         </div>
       )
     );
   }
 
-  protected onMinimapClick = (x: number, y: number) => {
+  /*
+   *
+   *
+   * REACT FUNCTIONS
+   *
+   *
+   */
+
+  componentDidMount() {
+    window.addEventListener("resize", this.windowDimensionsUpdated);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.windowDimensionsUpdated);
+  }
+
+  render() {
     const {
-      aceEditors,
-      alignmentEditorVisibleFirstRow: alignmentEditorFirstRow,
-      alignmentEditorVisibleLastRow: alignmentEditorLastRow,
-    } = this.state;
-    let rowCount = 40;
-    if (
-      alignmentEditorFirstRow !== undefined &&
-      alignmentEditorLastRow !== undefined
-    ) {
-      rowCount = alignmentEditorLastRow - alignmentEditorFirstRow;
+      alignment,
+      barplotDataseries,
+      showAnnotations,
+      showConsensus,
+      showLogo,
+      showQuery,
+      showRuler,
+    } = this.props;
+    if (!alignment) {
+      return null;
     }
 
-    if (aceEditors.length >= 1) {
-      aceEditors[0].scrollToRow(Math.floor(y));
-    }
-  };
+    const annotationClass = showAnnotations ? "" : " annotation-closed";
+
+    return (
+      <div className={`alignment-viewer${annotationClass}`}>
+        {this.renderMiniMap()}
+        {/*<div id="column_mouseover"></div>*/}
+        {!barplotDataseries
+          ? null
+          : this.renderWidget(
+              "av-barplot-holder",
+              barplotDataseries.map((series) => series.name).join(" / "),
+              this.renderConservationBox(),
+              true
+            )}
+
+        {!showLogo
+          ? null
+          : this.renderWidget(
+              "av-sequence-logo-holder",
+              "Logo:",
+              this.renderSequenceLogo(),
+              true
+            )}
+
+        {!showConsensus
+          ? null
+          : this.renderWidget(
+              "av-consensus-seq-holder",
+              "Consensus sequence:",
+              this.renderConsensusQueryBox()
+            )}
+
+        {!showQuery
+          ? null
+          : this.renderWidget(
+              "av-target-seq-holder",
+              "Query sequence:",
+              this.renderQuerySeqBox()
+            )}
+
+        {!showRuler
+          ? null
+          : this.renderWidget(
+              "av-position-indicator-holder",
+              "Position:",
+              this.renderPositionBox()
+            )}
+
+        {this.renderWidget(
+          "av-ace-msa-holder",
+          this.renderAlignmentAnnotationBox(),
+          this.renderAlignmentBox()
+        )}
+      </div>
+    );
+  }
 }

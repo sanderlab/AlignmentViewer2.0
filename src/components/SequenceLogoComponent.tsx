@@ -71,12 +71,12 @@ export class SequenceLogoComponent extends React.Component<
         type="light"
         border={true}
         getContent={(idx: string) => {
-          if (!idx || !this.logoData) {
+          if (!idx || !this.logoData || !this.logoData[parseInt(idx)]) {
             return;
           }
 
           const position = parseInt(idx) + 1;
-          const glyphData = this.logoData![parseInt(idx)];
+          const glyphData = this.logoData[parseInt(idx)];
           return glyphData.length === 0 ? null : (
             <div className="logo-tooltip">
               <h1>Position: {position}</h1>

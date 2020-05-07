@@ -160,8 +160,8 @@ export class StockholmAlignment extends Alignment {
           }
         }
       });
-    console.log("metadata:", metadata);
-    console.log("sequences:", sequences);
+    //console.log("metadata:", metadata);
+    //console.log("sequences:", sequences);
     return new StockholmAlignment(fileName, sequences, metadata);
   }
 

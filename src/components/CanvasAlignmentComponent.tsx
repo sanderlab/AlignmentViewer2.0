@@ -116,7 +116,7 @@ export class CanvasAlignmentComponent extends React.Component<
     let rowHighlighterHeight: number | undefined;
 
     if (highlightRows) {
-      rowHighlighterHeight = highlightRows[1] - highlightRows[0];
+      rowHighlighterHeight = highlightRows[1] - highlightRows[0] + 1; //why +1? start/end inclusive
       rowHighlightStart =
         dragging && dragPositions
           ? Math.round(dragPositions.current.y - dragPositions.startOffset.top)
@@ -159,7 +159,8 @@ export class CanvasAlignmentComponent extends React.Component<
                   positionsToStyle={positionsToStyle}
                 />
                 {rowHighlightStart !== undefined &&
-                rowHighlighterHeight !== undefined ? (
+                rowHighlighterHeight !== undefined &&
+                rowHighlighterHeight < alignment.getSequences().length ? (
                   <CanvasAlignmentHighlighter
                     fillColor={0xff0000}
                     fillAlpha={0.25}
