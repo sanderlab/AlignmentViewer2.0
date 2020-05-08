@@ -29,7 +29,9 @@ describe("MiniMap", () => {
     const wrapper = shallow(
       <MiniMapComponent
         alignment={new Alignment("", [])}
-        style={AlignmentStyle.fromAlignmentType(AlignmentTypes.AMINOACID)}
+        alignmentStyle={AlignmentStyle.fromAlignmentType(
+          AlignmentTypes.AMINOACID
+        )}
         sortBy={SequenceSortOptions.INPUT}
       />
     );

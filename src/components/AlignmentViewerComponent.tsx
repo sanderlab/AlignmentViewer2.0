@@ -359,18 +359,6 @@ export class AlignmentViewer extends React.Component<
               ScrollType.horizontal
             );
           }}
-          mouseEnter={() => {
-            //console.log("mouse entered position box");
-          }}
-          mouseLeave={() => {
-            //console.log("mouse left position box");
-          }}
-          mouseMove={(e) => {
-            //console.log("mouse moved in position box", e);
-          }}
-          mouseDown={(e) => {
-            //console.log("mouse down in position box", e);
-          }}
         />
       }
     </div>
@@ -434,14 +422,11 @@ export class AlignmentViewer extends React.Component<
 
     const { msaEditorVewport, windowHeight } = this.state;
 
-    //let width, height;
-    //if (minimapOptions) {
-    //width = minimapOptions.width ?
-    //}
-    const width = Math.max(
-      150,
-      Math.min(250, alignment.getMaxSequenceLength())
-    );
+    //const width = Math.max(
+    //  150,
+    //  Math.min(250, alignment.getMaxSequenceLength())
+    //);
+    const width = 100;
 
     const mmClassName = showMiniMap ? "mini-map" : "mini-map hidden";
     return (
@@ -453,7 +438,7 @@ export class AlignmentViewer extends React.Component<
             height={windowHeight}
             alignHorizontal={"right"}
             alignment={alignment}
-            style={style}
+            alignmentStyle={style}
             sortBy={sortBy!}
             resizable={"horizontal"}
             highlightRows={

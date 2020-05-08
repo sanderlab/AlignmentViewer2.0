@@ -7,6 +7,7 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
+import { ResizeSensor } from "css-element-queries";
 
 export interface IMiniMapProps {
   alignHorizontal: "left" | "right";
@@ -14,7 +15,7 @@ export interface IMiniMapProps {
   alignment: Alignment;
   height: number;
   sortBy: SequenceSortOptions;
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   startingWidth: number;
   resizable: "none" | "horizontal"; // | "vertical" | "both";
 
@@ -36,7 +37,7 @@ export class MiniMapComponent extends React.Component<
   IMiniMapState
 > {
   private myRef: HTMLDivElement | null = null;
-  private mutObserver?: MutationObserver;
+  private resizeSensor?: ResizeSensor;
 
   public static defaultProps = {
     alignHorizontal: "right",
@@ -52,17 +53,7 @@ export class MiniMapComponent extends React.Component<
     this.state = {
       //zoomPercent: 1,
     };
-  }
-
-  protected setupMutationObserver() {
-    this.mutObserver = new MutationObserver((mutations) => {
-      if (this.myRef) {
-        this.setState({
-          resizedWidth: this.myRef.clientWidth,
-        });
-      }
-    });
-    return this.mutObserver;
+    this.setupResizeSensor = this.setupResizeSensor.bind(this);
   }
 
   protected getSizing() {
@@ -81,55 +72,42 @@ export class MiniMapComponent extends React.Component<
     };
   }
 
-  public render() {
-    const { alignHorizontal, resizable } = this.props;
-    const size = this.getSizing();
-    return (
-      <div
-        ref={(newRef) => {
-          if (this.mutObserver) {
-            this.mutObserver.disconnect();
-          }
-
-          const mutObserver = this.mutObserver
-            ? this.mutObserver
-            : this.setupMutationObserver();
-          this.myRef = newRef;
-          if (newRef) {
-            mutObserver.observe(newRef, { attributes: true });
-          }
-        }}
-        className="minimap-holder"
-        style={{
-          ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
-          //...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
-          height: size.frameHeight,
-          width: size.frameWidth + 10, //add space for the dragger on safari
-          borderWidth: `${size.borderWidth}px`,
-          margin: `${size.margin}px`,
-          resize: resizable ? resizable : "none",
-          direction: alignHorizontal === "left" ? "ltr" : "rtl",
-        }}
-      >
-        {this.renderCanvasComponent()}
-        {/*this.renderZoomControls()*/}
-      </div>
-    );
+  protected setupResizeSensor(ref: HTMLDivElement | null) {
+    if (ref && !this.resizeSensor) {
+      this.resizeSensor = new ResizeSensor(ref, () => {
+        if (this.state.resizedWidth !== ref.clientWidth) {
+          setTimeout(() => {
+            //flashes (worse) without setTimeout. Safari still flashing.
+            this.setState({
+              resizedWidth: ref.clientWidth,
+            });
+          }, 10);
+        }
+      });
+    }
   }
 
+  /*
+   *
+   *
+   * RENDER METHODS
+   *
+   *
+   */
+
   protected renderCanvasComponent = () => {
-    const { alignment, highlightRows, sortBy, style } = this.props;
+    const { alignment, highlightRows, sortBy, alignmentStyle } = this.props;
     //const { zoomPercent } = this.state;
     const size = this.getSizing();
     return (
       <CanvasAlignmentComponent
         alignment={alignment}
-        alignmentType={style.alignmentType}
-        positionsToStyle={style.positionsToStyle}
-        colorScheme={style.colorScheme}
+        alignmentType={alignmentStyle.alignmentType}
+        positionsToStyle={alignmentStyle.positionsToStyle}
+        colorScheme={alignmentStyle.colorScheme}
         sortBy={sortBy}
         stageResolution={{
-          width: size.frameWidth,
+          width: size.frameWidth - 10, //add space for the dragger on safari
           height: size.frameHeight,
         }}
         highlightRows={highlightRows}
@@ -143,6 +121,37 @@ export class MiniMapComponent extends React.Component<
       />
     );
   };
+
+  /*
+   *
+   *
+   * REACT METHODS
+   *
+   *
+   */
+  render() {
+    const { alignHorizontal, resizable } = this.props;
+    const size = this.getSizing();
+    return (
+      <div
+        ref={this.setupResizeSensor}
+        className="minimap-holder"
+        style={{
+          ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
+          //...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
+          height: size.frameHeight,
+          width: size.frameWidth,
+          borderWidth: `${size.borderWidth}px`,
+          margin: `${size.margin}px`,
+          resize: resizable ? resizable : "none",
+          direction: alignHorizontal === "left" ? "ltr" : "rtl",
+        }}
+      >
+        {this.renderCanvasComponent()}
+        {/*this.renderZoomControls()*/}
+      </div>
+    );
+  }
 
   /*
   protected renderZoomControls = () => (

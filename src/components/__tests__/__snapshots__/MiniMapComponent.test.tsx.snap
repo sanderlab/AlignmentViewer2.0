@@ -11,7 +11,7 @@ exports[`MiniMap Should render with default props. 1`] = `
       "margin": "2px",
       "resize": "none",
       "right": 0,
-      "width": 305,
+      "width": 295,
     }
   }
 >
@@ -84,7 +84,7 @@ exports[`MiniMap Should render with default props. 1`] = `
     stageResolution={
       Object {
         "height": 595,
-        "width": 295,
+        "width": 285,
       }
     }
     viewportProps={Object {}}

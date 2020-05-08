@@ -6,16 +6,11 @@ export interface ICanvasAlignmentViewportProps {
   numColumns: number;
   numRows: number;
   app: PIXI.Application;
-  mouseClick?: (mousePosition: IPosition) => void;
+  onMouseClick?: (mousePosition: IPosition) => void;
   stageResolution: {
     width: number;
     height: number;
   };
-}
-
-interface IViewportInstance {
-  vp: Viewport;
-  lastMouseClick?: (data: ClickEventData) => void | undefined;
 }
 
 const OVERFLOW_ZOOM_ALLOWED = 0.05; //allow 5% zoom out (both sides = 10% total) past max width / height
@@ -74,13 +69,13 @@ export const CanvasAlignmentViewport = PixiComponent<
     oldProps: ICanvasAlignmentViewportProps,
     newProps: ICanvasAlignmentViewportProps
   ) {
-    const { mouseClick, numRows, numColumns, stageResolution } = newProps;
+    const { onMouseClick, numRows, numColumns, stageResolution } = newProps;
 
-    if (oldProps.mouseClick !== mouseClick) {
+    if (oldProps.onMouseClick !== onMouseClick) {
       vp.off("clicked"); //I tested and adding this line keeps us from getting multiple click listners
-      if (mouseClick) {
+      if (onMouseClick) {
         vp.on("clicked", (e) => {
-          mouseClick({ x: e.world.x, y: e.world.y });
+          onMouseClick({ x: e.world.x, y: e.world.y });
         });
       }
     }
@@ -104,48 +99,69 @@ export const CanvasAlignmentViewport = PixiComponent<
         numRows
       );
 
-      //*** TODO: as we increase in size, scale proportionally
-
-      //compress if the resize is making pushing the alignment off the
-      //screen -- this only happens when the resize is making everything
-      //smaller
-      if (!newAlignment && oldProps.stageResolution) {
-        //for new alignments zoom is done regardless (see below)
-        if (
-          oldProps.stageResolution.width > stageResolution.width &&
-          vp.scale.x * numColumns > stageResolution.width
-        ) {
-          //it is shrinking horizontally and pushing the current alignment
-          //off the screen
-          vp = vp.setZoom(stageResolution.width / numColumns, false);
-        }
-
-        if (
-          oldProps.stageResolution.height > stageResolution.height &&
-          vp.scale.y * numRows > stageResolution.height
-        ) {
-          //it is shrinking vertically and pushing the current alignment
-          //off the screen
-          vp = vp.setZoom(stageResolution.width / numColumns, false);
-        }
-      }
-    }
-
-    //new alignments set zoom clamping and also force the alignment into
-    //as much of a view as possible.
-    if (newAlignment) {
-      if (numRows > numColumns) {
+      //set the clamp based on the current stage height/width
+      let clampWidth,
+        clampHeight = 0;
+      if (
+        numColumns / stageResolution.width >
+        numRows / stageResolution.height
+      ) {
+        //width is more important
+        clampWidth = numColumns + OVERFLOW_ZOOM_ALLOWED * numColumns;
         vp = vp.clampZoom({
-          maxHeight: numRows + OVERFLOW_ZOOM_ALLOWED * numRows,
+          maxHeight: undefined,
+          maxWidth: clampWidth,
         });
       } else {
+        //height is more important
+        clampHeight = numRows + OVERFLOW_ZOOM_ALLOWED * numRows;
         vp = vp.clampZoom({
-          maxWidth: numColumns + OVERFLOW_ZOOM_ALLOWED * numColumns,
+          maxWidth: undefined,
+          maxHeight: clampHeight,
         });
       }
 
-      vp = vp.fitWorld(true);
-      vp = vp.setZoom(stageResolution.width / numColumns, false);
+      //zoom to appropriate level
+      if (newAlignment) {
+        //new alignments set zoom clamping and also force the alignment into
+        //as much of a view as possible.
+        vp = vp.fitWorld(true);
+        vp = vp.setZoom(stageResolution.width / numColumns, false);
+      } else if (
+        oldProps.stageResolution &&
+        oldProps.stageResolution.width !== stageResolution.width
+      ) {
+        //the viewport is being resized horizontally (likely by user dragging)
+        //  1. compress if the resize is making pushing the alignment off the screen
+        //  2. scale alignment if the resize is expanding
+
+        if (oldProps.stageResolution.width > stageResolution.width) {
+          //viewport is shrinking horizontally
+          if (vp.scale.x * numColumns > stageResolution.width) {
+            //it is pushing the current alignment off the screen, force
+            //the alignment to stay the same size as the viewport
+            vp = vp.setZoom(stageResolution.width / numColumns, false);
+          }
+        } else {
+          //viewport is expanding horizontally
+
+          //detect new zoom level. this is pretty crude. is there a better way?
+          let newZoomLevel =
+            vp.scale.x *
+            (stageResolution.width / oldProps.stageResolution.width);
+
+          if (
+            (clampWidth &&
+              (newZoomLevel * numColumns < clampWidth ||
+                numColumns > stageResolution.width)) ||
+            (clampHeight &&
+              (newZoomLevel * numRows < clampHeight ||
+                numRows > stageResolution.height))
+          ) {
+            vp = vp.setZoom(newZoomLevel, false);
+          }
+        }
+      }
     }
     return vp;
   },

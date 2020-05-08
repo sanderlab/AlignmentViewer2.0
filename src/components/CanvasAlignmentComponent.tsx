@@ -52,8 +52,6 @@ export class CanvasAlignmentComponent extends React.Component<
   ICanvasAlignmentState
 > {
   app?: PIXI.Application;
-  scaleX: number = 1;
-  scaleY: number = 1;
 
   static defaultProps = {
     stageResolution: {
@@ -67,18 +65,6 @@ export class CanvasAlignmentComponent extends React.Component<
     this.state = {
       dragging: false,
     };
-  }
-
-  protected sliderChanged(newValue: number, xy: "x" | "y") {
-    if (this.app) {
-      this.app.stage.children.forEach((sprite) => {
-        if (xy === "x") {
-          sprite.scale.x = newValue;
-        } else {
-          sprite.scale.y = newValue;
-        }
-      });
-    }
   }
 
   /**
@@ -167,7 +153,7 @@ export class CanvasAlignmentComponent extends React.Component<
                 app={app}
                 numColumns={maxSeqLength}
                 numRows={numSequences}
-                mouseClick={onClick}
+                onMouseClick={onClick}
                 stageResolution={stageResolution!}
                 {...viewportProps}
               >
@@ -235,6 +221,9 @@ export class CanvasAlignmentComponent extends React.Component<
   }
 
   protected onMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    //keep the scroll bars from appearing when the user is interacting with
+    //the canvas. This fixes an issue where the canvas keeps moving around
+    //due to appearince of the scroll bar in safari.
     document.body.style.overflow = "hidden";
   };
 
