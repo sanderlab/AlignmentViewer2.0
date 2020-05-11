@@ -387,23 +387,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -794,23 +778,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -893,23 +861,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -919,28 +871,7 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}
   onWheel={[Function]}
->
-  <t
-    height={650}
-    onMount={[Function]}
-    onUnmount={[Function]}
-    options={
-      Object {
-        "transparent": true,
-      }
-    }
-    raf={true}
-    renderOnComponentChange={true}
-    width={485}
-  >
-    <ContextConsumer>
-      <Component />
-    </ContextConsumer>
-    <ContextConsumer>
-      <Component />
-    </ContextConsumer>
-  </t>
-</div>
+/>
 `;
 
 exports[`CanvasAlignmentComponent Should match the snapshot when styling the PositionsToStyle {
@@ -1094,23 +1025,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -1265,23 +1180,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -1436,23 +1335,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -1607,23 +1490,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -1778,23 +1645,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -1949,23 +1800,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -2120,23 +1955,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -2291,23 +2110,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -2462,23 +2265,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;
 
@@ -2633,22 +2420,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     onWheel={[Function]}
-  >
-    <t
-      height={650}
-      onMount={[Function]}
-      onUnmount={[Function]}
-      options={
-        Object {
-          "transparent": true,
-        }
-      }
-      raf={true}
-      renderOnComponentChange={true}
-      width={485}
-    >
-      <canvas />
-    </t>
-  </div>
+  />
 </CanvasAlignmentComponent>
 `;

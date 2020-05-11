@@ -25,6 +25,7 @@ interface AppState {
   showAnnotations: boolean;
   showSettings: boolean;
   loading?: boolean;
+  minimapVerticalHeight?: "div" | "window";
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -46,6 +47,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const {
       alignment,
       logoPlotStyle,
+      minimapVerticalHeight,
       showAnnotations,
       showMiniMap,
       sortBy,
@@ -65,15 +67,16 @@ export default class App extends React.Component<AppProps, AppState> {
           sortBy={sortBy}
           showMiniMap={showMiniMap}
           showAnnotations={showAnnotations}
+          minimapVerticalHeight={minimapVerticalHeight}
         ></AlignmentViewer>
       </div>
     );
 
     return (
-      <div>
+      <>
         {this.renderSettingsBox(style)}
         {alignmentElement}
-      </div>
+      </>
     );
   }
 
@@ -142,6 +145,7 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderSequenceLogo()}
               {this.renderZoomButtons()}
               {this.renderMiniMapToggle()}
+              {this.renderMiniMapHeightToggle()}
               {this.renderAnnotationToggle()}
               <br></br>
               {this.renderFileUpload()}
@@ -393,6 +397,28 @@ export default class App extends React.Component<AppProps, AppState> {
           }}
           onAlignmentLoaded={this.onAlignmentReceived}
         />
+      </div>
+    );
+  };
+
+  protected renderMiniMapHeightToggle = () => {
+    return (
+      <div className="minimap-height-toggle">
+        <label>
+          <strong>Minimap Full Window:</strong>
+
+          <input
+            name="minimapVerticalHeight"
+            type="checkbox"
+            checked={this.state.minimapVerticalHeight === "window"}
+            onChange={(e) => {
+              const target = e.target;
+              this.setState({
+                minimapVerticalHeight: target.checked ? "window" : "div",
+              });
+            }}
+          />
+        </label>
       </div>
     );
   };

@@ -10,25 +10,28 @@ import {
 import { ResizeSensor } from "css-element-queries";
 
 export interface IMiniMapProps {
+  //props that should be exposed in AlignmentViewer full component:
   alignHorizontal: "left" | "right";
-  //alignVertical: "top" | "bottom";
+  startingWidth: number;
+  resizable: "none" | "horizontal";
+  verticalHeight?: "div" | "window";
+
+  //expose these, but requires smarter forwarding in the AlignmentViewer full component
+  onClick?(mousePosition: IPosition): void;
+  onIndicatorDrag?(rectBounds: IRectangle, mousePosition: IPosition): void;
+
+  //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
-  height: number;
   sortBy: SequenceSortOptions;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  startingWidth: number;
-  resizable: "none" | "horizontal"; // | "vertical" | "both";
-
   highlightRows?: {
     rowStart: number;
     rowEnd: number;
   };
-  onClick?(mousePosition: IPosition): void;
-  onIndicatorDrag?(rectBounds: IRectangle, mousePosition: IPosition): void;
 }
 
 export interface IMiniMapState {
-  //zoomPercent: number;
+  height: number; //calculated dynamically
   resizedWidth?: number;
 }
 
@@ -36,15 +39,15 @@ export class MiniMapComponent extends React.Component<
   IMiniMapProps,
   IMiniMapState
 > {
-  private myRef: HTMLDivElement | null = null;
+  private ref?: HTMLDivElement;
   private resizeSensor?: ResizeSensor;
 
   public static defaultProps = {
     alignHorizontal: "right",
     //alignVertical: "top",
-    height: 600,
     startingWidth: 300,
     resizable: "none",
+    verticalHeight: "div",
   };
 
   constructor(props: IMiniMapProps) {
@@ -52,6 +55,7 @@ export class MiniMapComponent extends React.Component<
 
     this.state = {
       //zoomPercent: 1,
+      height: window.innerHeight,
     };
     this.setupResizeSensor = this.setupResizeSensor.bind(this);
   }
@@ -65,7 +69,7 @@ export class MiniMapComponent extends React.Component<
     return {
       borderWidth: frameBorderWidth,
       margin: frameMargin,
-      frameHeight: this.props.height - 2 * frameMargin - 1 * frameBorderWidth,
+      frameHeight: this.state.height - 2 * frameMargin - 1 * frameBorderWidth,
       frameWidth: resizedWidth
         ? resizedWidth
         : this.props.startingWidth - 2 * frameMargin - 1 * frameBorderWidth,
@@ -74,12 +78,17 @@ export class MiniMapComponent extends React.Component<
 
   protected setupResizeSensor(ref: HTMLDivElement | null) {
     if (ref && !this.resizeSensor) {
+      this.ref = ref;
       this.resizeSensor = new ResizeSensor(ref, () => {
-        if (this.state.resizedWidth !== ref.clientWidth) {
+        if (
+          this.state.resizedWidth !== ref.clientWidth ||
+          this.state.height !== ref.clientHeight
+        ) {
           setTimeout(() => {
             //flashes (worse) without setTimeout. Safari still flashing.
             this.setState({
               resizedWidth: ref.clientWidth,
+              height: ref.clientHeight,
             });
           }, 10);
         }
@@ -97,7 +106,6 @@ export class MiniMapComponent extends React.Component<
 
   protected renderCanvasComponent = () => {
     const { alignment, highlightRows, sortBy, alignmentStyle } = this.props;
-    //const { zoomPercent } = this.state;
     const size = this.getSizing();
     return (
       <CanvasAlignmentComponent
@@ -111,11 +119,6 @@ export class MiniMapComponent extends React.Component<
           height: size.frameHeight,
         }}
         highlightRows={highlightRows}
-        viewportProps={
-          {
-            //zoomPercent,
-          }
-        }
         onClick={this.props.onClick}
         onIndicatorDrag={this.props.onIndicatorDrag}
       />
@@ -130,8 +133,11 @@ export class MiniMapComponent extends React.Component<
    *
    */
   render() {
-    const { alignHorizontal, resizable } = this.props;
+    const { alignHorizontal, resizable, verticalHeight } = this.props;
     const size = this.getSizing();
+
+    const position = verticalHeight === "div" ? "absolute" : "fixed";
+
     return (
       <div
         ref={this.setupResizeSensor}
@@ -139,7 +145,8 @@ export class MiniMapComponent extends React.Component<
         style={{
           ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
           //...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
-          height: size.frameHeight,
+          //height: size.frameHeight,
+          position: position,
           width: size.frameWidth,
           borderWidth: `${size.borderWidth}px`,
           margin: `${size.margin}px`,
@@ -148,38 +155,7 @@ export class MiniMapComponent extends React.Component<
         }}
       >
         {this.renderCanvasComponent()}
-        {/*this.renderZoomControls()*/}
       </div>
     );
   }
-
-  /*
-  protected renderZoomControls = () => (
-    <div style={{ textAlign: "center", opacity: 1 }}>
-      <button onClick={this.onZoomOut}>-</button>
-      <button onClick={this.onZoomReset}>Reset</button>
-      <button onClick={this.onZoomIn}>+</button>
-    </div>
-  );
-
-  protected onZoomIn = () => {
-    const { zoomPercent } = this.state;
-    this.setState({
-      zoomPercent: Math.min(8, zoomPercent + 0.25),
-    });
-  };
-
-  protected onZoomOut = () => {
-    const { zoomPercent } = this.state;
-    this.setState({
-      // A zoomPercent of 0 will not actually zoom out!
-      zoomPercent: Math.max(0.25, zoomPercent - 0.25),
-    });
-  };
-
-  protected onZoomReset = () => {
-    this.setState({
-      zoomPercent: 1,
-    });
-  };*/
 }

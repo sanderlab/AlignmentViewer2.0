@@ -33,6 +33,7 @@ const defaultProps = {
   zoomLevel: 13 as number,
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
   showMiniMap: false as boolean,
+  minimapVerticalHeight: "div" as "div" | "window",
   showAnnotations: true as boolean,
   showConsensus: true as boolean,
   showQuery: true as boolean,
@@ -63,7 +64,7 @@ interface IAlignmentViewerState {
   };
 
   windowWidth: number;
-  windowHeight: number;
+  //windowHeight: number;
 }
 
 export class AlignmentViewer extends React.Component<
@@ -82,7 +83,7 @@ export class AlignmentViewer extends React.Component<
       aceEditors: {},
       aceCharacterWidth: 0,
       windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight,
+      //windowHeight: window.innerHeight,
     };
 
     this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
@@ -168,7 +169,7 @@ export class AlignmentViewer extends React.Component<
   protected windowDimensionsUpdated() {
     this.setState({
       windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight,
+      //windowHeight: window.innerHeight,
     });
   }
 
@@ -423,9 +424,10 @@ export class AlignmentViewer extends React.Component<
       showMiniMap,
       style,
       //minimapOptions,
+      minimapVerticalHeight,
     } = this.props;
 
-    const { msaEditorVewport, windowHeight } = this.state;
+    const { msaEditorVewport /*windowHeight*/ } = this.state;
 
     //const width = Math.max(
     //  150,
@@ -433,19 +435,20 @@ export class AlignmentViewer extends React.Component<
     //);
     const width = 100;
 
-    const mmClassName = showMiniMap ? "mini-map" : "mini-map hidden";
+    const mmClassName = showMiniMap ? "minimap" : "minimap hidden";
     return (
       alignment &&
       style && (
         <div className={mmClassName}>
           <MiniMapComponent
             startingWidth={width}
-            height={windowHeight}
+            //height={windowHeight}
             alignHorizontal={"right"}
             alignment={alignment}
             alignmentStyle={style}
             sortBy={sortBy!}
             resizable={"horizontal"}
+            verticalHeight={minimapVerticalHeight}
             highlightRows={
               !msaEditorVewport
                 ? undefined
@@ -492,10 +495,13 @@ export class AlignmentViewer extends React.Component<
       return null;
     }
 
-    const annotationClass = showAnnotations ? "" : " annotation-closed";
+    const classes = ["alignment-viewer"];
+    if (!showAnnotations) {
+      classes.push("annotation-closed");
+    }
 
     return (
-      <div className={`alignment-viewer${annotationClass}`}>
+      <div className={classes.join(" ")}>
         {this.renderMiniMap()}
         {/*<div id="column_mouseover"></div>*/}
         {!barplotDataseries

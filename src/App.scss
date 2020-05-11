@@ -1,64 +1,73 @@
 /** App.scss */
 
-.app-header {
-  padding: 5px;
-  height: 120px;
-  position: relative;
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 
-  display: flex; // make us of Flexbox
-  justify-content: center; // horizontally centers single line items
-
-  .settings-box {
-    font-size: 11px;
-    margin: auto;
-    width: 450px;
-    border: 2px solid black;
-    padding: 15px;
-    position: absolute;
-    z-index: 10;
-    background-color: white;
-  }
-  .settings-box h3 {
-    margin-bottom: 0;
-    text-align: center;
-  }
-  .settings-box h4 {
-    margin-top: 0;
-    text-align: center;
-  }
-  .settings-box h2 {
-    padding-top: 0;
-    margin-top: 0;
-    text-align: center;
-  }
-
-  .settings-box .settings-header {
+  .app-header {
+    padding: 5px;
+    height: 120px;
     position: relative;
-  }
-  .settings-box .settings-header button {
-    position: absolute;
-    right: 0;
-    top: 0;
+
+    display: flex; // make us of Flexbox
+    justify-content: center; // horizontally centers single line items
+
+    .settings-box {
+      font-size: 11px;
+      margin: auto;
+      width: 450px;
+      border: 2px solid black;
+      padding: 15px;
+      position: absolute;
+      z-index: 10;
+      background-color: white;
+    }
+    .settings-box h3 {
+      margin-bottom: 0;
+      text-align: center;
+    }
+    .settings-box h4 {
+      margin-top: 0;
+      text-align: center;
+    }
+    .settings-box h2 {
+      padding-top: 0;
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .settings-box .settings-header {
+      position: relative;
+    }
+    .settings-box .settings-header button {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    .settings-box label strong {
+      width: 200px;
+      display: inline-block;
+    }
+    .settings-box label select,
+    .settings-box label .zoom-level {
+      width: 200px;
+      display: inline-block;
+    }
+
+    .examples button.button-link {
+      border: 1px solid transparent;
+    }
   }
 
-  .settings-box label strong {
-    width: 200px;
-    display: inline-block;
+  .av-holder {
+    position: relative;
+    //padding-top: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
   }
-  .settings-box label select,
-  .settings-box label .zoom-level {
-    width: 200px;
-    display: inline-block;
-  }
-
-  .examples button.button-link {
-    border: 1px solid transparent;
-  }
-}
-
-.av-holder {
-  position: relative;
-  padding-top: 10px;
 }
 
 button.button-link {

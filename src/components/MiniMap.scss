@@ -4,7 +4,6 @@
   z-index: 100000;
   top: 0;
   bottom: 0;
-  position: fixed;
   background-color: white;
   border-color: #333333;
   border-style: solid;
@@ -14,5 +13,10 @@
 
   .alignment-canvas {
     text-align: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
   }
 }

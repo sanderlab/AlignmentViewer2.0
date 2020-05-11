@@ -33,7 +33,7 @@ export const CanvasAlignmentViewport = PixiComponent<
 
     let vp = new Viewport({
       screenWidth: stageDimensions.width,
-      screenHeight: stageDimensions.height,
+      //screenHeight: stageDimensions.height,
       worldWidth: numColumns,
       worldHeight: numRows,
       interaction: app.renderer.plugins.interaction,
@@ -61,9 +61,6 @@ export const CanvasAlignmentViewport = PixiComponent<
       vp = vp.wheel();
     }
 
-    //if (zoomPercent) {
-    //  vp = vp.zoomPercent(zoomPercent);
-    //}
     return vp;
   },
 

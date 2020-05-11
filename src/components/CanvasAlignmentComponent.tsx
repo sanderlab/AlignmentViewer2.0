@@ -51,7 +51,8 @@ export class CanvasAlignmentComponent extends React.Component<
   ICanvasAlignmentProps,
   ICanvasAlignmentState
 > {
-  app?: PIXI.Application;
+  private app?: PIXI.Application;
+  private divElement: HTMLDivElement | null = null;
 
   static defaultProps = {
     stageDimensions: {
@@ -135,96 +136,102 @@ export class CanvasAlignmentComponent extends React.Component<
         onWheel={this.onWheel}
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
+        ref={(divElement) => {
+          this.divElement = divElement;
+        }}
       >
-        <Stage
-          width={stageDimensions?.width}
-          height={stageDimensions?.height}
-          options={{ transparent: true }}
-        >
-          <AppContext.Consumer>
-            {(app) => {
-              this.app = app;
-              return <></>;
-            }}
-          </AppContext.Consumer>
-          <AppContext.Consumer>
-            {(app) => (
-              <CanvasAlignmentViewport
-                app={app}
-                ensureVisible={
-                  rowHighlightStart === undefined ||
-                  rowHighlighterHeight === undefined
-                    ? undefined
-                    : {
-                        y: rowHighlightStart,
-                        height: rowHighlighterHeight,
-                      }
-                }
-                numColumns={maxSeqLength}
-                numRows={numSequences}
-                onMouseClick={onClick}
-                stageDimensions={stageDimensions!}
-                {...viewportProps}
-              >
-                <CanvasAlignmentTiled
-                  alignment={alignment}
-                  alignmentType={alignmentType}
-                  sortBy={sortBy}
-                  colorScheme={colorScheme}
-                  positionsToStyle={positionsToStyle}
-                />
-                {rowHighlightStart !== undefined &&
-                rowHighlighterHeight !== undefined &&
-                rowHighlighterHeight < alignment.getSequences().length ? (
-                  <CanvasAlignmentHighlighter
-                    fillColor={0xff0000}
-                    fillAlpha={0.25}
-                    x={0}
-                    y={rowHighlightStart}
-                    width={maxSeqLength}
-                    height={rowHighlighterHeight}
-                    dragFunctions={{
-                      onDragStart: (e, parent) => {
-                        const startPosition = e.data.getLocalPosition(parent);
-                        this.setState({
-                          dragging: true,
-                          dragPositions: {
-                            startOffset: {
-                              left: startPosition.x - 0,
-                              top: startPosition.y - rowHighlightStart!,
-                            },
-                            current: startPosition,
-                          },
-                        });
-                      },
-                      onDragEnd: (e, parent) => {
-                        this.setState({ dragging: false });
-                        this.informParentOfIndicatorDragged(
-                          e.data.getLocalPosition(parent)
-                        );
-                      },
-                      onDragMove: (e, parent) => {
-                        if (dragging) {
-                          const newPosition = e.data.getLocalPosition(parent);
-
+        {!this.divElement ? null : (
+          <Stage
+            width={stageDimensions?.width}
+            height={this.divElement.clientHeight}
+            /*height={stageDimensions?.height}*/
+            options={{ transparent: true }}
+          >
+            <AppContext.Consumer>
+              {(app) => {
+                this.app = app;
+                return <></>;
+              }}
+            </AppContext.Consumer>
+            <AppContext.Consumer>
+              {(app) => (
+                <CanvasAlignmentViewport
+                  app={app}
+                  ensureVisible={
+                    rowHighlightStart === undefined ||
+                    rowHighlighterHeight === undefined
+                      ? undefined
+                      : {
+                          y: rowHighlightStart,
+                          height: rowHighlighterHeight,
+                        }
+                  }
+                  numColumns={maxSeqLength}
+                  numRows={numSequences}
+                  onMouseClick={onClick}
+                  stageDimensions={stageDimensions!}
+                  {...viewportProps}
+                >
+                  <CanvasAlignmentTiled
+                    alignment={alignment}
+                    alignmentType={alignmentType}
+                    sortBy={sortBy}
+                    colorScheme={colorScheme}
+                    positionsToStyle={positionsToStyle}
+                  />
+                  {rowHighlightStart !== undefined &&
+                  rowHighlighterHeight !== undefined &&
+                  rowHighlighterHeight < alignment.getSequences().length ? (
+                    <CanvasAlignmentHighlighter
+                      fillColor={0xff0000}
+                      fillAlpha={0.25}
+                      x={0}
+                      y={rowHighlightStart}
+                      width={maxSeqLength}
+                      height={rowHighlighterHeight}
+                      dragFunctions={{
+                        onDragStart: (e, parent) => {
+                          const startPosition = e.data.getLocalPosition(parent);
                           this.setState({
+                            dragging: true,
                             dragPositions: {
-                              startOffset: dragPositions!.startOffset,
-                              current: newPosition,
+                              startOffset: {
+                                left: startPosition.x - 0,
+                                top: startPosition.y - rowHighlightStart!,
+                              },
+                              current: startPosition,
                             },
                           });
-                          this.informParentOfIndicatorDragged(newPosition);
-                        }
-                      },
-                    }}
-                  />
-                ) : (
-                  <></>
-                )}
-              </CanvasAlignmentViewport>
-            )}
-          </AppContext.Consumer>
-        </Stage>
+                        },
+                        onDragEnd: (e, parent) => {
+                          this.setState({ dragging: false });
+                          this.informParentOfIndicatorDragged(
+                            e.data.getLocalPosition(parent)
+                          );
+                        },
+                        onDragMove: (e, parent) => {
+                          if (dragging) {
+                            const newPosition = e.data.getLocalPosition(parent);
+
+                            this.setState({
+                              dragPositions: {
+                                startOffset: dragPositions!.startOffset,
+                                current: newPosition,
+                              },
+                            });
+                            this.informParentOfIndicatorDragged(newPosition);
+                          }
+                        },
+                      }}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                </CanvasAlignmentViewport>
+              )}
+            </AppContext.Consumer>
+          </Stage>
+        )}
       </div>
     );
   }

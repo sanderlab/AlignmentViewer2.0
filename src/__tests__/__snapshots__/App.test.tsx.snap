@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`App Should render within 2 minutes. 1`] = `
-<div>
+<Fragment>
   <div
     className="app-header"
   >
@@ -242,6 +242,21 @@ exports[`App Should render within 2 minutes. 1`] = `
             </label>
           </div>
           <div
+            className="minimap-height-toggle"
+          >
+            <label>
+              <strong>
+                Minimap Full Window:
+              </strong>
+              <input
+                checked={false}
+                name="minimapVerticalHeight"
+                onChange={[Function]}
+                type="checkbox"
+              />
+            </label>
+          </div>
+          <div
             className="annotation-toggle"
           >
             <label>
@@ -280,5 +295,5 @@ exports[`App Should render within 2 minutes. 1`] = `
       </form>
     </div>
   </div>
-</div>
+</Fragment>
 `;
