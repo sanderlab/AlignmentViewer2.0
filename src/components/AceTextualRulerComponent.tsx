@@ -5,7 +5,7 @@ export interface IAceTextualRulerComponentProps extends IAceEditorProps {
   alignment: Alignment;
 }
 
-export default class AceTextualRulerComponent extends AceEditorComponent<
+export class AceTextualRulerComponent extends AceEditorComponent<
   IAceTextualRulerComponentProps,
   {}
 > {

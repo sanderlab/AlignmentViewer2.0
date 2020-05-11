@@ -10,16 +10,6 @@ import {
 import { ResizeSensor } from "css-element-queries";
 
 export interface IMiniMapProps {
-  //props that should be exposed in AlignmentViewer full component:
-  alignHorizontal: "left" | "right";
-  startingWidth: number;
-  resizable: "none" | "horizontal";
-  verticalHeight?: "div" | "window";
-
-  //expose these, but requires smarter forwarding in the AlignmentViewer full component
-  onClick?(mousePosition: IPosition): void;
-  onIndicatorDrag?(rectBounds: IRectangle, mousePosition: IPosition): void;
-
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
   sortBy: SequenceSortOptions;
@@ -28,6 +18,16 @@ export interface IMiniMapProps {
     rowStart: number;
     rowEnd: number;
   };
+
+  //props that should be exposed in AlignmentViewer full component:
+  alignHorizontal: "left" | "right";
+  startingWidth: number;
+  resizable: "none" | "horizontal";
+  verticalHeight?: "div" | "window";
+
+  //expose these, but requires smarter forwarding within the AlignmentViewer full component
+  onClick?(mousePosition: IPosition): void;
+  onIndicatorDrag?(rectBounds: IRectangle, mousePosition: IPosition): void;
 }
 
 export interface IMiniMapState {

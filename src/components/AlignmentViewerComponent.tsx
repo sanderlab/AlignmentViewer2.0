@@ -17,9 +17,10 @@ import { MiniMapComponent } from "./MiniMapComponent";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
 import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
 import { AceTargetSequenceComponent } from "./AceTargetSequenceComponent";
-import AceTextualRulerComponent from "./AceTextualRulerComponent";
+import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
 import { ArrayOneOrMore } from "../common/Utils";
+import { IMiniMapProps } from "./MiniMapComponent";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -32,18 +33,30 @@ const defaultProps = {
   logoPlotStyle: LOGO_TYPES.LETTERS as LOGO_TYPES,
   zoomLevel: 13 as number,
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
-  showMiniMap: false as boolean,
-  minimapVerticalHeight: "div" as "div" | "window",
   showAnnotations: true as boolean,
   showConsensus: true as boolean,
   showQuery: true as boolean,
   showRuler: true as boolean,
   showLogo: true as boolean,
-  barplotDataseries: [
-    SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
-    //SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
-    SequenceBarplotComponent.GAPS_BARPLOT,
-  ] as undefined | ArrayOneOrMore<ISequenceBarplotDataSeries>,
+
+  minimapOptions: {
+    showMinimap: false as boolean,
+    alignHorizontal: "right" as IMiniMapProps["alignHorizontal"],
+    startingWidth: 100 as IMiniMapProps["startingWidth"],
+    resizable: "horizontal" as IMiniMapProps["resizable"],
+    verticalHeight: "div" as IMiniMapProps["verticalHeight"],
+  },
+
+  //array of individual barplots. Each barplot can contain multiple
+  //dataseries. Note that more than 2 dataseries in a single plot
+  //is difficult to understand and more than 3 is pretty much impossible
+  barplots: [
+    [
+      SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
+      SequenceBarplotComponent.GAPS_BARPLOT,
+    ],
+    //[SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT],
+  ] as undefined | ArrayOneOrMore<ISequenceBarplotDataSeries>[],
 };
 
 enum ACE_EDITOR_IDS {
@@ -246,10 +259,11 @@ export class AlignmentViewer extends React.Component<
     className: string,
     annotation: string | JSX.Element,
     content: JSX.Element | null,
-    addAsElementToScrollSync?: boolean
+    addAsElementToScrollSync?: boolean,
+    key?: string
   ) {
     return (
-      <div className={`av-widget ${className}`}>
+      <div className={`av-widget ${className}`} key={key}>
         <div className="av-annotation">{annotation}</div>
         <div
           className="av-content"
@@ -290,12 +304,13 @@ export class AlignmentViewer extends React.Component<
     );
   };
 
-  protected renderConservationBox = () => {
-    const { barplotDataseries } = this.props;
-    return !barplotDataseries || barplotDataseries.length < 1 ? null : (
+  protected renderBarplot = (
+    barplot: ArrayOneOrMore<ISequenceBarplotDataSeries>
+  ) => {
+    return (
       <SequenceBarplotComponent
         alignment={this.props.alignment}
-        dataSeries={barplotDataseries}
+        dataSeries={barplot}
         positionWidth={this.state.aceCharacterWidth}
       ></SequenceBarplotComponent>
     );
@@ -418,37 +433,22 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderMiniMap() {
-    const {
-      alignment,
-      sortBy,
-      showMiniMap,
-      style,
-      //minimapOptions,
-      minimapVerticalHeight,
-    } = this.props;
+    const { alignment, sortBy, style } = this.props;
+    const { msaEditorVewport } = this.state;
 
-    const { msaEditorVewport /*windowHeight*/ } = this.state;
-
-    //const width = Math.max(
-    //  150,
-    //  Math.min(250, alignment.getMaxSequenceLength())
-    //);
-    const width = 100;
-
-    const mmClassName = showMiniMap ? "minimap" : "minimap hidden";
+    let mmOptions = this.props.minimapOptions
+      ? this.props.minimapOptions
+      : defaultProps.minimapOptions;
+    const mmClassName = mmOptions.showMinimap ? "minimap" : "minimap hidden";
     return (
       alignment &&
       style && (
         <div className={mmClassName}>
           <MiniMapComponent
-            startingWidth={width}
-            //height={windowHeight}
-            alignHorizontal={"right"}
+            //not exposed to instantiator
             alignment={alignment}
             alignmentStyle={style}
             sortBy={sortBy!}
-            resizable={"horizontal"}
-            verticalHeight={minimapVerticalHeight}
             highlightRows={
               !msaEditorVewport
                 ? undefined
@@ -457,6 +457,12 @@ export class AlignmentViewer extends React.Component<
                     rowEnd: msaEditorVewport.lastFullyVisibleRow,
                   }
             }
+            //exposed by prop to instantiator
+            alignHorizontal={mmOptions.alignHorizontal}
+            resizable={mmOptions.resizable}
+            startingWidth={mmOptions.startingWidth}
+            verticalHeight={mmOptions.verticalHeight}
+            //not exposed yet to instantiator, but should in the future
             onClick={this.minimapClicked}
             onIndicatorDrag={this.minimapRectHighlightMoved}
           />
@@ -484,7 +490,7 @@ export class AlignmentViewer extends React.Component<
   render() {
     const {
       alignment,
-      barplotDataseries,
+      barplots,
       showAnnotations,
       showConsensus,
       showLogo,
@@ -503,14 +509,19 @@ export class AlignmentViewer extends React.Component<
     return (
       <div className={classes.join(" ")}>
         {this.renderMiniMap()}
+
         {/*<div id="column_mouseover"></div>*/}
-        {!barplotDataseries
+
+        {!barplots
           ? null
-          : this.renderWidget(
-              "av-barplot-holder",
-              barplotDataseries.map((series) => series.name).join(" / "),
-              this.renderConservationBox(),
-              true
+          : barplots.map((barplot, idx) =>
+              this.renderWidget(
+                "av-barplot-holder",
+                barplot.map((series) => series.name).join(" / "),
+                this.renderBarplot(barplot),
+                true,
+                `${idx}-${barplot.map((dataseries) => dataseries.id).join("|")}`
+              )
             )}
 
         {!showLogo

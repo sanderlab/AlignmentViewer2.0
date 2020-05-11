@@ -97,6 +97,7 @@ exports[`AlignmentViewer Should render 1`] = `
   </div>
   <div
     className="av-widget av-barplot-holder"
+    key="0-entropy|gaps"
   >
     <div
       className="av-annotation"

@@ -2,7 +2,7 @@ import React from "react";
 import "./SequenceBarplot.scss";
 import _ from "lodash";
 import { Alignment } from "../common/Alignment";
-import { mapGroupBy, ArrayOneOrMore } from "../common/Utils";
+import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
 import ReactTooltip from "react-tooltip";
 
 export interface ISequenceBarplotDataSeries {
@@ -17,11 +17,14 @@ export interface ISequenceBarplotDataSeries {
 }
 
 export interface ISequenceBarplotProps {
+  //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
-  dataSeries: ArrayOneOrMore<ISequenceBarplotDataSeries>;
   positionWidth: number;
 
-  //height?: number;
+  //props that should be exposed in AlignmentViewer full component:
+  dataSeries: ArrayOneOrMore<ISequenceBarplotDataSeries>;
+
+  //expose these, but requires smarter forwarding within the AlignmentViewer full component
   onPositionSelectionChanged?(
     positionsSelected: {
       position: number;
@@ -61,6 +64,7 @@ interface ISequenceBarplotState {
     bars: ISingleBarDetailsFull[];
   }[];
   svgHovered: boolean;
+  hoverKey: string;
 }
 
 export class SequenceBarplotComponent extends React.Component<
@@ -88,6 +92,7 @@ export class SequenceBarplotComponent extends React.Component<
     this.state = {
       svgHovered: false,
       positionsSelected: [],
+      hoverKey: generateUUIDv4(),
     };
     this.handleSvgHover = this.handleSvgHover.bind(this);
     this.handlePositionHover = this.handlePositionHover.bind(this);
@@ -356,9 +361,10 @@ export class SequenceBarplotComponent extends React.Component<
    */
   private renderTooltip() {
     const barsObj = this.getBars();
+    const { hoverKey } = this.state;
     return (
       <ReactTooltip
-        id="getBarTooltip"
+        id={`getBarTooltip-${hoverKey}`}
         effect="solid"
         type="light"
         border={true}
@@ -407,6 +413,7 @@ export class SequenceBarplotComponent extends React.Component<
    */
   private renderBarPlot() {
     const { alignment, positionWidth } = this.props;
+    const { hoverKey } = this.state;
 
     const maxSeqLength = alignment.getMaxSequenceLength();
     const totalWidth = positionWidth * maxSeqLength;
@@ -444,7 +451,7 @@ export class SequenceBarplotComponent extends React.Component<
                 className={
                   this.state.positionsSelected.some((p) => p.position === pos)
                     ? "position-container selected"
-                    : "position-container"
+                    : "position-container pos" + pos
                 }
                 onClick={(event) => {
                   this.handlePositionClicked(event, pos);
@@ -455,7 +462,7 @@ export class SequenceBarplotComponent extends React.Component<
                 onMouseLeave={(event) => {
                   this.handlePositionHover(event, pos, false);
                 }}
-                data-for="getBarTooltip"
+                data-for={`getBarTooltip-${hoverKey}`}
                 data-tip={pos}
                 data-class={"barplot-tooltip-container"}
                 key={`pos_${pos}`}

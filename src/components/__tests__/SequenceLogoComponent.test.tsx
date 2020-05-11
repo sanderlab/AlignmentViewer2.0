@@ -11,9 +11,7 @@ describe("SequenceLogoComponent", () => {
       <SequenceLogoComponent
         alignment={new Alignment("", [])}
         glyphWidth={3}
-        id={"test-sequence-logo-component"}
         logoType={LOGO_TYPES.BARS}
-        logoLoaded={jest.fn()}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -29,9 +27,7 @@ describe("SequenceLogoComponent", () => {
           ])
         }
         glyphWidth={3}
-        id={"test-sequence-logo-component"}
         logoType={LOGO_TYPES.BARS}
-        logoLoaded={jest.fn()}
       />
     );
     expect(wrapper).toMatchSnapshot();
