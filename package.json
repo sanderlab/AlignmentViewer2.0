@@ -45,7 +45,7 @@
     "test": "react-scripts test --env=jsdom-fifteen",
     "eject": "react-scripts eject",
     "cover": "react-scripts test --env=jsdom-fifteen --coverage --watchAll=false",
-    "build-and-deploy": "yarn build && yarn deploy && yarn pub2npm",
+    "build-and-deploy": "yarn deploy && yarn pub2npm",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
     "pub2npm": "rimraf dist && yarn babel && yarn tsc -p tsconfig.dist.json && node ./scripts/copyStyles.js && yarn publish",

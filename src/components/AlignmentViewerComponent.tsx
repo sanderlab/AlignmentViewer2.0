@@ -90,6 +90,11 @@ export class AlignmentViewer extends React.Component<
 
     this.minimapClicked = this.minimapClicked.bind(this);
     this.minimapRectHighlightMoved = this.minimapRectHighlightMoved.bind(this);
+    this.handleCharacterSizeChanged = this.handleCharacterSizeChanged.bind(
+      this
+    );
+    this.aceEditorLoaded = this.aceEditorLoaded.bind(this);
+    this.windowDimensionsUpdated = this.windowDimensionsUpdated.bind(this);
   }
 
   private handleCharacterSizeChanged(newCharSize: number) {
@@ -160,12 +165,12 @@ export class AlignmentViewer extends React.Component<
   /**
    * React to window dimension changes
    */
-  protected windowDimensionsUpdated = () => {
+  protected windowDimensionsUpdated() {
     this.setState({
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
     });
-  };
+  }
 
   /**
    * scroll the aceEditors to a specific position when user clicks on the minimap
@@ -207,10 +212,10 @@ export class AlignmentViewer extends React.Component<
    *       spans the entire row, but it will be trickier if e.g., we have
    *       the rectangle take up only the visible horizontal space also.
    */
-  protected minimapRectHighlightMoved = (
+  protected minimapRectHighlightMoved(
     rectBounds: IRectangle,
     mousePosition: IPosition
-  ) => {
+  ) {
     const { aceEditors } = this.state;
 
     if (aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES] !== undefined) {
@@ -219,7 +224,7 @@ export class AlignmentViewer extends React.Component<
     if (aceEditors[ACE_EDITOR_IDS.MSA_IDS] !== undefined) {
       aceEditors[ACE_EDITOR_IDS.MSA_IDS]!.scrollToRow(rectBounds.y);
     }
-  };
+  }
 
   /*
    *
