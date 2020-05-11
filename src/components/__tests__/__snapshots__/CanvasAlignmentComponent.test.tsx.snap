@@ -375,7 +375,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -782,7 +782,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -881,7 +881,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -1082,7 +1082,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -1253,7 +1253,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -1424,7 +1424,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -1595,7 +1595,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -1766,7 +1766,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -1937,7 +1937,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -2108,7 +2108,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -2279,7 +2279,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -2450,7 +2450,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,
@@ -2621,7 +2621,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "key": "as-input",
     }
   }
-  stageResolution={
+  stageDimensions={
     Object {
       "height": 650,
       "width": 485,

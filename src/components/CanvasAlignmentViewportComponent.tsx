@@ -1,14 +1,18 @@
 import * as PIXI from "pixi.js";
 import { PixiComponent } from "@inlet/react-pixi";
-import { Viewport, ClickEventData } from "pixi-viewport";
+import { Viewport } from "pixi-viewport";
 
 export interface ICanvasAlignmentViewportProps {
   numColumns: number;
   numRows: number;
   app: PIXI.Application;
   onMouseClick?: (mousePosition: IPosition) => void;
-  stageResolution: {
+  stageDimensions: {
     width: number;
+    height: number;
+  };
+  ensureVisible?: {
+    y: number;
     height: number;
   };
 }
@@ -20,7 +24,7 @@ export const CanvasAlignmentViewport = PixiComponent<
   any
 >("CanvasAlignmentViewport", {
   create(props: ICanvasAlignmentViewportProps) {
-    const { app, numColumns, numRows, stageResolution } = props;
+    const { app, numColumns, numRows, stageDimensions } = props;
     app.renderer.backgroundColor = 0xffffff;
 
     const useDrag = true; // Allows the user to drag the viewport around.
@@ -28,8 +32,8 @@ export const CanvasAlignmentViewport = PixiComponent<
     const useWheel = true; // Allows the user to use a mouse wheel to zoom.
 
     let vp = new Viewport({
-      screenWidth: stageResolution.width,
-      screenHeight: stageResolution.height,
+      screenWidth: stageDimensions.width,
+      screenHeight: stageDimensions.height,
       worldWidth: numColumns,
       worldHeight: numRows,
       interaction: app.renderer.plugins.interaction,
@@ -69,7 +73,7 @@ export const CanvasAlignmentViewport = PixiComponent<
     oldProps: ICanvasAlignmentViewportProps,
     newProps: ICanvasAlignmentViewportProps
   ) {
-    const { onMouseClick, numRows, numColumns, stageResolution } = newProps;
+    const { onMouseClick, numRows, numColumns, stageDimensions } = newProps;
 
     if (oldProps.onMouseClick !== onMouseClick) {
       vp.off("clicked"); //I tested and adding this line keeps us from getting multiple click listners
@@ -82,9 +86,9 @@ export const CanvasAlignmentViewport = PixiComponent<
 
     //deal with resizing events and new alignments
     const resizedStage =
-      !oldProps.stageResolution ||
-      oldProps.stageResolution.height !== stageResolution.height ||
-      oldProps.stageResolution.width !== stageResolution.width;
+      !oldProps.stageDimensions ||
+      oldProps.stageDimensions.height !== stageDimensions.height ||
+      oldProps.stageDimensions.width !== stageDimensions.width;
     const newAlignment =
       !oldProps.numColumns ||
       !oldProps.numRows ||
@@ -93,31 +97,36 @@ export const CanvasAlignmentViewport = PixiComponent<
 
     if (resizedStage || newAlignment) {
       vp.resize(
-        stageResolution.width,
-        stageResolution.height,
+        stageDimensions.width,
+        stageDimensions.height,
         numColumns,
         numRows
       );
 
       //set the clamp based on the current stage height/width
-      let clampWidth,
-        clampHeight = 0;
+      let clampWidthMax, clampHeightMax;
+      let clampMinWidth = newProps.ensureVisible
+        ? newProps.ensureVisible.height
+        : undefined;
+
       if (
-        numColumns / stageResolution.width >
-        numRows / stageResolution.height
+        numColumns / stageDimensions.width >
+        numRows / stageDimensions.height
       ) {
         //width is more important
-        clampWidth = numColumns + OVERFLOW_ZOOM_ALLOWED * numColumns;
+        clampWidthMax = numColumns + OVERFLOW_ZOOM_ALLOWED * numColumns;
         vp = vp.clampZoom({
           maxHeight: undefined,
-          maxWidth: clampWidth,
+          maxWidth: clampWidthMax,
+          minHeight: clampMinWidth,
         });
       } else {
         //height is more important
-        clampHeight = numRows + OVERFLOW_ZOOM_ALLOWED * numRows;
+        clampHeightMax = numRows + OVERFLOW_ZOOM_ALLOWED * numRows;
         vp = vp.clampZoom({
           maxWidth: undefined,
-          maxHeight: clampHeight,
+          maxHeight: clampHeightMax,
+          minHeight: clampMinWidth,
         });
       }
 
@@ -126,21 +135,21 @@ export const CanvasAlignmentViewport = PixiComponent<
         //new alignments set zoom clamping and also force the alignment into
         //as much of a view as possible.
         vp = vp.fitWorld(true);
-        vp = vp.setZoom(stageResolution.width / numColumns, false);
+        vp = vp.setZoom(stageDimensions.width / numColumns, false);
       } else if (
-        oldProps.stageResolution &&
-        oldProps.stageResolution.width !== stageResolution.width
+        oldProps.stageDimensions &&
+        oldProps.stageDimensions.width !== stageDimensions.width
       ) {
         //the viewport is being resized horizontally (likely by user dragging)
         //  1. compress if the resize is making pushing the alignment off the screen
         //  2. scale alignment if the resize is expanding
 
-        if (oldProps.stageResolution.width > stageResolution.width) {
+        if (oldProps.stageDimensions.width > stageDimensions.width) {
           //viewport is shrinking horizontally
-          if (vp.scale.x * numColumns > stageResolution.width) {
+          if (vp.scale.x * numColumns > stageDimensions.width) {
             //it is pushing the current alignment off the screen, force
             //the alignment to stay the same size as the viewport
-            vp = vp.setZoom(stageResolution.width / numColumns, false);
+            vp = vp.setZoom(stageDimensions.width / numColumns, false);
           }
         } else {
           //viewport is expanding horizontally
@@ -148,21 +157,33 @@ export const CanvasAlignmentViewport = PixiComponent<
           //detect new zoom level. this is pretty crude. is there a better way?
           let newZoomLevel =
             vp.scale.x *
-            (stageResolution.width / oldProps.stageResolution.width);
+            (stageDimensions.width / oldProps.stageDimensions.width);
 
           if (
-            (clampWidth &&
-              (newZoomLevel * numColumns < clampWidth ||
-                numColumns > stageResolution.width)) ||
-            (clampHeight &&
-              (newZoomLevel * numRows < clampHeight ||
-                numRows > stageResolution.height))
+            (clampWidthMax &&
+              (newZoomLevel * numColumns < clampWidthMax ||
+                numColumns > stageDimensions.width)) ||
+            (clampHeightMax &&
+              (newZoomLevel * numRows < clampHeightMax ||
+                numRows > stageDimensions.height))
           ) {
             vp = vp.setZoom(newZoomLevel, false);
           }
         }
       }
     }
+
+    //once all the zoom etc
+    if (newProps.ensureVisible) {
+      //@ts-ignore
+      vp.ensureVisible(
+        undefined,
+        newProps.ensureVisible.y,
+        undefined,
+        newProps.ensureVisible.height
+      );
+    }
+
     return vp;
   },
 });

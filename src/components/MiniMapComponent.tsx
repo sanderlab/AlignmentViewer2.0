@@ -106,7 +106,7 @@ export class MiniMapComponent extends React.Component<
         positionsToStyle={alignmentStyle.positionsToStyle}
         colorScheme={alignmentStyle.colorScheme}
         sortBy={sortBy}
-        stageResolution={{
+        stageDimensions={{
           width: size.frameWidth - 10, //add space for the dragger on safari
           height: size.frameHeight,
         }}

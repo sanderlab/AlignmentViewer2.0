@@ -81,7 +81,7 @@ exports[`MiniMap Should render with default props. 1`] = `
         "key": "as-input",
       }
     }
-    stageResolution={
+    stageDimensions={
       Object {
         "height": 595,
         "width": 285,

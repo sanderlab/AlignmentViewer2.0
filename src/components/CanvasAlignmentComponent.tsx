@@ -25,7 +25,7 @@ export interface ICanvasAlignmentProps {
     rowStart: number;
     rowEnd: number;
   };
-  stageResolution?: {
+  stageDimensions?: {
     width: number;
     height: number;
   };
@@ -54,7 +54,7 @@ export class CanvasAlignmentComponent extends React.Component<
   app?: PIXI.Application;
 
   static defaultProps = {
-    stageResolution: {
+    stageDimensions: {
       width: 485,
       height: 650,
     },
@@ -101,7 +101,7 @@ export class CanvasAlignmentComponent extends React.Component<
       onClick,
       positionsToStyle,
       sortBy,
-      stageResolution,
+      stageDimensions,
       viewportProps,
     } = this.props;
     const { dragging, dragPositions } = this.state;
@@ -137,8 +137,8 @@ export class CanvasAlignmentComponent extends React.Component<
         onMouseLeave={this.onMouseLeave}
       >
         <Stage
-          width={stageResolution?.width}
-          height={stageResolution?.height}
+          width={stageDimensions?.width}
+          height={stageDimensions?.height}
           options={{ transparent: true }}
         >
           <AppContext.Consumer>
@@ -151,10 +151,19 @@ export class CanvasAlignmentComponent extends React.Component<
             {(app) => (
               <CanvasAlignmentViewport
                 app={app}
+                ensureVisible={
+                  rowHighlightStart === undefined ||
+                  rowHighlighterHeight === undefined
+                    ? undefined
+                    : {
+                        y: rowHighlightStart,
+                        height: rowHighlighterHeight,
+                      }
+                }
                 numColumns={maxSeqLength}
                 numRows={numSequences}
                 onMouseClick={onClick}
-                stageResolution={stageResolution!}
+                stageDimensions={stageDimensions!}
                 {...viewportProps}
               >
                 <CanvasAlignmentTiled

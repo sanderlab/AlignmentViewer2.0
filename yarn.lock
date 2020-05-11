@@ -9055,10 +9055,10 @@ pirates@^4.0.1:
   dependencies:
     node-modules-regexp "^1.0.0"
 
-pixi-viewport@^4.8.0:
-  version "4.11.0"
-  resolved "https://registry.yarnpkg.com/pixi-viewport/-/pixi-viewport-4.11.0.tgz#36e92fb1274c92e36ff5fcce3f6123f36dc2fa49"
-  integrity sha512-6YgJdxEqh9mOxWKCLrx2HOZjVSa3odxgQHxaWpm2YugDMSHsJRcBd3Elp98Zr8xM9USI6MBJWOZqqbBtonff4Q==
+pixi-viewport@^4.11.1:
+  version "4.11.1"
+  resolved "https://registry.yarnpkg.com/pixi-viewport/-/pixi-viewport-4.11.1.tgz#0eee73a5eaa00d9f03e026b04f1cfa8fceb7d474"
+  integrity sha512-yHkTmL7FBWPUzD7SAcchH0WcDaT1MTmq/x0G2eX2xsLwVp0uort8Jc6XKQAIALJT1wTS9IfZMzOtV5gRRu4GAA==
   dependencies:
     penner "^0.1.3"
 
