@@ -3,10 +3,14 @@ import "./AlignmentViewer.scss";
 import { Ace } from "ace-builds";
 import { Alignment, SequenceSortOptions } from "../common/Alignment";
 import { ScrollSync, ScrollType } from "../common/ScrollSync";
-import { SequenceLogoComponent, LOGO_TYPES } from "./SequenceLogoComponent";
 import {
-  ISequenceBarplotDataSeries,
+  SequenceLogoComponent,
+  LOGO_TYPES,
+  ISequenceLogoProps,
+} from "./SequenceLogoComponent";
+import {
   SequenceBarplotComponent,
+  ISequenceBarplotProps,
 } from "./SequenceBarplotComponent";
 import {
   AminoAcidAlignmentStyle,
@@ -19,7 +23,6 @@ import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
 import { AceTargetSequenceComponent } from "./AceTargetSequenceComponent";
 import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
-import { ArrayOneOrMore } from "../common/Utils";
 import { IMiniMapProps } from "./MiniMapComponent";
 
 export type IAlignmentViewerProps = {
@@ -28,16 +31,24 @@ export type IAlignmentViewerProps = {
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
+type IBarplotExposedProps = {
+  dataSeriesSet: ISequenceBarplotProps["dataSeries"];
+  tooltipLocation?: ISequenceBarplotProps["tooltipPlacement"];
+};
 
 const defaultProps = {
-  logoPlotStyle: LOGO_TYPES.LETTERS as LOGO_TYPES,
   zoomLevel: 13 as number,
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
   showAnnotations: true as boolean,
   showConsensus: true as boolean,
   showQuery: true as boolean,
   showRuler: true as boolean,
-  showLogo: true as boolean,
+
+  logoOptions: {
+    showLogo: true as boolean,
+    logoType: LOGO_TYPES.LETTERS as ISequenceLogoProps["logoType"],
+    tooltipPlacement: "top" as ISequenceLogoProps["tooltipPlacement"],
+  },
 
   minimapOptions: {
     showMinimap: false as boolean,
@@ -51,12 +62,15 @@ const defaultProps = {
   //dataseries. Note that more than 2 dataseries in a single plot
   //is difficult to understand and more than 3 is pretty much impossible
   barplots: [
-    [
-      SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
-      SequenceBarplotComponent.GAPS_BARPLOT,
-    ],
+    {
+      dataSeriesSet: [
+        SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
+        SequenceBarplotComponent.GAPS_BARPLOT,
+      ],
+      tooltipLocation: undefined,
+    },
     //[SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT],
-  ] as undefined | ArrayOneOrMore<ISequenceBarplotDataSeries>[],
+  ] as undefined | IBarplotExposedProps[],
 };
 
 enum ACE_EDITOR_IDS {
@@ -283,7 +297,9 @@ export class AlignmentViewer extends React.Component<
   }
 
   protected renderSequenceLogo = () => {
-    const { alignment, logoPlotStyle, style } = this.props;
+    const { alignment, logoOptions, style } = this.props;
+    const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
+
     return (
       <div
         className={
@@ -296,21 +312,21 @@ export class AlignmentViewer extends React.Component<
           <SequenceLogoComponent
             alignment={alignment}
             glyphWidth={this.state.aceCharacterWidth}
-            logoType={logoPlotStyle}
             alignmentType={style.alignmentType}
+            logoType={logoOpts.logoType}
+            tooltipPlacement={logoOpts.tooltipPlacement}
           />
         }
       </div>
     );
   };
 
-  protected renderBarplot = (
-    barplot: ArrayOneOrMore<ISequenceBarplotDataSeries>
-  ) => {
+  protected renderBarplot = (barplotProps: IBarplotExposedProps) => {
     return (
       <SequenceBarplotComponent
         alignment={this.props.alignment}
-        dataSeries={barplot}
+        tooltipPlacement={barplotProps.tooltipLocation}
+        dataSeries={barplotProps.dataSeriesSet}
         positionWidth={this.state.aceCharacterWidth}
       ></SequenceBarplotComponent>
     );
@@ -493,7 +509,7 @@ export class AlignmentViewer extends React.Component<
       barplots,
       showAnnotations,
       showConsensus,
-      showLogo,
+      logoOptions,
       showQuery,
       showRuler,
     } = this.props;
@@ -517,14 +533,16 @@ export class AlignmentViewer extends React.Component<
           : barplots.map((barplot, idx) =>
               this.renderWidget(
                 "av-barplot-holder",
-                barplot.map((series) => series.name).join(" / "),
+                barplot.dataSeriesSet.map((series) => series.name).join(" / "),
                 this.renderBarplot(barplot),
                 true,
-                `${idx}-${barplot.map((dataseries) => dataseries.id).join("|")}`
+                `${idx}-${barplot.dataSeriesSet
+                  .map((dataseries) => dataseries.id)
+                  .join("|")}`
               )
             )}
 
-        {!showLogo
+        {!this.props.logoOptions || !this.props.logoOptions.showLogo
           ? null
           : this.renderWidget(
               "av-sequence-logo-holder",

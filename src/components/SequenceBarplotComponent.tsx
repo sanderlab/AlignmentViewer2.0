@@ -23,6 +23,7 @@ export interface ISequenceBarplotProps {
 
   //props that should be exposed in AlignmentViewer full component:
   dataSeries: ArrayOneOrMore<ISequenceBarplotDataSeries>;
+  tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
 
   //expose these, but requires smarter forwarding within the AlignmentViewer full component
   onPositionSelectionChanged?(
@@ -361,13 +362,16 @@ export class SequenceBarplotComponent extends React.Component<
    */
   private renderTooltip() {
     const barsObj = this.getBars();
+    const { tooltipPlacement } = this.props;
     const { hoverKey } = this.state;
+
     return (
       <ReactTooltip
         id={`getBarTooltip-${hoverKey}`}
         effect="solid"
         type="light"
         border={true}
+        place={tooltipPlacement}
         getContent={(pos: string) => {
           const posInt = parseInt(pos);
           const barsAtPostion = barsObj.barsGroupedByPosition.get(posInt)!;

@@ -34,10 +34,14 @@ interface IGlyphFrequency {
 interface IGlyphStackData extends Array<IGlyphFrequency> {}
 
 export interface ISequenceLogoProps {
+  //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
   glyphWidth: number;
-  logoType: LOGO_TYPES;
-  alignmentType?: AlignmentTypes;
+  alignmentType?: AlignmentTypes; //AlignmentViewer component does expose this through the style object
+
+  //props that should be exposed in AlignmentViewer full component:
+  logoType?: LOGO_TYPES;
+  tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
 }
 
 interface ISequenceLogoState {
@@ -64,19 +68,22 @@ export class SequenceLogoComponent extends React.Component<
    */
 
   private renderTooltip() {
+    const { tooltipPlacement } = this.props;
+
     return (
       <ReactTooltip
         id="getLogoTooltip"
         effect="solid"
         type="light"
+        place={tooltipPlacement} //isn't always respected?
         border={true}
-        getContent={(idx: string) => {
-          if (!idx || !this.logoData || !this.logoData[parseInt(idx)]) {
+        getContent={(pos: string) => {
+          if (!pos || !this.logoData || !this.logoData[parseInt(pos)]) {
             return;
           }
 
-          const position = parseInt(idx) + 1;
-          const glyphData = this.logoData[parseInt(idx)];
+          const position = parseInt(pos) + 1;
+          const glyphData = this.logoData[parseInt(pos)];
           return glyphData.length === 0 ? null : (
             <div className="logo-tooltip">
               <h1>Position: {position}</h1>
