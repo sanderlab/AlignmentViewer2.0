@@ -478,7 +478,7 @@ export class AlignmentViewer extends React.Component<
       style && (
         <div
           className="minimap"
-          style={{ display: showMinimap ? "flex" : "none", flexGrow: 1 }}
+          style={{ display: showMinimap ? "flex" : "none" }}
         >
           <MiniMapComponent
             //not exposed to instantiator

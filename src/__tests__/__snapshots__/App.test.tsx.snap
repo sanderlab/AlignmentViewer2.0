@@ -246,7 +246,7 @@ exports[`App Should render within 2 minutes. 1`] = `
           >
             <label>
               <strong>
-                Minimap Full Window:
+                Minimap Full Height:
               </strong>
               <input
                 checked={false}

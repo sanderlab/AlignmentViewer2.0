@@ -51,7 +51,7 @@ export class CanvasAlignmentComponent extends React.Component<
   ICanvasAlignmentProps,
   ICanvasAlignmentState
 > {
-  private app?: PIXI.Application;
+  app?: PIXI.Application;
   protected divElement: React.RefObject<HTMLInputElement>;
 
   static defaultProps = {
