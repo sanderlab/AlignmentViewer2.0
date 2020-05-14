@@ -22,7 +22,7 @@ export interface ISequenceBarplotProps {
   positionWidth: number;
 
   //props that should be exposed in AlignmentViewer full component:
-  dataSeries: ArrayOneOrMore<ISequenceBarplotDataSeries>;
+  dataSeriesSet: ArrayOneOrMore<ISequenceBarplotDataSeries>;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
 
   //expose these, but requires smarter forwarding within the AlignmentViewer full component
@@ -51,7 +51,7 @@ interface ISingleBarDetails {
 interface ISingleBarDetailsFull extends ISingleBarDetails {
   normalizedHeight: number;
   position: number;
-  dataSeries: ISequenceBarplotDataSeries;
+  dataSeriesSet: ISequenceBarplotDataSeries;
 }
 interface ISequenceBarplotState {
   positionHovered?: {
@@ -283,8 +283,8 @@ export class SequenceBarplotComponent extends React.Component<
     return bars.map((bar) => {
       const minHeight = overallMinHeight;
       const maxHeight =
-        bar.dataSeries.plotOptions && bar.dataSeries.plotOptions.fixYMax
-          ? bar.dataSeries.plotOptions.fixYMax(alignment)
+        bar.dataSeriesSet.plotOptions && bar.dataSeriesSet.plotOptions.fixYMax
+          ? bar.dataSeriesSet.plotOptions.fixYMax(alignment)
           : overallMaxHeight;
       return {
         ...bar,
@@ -301,23 +301,23 @@ export class SequenceBarplotComponent extends React.Component<
    * position. Uses cache to avoid too many updates.
    */
   private getBars() {
-    const { alignment, dataSeries } = this.props;
+    const { alignment, dataSeriesSet } = this.props;
     if (
       !this.cache.bars ||
       alignment !== this.cache.alignment ||
-      dataSeries !== this.cache.dataSeries
+      dataSeriesSet !== this.cache.dataSeriesSet
     ) {
       this.cache.alignment = alignment;
-      this.cache.dataSeries = dataSeries;
+      this.cache.dataSeriesSet = dataSeriesSet;
 
       const maxSeqLength = alignment.getMaxSequenceLength();
       let allBars: ISingleBarDetailsFull[] = [];
-      dataSeries.forEach((ds) => {
+      dataSeriesSet.forEach((ds) => {
         for (let i = 0; i < maxSeqLength; i++) {
           allBars.push({
             ...ds.getPositionalInfo(i, alignment),
             position: i,
-            dataSeries: ds,
+            dataSeriesSet: ds,
             normalizedHeight: -1, // define below
           });
         }
@@ -325,7 +325,7 @@ export class SequenceBarplotComponent extends React.Component<
 
       //normalize bars group by group
       this.cache.bars = Object.entries(
-        _.groupBy(allBars, (bar) => bar.dataSeries.id)
+        _.groupBy(allBars, (bar) => bar.dataSeriesSet.id)
       )
         .map(([categoryId, categoryBars]) => {
           return this.normalizeBarHeights(categoryBars);
@@ -339,7 +339,7 @@ export class SequenceBarplotComponent extends React.Component<
 
       this.cache.barsGroupedByDataseries = mapGroupBy(
         this.cache.bars,
-        (item) => item.dataSeries
+        (item) => item.dataSeriesSet
       );
     }
     return {
@@ -382,12 +382,12 @@ export class SequenceBarplotComponent extends React.Component<
               {barsAtPostion.map((bar) => {
                 return (
                   <div
-                    className={`dataseries-line ${bar.dataSeries.cssClass}`}
-                    key={bar.dataSeries.id}
+                    className={`dataseries-line ${bar.dataSeriesSet.cssClass}`}
+                    key={bar.dataSeriesSet.id}
                   >
                     <span className="legend-square"></span>
                     <span className="legend-text">
-                      {bar.dataSeries.name}: {+bar.height.toFixed(1)}
+                      {bar.dataSeriesSet.name}: {+bar.height.toFixed(1)}
                     </span>
                   </div>
                 );
@@ -474,7 +474,7 @@ export class SequenceBarplotComponent extends React.Component<
                 {bars.map((bar, dataseriesIdx) => {
                   return (
                     <rect
-                      className={bar.dataSeries.cssClass}
+                      className={bar.dataSeriesSet.cssClass}
                       transform={`translate(${
                         ((dataseriesIdx * 1) / bars.length) *
                         SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
@@ -484,7 +484,7 @@ export class SequenceBarplotComponent extends React.Component<
                       })`}
                       width={barWidth}
                       height={bar.normalizedHeight}
-                      key={`${bar.position}_${bar.dataSeries.id}`}
+                      key={`${bar.position}_${bar.dataSeriesSet.id}`}
                     ></rect>
                   );
                 })}
@@ -514,11 +514,11 @@ export class SequenceBarplotComponent extends React.Component<
    *
    */
   shouldComponentUpdate(nextProps: ISequenceBarplotProps) {
-    const { alignment, dataSeries, positionWidth } = this.props;
+    const { alignment, dataSeriesSet, positionWidth } = this.props;
     if (
       !this.cache ||
       alignment !== nextProps.alignment ||
-      dataSeries !== nextProps.dataSeries ||
+      dataSeriesSet !== nextProps.dataSeriesSet ||
       positionWidth !== nextProps.positionWidth
     ) {
       return true;

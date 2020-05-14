@@ -33,7 +33,10 @@ describe("AlignmentViewer", () => {
         style={AlignmentStyle.fromAlignmentType(AlignmentTypes.NUCLEOTIDE)}
         zoomLevel={0}
         sortBy={SequenceSortOptions.INPUT}
-        logoPlotStyle={LOGO_TYPES.BARS}
+        showLogo={true}
+        logoOptions={{
+          logoType: LOGO_TYPES.BARS,
+        }}
       />
     );
     expect(wrapper).toMatchSnapshot();

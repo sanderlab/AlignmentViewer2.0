@@ -11,7 +11,7 @@ exports[`MiniMap Should render with default props. 1`] = `
       "position": "absolute",
       "resize": "none",
       "right": 0,
-      "width": 295,
+      "width": 115,
     }
   }
 >
@@ -84,7 +84,7 @@ exports[`MiniMap Should render with default props. 1`] = `
     stageDimensions={
       Object {
         "height": 763,
-        "width": 285,
+        "width": 105,
       }
     }
   />

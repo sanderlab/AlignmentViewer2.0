@@ -11,7 +11,7 @@ describe("SequenceBarplotComponent", () => {
       <SequenceBarplotComponent
         positionWidth={3}
         alignment={new Alignment("", [])}
-        dataSeries={[SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT]}
+        dataSeriesSet={[SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT]}
       />
     );
     expect(wrapper).toMatchSnapshot();

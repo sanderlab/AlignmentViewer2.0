@@ -31,32 +31,37 @@ export type IAlignmentViewerProps = {
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
-type IBarplotExposedProps = {
-  dataSeriesSet: ISequenceBarplotProps["dataSeries"];
-  tooltipLocation?: ISequenceBarplotProps["tooltipPlacement"];
-};
+type IBarplotExposedProps = Pick<
+  ISequenceBarplotProps,
+  "dataSeriesSet" | "tooltipPlacement"
+>;
 
 const defaultProps = {
   zoomLevel: 13 as number,
   sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
+
   showAnnotations: true as boolean,
   showConsensus: true as boolean,
+  showLogo: true as boolean,
+  showMinimap: false as boolean,
   showQuery: true as boolean,
   showRuler: true as boolean,
 
   logoOptions: {
-    showLogo: true as boolean,
-    logoType: LOGO_TYPES.LETTERS as ISequenceLogoProps["logoType"],
-    tooltipPlacement: "top" as ISequenceLogoProps["tooltipPlacement"],
-  },
+    logoType: LOGO_TYPES.LETTERS,
+  } as Partial<Pick<ISequenceLogoProps, "tooltipPlacement" | "logoType">>,
 
   minimapOptions: {
-    showMinimap: false as boolean,
-    alignHorizontal: "right" as IMiniMapProps["alignHorizontal"],
-    startingWidth: 100 as IMiniMapProps["startingWidth"],
-    resizable: "horizontal" as IMiniMapProps["resizable"],
-    verticalHeight: "div" as IMiniMapProps["verticalHeight"],
-  },
+    alignHorizontal: "right",
+    startingWidth: 100,
+    resizable: "horizontal",
+    verticalHeight: "div",
+  } as Partial<
+    Pick<
+      IMiniMapProps,
+      "alignHorizontal" | "startingWidth" | "resizable" | "verticalHeight"
+    >
+  >,
 
   //array of individual barplots. Each barplot can contain multiple
   //dataseries. Note that more than 2 dataseries in a single plot
@@ -67,7 +72,7 @@ const defaultProps = {
         SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
         SequenceBarplotComponent.GAPS_BARPLOT,
       ],
-      tooltipLocation: undefined,
+      tooltipPlacement: undefined,
     },
     //[SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT],
   ] as undefined | IBarplotExposedProps[],
@@ -325,8 +330,8 @@ export class AlignmentViewer extends React.Component<
     return (
       <SequenceBarplotComponent
         alignment={this.props.alignment}
-        tooltipPlacement={barplotProps.tooltipLocation}
-        dataSeries={barplotProps.dataSeriesSet}
+        tooltipPlacement={barplotProps.tooltipPlacement}
+        dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={this.state.aceCharacterWidth}
       ></SequenceBarplotComponent>
     );
@@ -336,7 +341,9 @@ export class AlignmentViewer extends React.Component<
     <div className="consensusseq-box">
       <AceConsensusSequenceComponent
         alignment={this.props.alignment}
-        fontSize={this.props.zoomLevel}
+        fontSize={
+          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
+        }
         classNames={[
           "ace-consensusseq",
           this.props.style.residueDetail.className,
@@ -360,8 +367,10 @@ export class AlignmentViewer extends React.Component<
     <div className="queryseq-box">
       <AceTargetSequenceComponent
         alignment={this.props.alignment}
-        fontSize={this.props.zoomLevel}
-        sortBy={this.props.sortBy}
+        fontSize={
+          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
+        }
+        sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
         classNames={[
           "ace-queryseq",
           this.props.style.residueDetail.className,
@@ -387,7 +396,9 @@ export class AlignmentViewer extends React.Component<
         <AceTextualRulerComponent
           classNames="ace-positions"
           alignment={this.props.alignment}
-          fontSize={this.props.zoomLevel}
+          fontSize={
+            this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
+          }
           editorLoaded={(editor, parentElem) => {
             this.aceEditorLoaded(
               ACE_EDITOR_IDS.POSITIONAL_RULER,
@@ -405,8 +416,10 @@ export class AlignmentViewer extends React.Component<
     <div className="alignment-box">
       <AceMultipleSequenceAlignmentComponent
         alignment={this.props.alignment}
-        fontSize={this.props.zoomLevel}
-        sortBy={this.props.sortBy}
+        fontSize={
+          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
+        }
+        sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
         classNames={[
           "ace-alignment",
           this.props.style.residueDetail.className,
@@ -432,10 +445,14 @@ export class AlignmentViewer extends React.Component<
       <AceEditorComponent
         classNames="ace-alignment-metadata"
         text={this.props.alignment
-          .getSequences(this.props.sortBy)
+          .getSequences(
+            this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
+          )
           .map((x) => x.id)
           .join("\n")}
-        fontSize={this.props.zoomLevel}
+        fontSize={
+          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
+        }
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             ACE_EDITOR_IDS.MSA_IDS,
@@ -449,22 +466,25 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderMiniMap() {
-    const { alignment, sortBy, style } = this.props;
+    const { alignment, showMinimap, sortBy, style } = this.props;
     const { msaEditorVewport } = this.state;
 
     let mmOptions = this.props.minimapOptions
       ? this.props.minimapOptions
       : defaultProps.minimapOptions;
-    const mmClassName = mmOptions.showMinimap ? "minimap" : "minimap hidden";
+    //const mmClassName = showMinimap ? "minimap" : "minimap hidden";
     return (
       alignment &&
       style && (
-        <div className={mmClassName}>
+        <div
+          className="minimap"
+          style={{ display: showMinimap ? "flex" : "none", flexGrow: 1 }}
+        >
           <MiniMapComponent
             //not exposed to instantiator
             alignment={alignment}
             alignmentStyle={style}
-            sortBy={sortBy!}
+            sortBy={sortBy ? sortBy : defaultProps.sortBy}
             highlightRows={
               !msaEditorVewport
                 ? undefined
@@ -509,7 +529,6 @@ export class AlignmentViewer extends React.Component<
       barplots,
       showAnnotations,
       showConsensus,
-      logoOptions,
       showQuery,
       showRuler,
     } = this.props;
@@ -528,7 +547,7 @@ export class AlignmentViewer extends React.Component<
 
         {/*<div id="column_mouseover"></div>*/}
 
-        {!barplots
+        {!barplots || barplots.length < 1
           ? null
           : barplots.map((barplot, idx) =>
               this.renderWidget(
@@ -542,7 +561,7 @@ export class AlignmentViewer extends React.Component<
               )
             )}
 
-        {!this.props.logoOptions || !this.props.logoOptions.showLogo
+        {!this.props.showLogo || !this.props.logoOptions
           ? null
           : this.renderWidget(
               "av-sequence-logo-holder",

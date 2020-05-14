@@ -62,12 +62,19 @@ export default class App extends React.Component<AppProps, AppState> {
         <AlignmentViewer
           alignment={alignment}
           style={style}
-          logoPlotStyle={logoPlotStyle}
           zoomLevel={zoomLevel}
           sortBy={sortBy}
-          showMiniMap={showMiniMap}
+          showMinimap={showMiniMap}
           showAnnotations={showAnnotations}
-          minimapVerticalHeight={minimapVerticalHeight}
+          logoOptions={{
+            logoType: logoPlotStyle,
+          }}
+          minimapOptions={{
+            startingWidth: 120,
+            verticalHeight: minimapVerticalHeight,
+            alignHorizontal: "right",
+            resizable: "horizontal",
+          }}
         ></AlignmentViewer>
       </div>
     );
@@ -405,7 +412,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div className="minimap-height-toggle">
         <label>
-          <strong>Minimap Full Window:</strong>
+          <strong>Minimap Full Height:</strong>
 
           <input
             name="minimapVerticalHeight"

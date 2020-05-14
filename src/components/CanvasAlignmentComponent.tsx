@@ -52,7 +52,7 @@ export class CanvasAlignmentComponent extends React.Component<
   ICanvasAlignmentState
 > {
   private app?: PIXI.Application;
-  private divElement: HTMLDivElement | null = null;
+  protected divElement: React.RefObject<HTMLInputElement>;
 
   static defaultProps = {
     stageDimensions: {
@@ -66,6 +66,7 @@ export class CanvasAlignmentComponent extends React.Component<
     this.state = {
       dragging: false,
     };
+    this.divElement = React.createRef();
   }
 
   /**
@@ -130,21 +131,26 @@ export class CanvasAlignmentComponent extends React.Component<
       rowHighlightStart = rowHighlightStart > 0 ? rowHighlightStart : 0;
     }
 
+    //const stageHeight =
+    //  this.divElement.current && this.divElement.current.clientHeight // can be zero. this is kind of hacky
+    //    ? this.divElement.current.clientHeight
+    //    : stageDimensions?.height;
+    const stageHeight = stageDimensions?.height;
+    const stageWidth = stageDimensions?.width;
+
     return (
       <div
         className="alignment-canvas"
         onWheel={this.onWheel}
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}
-        ref={(divElement) => {
-          this.divElement = divElement;
-        }}
+        //style={{ width: stageWidth }}
+        ref={this.divElement}
       >
         {!this.divElement ? null : (
           <Stage
-            width={stageDimensions?.width}
-            height={this.divElement.clientHeight}
-            /*height={stageDimensions?.height}*/
+            width={stageWidth}
+            height={stageHeight}
             options={{ transparent: true }}
           >
             <AppContext.Consumer>
@@ -248,6 +254,7 @@ export class CanvasAlignmentComponent extends React.Component<
   };
 
   protected onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    //console.log("onWheel!", e);
     //e.preventDefault(); //TODO Drew is this necessary?
   };
 }

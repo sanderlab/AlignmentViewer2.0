@@ -20,9 +20,9 @@ export interface IMiniMapProps {
   };
 
   //props that should be exposed in AlignmentViewer full component:
-  alignHorizontal: "left" | "right";
-  startingWidth: number;
-  resizable: "none" | "horizontal";
+  alignHorizontal?: "left" | "right";
+  startingWidth?: number;
+  resizable?: "none" | "horizontal";
   verticalHeight?: "div" | "window";
 
   //expose these, but requires smarter forwarding within the AlignmentViewer full component
@@ -44,8 +44,7 @@ export class MiniMapComponent extends React.Component<
 
   public static defaultProps = {
     alignHorizontal: "right",
-    //alignVertical: "top",
-    startingWidth: 300,
+    startingWidth: 120,
     resizable: "none",
     verticalHeight: "div",
   };
@@ -61,18 +60,25 @@ export class MiniMapComponent extends React.Component<
   }
 
   protected getSizing() {
-    const { resizedWidth } = this.state;
+    const { startingWidth } = this.props;
+    const { height, resizedWidth } = this.state;
 
     const frameBorderWidth = 1; // in pixels
     const frameMargin = 2; // in pixels
 
+    function adjustForBorderAndMargin(length: number) {
+      return length - 2 * frameMargin - 1 * frameBorderWidth;
+    }
+
     return {
       borderWidth: frameBorderWidth,
       margin: frameMargin,
-      frameHeight: this.state.height - 2 * frameMargin - 1 * frameBorderWidth,
+      frameHeight: height, //adjustForBorderAndMargin(height),
       frameWidth: resizedWidth
         ? resizedWidth
-        : this.props.startingWidth - 2 * frameMargin - 1 * frameBorderWidth,
+        : startingWidth
+        ? adjustForBorderAndMargin(startingWidth)
+        : adjustForBorderAndMargin(MiniMapComponent.defaultProps.startingWidth),
     };
   }
 
@@ -90,7 +96,7 @@ export class MiniMapComponent extends React.Component<
               resizedWidth: ref.clientWidth,
               height: ref.clientHeight,
             });
-          }, 10);
+          });
         }
       });
     }
@@ -115,7 +121,7 @@ export class MiniMapComponent extends React.Component<
         colorScheme={alignmentStyle.colorScheme}
         sortBy={sortBy}
         stageDimensions={{
-          width: size.frameWidth - 10, //add space for the dragger on safari
+          width: size.frameWidth - 14, //add space for the dragger on safari
           height: size.frameHeight,
         }}
         highlightRows={highlightRows}
@@ -144,8 +150,6 @@ export class MiniMapComponent extends React.Component<
         className="minimap-holder"
         style={{
           ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
-          //...(alignVertical === "top" ? { top: 0 } : { bottom: 0 }),
-          //height: size.frameHeight,
           position: position,
           width: size.frameWidth,
           borderWidth: `${size.borderWidth}px`,

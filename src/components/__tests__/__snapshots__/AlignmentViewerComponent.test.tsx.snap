@@ -5,7 +5,12 @@ exports[`AlignmentViewer Should render 1`] = `
   className="alignment-viewer"
 >
   <div
-    className="minimap hidden"
+    className="minimap"
+    style={
+      Object {
+        "display": "none",
+      }
+    }
   >
     <MiniMapComponent
       alignHorizontal="right"
@@ -129,7 +134,7 @@ exports[`AlignmentViewer Should render 1`] = `
             "uuid": "10000000-1000-4000-8000-100000000000",
           }
         }
-        dataSeries={
+        dataSeriesSet={
           Array [
             Object {
               "cssClass": "barplot-shannon-entropy",
@@ -255,7 +260,7 @@ exports[`AlignmentViewer Should render 1`] = `
           }
           classNames="ace-consensusseq    "
           editorLoaded={[Function]}
-          fontSize={0}
+          fontSize={13}
           sortBy={
             SequenceSortOptions {
               "description": "As input",
@@ -306,7 +311,7 @@ exports[`AlignmentViewer Should render 1`] = `
           }
           classNames="ace-queryseq    "
           editorLoaded={[Function]}
-          fontSize={0}
+          fontSize={13}
           sortBy={
             SequenceSortOptions {
               "description": "As input",
@@ -357,7 +362,7 @@ exports[`AlignmentViewer Should render 1`] = `
           }
           classNames="ace-positions"
           editorLoaded={[Function]}
-          fontSize={0}
+          fontSize={13}
         />
       </div>
     </div>
@@ -374,7 +379,7 @@ exports[`AlignmentViewer Should render 1`] = `
         <AceEditorComponent
           classNames="ace-alignment-metadata"
           editorLoaded={[Function]}
-          fontSize={0}
+          fontSize={13}
           text=""
         />
       </div>
@@ -410,7 +415,7 @@ exports[`AlignmentViewer Should render 1`] = `
           characterSizeChanged={[Function]}
           classNames="ace-alignment    "
           editorLoaded={[Function]}
-          fontSize={0}
+          fontSize={13}
           sortBy={
             SequenceSortOptions {
               "description": "As input",
