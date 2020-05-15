@@ -86,3 +86,18 @@ export function mapGroupBy<T1, T2>(
 export type ArrayOneOrMore<T> = {
   0: T;
 } & Array<T>;
+
+/**
+ * Get all the parameters in the URL. Taken from:
+ * https://stackoverflow.com/questions/979975
+ */
+export function getURLParameters() {
+  return window.location.search
+    .substring(1)
+    .split("&")
+    .map((v) => v.split("="))
+    .reduce(
+      (map, [key, value]) => map.set(key, decodeURIComponent(value)),
+      new Map<string, string>()
+    );
+}

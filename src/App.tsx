@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.scss";
 import { Alignment, SequenceSortOptions } from "./common/Alignment";
+import { getURLParameters } from "./common/Utils";
 import { AlignmentViewer } from "./components/AlignmentViewerComponent";
 import {
   AminoAcidAlignmentStyle,
@@ -30,6 +31,10 @@ interface AppState {
   loading?: boolean;
 }
 
+const URL_PARAM_NAMES = {
+  ALIGNMENT_URL: "alignment-url",
+};
+
 export default class App extends React.Component<AppProps, AppState> {
   constructor(props: AppProps) {
     super(props);
@@ -45,6 +50,21 @@ export default class App extends React.Component<AppProps, AppState> {
       showSettings: true,
     };
     this.onAlignmentReceived = this.onAlignmentReceived.bind(this);
+  }
+
+  componentDidMount() {
+    //is there an alignment in the URL?
+    const params = getURLParameters();
+    if (params.has(URL_PARAM_NAMES.ALIGNMENT_URL)) {
+      this.setState({
+        loading: true,
+      });
+
+      AlignmentFileLoaderComponent.loadAlignmentFromURL(
+        params.get(URL_PARAM_NAMES.ALIGNMENT_URL),
+        this.onAlignmentReceived
+      );
+    }
   }
 
   render() {
@@ -383,7 +403,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <div className="zoom-level">
             <button
               type="button"
-              disabled={zoomLevel < 3}
+              disabled={zoomLevel < 7}
               onClick={(e) => {
                 this.setState({
                   zoomLevel: zoomLevel - 1,

@@ -53,8 +53,10 @@ export class SequenceSortOptions {
  * positional statistics are generated about the alignment and a consensus
  * sequence is determined.
  *
- * The class should be instantiated using the static methods:
- *     fromFileContents: accepts a fasta file-like string
+ * The class should generally be instantiated from subclasses (e.g., FastaAlignemtn)
+ * using static methods, e.g.,
+ *     FastaAlignment.fromFileContents
+ *     StockholmAlignment.fromFileContents
  */
 export class Alignment {
   private uuid: string;
