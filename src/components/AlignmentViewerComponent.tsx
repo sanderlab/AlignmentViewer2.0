@@ -33,7 +33,7 @@ export type IAlignmentViewerProps = {
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
 type IBarplotExposedProps = Pick<
   ISequenceBarplotProps,
-  "dataSeriesSet" | "tooltipPlacement"
+  "dataSeriesSet" | "tooltipPlacement" | "height"
 >;
 
 const defaultProps = {
@@ -49,7 +49,10 @@ const defaultProps = {
 
   logoOptions: {
     logoType: LOGO_TYPES.LETTERS,
-  } as Partial<Pick<ISequenceLogoProps, "tooltipPlacement" | "logoType">>,
+    height: "100px",
+  } as Partial<
+    Pick<ISequenceLogoProps, "tooltipPlacement" | "logoType" | "height">
+  >,
 
   minimapOptions: {
     alignHorizontal: "right",
@@ -73,6 +76,7 @@ const defaultProps = {
         SequenceBarplotComponent.GAPS_BARPLOT,
       ],
       tooltipPlacement: undefined,
+      height: "100px",
     },
     //[SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT],
   ] as undefined | IBarplotExposedProps[],
@@ -320,6 +324,7 @@ export class AlignmentViewer extends React.Component<
             alignmentType={style.alignmentType}
             logoType={logoOpts.logoType}
             tooltipPlacement={logoOpts.tooltipPlacement}
+            height={logoOpts.height}
           />
         }
       </div>
@@ -333,6 +338,7 @@ export class AlignmentViewer extends React.Component<
         tooltipPlacement={barplotProps.tooltipPlacement}
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={this.state.aceCharacterWidth}
+        height={barplotProps.height}
       ></SequenceBarplotComponent>
     );
   };

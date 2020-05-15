@@ -24,6 +24,7 @@ export interface ISequenceBarplotProps {
   //props that should be exposed in AlignmentViewer full component:
   dataSeriesSet: ArrayOneOrMore<ISequenceBarplotDataSeries>;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
+  height?: string;
 
   //expose these, but requires smarter forwarding within the AlignmentViewer full component
   onPositionSelectionChanged?(
@@ -47,6 +48,7 @@ export interface ISequenceBarplotProps {
 
 interface ISingleBarDetails {
   height: number;
+  tooltipValueText?: string;
 }
 interface ISingleBarDetailsFull extends ISingleBarDetails {
   normalizedHeight: number;
@@ -85,7 +87,7 @@ export class SequenceBarplotComponent extends React.Component<
   } = {};
 
   static defaultProps = {
-    height: 100,
+    height: "100px",
   };
 
   constructor(props: ISequenceBarplotProps) {
@@ -191,8 +193,13 @@ export class SequenceBarplotComponent extends React.Component<
       fixYMax: (alignment) => alignment.getSequences().length,
     },
     getPositionalInfo: (pos, al) => {
+      const gapCount = al.getGapCountAtColumn(pos);
       return {
-        height: al.getGapCountAtColumn(pos),
+        height: gapCount,
+        tooltipValueText: `${(
+          (gapCount / al.getSequences().length) *
+          100
+        ).toFixed(1)}% (${gapCount})`,
       };
     },
   };
@@ -302,10 +309,17 @@ export class SequenceBarplotComponent extends React.Component<
    */
   private getBars() {
     const { alignment, dataSeriesSet } = this.props;
+
+    const dataSeriesSetChanged =
+      !this.cache.dataSeriesSet ||
+      this.cache.dataSeriesSet.find((ds, idx) => {
+        return ds !== dataSeriesSet[idx];
+      });
+
     if (
       !this.cache.bars ||
       alignment !== this.cache.alignment ||
-      dataSeriesSet !== this.cache.dataSeriesSet
+      dataSeriesSetChanged
     ) {
       this.cache.alignment = alignment;
       this.cache.dataSeriesSet = dataSeriesSet;
@@ -387,7 +401,10 @@ export class SequenceBarplotComponent extends React.Component<
                   >
                     <span className="legend-square"></span>
                     <span className="legend-text">
-                      {bar.dataSeriesSet.name}: {+bar.height.toFixed(1)}
+                      {bar.dataSeriesSet.name}:{" "}
+                      {bar.tooltipValueText
+                        ? bar.tooltipValueText
+                        : +bar.height.toFixed(1)}
                     </span>
                   </div>
                 );
@@ -416,7 +433,7 @@ export class SequenceBarplotComponent extends React.Component<
    *   </svg>
    */
   private renderBarPlot() {
-    const { alignment, positionWidth } = this.props;
+    const { alignment, positionWidth, height } = this.props;
     const { hoverKey } = this.state;
 
     const maxSeqLength = alignment.getMaxSequenceLength();
@@ -430,7 +447,12 @@ export class SequenceBarplotComponent extends React.Component<
         viewBox={`0 0 ${
           maxSeqLength * SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
         } ${SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT}`}
-        style={{ width: totalWidth }}
+        style={{
+          width: totalWidth,
+          height: height
+            ? height
+            : SequenceBarplotComponent.defaultProps.height,
+        }}
         xmlns="http://www.w3.org/2000/svg"
         onMouseEnter={() => this.handleSvgHover(true)}
         onMouseLeave={() => this.handleSvgHover(false)}

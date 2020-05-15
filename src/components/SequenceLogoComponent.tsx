@@ -42,6 +42,7 @@ export interface ISequenceLogoProps {
   //props that should be exposed in AlignmentViewer full component:
   logoType?: LOGO_TYPES;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
+  height?: string;
 }
 
 interface ISequenceLogoState {
@@ -56,7 +57,7 @@ export class SequenceLogoComponent extends React.Component<
 
   static defaultProps = {
     logoType: LOGO_TYPES.LETTERS,
-    height: 100,
+    height: "100px",
   };
 
   /*
@@ -228,7 +229,7 @@ export class SequenceLogoComponent extends React.Component<
   }
 
   render() {
-    const { alignment, glyphWidth } = this.props;
+    const { alignment, glyphWidth, height } = this.props;
     if (!alignment || !glyphWidth) {
       return null;
     }
@@ -242,7 +243,10 @@ export class SequenceLogoComponent extends React.Component<
         <svg
           preserveAspectRatio="none"
           viewBox={`0 0 ${this.logoData.length} 100`}
-          style={{ width: totalWidth }}
+          style={{
+            width: totalWidth,
+            height: height ? height : SequenceLogoComponent.defaultProps.height,
+          }}
           xmlns="http://www.w3.org/2000/svg"
         >
           {this.logoData.map((singlePositionData, positionIdx) => {

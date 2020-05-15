@@ -13,6 +13,7 @@ import {
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
+import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
 
 interface AppProps {}
 interface AppState {
@@ -22,10 +23,11 @@ interface AppState {
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
   showMiniMap: boolean;
+  showEntropyGapBarplot: boolean;
+  showKLDivergenceBarplot: boolean;
   showAnnotations: boolean;
   showSettings: boolean;
   loading?: boolean;
-  minimapVerticalHeight?: "div" | "window";
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -37,6 +39,8 @@ export default class App extends React.Component<AppProps, AppState> {
       zoomLevel: 14,
       sortBy: SequenceSortOptions.INPUT,
       showMiniMap: false,
+      showEntropyGapBarplot: true,
+      showKLDivergenceBarplot: false,
       showAnnotations: true,
       showSettings: true,
     };
@@ -47,13 +51,33 @@ export default class App extends React.Component<AppProps, AppState> {
     const {
       alignment,
       logoPlotStyle,
-      minimapVerticalHeight,
       showAnnotations,
+      showEntropyGapBarplot,
+      showKLDivergenceBarplot,
       showMiniMap,
       sortBy,
       style,
       zoomLevel,
     } = this.state;
+
+    const barplots = [];
+    if (showEntropyGapBarplot) {
+      barplots.push({
+        dataSeriesSet: [
+          SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
+          SequenceBarplotComponent.GAPS_BARPLOT,
+        ],
+        height: "75px",
+      });
+    }
+    if (showKLDivergenceBarplot) {
+      barplots.push({
+        dataSeriesSet: [
+          SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
+        ],
+        height: "75px",
+      });
+    }
 
     const alignmentElement = !alignment ? (
       <></>
@@ -68,13 +92,15 @@ export default class App extends React.Component<AppProps, AppState> {
           showAnnotations={showAnnotations}
           logoOptions={{
             logoType: logoPlotStyle,
+            height: "80px",
           }}
           minimapOptions={{
             startingWidth: 120,
-            verticalHeight: minimapVerticalHeight,
+            verticalHeight: "div",
             alignHorizontal: "right",
             resizable: "horizontal",
           }}
+          barplots={barplots}
         ></AlignmentViewer>
       </div>
     );
@@ -152,7 +178,8 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderSequenceLogo()}
               {this.renderZoomButtons()}
               {this.renderMiniMapToggle()}
-              {this.renderMiniMapHeightToggle()}
+              {this.renderEntropyGapBarplotToggle()}
+              {this.renderKLDivergenceBarplot()}
               {this.renderAnnotationToggle()}
               <br></br>
               {this.renderFileUpload()}
@@ -408,20 +435,42 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
 
-  protected renderMiniMapHeightToggle = () => {
+  protected renderEntropyGapBarplotToggle = () => {
     return (
-      <div className="minimap-height-toggle">
+      <div className="barplot-entroy-gap-toggle">
         <label>
-          <strong>Minimap Full Height:</strong>
+          <strong>Show entropy/gap barplot:</strong>
 
           <input
-            name="minimapVerticalHeight"
+            name="entropyGapBarplotToggle"
             type="checkbox"
-            checked={this.state.minimapVerticalHeight === "window"}
+            checked={this.state.showEntropyGapBarplot}
             onChange={(e) => {
               const target = e.target;
               this.setState({
-                minimapVerticalHeight: target.checked ? "window" : "div",
+                showEntropyGapBarplot: target.checked,
+              });
+            }}
+          />
+        </label>
+      </div>
+    );
+  };
+
+  protected renderKLDivergenceBarplot = () => {
+    return (
+      <div className="barplot-kldivergence-toggle">
+        <label>
+          <strong>Show KL Divergence barplot:</strong>
+
+          <input
+            name="kldivergenceBarplotToggle"
+            type="checkbox"
+            checked={this.state.showKLDivergenceBarplot}
+            onChange={(e) => {
+              const target = e.target;
+              this.setState({
+                showKLDivergenceBarplot: target.checked,
               });
             }}
           />

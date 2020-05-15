@@ -156,7 +156,7 @@ exports[`AlignmentViewer Should render 1`] = `
             },
           ]
         }
-        height={100}
+        height="100px"
         positionWidth={0}
       />
     </div>
@@ -216,7 +216,7 @@ exports[`AlignmentViewer Should render 1`] = `
             }
           }
           glyphWidth={0}
-          height={100}
+          height="100px"
           logoType="Bar Plot"
         />
       </div>

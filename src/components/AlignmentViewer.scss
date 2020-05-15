@@ -15,9 +15,6 @@ $aceEditorLineHeight: 20px;
   right: 0;
   bottom: 0;
 
-  //position: relative;
-  //height: 100vh;
-
   //single row ace editors
   .av-widget.av-consensus-seq-holder,
   .av-widget.av-target-seq-holder,
@@ -62,18 +59,6 @@ $aceEditorLineHeight: 20px;
       flex: 1 0 85%; //annotations take up 15%
       position: relative;
       align-items: center;
-
-      .barplot {
-        svg {
-          height: 100px;
-        }
-      }
-
-      .sequence-logo {
-        svg {
-          height: 100px;
-        }
-      }
     }
 
     .ace_editor {

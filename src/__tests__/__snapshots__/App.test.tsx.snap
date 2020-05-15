@@ -242,15 +242,30 @@ exports[`App Should render within 2 minutes. 1`] = `
             </label>
           </div>
           <div
-            className="minimap-height-toggle"
+            className="barplot-entroy-gap-toggle"
           >
             <label>
               <strong>
-                Minimap Full Height:
+                Show entropy/gap barplot:
+              </strong>
+              <input
+                checked={true}
+                name="entropyGapBarplotToggle"
+                onChange={[Function]}
+                type="checkbox"
+              />
+            </label>
+          </div>
+          <div
+            className="barplot-kldivergence-toggle"
+          >
+            <label>
+              <strong>
+                Show KL Divergence barplot:
               </strong>
               <input
                 checked={false}
-                name="minimapVerticalHeight"
+                name="kldivergenceBarplotToggle"
                 onChange={[Function]}
                 type="checkbox"
               />
