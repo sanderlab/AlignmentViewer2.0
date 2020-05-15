@@ -574,7 +574,7 @@ export class AlignmentViewer extends React.Component<
           ? null
           : this.renderWidget(
               "av-consensus-seq-holder",
-              "Consensus sequence:",
+              "Consensus:",
               this.renderConsensusQueryBox()
             )}
 
@@ -582,7 +582,7 @@ export class AlignmentViewer extends React.Component<
           ? null
           : this.renderWidget(
               "av-target-seq-holder",
-              "Query sequence:",
+              "Query:",
               this.renderQuerySeqBox()
             )}
 

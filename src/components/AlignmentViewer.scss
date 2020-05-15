@@ -1,95 +1,90 @@
 /** AlignmentViewer.scss */
-
-$layoutGapSize: 2px;
 $annotationContentRightGapSize: 20px;
-$rowHeight: 25px;
+$aceEditorLineHeight: 20px;
 
-.alignment-viewer.annotation-closed .av-annotation {
+.alignment-viewer.annotation-closed .av-widget .av-annotation {
   display: none;
 }
 
 .alignment-viewer {
-  display: grid;
-  grid-template-columns: 10px repeat(auto-fill, minmax(200px, 1fr)) 10px;
-  grid-auto-rows: minmax($rowHeight, auto);
-  grid-gap: $layoutGapSize;
-
+  display: flex;
+  flex-flow: column;
   position: absolute;
   top: 0;
-  bottom: 0;
   left: 0;
   right: 0;
+  bottom: 0;
+
+  //position: relative;
+  //height: 100vh;
+
+  //single row ace editors
+  .av-widget.av-consensus-seq-holder,
+  .av-widget.av-target-seq-holder,
+  .av-widget.av-position-indicator-holder {
+    height: $aceEditorLineHeight;
+
+    .ace_editor {
+      line-height: $aceEditorLineHeight;
+    }
+  }
+
+  //the main ace editor
+  .av-widget.av-ace-msa-holder {
+    flex-grow: 4;
+  }
 
   .av-widget {
-    grid-column: 2 / -2;
-    grid-row-start: auto;
-
     display: flex;
-    flex-direction: row;
+    padding: 4px 8px;
 
-    position: relative;
-  }
-  .av-widget.av-webgl-msa-holder {
-    display: none;
-  }
-  .av-widget.av-barplot-holder {
-    grid-row-end: span 4;
-    .barplot svg {
-      height: 100px; // must be <= (grid-row-end span * $rowHeight)
+    .av-annotation,
+    .av-content {
+      display: flex;
+      overflow: auto;
     }
-  }
-  .av-widget.av-sequence-logo-holder {
-    grid-row-end: span 4;
-    .sequence-logo svg {
-      height: 100px; // must be <= (grid-row-end span * $rowHeight)
+    .av-content::-webkit-scrollbar {
+      background: transparent; // make scrollbar transparent
+      height: 0;
     }
-  }
-  .av-widget.av-ace-msa-holder {
-    grid-row-end: span 16;
-  }
+    .av-annotation {
+      flex: 0 1 15%;
+      justify-content: flex-end;
+      align-items: center;
+      // bit of a hack to put space between annotation and content
+      margin-right: $annotationContentRightGapSize;
+      font-weight: bold;
+      text-align: right;
+      position: relative;
+    }
 
-  .av-annotation,
-  .av-content {
-    display: flex;
-    overflow: auto;
-  }
-  .av-annotation {
-    flex: 0 1 20%;
-    justify-content: flex-end;
-    align-items: center;
-    /* bit of a hack to put space between annotation and content */
-    margin-right: $annotationContentRightGapSize;
-    font-weight: bold;
-    text-align: right;
-  }
-  .av-content {
-    flex: 1 0 80%; //annotations take up 20%
-    position: relative;
-    align-items: center;
-  }
-  .av-content::-webkit-scrollbar {
-    background: transparent; /* make scrollbar transparent */
-    height: 0;
-  }
+    .av-content {
+      flex: 1 0 85%; //annotations take up 15%
+      position: relative;
+      align-items: center;
 
-  .av-widget.av-consensus-seq-holder .ace-consensusseq .ace_editor,
-  .av-widget.av-target-seq-holder .ace-queryseq .ace_editor,
-  .av-widget.av-position-indicator-holder .ace-positions .ace_editor {
-    line-height: $rowHeight;
-  }
+      .barplot {
+        svg {
+          height: 100px;
+        }
+      }
 
-  .av-widget.av-consensus-seq-holder .ace-consensusseq .ace_editor,
-  .av-widget.av-target-seq-holder .ace-queryseq .ace_editor,
-  .av-widget.av-position-indicator-holder .ace-positions .ace_editor,
-  .av-widget.av-ace-msa-holder .ace-alignment .ace_editor,
-  .av-widget.av-ace-msa-holder .ace-alignment-metadata .ace_editor {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    overflow: auto;
-    overflow-x: hidden;
-    overflow-y: hidden;
+      .sequence-logo {
+        svg {
+          height: 100px;
+        }
+      }
+    }
+
+    .ace_editor {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
   }
 }

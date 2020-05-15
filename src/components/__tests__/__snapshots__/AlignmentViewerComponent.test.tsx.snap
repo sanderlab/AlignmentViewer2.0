@@ -228,7 +228,7 @@ exports[`AlignmentViewer Should render 1`] = `
     <div
       className="av-annotation"
     >
-      Consensus sequence:
+      Consensus:
     </div>
     <div
       className="av-content"
@@ -279,7 +279,7 @@ exports[`AlignmentViewer Should render 1`] = `
     <div
       className="av-annotation"
     >
-      Query sequence:
+      Query:
     </div>
     <div
       className="av-content"

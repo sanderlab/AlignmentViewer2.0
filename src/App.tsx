@@ -58,7 +58,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const alignmentElement = !alignment ? (
       <></>
     ) : (
-      <div className="av-holder">
+      <div className="app-content">
         <AlignmentViewer
           alignment={alignment}
           style={style}
