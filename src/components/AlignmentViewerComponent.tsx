@@ -50,6 +50,7 @@ const defaultProps = {
   logoOptions: {
     logoType: LOGO_TYPES.LETTERS,
     height: "100px",
+    tooltipPlacement: undefined,
   } as Partial<
     Pick<ISequenceLogoProps, "tooltipPlacement" | "logoType" | "height">
   >,
