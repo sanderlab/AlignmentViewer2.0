@@ -14,6 +14,7 @@ export * from "./components/SequenceBarplotComponent.js";
 export * from "./components/SequenceLogoComponent.js";
 export * from "./common/AceAlignmentMode.js";
 export * from "./common/Alignment.js";
+export * from "./common/AlignmentLoader.js";
 export * from "./common/FastaAlignment.js";
 export * from "./common/MolecularStyles.js";
 export * from "./common/Residues.js";
