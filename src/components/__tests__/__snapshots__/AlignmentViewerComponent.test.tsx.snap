@@ -138,7 +138,7 @@ exports[`AlignmentViewer Should render 1`] = `
           Array [
             Object {
               "cssClass": "barplot-shannon-entropy",
-              "getPositionalInfo": [Function],
+              "getBars": [Function],
               "id": "entropy",
               "name": "Entropy",
               "plotOptions": Object {
@@ -147,7 +147,7 @@ exports[`AlignmentViewer Should render 1`] = `
             },
             Object {
               "cssClass": "barplot-gaps",
-              "getPositionalInfo": [Function],
+              "getBars": [Function],
               "id": "gaps",
               "name": "Gaps",
               "plotOptions": Object {

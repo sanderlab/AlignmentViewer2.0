@@ -242,6 +242,21 @@ exports[`App Should render within 2 minutes. 1`] = `
             </label>
           </div>
           <div
+            className="barplot-conservation-toggle"
+          >
+            <label>
+              <strong>
+                Show conservation barplot:
+              </strong>
+              <input
+                checked={true}
+                name="conservationBarplotToggle"
+                onChange={[Function]}
+                type="checkbox"
+              />
+            </label>
+          </div>
+          <div
             className="barplot-entroy-gap-toggle"
           >
             <label>
