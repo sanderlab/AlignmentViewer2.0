@@ -1,4 +1,5 @@
 import { Alignment, ISequence } from "./Alignment";
+import { getParseError } from "./Utils";
 
 /**
  * FastaAlignment
@@ -14,7 +15,12 @@ export class FastaAlignment extends Alignment {
     fileName: string,
     fileContents: string
   ): FastaAlignment {
-    const fastaSplitCaret = fileContents.trim().split(">");
+    const trimmedFile = fileContents.trim();
+    if (trimmedFile.length < 1 || trimmedFile[0] !== ">") {
+      throw getParseError("Fasta", "File needs to begin with '>'");
+    }
+
+    const fastaSplitCaret = trimmedFile.split(">");
     var sequences: ISequence[] = [];
     for (var i = 0; i < fastaSplitCaret.length; i++) {
       const seqArr = fastaSplitCaret[i].split(/\r?\n/);

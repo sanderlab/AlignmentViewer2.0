@@ -101,3 +101,12 @@ export function getURLParameters() {
       new Map<string, string>()
     );
 }
+
+/**
+ * Get an Error that represents a parser problem
+ */
+export function getParseError(parserName: string, errorMessage: string) {
+  const toReturn = new Error(errorMessage);
+  toReturn.name = parserName;
+  return toReturn;
+}

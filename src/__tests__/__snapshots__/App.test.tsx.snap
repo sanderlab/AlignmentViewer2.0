@@ -299,13 +299,11 @@ exports[`App Should render within 2 minutes. 1`] = `
                 ]
               }
               fileSelectorLabelText="Upload Alignment File:"
+              onAlignmenLoadError={[Function]}
               onAlignmentLoaded={[Function]}
               onFileLoadStart={[Function]}
             />
           </div>
-          <div
-            className="loader hide"
-          />
         </div>
       </form>
     </div>

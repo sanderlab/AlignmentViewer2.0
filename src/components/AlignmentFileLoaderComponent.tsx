@@ -1,8 +1,7 @@
 import * as React from "react";
 import "./FileInput.scss";
 import { Alignment } from "../common/Alignment";
-import { FastaAlignment } from "../common/FastaAlignment";
-import { StockholmAlignment } from "../common/StockholmAlignment";
+import { AlignmentLoader } from "../common/AlignmentLoader";
 
 export interface IExampleFileProps {
   labelText: string;
@@ -14,6 +13,7 @@ export interface IAlignmentLoaderProps {
   fileSelectorLabelText: string;
 
   onAlignmentLoaded: (alignment: Alignment) => void; //loading ended
+  onAlignmenLoadError: (e: Error[]) => void; //loading error
 
   exampleFiles?: IExampleFileProps[];
   onFileLoadStart?: () => void; //notify on begin loading
@@ -39,47 +39,6 @@ export class AlignmentFileLoaderComponent extends React.Component<
       this
     );
     this.fileInput = React.createRef();
-  }
-
-  /*
-   *
-   *
-   * STATIC METHODS
-   *
-   *
-   */
-  public static async loadAlignmentFromURL(
-    url: string,
-    callback: (a: Alignment) => void,
-    filename?: string
-  ) {
-    const f = new File(
-      [await (await fetch(`${url}`)).blob()],
-      filename ? filename : url.substring(url.lastIndexOf("/") + 1)
-    );
-    return AlignmentFileLoaderComponent.readAlignmentFileText(f, callback);
-  }
-
-  /**
-   * Read the file text and report loading to the parent
-   * @param file
-   */
-  private static readAlignmentFileText(
-    file: File,
-    callback: (a: Alignment) => void
-  ) {
-    var reader = new FileReader();
-    reader.onload = (e) => {
-      const fileText = reader.result as string;
-      let alignment: Alignment;
-      try {
-        alignment = StockholmAlignment.fromFileContents(file.name, fileText);
-      } catch (e) {
-        alignment = FastaAlignment.fromFileContents(file.name, fileText);
-      }
-      callback(alignment);
-    };
-    reader.readAsText(file);
   }
 
   /*
@@ -117,7 +76,7 @@ export class AlignmentFileLoaderComponent extends React.Component<
   private handleFileUploadInputChange(
     event: React.FormEvent<HTMLInputElement>
   ) {
-    const { onFileLoadStart } = this.props;
+    const { onFileLoadStart, onAlignmenLoadError } = this.props;
     event.preventDefault();
 
     if (this.fileInput.current && this.fileInput.current.files) {
@@ -127,9 +86,10 @@ export class AlignmentFileLoaderComponent extends React.Component<
       setTimeout(() => {
         //safari needs this in a timeout, otherwise it runs synchronously?!?
         const file = this.fileInput.current!.files![0];
-        AlignmentFileLoaderComponent.readAlignmentFileText(
+        AlignmentLoader.loadAlignmentFromFile(
           file,
-          this.alignmentLoaded
+          this.alignmentLoaded,
+          onAlignmenLoadError
         );
       });
     }
@@ -160,7 +120,7 @@ export class AlignmentFileLoaderComponent extends React.Component<
    * render example fileset
    */
   private renderExampleFiles() {
-    const { exampleFiles, onFileLoadStart } = this.props;
+    const { exampleFiles, onFileLoadStart, onAlignmenLoadError } = this.props;
     return !exampleFiles ? null : (
       <label>
         <strong>Example Alignments:</strong>
@@ -174,9 +134,10 @@ export class AlignmentFileLoaderComponent extends React.Component<
                 if (onFileLoadStart) {
                   onFileLoadStart();
                 }
-                AlignmentFileLoaderComponent.loadAlignmentFromURL(
+                AlignmentLoader.loadAlignmentFromURL(
                   ef.fileURL,
                   this.alignmentLoaded,
+                  onAlignmenLoadError,
                   ef.fileName
                 );
               }}

@@ -15,6 +15,7 @@ import {
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
 import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
+import { AlignmentLoader } from "./common/AlignmentLoader";
 
 interface AppProps {}
 interface AppState {
@@ -29,6 +30,7 @@ interface AppState {
   showAnnotations: boolean;
   showSettings: boolean;
   loading?: boolean;
+  loadError?: Error[];
 }
 
 const URL_PARAM_NAMES = {
@@ -50,6 +52,7 @@ export default class App extends React.Component<AppProps, AppState> {
       showSettings: true,
     };
     this.onAlignmentReceived = this.onAlignmentReceived.bind(this);
+    this.onAlignmentLoadError = this.onAlignmentLoadError.bind(this);
   }
 
   componentDidMount() {
@@ -60,9 +63,10 @@ export default class App extends React.Component<AppProps, AppState> {
         loading: true,
       });
 
-      AlignmentFileLoaderComponent.loadAlignmentFromURL(
+      AlignmentLoader.loadAlignmentFromURL(
         params.get(URL_PARAM_NAMES.ALIGNMENT_URL),
-        this.onAlignmentReceived
+        this.onAlignmentReceived,
+        this.onAlignmentLoadError
       );
     }
   }
@@ -136,7 +140,7 @@ export default class App extends React.Component<AppProps, AppState> {
   protected renderSettingsBox = (
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
   ) => {
-    const { alignment } = this.state;
+    const { alignment, loading, loadError, showSettings } = this.state;
     const alignmentDescription = alignment ? (
       <div>
         <h3>{alignment.getName()}</h3>
@@ -154,9 +158,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <form>
             <div className="settings-header">
               <button
-                className={`button-link${
-                  this.state.showSettings ? " hide" : ""
-                }`}
+                className={`button-link${showSettings ? " hide" : ""}`}
                 type="button"
                 onClick={(e) => {
                   this.setState({
@@ -167,9 +169,7 @@ export default class App extends React.Component<AppProps, AppState> {
                 Expand
               </button>
               <button
-                className={`button-link${
-                  this.state.showSettings ? "" : " hide"
-                }`}
+                className={`button-link${showSettings ? "" : " hide"}`}
                 type="button"
                 onClick={(e) => {
                   this.setState({
@@ -186,7 +186,7 @@ export default class App extends React.Component<AppProps, AppState> {
             </div>
             <div
               style={{
-                display: this.state.showSettings ? "block" : "none",
+                display: showSettings ? "block" : "none",
                 position: "relative",
               }}
             >
@@ -203,9 +203,23 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderAnnotationToggle()}
               <br></br>
               {this.renderFileUpload()}
-              <div
-                className={`loader${this.state.loading ? "" : " hide"}`}
-              ></div>
+              {!loading ? null : <div className="loader" />}
+              {!loadError || loadError.length < 1 ? null : (
+                <div className={`load-error`}>
+                  <h3>
+                    <strong>Error loading alignment:</strong>
+                  </h3>
+                  <ul>
+                    {loadError.map((e) => {
+                      return (
+                        <li key={e.name + e.message}>
+                          <strong>{e.name} parse error:</strong> {e.message}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
             </div>
           </form>
         </div>
@@ -450,6 +464,7 @@ export default class App extends React.Component<AppProps, AppState> {
             });
           }}
           onAlignmentLoaded={this.onAlignmentReceived}
+          onAlignmenLoadError={this.onAlignmentLoadError}
         />
       </div>
     );
@@ -543,12 +558,20 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
 
+  protected onAlignmentLoadError(errors: Error[]) {
+    this.setState({
+      loadError: errors,
+      loading: false,
+    });
+  }
+
   protected onAlignmentReceived(alignment: Alignment) {
     this.setState({
       alignment: alignment,
       showSettings: false,
       style: alignment.getDefaultStyle(),
       loading: false,
+      loadError: undefined,
     });
   }
 }
