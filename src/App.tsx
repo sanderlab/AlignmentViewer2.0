@@ -25,6 +25,7 @@ interface AppState {
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
   showMiniMap: boolean;
+  showConservationBarplot: boolean;
   showEntropyGapBarplot: boolean;
   showKLDivergenceBarplot: boolean;
   showAnnotations: boolean;
@@ -46,6 +47,7 @@ export default class App extends React.Component<AppProps, AppState> {
       zoomLevel: 14,
       sortBy: SequenceSortOptions.INPUT,
       showMiniMap: false,
+      showConservationBarplot: true,
       showEntropyGapBarplot: true,
       showKLDivergenceBarplot: false,
       showAnnotations: true,
@@ -76,6 +78,7 @@ export default class App extends React.Component<AppProps, AppState> {
       alignment,
       logoPlotStyle,
       showAnnotations,
+      showConservationBarplot,
       showEntropyGapBarplot,
       showKLDivergenceBarplot,
       showMiniMap,
@@ -85,6 +88,12 @@ export default class App extends React.Component<AppProps, AppState> {
     } = this.state;
 
     const barplots = [];
+    if (showConservationBarplot) {
+      barplots.push({
+        dataSeriesSet: [SequenceBarplotComponent.CONSERVATION_BARPLOT],
+        height: "75px",
+      });
+    }
     if (showEntropyGapBarplot) {
       barplots.push({
         dataSeriesSet: [
@@ -198,6 +207,7 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderSequenceLogo()}
               {this.renderZoomButtons()}
               {this.renderMiniMapToggle()}
+              {this.renderConservationBarplotToggle()}
               {this.renderEntropyGapBarplotToggle()}
               {this.renderKLDivergenceBarplot()}
               {this.renderAnnotationToggle()}
@@ -466,6 +476,28 @@ export default class App extends React.Component<AppProps, AppState> {
           onAlignmentLoaded={this.onAlignmentReceived}
           onAlignmenLoadError={this.onAlignmentLoadError}
         />
+      </div>
+    );
+  };
+
+  protected renderConservationBarplotToggle = () => {
+    return (
+      <div className="barplot-conservation-toggle">
+        <label>
+          <strong>Show conservation barplot:</strong>
+
+          <input
+            name="conservationBarplotToggle"
+            type="checkbox"
+            checked={this.state.showConservationBarplot}
+            onChange={(e) => {
+              const target = e.target;
+              this.setState({
+                showConservationBarplot: target.checked,
+              });
+            }}
+          />
+        </label>
       </div>
     );
   };

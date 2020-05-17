@@ -35,6 +35,14 @@
 //users should override what is below to change bar colors
 //
 
+.barplot svg rect.barplot-conservation {
+  fill: #414141;
+  color: #414141;
+}
+.bar-position-textblock .barplot-conservation .legend-square {
+  background-color: #414141;
+}
+
 .barplot svg rect.barplot-shannon-entropy {
   fill: #000000;
   color: #000000;
