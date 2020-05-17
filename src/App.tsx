@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.scss";
-import { Alignment, SequenceSortOptions } from "./common/Alignment";
+import { Alignment } from "./common/Alignment";
+import { SequenceSorter } from "./common/AlignmentSorter";
 import { getURLParameters } from "./common/Utils";
 import { AlignmentViewer } from "./components/AlignmentViewerComponent";
 import {
@@ -21,7 +22,7 @@ interface AppProps {}
 interface AppState {
   alignment?: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  sortBy: SequenceSortOptions;
+  sortBy: SequenceSorter;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
   showMiniMap: boolean;
@@ -45,7 +46,7 @@ export default class App extends React.Component<AppProps, AppState> {
       style: new AminoAcidAlignmentStyle(),
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
       zoomLevel: 14,
-      sortBy: SequenceSortOptions.INPUT,
+      sortBy: SequenceSorter.INPUT,
       showMiniMap: false,
       showConservationBarplot: true,
       showEntropyGapBarplot: true,
@@ -238,7 +239,12 @@ export default class App extends React.Component<AppProps, AppState> {
   };
 
   protected renderSortControl = () => {
-    const { sortBy } = this.state;
+    const { sortBy, style } = this.state;
+    const sorters =
+      style instanceof AminoAcidAlignmentStyle
+        ? SequenceSorter.aminoAcidSorters
+        : SequenceSorter.nucleotideSorters;
+
     return (
       <div>
         <label>
@@ -247,11 +253,11 @@ export default class App extends React.Component<AppProps, AppState> {
             value={sortBy.key}
             onChange={(e) =>
               this.setState({
-                sortBy: SequenceSortOptions.fromKey(e.target.value)!,
+                sortBy: SequenceSorter.fromKey(e.target.value)!,
               })
             }
           >
-            {SequenceSortOptions.list.map((sso) => {
+            {sorters.map((sso) => {
               return (
                 <option value={sso.key} key={sso.key}>
                   {sso.description}

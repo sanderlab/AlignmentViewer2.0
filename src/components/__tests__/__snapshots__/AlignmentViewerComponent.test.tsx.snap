@@ -18,20 +18,27 @@ exports[`AlignmentViewer Should render 1`] = `
         Alignment {
           "aceEditorMode": undefined,
           "allUpperAlphaLettersInAlignmentSorted": Array [],
-          "consensus": Array [],
+          "consensus": Object {
+            "sequence": Object {
+              "id": "consensus",
+              "sequence": "",
+            },
+            "statistics": Array [],
+          },
           "globalAlphaLetterCounts": Object {},
           "name": "",
           "positionalLetterCounts": Map {},
           "predictedNT": true,
+          "querySequence": undefined,
           "sequences": Map {
-            SequenceSortOptions {
+            SequenceSorter {
               "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
+              "isQuerySequenceDependent": false,
               "key": "as-input",
+              "sortFn": [Function],
+              "targetAlignmentType": "both",
             } => Array [],
           },
-          "targetSequence": undefined,
           "uuid": "10000000-1000-4000-8000-100000000000",
         }
       }
@@ -89,11 +96,12 @@ exports[`AlignmentViewer Should render 1`] = `
       onIndicatorDrag={[Function]}
       resizable="horizontal"
       sortBy={
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         }
       }
       startingWidth={100}
@@ -117,20 +125,27 @@ exports[`AlignmentViewer Should render 1`] = `
           Alignment {
             "aceEditorMode": undefined,
             "allUpperAlphaLettersInAlignmentSorted": Array [],
-            "consensus": Array [],
+            "consensus": Object {
+              "sequence": Object {
+                "id": "consensus",
+                "sequence": "",
+              },
+              "statistics": Array [],
+            },
             "globalAlphaLetterCounts": Object {},
             "name": "",
             "positionalLetterCounts": Map {},
             "predictedNT": true,
+            "querySequence": undefined,
             "sequences": Map {
-              SequenceSortOptions {
+              SequenceSorter {
                 "description": "As input",
-                "distanceFn": undefined,
-                "isTargetSequenceDependent": false,
+                "isQuerySequenceDependent": false,
                 "key": "as-input",
+                "sortFn": [Function],
+                "targetAlignmentType": "both",
               } => Array [],
             },
-            "targetSequence": undefined,
             "uuid": "10000000-1000-4000-8000-100000000000",
           }
         }
@@ -182,20 +197,27 @@ exports[`AlignmentViewer Should render 1`] = `
             Alignment {
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
-              "consensus": Array [],
+              "consensus": Object {
+                "sequence": Object {
+                  "id": "consensus",
+                  "sequence": "",
+                },
+                "statistics": Array [],
+              },
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
               "predictedNT": true,
+              "querySequence": undefined,
               "sequences": Map {
-                SequenceSortOptions {
+                SequenceSorter {
                   "description": "As input",
-                  "distanceFn": undefined,
-                  "isTargetSequenceDependent": false,
+                  "isQuerySequenceDependent": false,
                   "key": "as-input",
+                  "sortFn": [Function],
+                  "targetAlignmentType": "both",
                 } => Array [],
               },
-              "targetSequence": undefined,
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
@@ -243,20 +265,27 @@ exports[`AlignmentViewer Should render 1`] = `
             Alignment {
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
-              "consensus": Array [],
+              "consensus": Object {
+                "sequence": Object {
+                  "id": "consensus",
+                  "sequence": "",
+                },
+                "statistics": Array [],
+              },
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
               "predictedNT": true,
+              "querySequence": undefined,
               "sequences": Map {
-                SequenceSortOptions {
+                SequenceSorter {
                   "description": "As input",
-                  "distanceFn": undefined,
-                  "isTargetSequenceDependent": false,
+                  "isQuerySequenceDependent": false,
                   "key": "as-input",
+                  "sortFn": [Function],
+                  "targetAlignmentType": "both",
                 } => Array [],
               },
-              "targetSequence": undefined,
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
@@ -264,11 +293,12 @@ exports[`AlignmentViewer Should render 1`] = `
           editorLoaded={[Function]}
           fontSize={13}
           sortBy={
-            SequenceSortOptions {
+            SequenceSorter {
               "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
+              "isQuerySequenceDependent": false,
               "key": "as-input",
+              "sortFn": [Function],
+              "targetAlignmentType": "both",
             }
           }
         />
@@ -276,7 +306,7 @@ exports[`AlignmentViewer Should render 1`] = `
     </div>
   </div>
   <div
-    className="av-widget av-target-seq-holder"
+    className="av-widget av-query-seq-holder"
   >
     <div
       className="av-annotation"
@@ -289,25 +319,32 @@ exports[`AlignmentViewer Should render 1`] = `
       <div
         className="queryseq-box"
       >
-        <AceTargetSequenceComponent
+        <AceQuerySequenceComponent
           alignment={
             Alignment {
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
-              "consensus": Array [],
+              "consensus": Object {
+                "sequence": Object {
+                  "id": "consensus",
+                  "sequence": "",
+                },
+                "statistics": Array [],
+              },
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
               "predictedNT": true,
+              "querySequence": undefined,
               "sequences": Map {
-                SequenceSortOptions {
+                SequenceSorter {
                   "description": "As input",
-                  "distanceFn": undefined,
-                  "isTargetSequenceDependent": false,
+                  "isQuerySequenceDependent": false,
                   "key": "as-input",
+                  "sortFn": [Function],
+                  "targetAlignmentType": "both",
                 } => Array [],
               },
-              "targetSequence": undefined,
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
@@ -315,11 +352,12 @@ exports[`AlignmentViewer Should render 1`] = `
           editorLoaded={[Function]}
           fontSize={13}
           sortBy={
-            SequenceSortOptions {
+            SequenceSorter {
               "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
+              "isQuerySequenceDependent": false,
               "key": "as-input",
+              "sortFn": [Function],
+              "targetAlignmentType": "both",
             }
           }
         />
@@ -345,20 +383,27 @@ exports[`AlignmentViewer Should render 1`] = `
             Alignment {
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
-              "consensus": Array [],
+              "consensus": Object {
+                "sequence": Object {
+                  "id": "consensus",
+                  "sequence": "",
+                },
+                "statistics": Array [],
+              },
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
               "predictedNT": true,
+              "querySequence": undefined,
               "sequences": Map {
-                SequenceSortOptions {
+                SequenceSorter {
                   "description": "As input",
-                  "distanceFn": undefined,
-                  "isTargetSequenceDependent": false,
+                  "isQuerySequenceDependent": false,
                   "key": "as-input",
+                  "sortFn": [Function],
+                  "targetAlignmentType": "both",
                 } => Array [],
               },
-              "targetSequence": undefined,
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
@@ -397,20 +442,27 @@ exports[`AlignmentViewer Should render 1`] = `
             Alignment {
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
-              "consensus": Array [],
+              "consensus": Object {
+                "sequence": Object {
+                  "id": "consensus",
+                  "sequence": "",
+                },
+                "statistics": Array [],
+              },
               "globalAlphaLetterCounts": Object {},
               "name": "",
               "positionalLetterCounts": Map {},
               "predictedNT": true,
+              "querySequence": undefined,
               "sequences": Map {
-                SequenceSortOptions {
+                SequenceSorter {
                   "description": "As input",
-                  "distanceFn": undefined,
-                  "isTargetSequenceDependent": false,
+                  "isQuerySequenceDependent": false,
                   "key": "as-input",
+                  "sortFn": [Function],
+                  "targetAlignmentType": "both",
                 } => Array [],
               },
-              "targetSequence": undefined,
               "uuid": "10000000-1000-4000-8000-100000000000",
             }
           }
@@ -419,11 +471,12 @@ exports[`AlignmentViewer Should render 1`] = `
           editorLoaded={[Function]}
           fontSize={13}
           sortBy={
-            SequenceSortOptions {
+            SequenceSorter {
               "description": "As input",
-              "distanceFn": undefined,
-              "isTargetSequenceDependent": false,
+              "isQuerySequenceDependent": false,
               "key": "as-input",
+              "sortFn": [Function],
+              "targetAlignmentType": "both",
             }
           }
         />

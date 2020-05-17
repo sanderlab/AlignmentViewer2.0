@@ -33,138 +33,144 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
         "Y",
         "Z",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-        Object {
-          "letter": "C",
-          "occurrences": 10,
-          "position": 2,
-        },
-        Object {
-          "letter": "D",
-          "occurrences": 10,
-          "position": 3,
-        },
-        Object {
-          "letter": "E",
-          "occurrences": 10,
-          "position": 4,
-        },
-        Object {
-          "letter": "F",
-          "occurrences": 10,
-          "position": 5,
-        },
-        Object {
-          "letter": "G",
-          "occurrences": 10,
-          "position": 6,
-        },
-        Object {
-          "letter": "H",
-          "occurrences": 10,
-          "position": 7,
-        },
-        Object {
-          "letter": "I",
-          "occurrences": 10,
-          "position": 8,
-        },
-        Object {
-          "letter": "J",
-          "occurrences": 10,
-          "position": 9,
-        },
-        Object {
-          "letter": "K",
-          "occurrences": 10,
-          "position": 10,
-        },
-        Object {
-          "letter": "L",
-          "occurrences": 10,
-          "position": 11,
-        },
-        Object {
-          "letter": "M",
-          "occurrences": 10,
-          "position": 12,
-        },
-        Object {
-          "letter": "N",
-          "occurrences": 10,
-          "position": 13,
-        },
-        Object {
-          "letter": "O",
-          "occurrences": 10,
-          "position": 14,
-        },
-        Object {
-          "letter": "P",
-          "occurrences": 10,
-          "position": 15,
-        },
-        Object {
-          "letter": "Q",
-          "occurrences": 10,
-          "position": 16,
-        },
-        Object {
-          "letter": "R",
-          "occurrences": 10,
-          "position": 17,
-        },
-        Object {
-          "letter": "S",
-          "occurrences": 10,
-          "position": 18,
-        },
-        Object {
-          "letter": "T",
-          "occurrences": 10,
-          "position": 19,
-        },
-        Object {
-          "letter": "U",
-          "occurrences": 10,
-          "position": 20,
-        },
-        Object {
-          "letter": "V",
-          "occurrences": 10,
-          "position": 21,
-        },
-        Object {
-          "letter": "W",
-          "occurrences": 10,
-          "position": 22,
-        },
-        Object {
-          "letter": "X",
-          "occurrences": 10,
-          "position": 23,
-        },
-        Object {
-          "letter": "Y",
-          "occurrences": 10,
-          "position": 24,
-        },
-        Object {
-          "letter": "Z",
-          "occurrences": 10,
-          "position": 25,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+          Object {
+            "letter": "C",
+            "occurrences": 10,
+            "position": 2,
+          },
+          Object {
+            "letter": "D",
+            "occurrences": 10,
+            "position": 3,
+          },
+          Object {
+            "letter": "E",
+            "occurrences": 10,
+            "position": 4,
+          },
+          Object {
+            "letter": "F",
+            "occurrences": 10,
+            "position": 5,
+          },
+          Object {
+            "letter": "G",
+            "occurrences": 10,
+            "position": 6,
+          },
+          Object {
+            "letter": "H",
+            "occurrences": 10,
+            "position": 7,
+          },
+          Object {
+            "letter": "I",
+            "occurrences": 10,
+            "position": 8,
+          },
+          Object {
+            "letter": "J",
+            "occurrences": 10,
+            "position": 9,
+          },
+          Object {
+            "letter": "K",
+            "occurrences": 10,
+            "position": 10,
+          },
+          Object {
+            "letter": "L",
+            "occurrences": 10,
+            "position": 11,
+          },
+          Object {
+            "letter": "M",
+            "occurrences": 10,
+            "position": 12,
+          },
+          Object {
+            "letter": "N",
+            "occurrences": 10,
+            "position": 13,
+          },
+          Object {
+            "letter": "O",
+            "occurrences": 10,
+            "position": 14,
+          },
+          Object {
+            "letter": "P",
+            "occurrences": 10,
+            "position": 15,
+          },
+          Object {
+            "letter": "Q",
+            "occurrences": 10,
+            "position": 16,
+          },
+          Object {
+            "letter": "R",
+            "occurrences": 10,
+            "position": 17,
+          },
+          Object {
+            "letter": "S",
+            "occurrences": 10,
+            "position": 18,
+          },
+          Object {
+            "letter": "T",
+            "occurrences": 10,
+            "position": 19,
+          },
+          Object {
+            "letter": "U",
+            "occurrences": 10,
+            "position": 20,
+          },
+          Object {
+            "letter": "V",
+            "occurrences": 10,
+            "position": 21,
+          },
+          Object {
+            "letter": "W",
+            "occurrences": 10,
+            "position": 22,
+          },
+          Object {
+            "letter": "X",
+            "occurrences": 10,
+            "position": 23,
+          },
+          Object {
+            "letter": "Y",
+            "occurrences": 10,
+            "position": 24,
+          },
+          Object {
+            "letter": "Z",
+            "occurrences": 10,
+            "position": 25,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -275,12 +281,17 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "big-sequence-0",
+        "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "big-sequence-0",
@@ -324,10 +335,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "big-sequence-0",
-        "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -368,11 +375,12 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -440,138 +448,144 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
         "Y",
         "Z",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-        Object {
-          "letter": "C",
-          "occurrences": 10,
-          "position": 2,
-        },
-        Object {
-          "letter": "D",
-          "occurrences": 10,
-          "position": 3,
-        },
-        Object {
-          "letter": "E",
-          "occurrences": 10,
-          "position": 4,
-        },
-        Object {
-          "letter": "F",
-          "occurrences": 10,
-          "position": 5,
-        },
-        Object {
-          "letter": "G",
-          "occurrences": 10,
-          "position": 6,
-        },
-        Object {
-          "letter": "H",
-          "occurrences": 10,
-          "position": 7,
-        },
-        Object {
-          "letter": "I",
-          "occurrences": 10,
-          "position": 8,
-        },
-        Object {
-          "letter": "J",
-          "occurrences": 10,
-          "position": 9,
-        },
-        Object {
-          "letter": "K",
-          "occurrences": 10,
-          "position": 10,
-        },
-        Object {
-          "letter": "L",
-          "occurrences": 10,
-          "position": 11,
-        },
-        Object {
-          "letter": "M",
-          "occurrences": 10,
-          "position": 12,
-        },
-        Object {
-          "letter": "N",
-          "occurrences": 10,
-          "position": 13,
-        },
-        Object {
-          "letter": "O",
-          "occurrences": 10,
-          "position": 14,
-        },
-        Object {
-          "letter": "P",
-          "occurrences": 10,
-          "position": 15,
-        },
-        Object {
-          "letter": "Q",
-          "occurrences": 10,
-          "position": 16,
-        },
-        Object {
-          "letter": "R",
-          "occurrences": 10,
-          "position": 17,
-        },
-        Object {
-          "letter": "S",
-          "occurrences": 10,
-          "position": 18,
-        },
-        Object {
-          "letter": "T",
-          "occurrences": 10,
-          "position": 19,
-        },
-        Object {
-          "letter": "U",
-          "occurrences": 10,
-          "position": 20,
-        },
-        Object {
-          "letter": "V",
-          "occurrences": 10,
-          "position": 21,
-        },
-        Object {
-          "letter": "W",
-          "occurrences": 10,
-          "position": 22,
-        },
-        Object {
-          "letter": "X",
-          "occurrences": 10,
-          "position": 23,
-        },
-        Object {
-          "letter": "Y",
-          "occurrences": 10,
-          "position": 24,
-        },
-        Object {
-          "letter": "Z",
-          "occurrences": 10,
-          "position": 25,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+          Object {
+            "letter": "C",
+            "occurrences": 10,
+            "position": 2,
+          },
+          Object {
+            "letter": "D",
+            "occurrences": 10,
+            "position": 3,
+          },
+          Object {
+            "letter": "E",
+            "occurrences": 10,
+            "position": 4,
+          },
+          Object {
+            "letter": "F",
+            "occurrences": 10,
+            "position": 5,
+          },
+          Object {
+            "letter": "G",
+            "occurrences": 10,
+            "position": 6,
+          },
+          Object {
+            "letter": "H",
+            "occurrences": 10,
+            "position": 7,
+          },
+          Object {
+            "letter": "I",
+            "occurrences": 10,
+            "position": 8,
+          },
+          Object {
+            "letter": "J",
+            "occurrences": 10,
+            "position": 9,
+          },
+          Object {
+            "letter": "K",
+            "occurrences": 10,
+            "position": 10,
+          },
+          Object {
+            "letter": "L",
+            "occurrences": 10,
+            "position": 11,
+          },
+          Object {
+            "letter": "M",
+            "occurrences": 10,
+            "position": 12,
+          },
+          Object {
+            "letter": "N",
+            "occurrences": 10,
+            "position": 13,
+          },
+          Object {
+            "letter": "O",
+            "occurrences": 10,
+            "position": 14,
+          },
+          Object {
+            "letter": "P",
+            "occurrences": 10,
+            "position": 15,
+          },
+          Object {
+            "letter": "Q",
+            "occurrences": 10,
+            "position": 16,
+          },
+          Object {
+            "letter": "R",
+            "occurrences": 10,
+            "position": 17,
+          },
+          Object {
+            "letter": "S",
+            "occurrences": 10,
+            "position": 18,
+          },
+          Object {
+            "letter": "T",
+            "occurrences": 10,
+            "position": 19,
+          },
+          Object {
+            "letter": "U",
+            "occurrences": 10,
+            "position": 20,
+          },
+          Object {
+            "letter": "V",
+            "occurrences": 10,
+            "position": 21,
+          },
+          Object {
+            "letter": "W",
+            "occurrences": 10,
+            "position": 22,
+          },
+          Object {
+            "letter": "X",
+            "occurrences": 10,
+            "position": 23,
+          },
+          Object {
+            "letter": "Y",
+            "occurrences": 10,
+            "position": 24,
+          },
+          Object {
+            "letter": "Z",
+            "occurrences": 10,
+            "position": 25,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -682,12 +696,17 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "nt-sequence-0",
+        "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "nt-sequence-0",
@@ -731,10 +750,6 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "nt-sequence-0",
-        "sequence": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -775,11 +790,12 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -820,20 +836,27 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     Alignment {
       "aceEditorMode": undefined,
       "allUpperAlphaLettersInAlignmentSorted": Array [],
-      "consensus": Array [],
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "",
+        },
+        "statistics": Array [],
+      },
       "globalAlphaLetterCounts": Object {},
       "name": "My-Alignment",
       "positionalLetterCounts": Map {},
       "predictedNT": true,
+      "querySequence": undefined,
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [],
       },
-      "targetSequence": undefined,
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -874,11 +897,12 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -956,18 +980,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -982,12 +1012,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -1031,10 +1066,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -1075,11 +1106,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -1127,18 +1159,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -1153,12 +1191,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -1201,10 +1244,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "sequence": "AB",
           },
         ],
-      },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
       },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
@@ -1246,11 +1285,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -1298,18 +1338,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -1324,12 +1370,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -1373,10 +1424,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -1417,11 +1464,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -1469,18 +1517,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -1495,12 +1549,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -1543,10 +1602,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "sequence": "AB",
           },
         ],
-      },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
       },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
@@ -1588,11 +1643,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -1640,18 +1696,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -1666,12 +1728,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -1715,10 +1782,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -1759,11 +1822,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -1811,18 +1875,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -1837,12 +1907,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -1885,10 +1960,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "sequence": "AB",
           },
         ],
-      },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
       },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
@@ -1930,11 +2001,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -1982,18 +2054,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -2008,12 +2086,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -2057,10 +2140,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -2101,11 +2180,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -2153,18 +2233,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -2179,12 +2265,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -2228,10 +2319,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -2272,11 +2359,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -2324,18 +2412,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -2350,12 +2444,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -2399,10 +2498,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -2443,11 +2538,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={
@@ -2495,18 +2591,24 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A",
         "B",
       ],
-      "consensus": Array [
-        Object {
-          "letter": "A",
-          "occurrences": 10,
-          "position": 0,
+      "consensus": Object {
+        "sequence": Object {
+          "id": "consensus",
+          "sequence": "AB",
         },
-        Object {
-          "letter": "B",
-          "occurrences": 10,
-          "position": 1,
-        },
-      ],
+        "statistics": Array [
+          Object {
+            "letter": "A",
+            "occurrences": 10,
+            "position": 0,
+          },
+          Object {
+            "letter": "B",
+            "occurrences": 10,
+            "position": 1,
+          },
+        ],
+      },
       "globalAlphaLetterCounts": Object {
         "A": 10,
         "B": 10,
@@ -2521,12 +2623,17 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         },
       },
       "predictedNT": false,
+      "querySequence": Object {
+        "id": "sequence-0",
+        "sequence": "AB",
+      },
       "sequences": Map {
-        SequenceSortOptions {
+        SequenceSorter {
           "description": "As input",
-          "distanceFn": undefined,
-          "isTargetSequenceDependent": false,
+          "isQuerySequenceDependent": false,
           "key": "as-input",
+          "sortFn": [Function],
+          "targetAlignmentType": "both",
         } => Array [
           Object {
             "id": "sequence-0",
@@ -2570,10 +2677,6 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           },
         ],
       },
-      "targetSequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
-      },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
   }
@@ -2614,11 +2717,12 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     }
   }
   sortBy={
-    SequenceSortOptions {
+    SequenceSorter {
       "description": "As input",
-      "distanceFn": undefined,
-      "isTargetSequenceDependent": false,
+      "isQuerySequenceDependent": false,
       "key": "as-input",
+      "sortFn": [Function],
+      "targetAlignmentType": "both",
     }
   }
   stageDimensions={

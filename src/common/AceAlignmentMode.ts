@@ -66,8 +66,8 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
               token: function (letter: string) {
                 const toreturn = getLetterClassNames(
                   letter,
-                  letter === alignment.getConsensus()[i].letter,
-                  letter === alignment.getTargetSequence().sequence[i],
+                  letter === alignment.getConsensus().statistics[i].letter,
+                  letter === alignment.getQuerySequence().sequence[i],
                   true
                 );
                 return toreturn;

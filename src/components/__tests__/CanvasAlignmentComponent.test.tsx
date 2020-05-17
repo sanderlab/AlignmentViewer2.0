@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { mount, shallow } from "enzyme";
 
-import { Alignment, SequenceSortOptions } from "../../common/Alignment";
+import { Alignment } from "../../common/Alignment";
 import { CanvasAlignmentComponent } from "../../components/CanvasAlignmentComponent";
 import {
   AlignmentTypes,
@@ -11,6 +11,7 @@ import {
   ALL_AMINOACID_COLORSCHEMES,
   ALL_NUCLEOTIDE_COLORSCHEMES,
 } from "../../common/MolecularStyles";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -48,7 +49,7 @@ describe("CanvasAlignmentComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -61,7 +62,7 @@ describe("CanvasAlignmentComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -78,7 +79,7 @@ describe("CanvasAlignmentComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -103,7 +104,7 @@ describe("CanvasAlignmentComponent", () => {
           alignmentType={AlignmentTypes.AMINOACID}
           positionsToStyle={positionsToStyle}
           colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
-          sortBy={SequenceSortOptions.INPUT}
+          sortBy={SequenceSorter.INPUT}
         />
       );
       const nucleotideWrapper = mount(
@@ -112,7 +113,7 @@ describe("CanvasAlignmentComponent", () => {
           alignmentType={AlignmentTypes.NUCLEOTIDE}
           positionsToStyle={positionsToStyle}
           colorScheme={ALL_NUCLEOTIDE_COLORSCHEMES[0]}
-          sortBy={SequenceSortOptions.INPUT}
+          sortBy={SequenceSorter.INPUT}
         />
       );
       expect(aminoWrapper).toMatchSnapshot();
@@ -131,7 +132,7 @@ describe("CanvasAlignmentComponent", () => {
         alignmentType={AlignmentTypes.NUCLEOTIDE}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_NUCLEOTIDE_COLORSCHEMES[0]}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -151,7 +152,7 @@ describe("CanvasAlignmentComponent", () => {
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     const instance = wrapper.instance() as CanvasAlignmentComponent;

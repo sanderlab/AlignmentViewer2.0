@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AceTargetSequenceComponent Should render when given default props 1`] = `
+exports[`AceQuerySequenceComponent Should render when given default props 1`] = `
 <div
   onMouseEnter={[Function]}
   onMouseLeave={[Function]}

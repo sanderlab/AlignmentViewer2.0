@@ -389,11 +389,8 @@ export class SequenceBarplotComponent extends React.Component<
       this.cache.alignment = alignment;
       this.cache.dataSeriesSet = dataSeriesSet;
 
-      const maxSeqLength = alignment.getMaxSequenceLength();
       let allBars: ISingleBarDetailsFull[] = [];
       dataSeriesSet.forEach((ds) => {
-        const dataSeriesBars = ds.getBars(alignment);
-
         allBars = allBars.concat(
           ds.getBars(alignment).map((bar, idx) => {
             return {
@@ -611,7 +608,10 @@ export class SequenceBarplotComponent extends React.Component<
                     );
                   }
                   return acc;
-                }, new Array())}
+
+                  //something off here with typescript and this accumulator.
+                  //can't specify type as rect
+                }, new Array<JSX.Element>())}
 
                 <rect
                   className="interaction-placeholder"

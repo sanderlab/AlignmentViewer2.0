@@ -2,7 +2,8 @@ import * as React from "react";
 import "./MiniMap.scss";
 
 import { CanvasAlignmentComponent } from "./CanvasAlignmentComponent";
-import { Alignment, SequenceSortOptions } from "../common/Alignment";
+import { Alignment } from "../common/Alignment";
+import { SequenceSorter } from "../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -12,7 +13,7 @@ import { ResizeSensor } from "css-element-queries";
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
-  sortBy: SequenceSortOptions;
+  sortBy: SequenceSorter;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   highlightRows?: {
     rowStart: number;

@@ -3,9 +3,10 @@ import * as React from "react";
 
 import { shallow, mount } from "enzyme";
 
-import { AceTargetSequenceComponent } from "../AceTargetSequenceComponent";
-import { Alignment, SequenceSortOptions } from "../../common/Alignment";
+import { AceQuerySequenceComponent } from "../AceQuerySequenceComponent";
+import { Alignment } from "../../common/Alignment";
 import { Ace, default as ace } from "ace-builds";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -24,7 +25,7 @@ jest.mock("../MolecularStyles.module.scss", () => {
   };
 });
 
-describe("AceTargetSequenceComponent", () => {
+describe("AceQuerySequenceComponent", () => {
   let editor: Ace.Editor;
   let editorLoadedSpy: jest.Mock;
 
@@ -42,12 +43,12 @@ describe("AceTargetSequenceComponent", () => {
 
   it("Should render when given default props", () => {
     const wrapper = shallow(
-      <AceTargetSequenceComponent
+      <AceQuerySequenceComponent
         id="test-id"
         text={"testing"}
         fontSize={3}
         alignment={new Alignment("", [])}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -55,17 +56,17 @@ describe("AceTargetSequenceComponent", () => {
 
   it("Should invoke the loaded callback when the Ace editor is loaded.", () => {
     mount(
-      <AceTargetSequenceComponent
+      <AceQuerySequenceComponent
         editorLoaded={editorLoadedSpy}
         alignment={
           new Alignment("test-alignment", [
-            { id: "Target", sequence: "ATGCC" },
+            { id: "Query", sequence: "ATGCC" },
             { id: "Psychic", sequence: "ATGCC" },
           ])
         }
         fontSize={4}
         id={"ace-msa-editor"}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(editorLoadedSpy).toHaveBeenCalled();

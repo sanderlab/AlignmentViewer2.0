@@ -7,7 +7,7 @@ import { enableFetchMocks, default as fetchMock } from "jest-fetch-mock";
 enableFetchMocks();
 
 describe("Alignment", () => {
-  let pse1TargetSequence: ISequence;
+  let pse1QuerySequence: ISequence;
   let pse1Alignment: FastaAlignment;
 
   beforeAll(async () => {
@@ -22,7 +22,7 @@ describe("Alignment", () => {
       "7fa1c5691376beab198788a726917d48_b0.4.a2m",
       await result.text()
     );
-    pse1TargetSequence = pse1Alignment.getSequences()[0];
+    pse1QuerySequence = pse1Alignment.getSequences()[0];
     expect(pse1Alignment.getName()).toEqual(
       "7fa1c5691376beab198788a726917d48_b0.4.a2m"
     );
@@ -69,6 +69,6 @@ describe("Alignment", () => {
       seq1,
       { id: "id-2", sequence: "CBA" },
     ]);
-    expect(alignment.getTargetSequence()).toEqual(seq1);
+    expect(alignment.getQuerySequence()).toEqual(seq1);
   });
 });

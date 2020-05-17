@@ -1,5 +1,6 @@
 import React from "react";
-import { Alignment, SequenceSortOptions } from "../common/Alignment";
+import { Alignment } from "../common/Alignment";
+import { SequenceSorter } from "../common/AlignmentSorter";
 import * as PIXI from "pixi.js";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import {
@@ -18,7 +19,7 @@ import {
 export interface ICanvasAlignmentProps {
   alignment: Alignment;
   alignmentType: AlignmentTypes;
-  sortBy: SequenceSortOptions;
+  sortBy: SequenceSorter;
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
   highlightRows?: {

@@ -4,8 +4,9 @@ import * as React from "react";
 import { shallow, mount } from "enzyme";
 
 import { AceMultipleSequenceAlignmentComponent } from "../AceMultipleSequenceAlignmentComponent";
-import { Alignment, SequenceSortOptions } from "../../common/Alignment";
+import { Alignment } from "../../common/Alignment";
 import { Ace, default as ace } from "ace-builds";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -47,7 +48,7 @@ describe("AceMultipleSequenceAlignmentComponent", () => {
         text={"testing"}
         fontSize={3}
         alignment={new Alignment("", [])}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -62,7 +63,7 @@ describe("AceMultipleSequenceAlignmentComponent", () => {
         }
         fontSize={4}
         id={"ace-msa-editor"}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(editorLoadedSpy).toHaveBeenCalled();

@@ -80,10 +80,28 @@ exports[`App Should render within 2 minutes. 1`] = `
                   As input
                 </option>
                 <option
-                  key="hamming-dist-to-target"
-                  value="hamming-dist-to-target"
+                  key="hamming-dist-to-query"
+                  value="hamming-dist-to-query"
                 >
-                  Hamming distance to target sequence
+                  Hamming distance to query sequence
+                </option>
+                <option
+                  key="hamming-dist-to-consensus"
+                  value="hamming-dist-to-consensus"
+                >
+                  Hamming distance to consensus sequence
+                </option>
+                <option
+                  key="blosum-score-to-query"
+                  value="blosum-score-to-query"
+                >
+                  BLOSUM62 score to query sequence
+                </option>
+                <option
+                  key="blosum-score-to-consensus"
+                  value="blosum-score-to-consensus"
+                >
+                  BLOSUM62 score to consensus sequence
                 </option>
               </select>
             </label>

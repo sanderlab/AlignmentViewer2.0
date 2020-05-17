@@ -1,7 +1,8 @@
 import React from "react";
 import "./AlignmentViewer.scss";
 import { Ace } from "ace-builds";
-import { Alignment, SequenceSortOptions } from "../common/Alignment";
+import { Alignment } from "../common/Alignment";
+import { SequenceSorter } from "../common/AlignmentSorter";
 import { ScrollSync, ScrollType } from "../common/ScrollSync";
 import {
   SequenceLogoComponent,
@@ -20,7 +21,7 @@ import {
 import { MiniMapComponent } from "./MiniMapComponent";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
 import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
-import { AceTargetSequenceComponent } from "./AceTargetSequenceComponent";
+import { AceQuerySequenceComponent } from "./AceQuerySequenceComponent";
 import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
 import { IMiniMapProps } from "./MiniMapComponent";
@@ -38,7 +39,7 @@ type IBarplotExposedProps = Pick<
 
 const defaultProps = {
   zoomLevel: 13 as number,
-  sortBy: SequenceSortOptions.INPUT as SequenceSortOptions,
+  sortBy: SequenceSorter.INPUT as SequenceSorter,
 
   showAnnotations: true as boolean,
   showConsensus: true as boolean,
@@ -372,7 +373,7 @@ export class AlignmentViewer extends React.Component<
 
   protected renderQuerySeqBox = () => (
     <div className="queryseq-box">
-      <AceTargetSequenceComponent
+      <AceQuerySequenceComponent
         alignment={this.props.alignment}
         fontSize={
           this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
@@ -393,7 +394,7 @@ export class AlignmentViewer extends React.Component<
             ScrollType.horizontal
           );
         }}
-      ></AceTargetSequenceComponent>
+      ></AceQuerySequenceComponent>
     </div>
   );
 
@@ -588,7 +589,7 @@ export class AlignmentViewer extends React.Component<
         {!showQuery
           ? null
           : this.renderWidget(
-              "av-target-seq-holder",
+              "av-query-seq-holder",
               "Query:",
               this.renderQuerySeqBox()
             )}

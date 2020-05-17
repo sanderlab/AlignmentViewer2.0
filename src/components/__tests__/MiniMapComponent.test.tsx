@@ -4,8 +4,9 @@ import * as React from "react";
 import { shallow } from "enzyme";
 
 import { MiniMapComponent } from "../MiniMapComponent";
-import { Alignment, SequenceSortOptions } from "../../common/Alignment";
+import { Alignment } from "../../common/Alignment";
 import { AlignmentStyle, AlignmentTypes } from "../../common/MolecularStyles";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -32,7 +33,7 @@ describe("MiniMap", () => {
         alignmentStyle={AlignmentStyle.fromAlignmentType(
           AlignmentTypes.AMINOACID
         )}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
       />
     );
     expect(wrapper).toMatchSnapshot();

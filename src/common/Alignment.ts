@@ -1,6 +1,7 @@
 import { generateUUIDv4 } from "./Utils";
 import { defineNewAlignmentMode } from "./AceAlignmentMode";
 import { Nucleotide } from "./Residues";
+import { SequenceSorter } from "./AlignmentSorter";
 import {
   AlignmentTypes,
   AminoAcidAlignmentStyle,
@@ -10,41 +11,6 @@ import {
 export interface ISequence {
   id: string;
   sequence: string;
-}
-
-enum DistanceFunctions {
-  "hamming",
-}
-export class SequenceSortOptions {
-  static readonly INPUT = new SequenceSortOptions(
-    "as-input",
-    "As input",
-    false
-  );
-  static readonly HAMMING_DIST_TARGET = new SequenceSortOptions(
-    "hamming-dist-to-target",
-    "Hamming distance to target sequence",
-    true,
-    DistanceFunctions.hamming
-  );
-
-  static list = [
-    SequenceSortOptions.INPUT,
-    SequenceSortOptions.HAMMING_DIST_TARGET,
-  ];
-
-  static fromKey(key: string) {
-    return SequenceSortOptions.list.find((at) => {
-      return at.key === key;
-    });
-  }
-
-  private constructor(
-    public readonly key: string,
-    public readonly description: string,
-    public readonly isTargetSequenceDependent: boolean,
-    public readonly distanceFn?: DistanceFunctions
-  ) {}
 }
 
 /**
@@ -63,8 +29,8 @@ export class Alignment {
   private aceEditorMode: string | undefined;
   private name: string;
   private predictedNT: boolean;
-  private sequences: Map<SequenceSortOptions, ISequence[]>;
-  private targetSequence: ISequence;
+  private sequences: Map<SequenceSorter, ISequence[]>;
+  private querySequence: ISequence;
   private positionalLetterCounts = new Map<
     number,
     { [letter: string]: number }
@@ -72,42 +38,13 @@ export class Alignment {
   private globalAlphaLetterCounts: { [letter: string]: number } = {};
   private allUpperAlphaLettersInAlignmentSorted: string[];
   private consensus: {
-    letter: string;
-    position: number;
-    occurrences: number;
-  }[] = [];
-
-  /**
-   * Determine the distance between two sequences
-   * @param seq1
-   * @param seq2
-   * @param distFn what method should be used to calculate distance
-   * @returns the distance between the sequence pair
-   * @throws an Error if an invalid distance function is provided.
-   */
-  private static getSequenceDistance(
-    seq1: ISequence,
-    seq2: ISequence,
-    distFn: DistanceFunctions
-  ) {
-    const minLength =
-      seq1.sequence.length < seq2.sequence.length
-        ? seq1.sequence.length
-        : seq2.sequence.length;
-    let distance = 0;
-
-    if (distFn === DistanceFunctions.hamming) {
-      for (var i = 0; i < minLength; i++) {
-        if (seq1.sequence[i] !== seq2.sequence[i]) {
-          distance += 1;
-        }
-      }
-      return distance;
-    }
-    throw Error(
-      "Unable to determine sequence distance with distance function " + distFn
-    );
-  }
+    sequence: ISequence;
+    statistics: {
+      letter: string;
+      position: number;
+      occurrences: number;
+    }[];
+  };
 
   /**
    * Normalize all values in an object that contains all counts such that
@@ -137,17 +74,17 @@ export class Alignment {
   }
 
   /**
-   * Create a new Alignment object. The default target sequence will
+   * Create a new Alignment object. The default query sequence will
    * be set to the first sequence in sequences. This can be changed
-   * by calling setTargetSequence() after creation
+   * by calling setQuerySequence() after creation
    * @param sequences
    */
   public constructor(name: string, sequencesAsInput: ISequence[]) {
     this.uuid = generateUUIDv4();
     this.name = name;
-    this.sequences = new Map<SequenceSortOptions, ISequence[]>();
-    this.sequences.set(SequenceSortOptions.INPUT, sequencesAsInput);
-    this.targetSequence = sequencesAsInput[0];
+    this.sequences = new Map<SequenceSorter, ISequence[]>();
+    this.sequences.set(SequenceSorter.INPUT, sequencesAsInput);
+    this.querySequence = sequencesAsInput[0];
     this.predictedNT = true;
 
     //
@@ -156,7 +93,9 @@ export class Alignment {
     const start = new Date();
     const allLettersInAlignment: { [key: string]: number } = {}; //all letters in the alignment
 
-    //this for loop takes the bulk of the time
+    // aggregate stats for each position and globally including
+    // the number of time each amino acid occurs
+    // ** this loop takes the bulk of the initialization time
     for (
       let sequenceIdx = 0;
       sequenceIdx < sequencesAsInput.length;
@@ -196,6 +135,7 @@ export class Alignment {
       }
     }
 
+    //get a list of all the upper letters found in the alignment
     this.allUpperAlphaLettersInAlignmentSorted = Object.keys(
       allLettersInAlignment
     )
@@ -208,7 +148,8 @@ export class Alignment {
         return arr;
       }, []);
 
-    this.consensus = Array.from(this.positionalLetterCounts).map(
+    //determine consensus sequence
+    const consensusStats = Array.from(this.positionalLetterCounts).map(
       ([position, letterCounts]) => {
         const topLetter = Object.keys(letterCounts).reduce((a, b) => {
           const aIsLetter = a.match(/[a-z]/i);
@@ -228,6 +169,14 @@ export class Alignment {
         };
       }
     );
+    this.consensus = {
+      sequence: {
+        id: "consensus",
+        sequence: consensusStats.map((s) => s.letter).join(""),
+      },
+      statistics: consensusStats,
+    };
+
     console.log(
       "done parsing alignment. took " +
         (new Date().getTime() - start.getTime()) +
@@ -398,30 +347,18 @@ export class Alignment {
    *                    than possibly cached)
    * @returns all sequences in this alignment
    */
-  getSequences(
-    sortBy?: SequenceSortOptions,
-    forceReSort?: boolean
-  ): ISequence[] {
-    sortBy = sortBy ? sortBy : SequenceSortOptions.INPUT;
+  getSequences(sortBy?: SequenceSorter, forceReSort?: boolean): ISequence[] {
+    sortBy = sortBy ? sortBy : SequenceSorter.INPUT;
     forceReSort = forceReSort ? forceReSort : false;
-    if (!this.sequences.has(sortBy) || forceReSort) {
+    if (
+      sortBy !== SequenceSorter.INPUT &&
+      (!this.sequences.has(sortBy) || forceReSort)
+    ) {
       //cache not yet populated for this sort option
-      switch (sortBy) {
-        case SequenceSortOptions.INPUT:
-          break;
-        case SequenceSortOptions.HAMMING_DIST_TARGET:
-          this.sequences.set(
-            sortBy,
-            this.sortByDistanceToTargetSequence(
-              SequenceSortOptions.HAMMING_DIST_TARGET.distanceFn!
-            )
-          );
-          break;
-        default:
-          throw Error(
-            `The sortBy option provided "${sortBy}" is not implemented`
-          );
-      }
+      this.sequences.set(
+        sortBy,
+        sortBy.sortFn(this.sequences.get(SequenceSorter.INPUT)!, this)
+      );
     }
     return this.sequences.get(sortBy)!;
   }
@@ -438,66 +375,41 @@ export class Alignment {
    * Get all the first sequence in the alignment, aka, target / query / first
    * @returns all sequences in this alignment
    */
-  getTargetSequence(): ISequence {
-    return this.targetSequence;
+  getQuerySequence(): ISequence {
+    return this.querySequence;
   }
 
   /**
-   * Set the target sequence
-   * @param newTarget The new target sequence. Must already exist in the alignment.
-   * @throws an error if the target sequence does not yet exist in the alignment
+   * Set the query sequence
+   * @param newQuery The new query sequence. Must already exist in the alignment.
+   * @throws an error if the query sequence does not yet exist in the alignment
    *
    * IMPORTANT: Requires re-sorting
    */
-  setTargetSequence(newTarget: ISequence) {
-    const targetInAlignment = this.getSequences().find((seq) => {
-      if (seq === newTarget) {
+  /*setQuerySequence(newQuery: ISequence) {
+    const queryInAlignment = this.getSequences().find((seq) => {
+      if (seq === newQuery) {
         return true;
       }
       return false;
     });
-    if (targetInAlignment !== undefined) {
-      this.targetSequence = newTarget;
+    if (queryInAlignment !== undefined) {
+      this.querySequence = newQuery;
 
+      //the resort could be really slow ... need to rethink.
+      SequenceSorter.list.forEach((sortOption) => {
+        //updated cached sorted sequences
+        if (sortOption.isQuerySequenceDependent) {
+          this.getSequences(sortOption, true);
+        }
+      });
       this.sequences.forEach(
-        (sequences: ISequence[], sortBy: SequenceSortOptions) => {
+        (sequences: ISequence[], sortBy: SequenceSorter) => {
           this.getSequences(sortBy, true); // force re-sorting, which updates cache
         }
       );
     } else {
-      throw Error("target sequence does not exist in alignment");
+      throw Error("query sequence does not exist in alignment");
     }
-  }
-
-  /**
-   * This method sorts sequences or
-   * Sort the current alignment similarity to the target sequence
-   * @returns a new alignment whose sequences are sorted in descending
-   *          order by similarity to the target sequence.
-   */
-  private sortByDistanceToTargetSequence(distFn: DistanceFunctions) {
-    const inputSequences = this.getSequences();
-    switch (distFn) {
-      case DistanceFunctions.hamming:
-        return inputSequences
-          .map((s) => s)
-          .sort((seq1, seq2) => {
-            const dist1 = Alignment.getSequenceDistance(
-              this.targetSequence,
-              seq1,
-              DistanceFunctions.hamming
-            );
-            const dist2 = Alignment.getSequenceDistance(
-              this.targetSequence,
-              seq2,
-              DistanceFunctions.hamming
-            );
-            return dist1 - dist2;
-          });
-      default:
-        throw Error(
-          `The distFn option provided "${distFn}" is not implemented`
-        );
-    }
-  }
+  }*/
 }
