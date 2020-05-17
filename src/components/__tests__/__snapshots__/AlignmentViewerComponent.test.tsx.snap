@@ -137,6 +137,7 @@ exports[`AlignmentViewer Should render 1`] = `
         dataSeriesSet={
           Array [
             Object {
+              "color": "#000000",
               "cssClass": "barplot-shannon-entropy",
               "getBars": [Function],
               "id": "entropy",
@@ -146,6 +147,7 @@ exports[`AlignmentViewer Should render 1`] = `
               },
             },
             Object {
+              "color": "#b7b7b7",
               "cssClass": "barplot-gaps",
               "getBars": [Function],
               "id": "gaps",
