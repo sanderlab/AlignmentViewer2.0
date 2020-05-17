@@ -9,6 +9,7 @@ export interface ISequenceBarplotDataSeries {
   id: string; //must be unique for each series
   name: string;
   cssClass: string;
+  color?: string;
   plotOptions?: {
     fixYMax?(alignment: Alignment): number; //defaults to data max
     //fixYMin?: number; //defaults to data min
@@ -119,6 +120,7 @@ export class SequenceBarplotComponent extends React.Component<
     id: "entropy",
     name: "Entropy",
     cssClass: "barplot-shannon-entropy",
+    color: "#000000",
     plotOptions: {
       fixYMax: (al) => {
         const allLettersInAlignment = al.getAllUpperAlphaLettersInAlignmentSorted();
@@ -164,6 +166,7 @@ export class SequenceBarplotComponent extends React.Component<
     id: "conservation",
     name: "Conservation",
     cssClass: "barplot-conservation",
+    color: "#414141",
     plotOptions: {
       fixYMax: (al) => {
         return SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT.plotOptions!
@@ -200,6 +203,7 @@ export class SequenceBarplotComponent extends React.Component<
     id: "kullback-leibler-divergence",
     name: "KL Divergence",
     cssClass: "barplot-kullback-leibler-divergence",
+    color: "darkred",
     getBars: (al) => {
       const allLetters = al.getAllUpperAlphaLettersInAlignmentSorted();
       const pk = al.getPositionalLetterCounts(true, allLetters);
@@ -237,6 +241,7 @@ export class SequenceBarplotComponent extends React.Component<
     id: "gaps",
     name: "Gaps",
     cssClass: "barplot-gaps",
+    color: "#b7b7b7",
     plotOptions: {
       fixYMax: (alignment) => alignment.getSequences().length,
     },
@@ -469,7 +474,14 @@ export class SequenceBarplotComponent extends React.Component<
                     className={`dataseries-line ${bar.dataSeriesSet.cssClass}`}
                     key={bar.dataSeriesSet.id}
                   >
-                    <span className="legend-square"></span>
+                    <span
+                      className="legend-square"
+                      style={{
+                        backgroundColor: bar.dataSeriesSet.color
+                          ? bar.dataSeriesSet.color
+                          : undefined,
+                      }}
+                    ></span>
                     <span className="legend-text">
                       {bar.dataSeriesSet.name}:{" "}
                       {bar.tooltipValueText
@@ -577,6 +589,14 @@ export class SequenceBarplotComponent extends React.Component<
                     acc.push(
                       <rect
                         className={bar.dataSeriesSet.cssClass}
+                        style={{
+                          fill: bar.dataSeriesSet.color
+                            ? bar.dataSeriesSet.color
+                            : undefined,
+                          color: bar.dataSeriesSet.color
+                            ? bar.dataSeriesSet.color
+                            : undefined,
+                        }}
                         transform={`translate(${
                           ((dataseriesIdx * 1) / bars.length) *
                           SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
