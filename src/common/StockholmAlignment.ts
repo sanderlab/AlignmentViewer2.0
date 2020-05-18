@@ -1,4 +1,5 @@
 import { Alignment, ISequence } from "./Alignment";
+import { getParseError } from "./Utils";
 
 export interface IStockholmAlignmentMetadata {
   //GF: Data relating to the multiple sequence alignment as a whole, such as authors or
@@ -76,15 +77,17 @@ export class StockholmAlignment extends Alignment {
     // that the file string is of stockholm format:
     //   header must start with "# STOCKHOLM 1.0"
     //   footer must be "//"
-    if (
-      trimmedAndSplit.length < 3 ||
-      trimmedAndSplit[0].startsWith("# STOCKHOLM 1.0") === false ||
-      trimmedAndSplit[trimmedAndSplit.length - 1] !== "//"
-    ) {
-      throw Error(
-        "'fileContents' do not appear to be stockholm format" +
-          " (header !== '# STOCKHOLM 1.0' or footer !== '//')"
+    if (trimmedAndSplit.length < 3) {
+      throw getParseError("Stockholm", "The file length is less than 3 rows");
+    }
+    if (trimmedAndSplit[0].startsWith("# STOCKHOLM 1.0") === false) {
+      throw getParseError(
+        "Stockholm",
+        "The first line must be '# STOCKHOLM 1.0'"
       );
+    }
+    if (trimmedAndSplit[trimmedAndSplit.length - 1] !== "//") {
+      throw getParseError("Stockholm", "The last line must be '//'");
     }
 
     const metadata: IStockholmAlignmentMetadata = {

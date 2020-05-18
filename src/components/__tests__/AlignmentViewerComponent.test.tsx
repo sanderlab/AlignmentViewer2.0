@@ -3,10 +3,11 @@ import * as React from "react";
 
 import { shallow } from "enzyme";
 
-import { Alignment, SequenceSortOptions } from "../../common/Alignment";
+import { Alignment } from "../../common/Alignment";
 import { AlignmentViewer } from "../AlignmentViewerComponent";
 import { AlignmentStyle, AlignmentTypes } from "../../common/MolecularStyles";
 import { LOGO_TYPES } from "../SequenceLogoComponent";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
 // https://github.com/facebook/jest/issues/3094
@@ -32,7 +33,7 @@ describe("AlignmentViewer", () => {
         alignment={new Alignment("", [])}
         style={AlignmentStyle.fromAlignmentType(AlignmentTypes.NUCLEOTIDE)}
         zoomLevel={0}
-        sortBy={SequenceSortOptions.INPUT}
+        sortBy={SequenceSorter.INPUT}
         showLogo={true}
         logoOptions={{
           logoType: LOGO_TYPES.BARS,

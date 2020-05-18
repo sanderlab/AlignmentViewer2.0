@@ -22,42 +22,49 @@
       position: absolute;
       z-index: 500;
       background-color: white;
-    }
-    .settings-box h3 {
-      margin-bottom: 0;
-      text-align: center;
-    }
-    .settings-box h4 {
-      margin-top: 0;
-      text-align: center;
-    }
-    .settings-box h2 {
-      padding-top: 0;
-      margin-top: 0;
-      text-align: center;
-    }
 
-    .settings-box .settings-header {
-      position: relative;
-    }
-    .settings-box .settings-header button {
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
+      h2,
+      h3,
+      h4 {
+        text-align: center;
+      }
+      h2 {
+        padding-top: 0;
+        margin-top: 0;
+      }
+      h3 {
+        margin-bottom: 0;
+      }
+      h4 {
+        margin-top: 0;
+      }
 
-    .settings-box label strong {
-      width: 200px;
-      display: inline-block;
-    }
-    .settings-box label select,
-    .settings-box label .zoom-level {
-      width: 200px;
-      display: inline-block;
-    }
+      .settings-header {
+        position: relative;
+        button {
+          position: absolute;
+          right: 0;
+          top: 0;
+        }
+      }
 
-    .examples button.button-link {
-      border: 1px solid transparent;
+      label strong {
+        width: 200px;
+        display: inline-block;
+      }
+      label select,
+      label .zoom-level {
+        width: 200px;
+        display: inline-block;
+      }
+
+      .examples button.button-link {
+        border: 1px solid transparent;
+      }
+
+      .load-error {
+        color: red;
+      }
     }
   }
   .app-content {

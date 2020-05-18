@@ -9,11 +9,12 @@ export interface ISequenceBarplotDataSeries {
   id: string; //must be unique for each series
   name: string;
   cssClass: string;
+  color?: string;
   plotOptions?: {
     fixYMax?(alignment: Alignment): number; //defaults to data max
     //fixYMin?: number; //defaults to data min
   };
-  getPositionalInfo(pos: number, alignment: Alignment): ISingleBarDetails;
+  getBars(alignment: Alignment): ISingleBarDetails[];
 }
 
 export interface ISequenceBarplotProps {
@@ -47,11 +48,11 @@ export interface ISequenceBarplotProps {
 }
 
 interface ISingleBarDetails {
-  height: number;
+  height: number | undefined;
   tooltipValueText?: string;
 }
 interface ISingleBarDetailsFull extends ISingleBarDetails {
-  normalizedHeight: number;
+  normalizedHeight: number | undefined;
   position: number;
   dataSeriesSet: ISequenceBarplotDataSeries;
 }
@@ -119,6 +120,7 @@ export class SequenceBarplotComponent extends React.Component<
     id: "entropy",
     name: "Entropy",
     cssClass: "barplot-shannon-entropy",
+    color: "#000000",
     plotOptions: {
       fixYMax: (al) => {
         const allLettersInAlignment = al.getAllUpperAlphaLettersInAlignmentSorted();
@@ -131,22 +133,61 @@ export class SequenceBarplotComponent extends React.Component<
         );
       },
     },
-    getPositionalInfo: (pos, al) => {
-      const plc = al
-        .getPositionalLetterCounts(
-          true,
-          al.getAllUpperAlphaLettersInAlignmentSorted()
-        )
-        .get(pos);
-      return {
-        height:
-          !plc || Object.keys(plc).length === 0
-            ? 0
-            : -1 *
-              Object.values(plc).reduce((acc, p) => {
+    getBars: (al) => {
+      const toReturn: ISingleBarDetails[] = [];
+      const plc = al.getPositionalLetterCounts(
+        true,
+        al.getAllUpperAlphaLettersInAlignmentSorted()
+      );
+
+      const maxSeqLength = al.getMaxSequenceLength();
+      for (let i = 0; i < maxSeqLength; i++) {
+        const singlePlc = plc.get(i);
+        if (!singlePlc || Object.keys(singlePlc).length === 0) {
+          toReturn.push({ height: undefined });
+        } else {
+          toReturn.push({
+            height:
+              -1 *
+              Object.values(singlePlc).reduce((acc, p) => {
                 return acc + p * Math.log2(p);
               }, 0),
-      };
+          });
+        }
+      }
+      return toReturn;
+    },
+  };
+
+  /**
+   * Plot evcouplings style conservation defined as 1 - the shannon entropy
+   */
+  public static CONSERVATION_BARPLOT: ISequenceBarplotDataSeries = {
+    id: "conservation",
+    name: "Conservation",
+    cssClass: "barplot-conservation",
+    color: "#414141",
+    plotOptions: {
+      fixYMax: (al) => {
+        return SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT.plotOptions!
+          .fixYMax!(al);
+      },
+    },
+    getBars: (al) => {
+      const ymax = SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT.plotOptions!
+        .fixYMax!(al);
+      const entropyBars = SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT.getBars(
+        al
+      );
+      return entropyBars.map((entropyBar) => {
+        return {
+          ...entropyBar,
+          height:
+            entropyBar.height === undefined
+              ? undefined
+              : ymax - entropyBar.height,
+        };
+      });
     },
   };
 
@@ -162,21 +203,32 @@ export class SequenceBarplotComponent extends React.Component<
     id: "kullback-leibler-divergence",
     name: "KL Divergence",
     cssClass: "barplot-kullback-leibler-divergence",
-    getPositionalInfo: (pos, al) => {
+    color: "darkred",
+    getBars: (al) => {
       const allLetters = al.getAllUpperAlphaLettersInAlignmentSorted();
-      const pk = al.getPositionalLetterCounts(true, allLetters).get(pos);
+      const pk = al.getPositionalLetterCounts(true, allLetters);
       const qk = al.getGlobalAlphaLetterCounts(true, allLetters);
-      return {
-        height:
-          !pk || Object.keys(pk).length === 0
-            ? 0
-            : allLetters.reduce((acc, letter) => {
-                if (letter in pk) {
-                  acc += pk[letter] * Math.log(pk[letter] / qk[letter]);
-                }
-                return acc;
-              }, 0),
-      };
+
+      const toReturn: ISingleBarDetails[] = [];
+      const maxSeqLength = al.getMaxSequenceLength();
+      for (let i = 0; i < maxSeqLength; i++) {
+        const positionsPk = pk.get(i);
+        if (!positionsPk || Object.keys(positionsPk).length === 0) {
+          toReturn.push({ height: undefined });
+        } else {
+          toReturn.push({
+            height: allLetters.reduce((acc, letter) => {
+              if (letter in positionsPk) {
+                acc +=
+                  positionsPk[letter] *
+                  Math.log(positionsPk[letter] / qk[letter]);
+              }
+              return acc;
+            }, 0),
+          });
+        }
+      }
+      return toReturn;
     },
   };
 
@@ -189,18 +241,24 @@ export class SequenceBarplotComponent extends React.Component<
     id: "gaps",
     name: "Gaps",
     cssClass: "barplot-gaps",
+    color: "#b7b7b7",
     plotOptions: {
       fixYMax: (alignment) => alignment.getSequences().length,
     },
-    getPositionalInfo: (pos, al) => {
-      const gapCount = al.getGapCountAtColumn(pos);
-      return {
-        height: gapCount,
-        tooltipValueText: `${(
-          (gapCount / al.getSequences().length) *
-          100
-        ).toFixed(1)}% (${gapCount})`,
-      };
+    getBars: (al) => {
+      const toReturn: ISingleBarDetails[] = [];
+      const maxSeqLength = al.getMaxSequenceLength();
+      for (let i = 0; i < maxSeqLength; i++) {
+        const gapCount = al.getGapCountAtColumn(i);
+        toReturn.push({
+          height: gapCount,
+          tooltipValueText: `${(
+            (gapCount / al.getSequences().length) *
+            100
+          ).toFixed(1)}% (${gapCount})`,
+        });
+      }
+      return toReturn;
     },
   };
 
@@ -284,9 +342,14 @@ export class SequenceBarplotComponent extends React.Component<
     bars: ISingleBarDetailsFull[]
   ): ISingleBarDetailsFull[] {
     const { alignment } = this.props;
-    const allHeights = bars.map((bar) => bar.height);
-    const overallMinHeight = Math.min(...allHeights);
-    const overallMaxHeight = Math.max(...allHeights);
+    const allValidHeights = bars.reduce((acc, bar) => {
+      if (bar.height !== undefined) {
+        acc.push(bar.height);
+      }
+      return acc;
+    }, [] as number[]);
+    const overallMinHeight = Math.min(...allValidHeights);
+    const overallMaxHeight = Math.max(...allValidHeights);
     return bars.map((bar) => {
       const minHeight = overallMinHeight;
       const maxHeight =
@@ -296,8 +359,10 @@ export class SequenceBarplotComponent extends React.Component<
       return {
         ...bar,
         normalizedHeight:
-          ((bar.height - minHeight) / (maxHeight - minHeight)) *
-          SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT,
+          bar.height === undefined
+            ? undefined
+            : ((bar.height - minHeight) / (maxHeight - minHeight)) *
+              SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT,
       };
     });
   }
@@ -324,17 +389,18 @@ export class SequenceBarplotComponent extends React.Component<
       this.cache.alignment = alignment;
       this.cache.dataSeriesSet = dataSeriesSet;
 
-      const maxSeqLength = alignment.getMaxSequenceLength();
       let allBars: ISingleBarDetailsFull[] = [];
       dataSeriesSet.forEach((ds) => {
-        for (let i = 0; i < maxSeqLength; i++) {
-          allBars.push({
-            ...ds.getPositionalInfo(i, alignment),
-            position: i,
-            dataSeriesSet: ds,
-            normalizedHeight: -1, // define below
-          });
-        }
+        allBars = allBars.concat(
+          ds.getBars(alignment).map((bar, idx) => {
+            return {
+              ...bar,
+              position: idx,
+              dataSeriesSet: ds,
+              normalizedHeight: -1, // define below
+            };
+          })
+        );
       });
 
       //normalize bars group by group
@@ -388,9 +454,15 @@ export class SequenceBarplotComponent extends React.Component<
         place={tooltipPlacement}
         getContent={(pos: string) => {
           const posInt = parseInt(pos);
-          const barsAtPostion = barsObj.barsGroupedByPosition.get(posInt)!;
           const posPlusOne = posInt + 1; // positions should be 1 based, not zero based
-          return !barsAtPostion ? undefined : (
+          const barsAtPostion = barsObj.barsGroupedByPosition.get(posInt)!;
+          const numValidBars = !barsAtPostion
+            ? 0
+            : barsAtPostion.reduce((acc, bar) => {
+                return acc + (bar.height !== undefined ? 1 : 0);
+              }, 0 as number);
+
+          return numValidBars < 1 ? undefined : (
             <div className="bar-position-textblock">
               <h1>Position: {posPlusOne}</h1>
               {barsAtPostion.map((bar) => {
@@ -399,12 +471,21 @@ export class SequenceBarplotComponent extends React.Component<
                     className={`dataseries-line ${bar.dataSeriesSet.cssClass}`}
                     key={bar.dataSeriesSet.id}
                   >
-                    <span className="legend-square"></span>
+                    <span
+                      className="legend-square"
+                      style={{
+                        backgroundColor: bar.dataSeriesSet.color
+                          ? bar.dataSeriesSet.color
+                          : undefined,
+                      }}
+                    ></span>
                     <span className="legend-text">
                       {bar.dataSeriesSet.name}:{" "}
                       {bar.tooltipValueText
                         ? bar.tooltipValueText
-                        : +bar.height.toFixed(1)}
+                        : bar.height !== undefined
+                        ? +bar.height.toFixed(1)
+                        : "undefined"}
                     </span>
                   </div>
                 );
@@ -459,9 +540,16 @@ export class SequenceBarplotComponent extends React.Component<
       >
         {Array.from(barsObj.barsGroupedByPosition.entries()).map(
           ([pos, bars]) => {
-            const maxBarHeight = Math.max(
-              ...bars.map((bar) => bar.normalizedHeight)
-            );
+            const allBarsHeightsAtPosition = bars.reduce((acc, bar) => {
+              if (bar.normalizedHeight !== undefined) {
+                acc.push(bar.normalizedHeight);
+              }
+              return acc;
+            }, [] as number[]);
+            const maxBarHeight =
+              allBarsHeightsAtPosition.length < 1
+                ? 0
+                : Math.max(...allBarsHeightsAtPosition);
 
             const numDataSeries = barsObj.barsGroupedByDataseries.size;
             const barWidth =
@@ -471,7 +559,7 @@ export class SequenceBarplotComponent extends React.Component<
               (numDataSeries === 1 ? pos + 0.05 : pos) *
               SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH;
 
-            return (
+            return allBarsHeightsAtPosition.length < 1 ? null : (
               <g
                 transform={`translate(${firstBarOffset},0)`}
                 className={
@@ -493,23 +581,37 @@ export class SequenceBarplotComponent extends React.Component<
                 data-class={"barplot-tooltip-container"}
                 key={`pos_${pos}`}
               >
-                {bars.map((bar, dataseriesIdx) => {
-                  return (
-                    <rect
-                      className={bar.dataSeriesSet.cssClass}
-                      transform={`translate(${
-                        ((dataseriesIdx * 1) / bars.length) *
-                        SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
-                      },${
-                        SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT -
-                        bar.normalizedHeight
-                      })`}
-                      width={barWidth}
-                      height={bar.normalizedHeight}
-                      key={`${bar.position}_${bar.dataSeriesSet.id}`}
-                    ></rect>
-                  );
-                })}
+                {bars.reduce((acc, bar, dataseriesIdx) => {
+                  if (bar.normalizedHeight !== undefined) {
+                    acc.push(
+                      <rect
+                        className={bar.dataSeriesSet.cssClass}
+                        style={{
+                          fill: bar.dataSeriesSet.color
+                            ? bar.dataSeriesSet.color
+                            : undefined,
+                          color: bar.dataSeriesSet.color
+                            ? bar.dataSeriesSet.color
+                            : undefined,
+                        }}
+                        transform={`translate(${
+                          ((dataseriesIdx * 1) / bars.length) *
+                          SequenceBarplotComponent.POSITION_VIEWBOX_WIDTH
+                        },${
+                          SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT -
+                          bar.normalizedHeight
+                        })`}
+                        width={barWidth}
+                        height={bar.normalizedHeight}
+                        key={`${bar.position}_${bar.dataSeriesSet.id}`}
+                      />
+                    );
+                  }
+                  return acc;
+
+                  //something off here with typescript and this accumulator.
+                  //can't specify type as rect
+                }, new Array<JSX.Element>())}
 
                 <rect
                   className="interaction-placeholder"

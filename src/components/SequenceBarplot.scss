@@ -28,37 +28,5 @@
       fill-opacity: 0;
       stroke: none;
     }
-    .position-container.selected rect.interaction-placeholder {
-      //stroke: red;
-      //stroke-width: 5;
-    }
   }
-}
-
-//
-//users should override what is below to change bar colors
-//
-
-.barplot svg rect.barplot-shannon-entropy {
-  fill: #000000;
-  color: #000000;
-}
-.bar-position-textblock .barplot-shannon-entropy .legend-square {
-  background-color: #000000;
-}
-
-.barplot svg rect.barplot-gaps {
-  fill: #b7b7b7;
-  color: #b7b7b7;
-}
-.bar-position-textblock .barplot-gaps .legend-square {
-  background-color: #b7b7b7;
-}
-
-.barplot svg rect.barplot-kullback-leibler-divergence {
-  fill: darkred;
-  color: darkred;
-}
-.bar-position-textblock .barplot-kullback-leibler-divergence .legend-square {
-  background-color: darkred;
 }

@@ -1,8 +1,7 @@
 import * as React from "react";
 import "./FileInput.scss";
 import { Alignment } from "../common/Alignment";
-import { FastaAlignment } from "../common/FastaAlignment";
-import { StockholmAlignment } from "../common/StockholmAlignment";
+import { AlignmentLoader } from "../common/AlignmentLoader";
 
 export interface IExampleFileProps {
   labelText: string;
@@ -14,6 +13,7 @@ export interface IAlignmentLoaderProps {
   fileSelectorLabelText: string;
 
   onAlignmentLoaded: (alignment: Alignment) => void; //loading ended
+  onAlignmenLoadError: (e: Error[]) => void; //loading error
 
   exampleFiles?: IExampleFileProps[];
   onFileLoadStart?: () => void; //notify on begin loading
@@ -34,8 +34,20 @@ export class AlignmentFileLoaderComponent extends React.Component<
       this
     );
     this.handleClick = this.handleClick.bind(this);
+    this.alignmentLoaded = this.alignmentLoaded.bind(this);
+    this.handleFileUploadInputChange = this.handleFileUploadInputChange.bind(
+      this
+    );
     this.fileInput = React.createRef();
   }
+
+  /*
+   *
+   *
+   * PRIVATE METHODS
+   *
+   *
+   */
 
   /**
    * Pass the visible button click through to the file input
@@ -47,28 +59,14 @@ export class AlignmentFileLoaderComponent extends React.Component<
   }
 
   /**
-   * Read the file text and report loading to the parent
-   * @param file
+   *
+   * @param alignment
    */
-  private readFileText(file: File) {
-    const { onAlignmentLoaded } = this.props;
-
-    var reader = new FileReader();
-    reader.onload = (e) => {
-      const fileText = reader.result as string;
-      let alignment: Alignment;
-      try {
-        alignment = StockholmAlignment.fromFileContents(file.name, fileText);
-      } catch (e) {
-        alignment = FastaAlignment.fromFileContents(file.name, fileText);
-      }
-
-      onAlignmentLoaded(alignment);
-      if (this.fileInput.current) {
-        this.fileInput.current.value = ""; //reset the input box
-      }
-    };
-    reader.readAsText(file);
+  private alignmentLoaded(alignment: Alignment) {
+    this.props.onAlignmentLoaded(alignment);
+    if (this.fileInput.current) {
+      this.fileInput.current.value = ""; //reset the input box
+    }
   }
 
   /**
@@ -78,7 +76,7 @@ export class AlignmentFileLoaderComponent extends React.Component<
   private handleFileUploadInputChange(
     event: React.FormEvent<HTMLInputElement>
   ) {
-    const { onFileLoadStart } = this.props;
+    const { onFileLoadStart, onAlignmenLoadError } = this.props;
     event.preventDefault();
 
     if (this.fileInput.current && this.fileInput.current.files) {
@@ -88,7 +86,11 @@ export class AlignmentFileLoaderComponent extends React.Component<
       setTimeout(() => {
         //safari needs this in a timeout, otherwise it runs synchronously?!?
         const file = this.fileInput.current!.files![0];
-        this.readFileText(file);
+        AlignmentLoader.loadAlignmentFromFile(
+          file,
+          this.alignmentLoaded,
+          onAlignmenLoadError
+        );
       });
     }
   }
@@ -118,7 +120,7 @@ export class AlignmentFileLoaderComponent extends React.Component<
    * render example fileset
    */
   private renderExampleFiles() {
-    const { exampleFiles, onFileLoadStart } = this.props;
+    const { exampleFiles, onFileLoadStart, onAlignmenLoadError } = this.props;
     return !exampleFiles ? null : (
       <label>
         <strong>Example Alignments:</strong>
@@ -132,11 +134,12 @@ export class AlignmentFileLoaderComponent extends React.Component<
                 if (onFileLoadStart) {
                   onFileLoadStart();
                 }
-                const f = new File(
-                  [await (await fetch(`${ef.fileURL}`)).blob()],
+                AlignmentLoader.loadAlignmentFromURL(
+                  ef.fileURL,
+                  this.alignmentLoaded,
+                  onAlignmenLoadError,
                   ef.fileName
                 );
-                this.readFileText(f);
               }}
             >
               {ef.labelText}
@@ -147,6 +150,13 @@ export class AlignmentFileLoaderComponent extends React.Component<
     );
   }
 
+  /*
+   *
+   *
+   * REACT METHODS
+   *
+   *
+   */
   render() {
     return (
       <div className="alignment-file-loader">

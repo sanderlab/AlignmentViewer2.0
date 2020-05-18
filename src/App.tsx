@@ -1,6 +1,8 @@
 import React from "react";
 import "./App.scss";
-import { Alignment, SequenceSortOptions } from "./common/Alignment";
+import { Alignment } from "./common/Alignment";
+import { SequenceSorter } from "./common/AlignmentSorter";
+import { getURLParameters } from "./common/Utils";
 import { AlignmentViewer } from "./components/AlignmentViewerComponent";
 import {
   AminoAcidAlignmentStyle,
@@ -14,21 +16,28 @@ import {
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
 import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
+import { AlignmentLoader } from "./common/AlignmentLoader";
 
 interface AppProps {}
 interface AppState {
   alignment?: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  sortBy: SequenceSortOptions;
+  sortBy: SequenceSorter;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
   showMiniMap: boolean;
+  showConservationBarplot: boolean;
   showEntropyGapBarplot: boolean;
   showKLDivergenceBarplot: boolean;
   showAnnotations: boolean;
   showSettings: boolean;
   loading?: boolean;
+  loadError?: Error[];
 }
+
+const URL_PARAM_NAMES = {
+  ALIGNMENT_URL: "alignment-url",
+};
 
 export default class App extends React.Component<AppProps, AppState> {
   constructor(props: AppProps) {
@@ -37,14 +46,32 @@ export default class App extends React.Component<AppProps, AppState> {
       style: new AminoAcidAlignmentStyle(),
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
       zoomLevel: 14,
-      sortBy: SequenceSortOptions.INPUT,
+      sortBy: SequenceSorter.INPUT,
       showMiniMap: false,
+      showConservationBarplot: true,
       showEntropyGapBarplot: true,
       showKLDivergenceBarplot: false,
       showAnnotations: true,
       showSettings: true,
     };
     this.onAlignmentReceived = this.onAlignmentReceived.bind(this);
+    this.onAlignmentLoadError = this.onAlignmentLoadError.bind(this);
+  }
+
+  componentDidMount() {
+    //is there an alignment in the URL?
+    const params = getURLParameters();
+    if (params.has(URL_PARAM_NAMES.ALIGNMENT_URL)) {
+      this.setState({
+        loading: true,
+      });
+
+      AlignmentLoader.loadAlignmentFromURL(
+        params.get(URL_PARAM_NAMES.ALIGNMENT_URL),
+        this.onAlignmentReceived,
+        this.onAlignmentLoadError
+      );
+    }
   }
 
   render() {
@@ -52,6 +79,7 @@ export default class App extends React.Component<AppProps, AppState> {
       alignment,
       logoPlotStyle,
       showAnnotations,
+      showConservationBarplot,
       showEntropyGapBarplot,
       showKLDivergenceBarplot,
       showMiniMap,
@@ -61,6 +89,12 @@ export default class App extends React.Component<AppProps, AppState> {
     } = this.state;
 
     const barplots = [];
+    if (showConservationBarplot) {
+      barplots.push({
+        dataSeriesSet: [SequenceBarplotComponent.CONSERVATION_BARPLOT],
+        height: "75px",
+      });
+    }
     if (showEntropyGapBarplot) {
       barplots.push({
         dataSeriesSet: [
@@ -116,7 +150,7 @@ export default class App extends React.Component<AppProps, AppState> {
   protected renderSettingsBox = (
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
   ) => {
-    const { alignment } = this.state;
+    const { alignment, loading, loadError, showSettings } = this.state;
     const alignmentDescription = alignment ? (
       <div>
         <h3>{alignment.getName()}</h3>
@@ -134,9 +168,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <form>
             <div className="settings-header">
               <button
-                className={`button-link${
-                  this.state.showSettings ? " hide" : ""
-                }`}
+                className={`button-link${showSettings ? " hide" : ""}`}
                 type="button"
                 onClick={(e) => {
                   this.setState({
@@ -147,9 +179,7 @@ export default class App extends React.Component<AppProps, AppState> {
                 Expand
               </button>
               <button
-                className={`button-link${
-                  this.state.showSettings ? "" : " hide"
-                }`}
+                className={`button-link${showSettings ? "" : " hide"}`}
                 type="button"
                 onClick={(e) => {
                   this.setState({
@@ -166,7 +196,7 @@ export default class App extends React.Component<AppProps, AppState> {
             </div>
             <div
               style={{
-                display: this.state.showSettings ? "block" : "none",
+                display: showSettings ? "block" : "none",
                 position: "relative",
               }}
             >
@@ -178,14 +208,29 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderSequenceLogo()}
               {this.renderZoomButtons()}
               {this.renderMiniMapToggle()}
+              {this.renderConservationBarplotToggle()}
               {this.renderEntropyGapBarplotToggle()}
               {this.renderKLDivergenceBarplot()}
               {this.renderAnnotationToggle()}
               <br></br>
               {this.renderFileUpload()}
-              <div
-                className={`loader${this.state.loading ? "" : " hide"}`}
-              ></div>
+              {!loading ? null : <div className="loader" />}
+              {!loadError || loadError.length < 1 ? null : (
+                <div className={`load-error`}>
+                  <h3>
+                    <strong>Error loading alignment:</strong>
+                  </h3>
+                  <ul>
+                    {loadError.map((e) => {
+                      return (
+                        <li key={e.name + e.message}>
+                          <strong>{e.name} parse error:</strong> {e.message}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
             </div>
           </form>
         </div>
@@ -194,7 +239,12 @@ export default class App extends React.Component<AppProps, AppState> {
   };
 
   protected renderSortControl = () => {
-    const { sortBy } = this.state;
+    const { sortBy, style } = this.state;
+    const sorters =
+      style instanceof AminoAcidAlignmentStyle
+        ? SequenceSorter.aminoAcidSorters
+        : SequenceSorter.nucleotideSorters;
+
     return (
       <div>
         <label>
@@ -203,11 +253,11 @@ export default class App extends React.Component<AppProps, AppState> {
             value={sortBy.key}
             onChange={(e) =>
               this.setState({
-                sortBy: SequenceSortOptions.fromKey(e.target.value)!,
+                sortBy: SequenceSorter.fromKey(e.target.value)!,
               })
             }
           >
-            {SequenceSortOptions.list.map((sso) => {
+            {sorters.map((sso) => {
               return (
                 <option value={sso.key} key={sso.key}>
                   {sso.description}
@@ -383,7 +433,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <div className="zoom-level">
             <button
               type="button"
-              disabled={zoomLevel < 3}
+              disabled={zoomLevel < 7}
               onClick={(e) => {
                 this.setState({
                   zoomLevel: zoomLevel - 1,
@@ -430,7 +480,30 @@ export default class App extends React.Component<AppProps, AppState> {
             });
           }}
           onAlignmentLoaded={this.onAlignmentReceived}
+          onAlignmenLoadError={this.onAlignmentLoadError}
         />
+      </div>
+    );
+  };
+
+  protected renderConservationBarplotToggle = () => {
+    return (
+      <div className="barplot-conservation-toggle">
+        <label>
+          <strong>Show conservation barplot:</strong>
+
+          <input
+            name="conservationBarplotToggle"
+            type="checkbox"
+            checked={this.state.showConservationBarplot}
+            onChange={(e) => {
+              const target = e.target;
+              this.setState({
+                showConservationBarplot: target.checked,
+              });
+            }}
+          />
+        </label>
       </div>
     );
   };
@@ -523,12 +596,20 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
 
+  protected onAlignmentLoadError(errors: Error[]) {
+    this.setState({
+      loadError: errors,
+      loading: false,
+    });
+  }
+
   protected onAlignmentReceived(alignment: Alignment) {
     this.setState({
       alignment: alignment,
       showSettings: false,
       style: alignment.getDefaultStyle(),
       loading: false,
+      loadError: undefined,
     });
   }
 }

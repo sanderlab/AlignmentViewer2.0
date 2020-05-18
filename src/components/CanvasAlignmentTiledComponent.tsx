@@ -195,8 +195,8 @@ export class CanvasAlignmentTiled extends React.Component<
     offsets: { seqY: number; letterX: number }
   ) {
     const { alignment, alignmentType, colorScheme } = this.props;
-    const consensusSequence = alignment.getConsensus();
-    const querySequence = alignment.getTargetSequence().sequence;
+    const consensusSequence = alignment.getConsensus().statistics;
+    const querySequence = alignment.getQuerySequence().sequence;
     const moleculeClass =
       alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
     let molecule = moleculeClass.UNKNOWN;

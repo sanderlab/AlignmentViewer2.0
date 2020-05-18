@@ -1,7 +1,7 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "1.0.0-beta-9",
+  "version": "1.0.0-beta-11",
   "private": false,
   "author": "Nicholas Gauthier",
   "module": "dist/js/index.js",
@@ -48,8 +48,9 @@
     "build-and-deploy": "yarn deploy && yarn pub2npm",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "pub2npm": "rimraf dist && yarn babel && yarn tsc -p tsconfig.dist.json && node ./scripts/copyStyles.js && yarn publish",
-    "babel": "yarn babel:cjs && yarn babel:esm && yarn babel:umd",
+    "prep-dist": "rimraf dist && yarn babel:all && yarn tsc -p tsconfig.dist.json && node ./scripts/copyStyles.js && yarn webpack --config webpack-standalone.config.js",
+    "publish-to-npm": "yarn prep-dist && yarn publish",
+    "babel:all": "yarn babel:cjs && yarn babel:esm && yarn babel:umd",
     "babel:cjs": "BABEL_ENV=cjs babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/js --presets=@babel/env",
     "babel:esm": "BABEL_ENV=esm babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/esm",
     "babel:umd": "BABEL_ENV=umd babel --source-maps --extensions \".ts,.tsx\" --ignore \"**/__tests__\" src --out-dir dist/umd --plugins=transform-es2015-modules-umd"
@@ -99,7 +100,8 @@
     "react-scripts": "3.4.0",
     "ts-jest": "^25.2.1",
     "ts-node": "^8.9.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "webpack-cli": "^3.3.11"
   },
   "jest": {
     "collectCoverageFrom": [
