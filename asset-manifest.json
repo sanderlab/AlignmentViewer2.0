@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/AlignmentViewer2.0/static/css/main.849ae1d3.chunk.css",
+    "main.css": "/AlignmentViewer2.0/static/css/main.5ae50a45.chunk.css",
     "main.js": "/AlignmentViewer2.0/static/js/main.9172d652.chunk.js",
     "main.js.map": "/AlignmentViewer2.0/static/js/main.9172d652.chunk.js.map",
     "runtime-main.js": "/AlignmentViewer2.0/static/js/runtime-main.e0848fe5.js",
@@ -8,15 +8,15 @@
     "static/js/2.d0eaf4db.chunk.js": "/AlignmentViewer2.0/static/js/2.d0eaf4db.chunk.js",
     "static/js/2.d0eaf4db.chunk.js.map": "/AlignmentViewer2.0/static/js/2.d0eaf4db.chunk.js.map",
     "index.html": "/AlignmentViewer2.0/index.html",
-    "precache-manifest.3aafb5812e3ceeb3bf59a7134ddb1115.js": "/AlignmentViewer2.0/precache-manifest.3aafb5812e3ceeb3bf59a7134ddb1115.js",
+    "precache-manifest.145ed20726e7635769d452bf57a54125.js": "/AlignmentViewer2.0/precache-manifest.145ed20726e7635769d452bf57a54125.js",
     "service-worker.js": "/AlignmentViewer2.0/service-worker.js",
-    "static/css/main.849ae1d3.chunk.css.map": "/AlignmentViewer2.0/static/css/main.849ae1d3.chunk.css.map",
+    "static/css/main.5ae50a45.chunk.css.map": "/AlignmentViewer2.0/static/css/main.5ae50a45.chunk.css.map",
     "static/js/2.d0eaf4db.chunk.js.LICENSE.txt": "/AlignmentViewer2.0/static/js/2.d0eaf4db.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.e0848fe5.js",
     "static/js/2.d0eaf4db.chunk.js",
-    "static/css/main.849ae1d3.chunk.css",
+    "static/css/main.5ae50a45.chunk.css",
     "static/js/main.9172d652.chunk.js"
   ]
 }
