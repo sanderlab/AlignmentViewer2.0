@@ -207,11 +207,33 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderPositionStyling(style)}
               {this.renderSequenceLogo()}
               {this.renderZoomButtons()}
-              {this.renderMiniMapToggle()}
-              {this.renderConservationBarplotToggle()}
-              {this.renderEntropyGapBarplotToggle()}
-              {this.renderKLDivergenceBarplot()}
-              {this.renderAnnotationToggle()}
+
+              {this.renderToggle(
+                "annotation-toggle",
+                "Show Annotations",
+                "showAnnotations"
+              )}
+              {this.renderToggle(
+                "minimap-toggle",
+                "Show MiniMap",
+                "showMiniMap"
+              )}
+              {this.renderToggle(
+                "barplot-conservation-toggle",
+                "Show Conservation Barplot",
+                "showConservationBarplot"
+              )}
+              {this.renderToggle(
+                "barplot-entropy-gaps-toggle",
+                "Show Entropy / Gaps Barplot",
+                "showEntropyGapBarplot"
+              )}
+              {this.renderToggle(
+                "barplot-kldivergence-toggle",
+                "Show KL Divergence Barplot",
+                "showKLDivergenceBarplot"
+              )}
+
               <br></br>
               {this.renderFileUpload()}
               {!loading ? null : <div className="loader" />}
@@ -401,6 +423,7 @@ export default class App extends React.Component<AppProps, AppState> {
       </div>
     );
   };
+
   protected renderSequenceLogo = () => {
     const { logoPlotStyle } = this.state;
     return (
@@ -427,6 +450,7 @@ export default class App extends React.Component<AppProps, AppState> {
       </div>
     );
   };
+
   protected renderZoomButtons = () => {
     const { zoomLevel } = this.state;
     return (
@@ -489,109 +513,24 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
 
-  protected renderConservationBarplotToggle = () => {
+  protected renderToggle = (
+    classInputName: string,
+    label: string,
+    stateVar: string
+  ) => {
     return (
-      <div className="barplot-conservation-toggle">
+      <div className={classInputName}>
         <label>
-          <strong>Show conservation barplot:</strong>
+          <strong>{label}:</strong>
 
           <input
-            name="conservationBarplotToggle"
+            name={classInputName}
             type="checkbox"
-            checked={this.state.showConservationBarplot}
+            checked={this.state[stateVar]}
             onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showConservationBarplot: target.checked,
-              });
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderEntropyGapBarplotToggle = () => {
-    return (
-      <div className="barplot-entroy-gap-toggle">
-        <label>
-          <strong>Show entropy/gap barplot:</strong>
-
-          <input
-            name="entropyGapBarplotToggle"
-            type="checkbox"
-            checked={this.state.showEntropyGapBarplot}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showEntropyGapBarplot: target.checked,
-              });
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderKLDivergenceBarplot = () => {
-    return (
-      <div className="barplot-kldivergence-toggle">
-        <label>
-          <strong>Show KL Divergence barplot:</strong>
-
-          <input
-            name="kldivergenceBarplotToggle"
-            type="checkbox"
-            checked={this.state.showKLDivergenceBarplot}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showKLDivergenceBarplot: target.checked,
-              });
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderMiniMapToggle = () => {
-    return (
-      <div className="minimap-toggle">
-        <label>
-          <strong>Show MiniMap:</strong>
-
-          <input
-            name="showMiniMap"
-            type="checkbox"
-            checked={this.state.showMiniMap}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showMiniMap: target.checked,
-              });
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderAnnotationToggle = () => {
-    return (
-      <div className="annotation-toggle">
-        <label>
-          <strong>Show Annotations:</strong>
-
-          <input
-            name="showAnnotations"
-            type="checkbox"
-            checked={this.state.showAnnotations}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showAnnotations: target.checked,
-              });
+              const newState = {};
+              newState[stateVar] = e.target.checked;
+              this.setState(newState);
             }}
           />
         </label>
