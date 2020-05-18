@@ -1,7 +1,7 @@
 {
   "name": "alignment-viewer-2",
   "homepage": "https://sanderlab.github.io/AlignmentViewer2.0/",
-  "version": "1.0.0-beta-11",
+  "version": "1.0.0-beta-12",
   "private": false,
   "author": "Nicholas Gauthier",
   "module": "dist/js/index.js",
@@ -45,7 +45,7 @@
     "test": "react-scripts test --env=jsdom-fifteen",
     "eject": "react-scripts eject",
     "cover": "react-scripts test --env=jsdom-fifteen --coverage --watchAll=false",
-    "build-and-deploy": "yarn deploy && yarn pub2npm",
+    "build-and-deploy": "yarn deploy && yarn publish-to-npm",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
     "prep-dist": "rimraf dist && yarn babel:all && yarn tsc -p tsconfig.dist.json && node ./scripts/copyStyles.js && yarn webpack --config webpack-standalone.config.js",
