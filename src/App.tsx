@@ -16,7 +16,7 @@ import {
 import { LOGO_TYPES } from "./components/SequenceLogoComponent";
 import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
 import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
-import { AlignmentLoader } from "./common/AlignmentLoader";
+import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
 
 interface AppProps {}
 interface AppState {
@@ -32,7 +32,7 @@ interface AppState {
   showAnnotations: boolean;
   showSettings: boolean;
   loading?: boolean;
-  loadError?: Error[];
+  loadError?: AlignmentLoadError;
 }
 
 const URL_PARAM_NAMES = {
@@ -215,20 +215,23 @@ export default class App extends React.Component<AppProps, AppState> {
               <br></br>
               {this.renderFileUpload()}
               {!loading ? null : <div className="loader" />}
-              {!loadError || loadError.length < 1 ? null : (
+              {!loadError ? null : (
                 <div className={`load-error`}>
                   <h3>
-                    <strong>Error loading alignment:</strong>
+                    <strong>{loadError.message}</strong>
                   </h3>
                   <ul>
-                    {loadError.map((e) => {
+                    {loadError.errors.map((e) => {
                       return (
-                        <li key={e.name + e.message}>
-                          <strong>{e.name} parse error:</strong> {e.message}
+                        <li key={e.name}>
+                          <strong>{e.name}:</strong> {e.message}
                         </li>
                       );
                     })}
                   </ul>
+                  {!loadError.possibleResolution ? null : (
+                    <div>{loadError.possibleResolution}</div>
+                  )}
                 </div>
               )}
             </div>
@@ -596,9 +599,9 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
 
-  protected onAlignmentLoadError(errors: Error[]) {
+  protected onAlignmentLoadError(error: AlignmentLoadError) {
     this.setState({
-      loadError: errors,
+      loadError: error,
       loading: false,
     });
   }

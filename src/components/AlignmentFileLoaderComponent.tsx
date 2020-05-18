@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./FileInput.scss";
 import { Alignment } from "../common/Alignment";
-import { AlignmentLoader } from "../common/AlignmentLoader";
+import { AlignmentLoader, AlignmentLoadError } from "../common/AlignmentLoader";
 
 export interface IExampleFileProps {
   labelText: string;
@@ -13,7 +13,7 @@ export interface IAlignmentLoaderProps {
   fileSelectorLabelText: string;
 
   onAlignmentLoaded: (alignment: Alignment) => void; //loading ended
-  onAlignmenLoadError: (e: Error[]) => void; //loading error
+  onAlignmenLoadError: (e: AlignmentLoadError) => void; //loading error
 
   exampleFiles?: IExampleFileProps[];
   onFileLoadStart?: () => void; //notify on begin loading

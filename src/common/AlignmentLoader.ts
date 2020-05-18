@@ -5,6 +5,20 @@ import { Alignment } from "../common/Alignment";
 import { FastaAlignment } from "../common/FastaAlignment";
 import { StockholmAlignment } from "../common/StockholmAlignment";
 
+export class AlignmentLoadError extends Error {
+  errors: { name: string; message: string }[];
+  possibleResolution?: string;
+  constructor(
+    message: string,
+    errors: { name: string; message: string }[],
+    possibleResolution?: string
+  ) {
+    super(message);
+    this.errors = errors;
+    this.possibleResolution = possibleResolution;
+  }
+}
+
 export class AlignmentLoader {
   /**
    * List of all possible alignments. The order is respected when attempting
@@ -24,14 +38,29 @@ export class AlignmentLoader {
   public static async loadAlignmentFromURL(
     url: string,
     callback: (a: Alignment) => void,
-    errorCallback: (e: Error[]) => void,
+    errorCallback: (e: AlignmentLoadError) => void,
     alignmentName?: string
   ) {
+    let f;
     try {
-      const f = new File(
+      f = new File(
         [await (await fetch(`${url}`)).blob()],
         alignmentName ? alignmentName : url.substring(url.lastIndexOf("/") + 1)
       );
+    } catch (e) {
+      console.error("Unable to load alignment by URL '" + url + "'", e);
+      const err = new AlignmentLoadError(
+        "Unable to fetch alignment in URL",
+        [{ name: "Browser-reported error message", message: e.message }],
+        "Possible causes: (1) The alignment is not sent using SSL or (2) the server that hosts " +
+          "the alignment has not enabled CORS. To be assessible to Alignment Viewer 2, the " +
+          "alignment must be served by HTTPS and the server must enable CORS."
+      );
+      errorCallback(err);
+      return;
+    }
+
+    try {
       AlignmentLoader.loadAlignmentFromFile(f, callback, errorCallback);
     } catch (e) {
       errorCallback(e);
@@ -48,7 +77,7 @@ export class AlignmentLoader {
   public static async loadAlignmentFromFile(
     file: File,
     callback: (a: Alignment) => void,
-    errorCallback: (e: Error[]) => void
+    errorCallback: (e: AlignmentLoadError) => void
   ) {
     var reader = new FileReader();
     reader.onload = (e) => {
@@ -70,10 +99,10 @@ export class AlignmentLoader {
    * Parse an alignment from text
    * @param alignmentName
    * @param text
-   * @throws an excpetion if the text cannot be parsed.
+   * @throws an AlignmentLoadError if the text cannot be parsed.
    */
   public static loadAlignmentFromText(alignmentName: string, text: string) {
-    const errors: Error[] = [];
+    const err = new AlignmentLoadError("Alignment Format Error", []);
     for (let i = 0; i < AlignmentLoader.AlignmentFileTypes.length; i++) {
       try {
         const toreturn = AlignmentLoader.AlignmentFileTypes[i].fromFileContents(
@@ -82,9 +111,9 @@ export class AlignmentLoader {
         );
         return toreturn;
       } catch (e) {
-        errors.push(e);
+        err.errors.push(e);
       }
     }
-    throw errors;
+    throw err;
   }
 }

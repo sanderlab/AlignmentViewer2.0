@@ -107,6 +107,6 @@ export function getURLParameters() {
  */
 export function getParseError(parserName: string, errorMessage: string) {
   const toReturn = new Error(errorMessage);
-  toReturn.name = parserName;
+  toReturn.name = parserName + " Parse Error";
   return toReturn;
 }
