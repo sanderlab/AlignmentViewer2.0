@@ -195,9 +195,9 @@ export default class App extends React.Component<AppProps, AppState> {
               </div>
             </div>
             <div
+              className={"settings-content"}
               style={{
                 display: showSettings ? "block" : "none",
-                position: "relative",
               }}
             >
               {this.renderAlignmentTypeLabel(style)}

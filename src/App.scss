@@ -48,25 +48,30 @@
         }
       }
 
-      label strong {
-        width: 200px;
-        display: inline-block;
-      }
-      label select,
-      label .zoom-level {
-        width: 200px;
-        display: inline-block;
-      }
+      .settings-content {
+        position: relative;
 
-      .examples button.button-link {
-        border: 1px solid transparent;
-      }
+        label strong {
+          width: 200px;
+          display: inline-block;
+        }
+        label select,
+        label .zoom-level {
+          width: 200px;
+          display: inline-block;
+        }
 
-      .load-error {
-        color: red;
+        .examples button.button-link {
+          border: 1px solid transparent;
+        }
+
+        .load-error {
+          color: red;
+        }
       }
     }
   }
+
   .app-content {
     position: relative;
     flex: 1;
