@@ -1,5 +1,17 @@
 /** App.scss */
 
+body {
+  //stop the bouncy at the bottom of a scroll - since the webgl component
+  //is only showing a fraction of the alignment, this is irritating when
+  //trying to "fake scroll" through the alignment
+  //TODO: figure out if this can be done on the element (like msa viewer)
+  overscroll-behavior-y: none;
+
+  //stop the back button swipe, which happens often when going to the start of
+  //the alignment
+  overscroll-behavior-x: none;
+}
+
 #root {
   height: 100vh;
   display: flex;
