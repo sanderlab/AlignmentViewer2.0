@@ -1,32 +1,41 @@
 /** SequenceBarplot.scss */
 
-.barplot .barplot-tooltip-container {
-  margin: 0;
-
-  .bar-position-textblock {
-    h1 {
-      padding-bottom: 4px;
-      margin: 0;
-      font-size: 14px;
-    }
-    .dataseries-line {
-      line-height: 16px;
-      font-size: 13px;
-    }
-    .legend-square {
-      width: 8px;
-      height: 8px;
-      display: inline-block;
-      margin-right: 6px;
-    }
-  }
+.barplot::-webkit-scrollbar {
+  background: transparent; // make scrollbar transparent
+  height: 0;
 }
 
 .barplot {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+
   svg {
     .position-container rect.interaction-placeholder {
       fill-opacity: 0;
       stroke: none;
+    }
+  }
+
+  .barplot-tooltip-container {
+    margin: 0;
+
+    .bar-position-textblock {
+      h1 {
+        padding-bottom: 4px;
+        margin: 0;
+        font-size: 14px;
+      }
+      .dataseries-line {
+        line-height: 16px;
+        font-size: 13px;
+      }
+      .legend-square {
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        margin-right: 6px;
+      }
     }
   }
 }

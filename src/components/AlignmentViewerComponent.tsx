@@ -16,7 +16,6 @@ import {
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-  PositionsToStyle,
 } from "../common/MolecularStyles";
 import { MiniMapComponent } from "./MiniMapComponent";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
@@ -25,6 +24,7 @@ import { AceQuerySequenceComponent } from "./AceQuerySequenceComponent";
 import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
 import { IMiniMapProps } from "./MiniMapComponent";
+import { WebGLAlignmentComponent } from "./WebGLAlignmentComponent";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -292,14 +292,14 @@ export class AlignmentViewer extends React.Component<
         <div className="av-annotation">{annotation}</div>
         <div
           className="av-content"
-          ref={(e) => {
+          /*ref={(e) => {
             if (e && addAsElementToScrollSync) {
               //TODO: move into separate component .. Ref can be null here and
               //      also good to keep track of removal / addition for scroll sync
               //console.log("the ref is:", e);
               this.horizontalScrollSync.registerElementScroller(e);
             }
-          }}
+          }}*/
         >
           {content}
         </div>
@@ -312,24 +312,20 @@ export class AlignmentViewer extends React.Component<
     const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
 
     return (
-      <div
-        className={
-          `${style.alignmentType.className} ` +
-          `${style.colorScheme.className} ` +
-          `${PositionsToStyle.ALL.className}`
-        }
-      >
-        {
-          <SequenceLogoComponent
-            alignment={alignment}
-            glyphWidth={this.state.aceCharacterWidth}
-            alignmentType={style.alignmentType}
-            logoType={logoOpts.logoType}
-            tooltipPlacement={logoOpts.tooltipPlacement}
-            height={logoOpts.height}
-          />
-        }
-      </div>
+      <SequenceLogoComponent
+        alignment={alignment}
+        style={style}
+        glyphWidth={this.state.aceCharacterWidth}
+        logoType={logoOpts.logoType}
+        tooltipPlacement={logoOpts.tooltipPlacement}
+        height={logoOpts.height}
+        scrollerLoaded={(scroller) => {
+          this.horizontalScrollSync.registerElementScroller(scroller);
+        }}
+        scrollerUnloaded={(scroller) => {
+          this.horizontalScrollSync.unRegisterElementScroller(scroller);
+        }}
+      />
     );
   };
 
@@ -341,6 +337,12 @@ export class AlignmentViewer extends React.Component<
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={this.state.aceCharacterWidth}
         height={barplotProps.height}
+        scrollerLoaded={(scroller) => {
+          this.horizontalScrollSync.registerElementScroller(scroller);
+        }}
+        scrollerUnloaded={(scroller) => {
+          this.horizontalScrollSync.unRegisterElementScroller(scroller);
+        }}
       ></SequenceBarplotComponent>
     );
   };
@@ -386,6 +388,7 @@ export class AlignmentViewer extends React.Component<
           this.props.style.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
+        characterSizeChanged={this.handleCharacterSizeChanged}
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             ACE_EDITOR_IDS.QUERY,
@@ -601,6 +604,24 @@ export class AlignmentViewer extends React.Component<
               "Position:",
               this.renderPositionBox()
             )}
+
+        {/*this.renderWidget(
+          "webgl-alignment-holder",
+          "WEBGL:",
+          <WebGLAlignmentComponent
+            alignment={this.props.alignment}
+            alignmentStyle={this.props.style}
+            residueWidth={this.state.aceCharacterWidth}
+            sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
+            scrollerLoaded={(scroller) => {
+              this.horizontalScrollSync.registerElementScroller(scroller);
+            }}
+            scrollerUnloaded={(scroller) => {
+              this.horizontalScrollSync.unRegisterElementScroller(scroller);
+            }}
+          />,
+          true
+          )*/}
 
         {this.renderWidget(
           "av-ace-msa-holder",

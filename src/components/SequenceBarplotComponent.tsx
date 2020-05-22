@@ -22,6 +22,9 @@ export interface ISequenceBarplotProps {
   alignment: Alignment;
   positionWidth: number;
 
+  scrollerLoaded: (e: HTMLElement) => void;
+  scrollerUnloaded: (e: HTMLElement) => void;
+
   //props that should be exposed in AlignmentViewer full component:
   dataSeriesSet: ArrayOneOrMore<ISequenceBarplotDataSeries>;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
@@ -77,6 +80,7 @@ export class SequenceBarplotComponent extends React.Component<
 > {
   private static POSITION_VIEWBOX_HEIGHT = 100;
   private static POSITION_VIEWBOX_WIDTH = 1;
+  private ref: React.RefObject<HTMLDivElement>;
 
   private cache: Partial<ISequenceBarplotProps> & {
     bars?: ISingleBarDetailsFull[];
@@ -98,6 +102,8 @@ export class SequenceBarplotComponent extends React.Component<
       positionsSelected: [],
       hoverKey: generateUUIDv4(),
     };
+
+    this.ref = React.createRef<HTMLDivElement>();
     this.handleSvgHover = this.handleSvgHover.bind(this);
     this.handlePositionHover = this.handlePositionHover.bind(this);
     this.handlePositionClicked = this.handlePositionClicked.bind(this);
@@ -243,7 +249,7 @@ export class SequenceBarplotComponent extends React.Component<
     cssClass: "barplot-gaps",
     color: "#b7b7b7",
     plotOptions: {
-      fixYMax: (alignment) => alignment.getSequences().length,
+      fixYMax: (alignment) => alignment.getSequenceCount(),
     },
     getBars: (al) => {
       const toReturn: ISingleBarDetails[] = [];
@@ -253,7 +259,7 @@ export class SequenceBarplotComponent extends React.Component<
         toReturn.push({
           height: gapCount,
           tooltipValueText: `${(
-            (gapCount / al.getSequences().length) *
+            (gapCount / al.getSequenceCount()) *
             100
           ).toFixed(1)}% (${gapCount})`,
         });
@@ -654,11 +660,22 @@ export class SequenceBarplotComponent extends React.Component<
     ReactTooltip.rebuild();
   }
 
+  componentDidMount() {
+    this.props.scrollerLoaded(this.ref.current!);
+  }
+
+  componentWillUnmount() {
+    this.props.scrollerUnloaded(this.ref.current!);
+  }
+
   render() {
-    const className = this.state.svgHovered ? "barplot hovered" : "barplot";
+    const classNames = ["barplot"];
+    if (this.state.svgHovered) {
+      classNames.push("hovered");
+    }
 
     return !this.props.alignment ? null : (
-      <div className={className}>
+      <div className={classNames.join(" ")} ref={this.ref}>
         {this.renderTooltip()}
         {this.renderBarPlot()}
       </div>

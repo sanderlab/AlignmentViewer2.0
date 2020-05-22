@@ -12,6 +12,9 @@ import {
   aceResidueParentClass,
   getLetterClassNames,
   AlignmentTypes,
+  AminoAcidAlignmentStyle,
+  NucleotideAlignmentStyle,
+  PositionsToStyle,
 } from "../common/MolecularStyles";
 import ReactTooltip from "react-tooltip";
 import { AminoAcid, Nucleotide } from "../common/Residues";
@@ -37,7 +40,10 @@ export interface ISequenceLogoProps {
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
   glyphWidth: number;
-  alignmentType?: AlignmentTypes; //AlignmentViewer component does expose this through the style object
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+
+  scrollerLoaded: (e: HTMLElement) => void;
+  scrollerUnloaded: (e: HTMLElement) => void;
 
   //props that should be exposed in AlignmentViewer full component:
   logoType?: LOGO_TYPES;
@@ -54,11 +60,17 @@ export class SequenceLogoComponent extends React.Component<
   ISequenceLogoState
 > {
   private logoData?: IGlyphStackData[];
+  private ref: React.RefObject<HTMLDivElement>;
 
   static defaultProps = {
     logoType: LOGO_TYPES.LETTERS,
     height: "100px",
   };
+
+  constructor(props: ISequenceLogoProps) {
+    super(props);
+    this.ref = React.createRef<HTMLDivElement>();
+  }
 
   /*
    *
@@ -120,6 +132,52 @@ export class SequenceLogoComponent extends React.Component<
     );
   }
 
+  private renderSvg() {
+    const { alignment, glyphWidth, height } = this.props;
+    if (!alignment || !glyphWidth) {
+      return null;
+    }
+
+    //perform a bunch of data munging
+    this.logoData = this.mungeLogoData();
+    const totalWidth = this.logoData.length * glyphWidth;
+
+    return (
+      <svg
+        preserveAspectRatio="none"
+        viewBox={`0 0 ${this.logoData.length} 100`}
+        style={{
+          width: totalWidth,
+          height: height ? height : SequenceLogoComponent.defaultProps.height,
+        }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {this.logoData.map((singlePositionData, positionIdx) => {
+          return (
+            <g
+              transform={`translate(${positionIdx},0)`}
+              className={aceResidueParentClass} //required for default coloring
+              key={"p_" + positionIdx}
+            >
+              {this.renderSinglePositionStack(
+                singlePositionData,
+                this.logoData!.length
+              )}
+              <rect
+                className="interaction-placeholder"
+                width="1"
+                height="100"
+                data-for="getLogoTooltip"
+                data-tip={positionIdx}
+                data-class={"sequence-logo-tooltip-container"}
+              ></rect>
+            </g>
+          );
+        })}
+      </svg>
+    );
+  }
+
   /**
    * Generate the svg elements for a single position, i.e., column
    */
@@ -161,16 +219,13 @@ export class SequenceLogoComponent extends React.Component<
    * into a form appropriate for the glyph generation
    */
   private mungeLogoData(): IGlyphStackData[] {
-    const { alignment } = this.props;
+    const { alignment, style } = this.props;
 
-    const numberSequences = alignment.getSequences().length;
+    const numberSequences = alignment.getSequenceCount();
     const lettersSorted = alignment.getAllUpperAlphaLettersInAlignmentSorted();
 
-    const alignmentType = this.props.alignmentType
-      ? this.props.alignmentType
-      : this.props.alignment.getPredictedType();
     const moleculeClass =
-      alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
+      style.alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
 
     //load class names for each letter
     const letterObjects = lettersSorted.reduce((arr, letter) => {
@@ -211,13 +266,13 @@ export class SequenceLogoComponent extends React.Component<
    *
    */
   shouldComponentUpdate(nextProps: ISequenceLogoProps) {
-    const { alignment, alignmentType, logoType, glyphWidth } = this.props;
+    const { alignment, style, logoType, glyphWidth } = this.props;
     if (
       !this.logoData ||
       logoType !== nextProps.logoType ||
       glyphWidth !== nextProps.glyphWidth ||
       alignment !== nextProps.alignment ||
-      alignmentType !== nextProps.alignmentType
+      style !== nextProps.style
     ) {
       return true;
     }
@@ -228,50 +283,26 @@ export class SequenceLogoComponent extends React.Component<
     ReactTooltip.rebuild();
   }
 
-  render() {
-    const { alignment, glyphWidth, height } = this.props;
-    if (!alignment || !glyphWidth) {
-      return null;
-    }
+  componentDidMount() {
+    this.props.scrollerLoaded(this.ref.current!);
+  }
 
-    //perform a bunch of data munging
-    this.logoData = this.mungeLogoData();
-    const totalWidth = this.logoData.length * glyphWidth;
+  componentWillUnmount() {
+    this.props.scrollerUnloaded(this.ref.current!);
+  }
+
+  render() {
+    const { style } = this.props;
+    const classNames = [
+      "sequence-logo",
+      style.alignmentType.className,
+      style.colorScheme.className,
+      PositionsToStyle.ALL.className,
+    ];
 
     return (
-      <div className="sequence-logo">
-        <svg
-          preserveAspectRatio="none"
-          viewBox={`0 0 ${this.logoData.length} 100`}
-          style={{
-            width: totalWidth,
-            height: height ? height : SequenceLogoComponent.defaultProps.height,
-          }}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {this.logoData.map((singlePositionData, positionIdx) => {
-            return (
-              <g
-                transform={`translate(${positionIdx},0)`}
-                className={aceResidueParentClass} //required for default coloring
-                key={"p_" + positionIdx}
-              >
-                {this.renderSinglePositionStack(
-                  singlePositionData,
-                  this.logoData!.length
-                )}
-                <rect
-                  className="interaction-placeholder"
-                  width="1"
-                  height="100"
-                  data-for="getLogoTooltip"
-                  data-tip={positionIdx}
-                  data-class={"sequence-logo-tooltip-container"}
-                ></rect>
-              </g>
-            );
-          })}
-        </svg>
+      <div className={classNames.join(" ")} ref={this.ref}>
+        {this.renderSvg()}
         {this.renderTooltip()}
       </div>
     );

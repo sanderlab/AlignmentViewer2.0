@@ -1,6 +1,15 @@
 /** SequenceLogo.scss */
 
+.sequence-logo::-webkit-scrollbar {
+  background: transparent; // make scrollbar transparent
+  height: 0;
+}
+
 .sequence-logo {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+
   rect.interaction-placeholder {
     opacity: 0;
   }
@@ -48,10 +57,6 @@
       }
       .name {
         width: 100px;
-      }
-      .frequency {
-      }
-      .count {
       }
     }
   }

@@ -26,6 +26,8 @@ export class ScrollSync {
   private scrollDirection: ScrollType.vertical | ScrollType.horizontal;
   private aceEditorDirection: "changeScrollLeft" | "changeScrollTop";
   private scrollers: (Ace.Editor | HTMLElement)[];
+  private scrollerMouseEnterListeners = new Map<HTMLElement, () => void>();
+  private scrollerMouseLeaveListeners = new Map<HTMLElement, () => void>();
 
   //reuse the same scroll functions for each element / ace editor
   private scrollFnHandles: Map<
@@ -63,13 +65,43 @@ export class ScrollSync {
   registerElementScroller(scroller: HTMLElement) {
     if (!this.scrollers.includes(scroller)) {
       this.scrollers.push(scroller);
-      scroller.addEventListener("mouseenter", () => {
+
+      //keep track of functions
+      this.scrollerMouseEnterListeners.set(scroller, () => {
         this.addScrollEvents(scroller);
       });
-      scroller.addEventListener("mouseleave", () => {
+      this.scrollerMouseLeaveListeners.set(scroller, () => {
         this.removeScrollEvents(scroller);
       });
+
+      //register the listeners
+      scroller.addEventListener(
+        "mouseenter",
+        this.scrollerMouseEnterListeners.get(scroller)!
+      );
+      scroller.addEventListener(
+        "mouseleave",
+        this.scrollerMouseLeaveListeners.get(scroller)!
+      );
     }
+  }
+
+  /**
+   * Un-register a scroller with this scroll sync.
+   * @param scroller
+   */
+  unRegisterElementScroller(scrollerToRemove: HTMLElement) {
+    this.scrollers = this.scrollers.filter((el) => el !== scrollerToRemove);
+
+    scrollerToRemove.removeEventListener(
+      "mouseenter",
+      this.scrollerMouseEnterListeners.get(scrollerToRemove)!
+    );
+    scrollerToRemove.removeEventListener(
+      "mouseleave",
+      this.scrollerMouseLeaveListeners.get(scrollerToRemove)!
+    );
+    this.removeScrollEvents(scrollerToRemove);
   }
 
   /**
@@ -204,8 +236,6 @@ export class ScrollSync {
       } else {
         scroller.removeEventListener("scroll", scrollFn);
       }
-    } else {
-      console.log("failed to remove scrollFn");
     }
   }
 }
