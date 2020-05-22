@@ -30,6 +30,7 @@ export class Alignment {
   private name: string;
   private predictedNT: boolean;
   private sequences: Map<SequenceSorter, ISequence[]>;
+  private maxSequenceLength: number;
   private querySequence: ISequence;
   private positionalLetterCounts = new Map<
     number,
@@ -86,6 +87,7 @@ export class Alignment {
     this.sequences.set(SequenceSorter.INPUT, sequencesAsInput);
     this.querySequence = sequencesAsInput[0];
     this.predictedNT = true;
+    this.maxSequenceLength = 0;
 
     //
     //generate statistics
@@ -102,6 +104,10 @@ export class Alignment {
       sequenceIdx++
     ) {
       const seq = sequencesAsInput[sequenceIdx].sequence;
+      if (seq.length > this.maxSequenceLength) {
+        this.maxSequenceLength = seq.length;
+      }
+
       for (let positionIdx = 0; positionIdx < seq.length; positionIdx++) {
         const letter = seq[positionIdx];
         const letterIsAlpha = letter.match(/[a-z]/i) ? true : false;
@@ -292,16 +298,20 @@ export class Alignment {
   }
 
   /**
-   * Get the length of the longest sequence
+   * Get the length of the longest sequence. Determined in constructor
+   * during stat generation.
    * @returns the length of the largest sequence in this alignment
    */
   getMaxSequenceLength(): number {
-    return this.getSequences().reduce((acc, seq) => {
-      if (seq.sequence.length > acc) {
-        acc = seq.sequence.length;
-      }
-      return acc;
-    }, -1);
+    return this.maxSequenceLength;
+  }
+
+  /**
+   * Get the total number of sequences.
+   * @returns the number of sequences
+   */
+  getSequenceCount(): number {
+    return this.sequences.get(SequenceSorter.INPUT)!.length;
   }
 
   /**

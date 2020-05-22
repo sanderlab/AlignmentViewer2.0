@@ -109,7 +109,7 @@ export class CanvasAlignmentComponent extends React.Component<
     } = this.props;
     const { dragging, dragPositions } = this.state;
 
-    const numSequences = alignment.getSequences().length;
+    const numSequences = alignment.getSequenceCount();
     const maxSeqLength = alignment.getMaxSequenceLength();
 
     PIXI.utils.skipHello();
@@ -188,7 +188,7 @@ export class CanvasAlignmentComponent extends React.Component<
                   />
                   {rowHighlightStart !== undefined &&
                   rowHighlighterHeight !== undefined &&
-                  rowHighlighterHeight < alignment.getSequences().length ? (
+                  rowHighlighterHeight < alignment.getSequenceCount() ? (
                     <CanvasAlignmentHighlighter
                       fillColor={0xff0000}
                       fillAlpha={0.25}
