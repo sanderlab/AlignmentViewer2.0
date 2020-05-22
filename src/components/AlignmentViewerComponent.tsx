@@ -605,7 +605,7 @@ export class AlignmentViewer extends React.Component<
               this.renderPositionBox()
             )}
 
-        {/*this.renderWidget(
+        {this.renderWidget(
           "webgl-alignment-holder",
           "WEBGL:",
           <WebGLAlignmentComponent
@@ -621,13 +621,13 @@ export class AlignmentViewer extends React.Component<
             }}
           />,
           true
-          )*/}
+        )}
 
-        {this.renderWidget(
+        {/*this.renderWidget(
           "av-ace-msa-holder",
           this.renderAlignmentAnnotationBox(),
           this.renderAlignmentBox()
-        )}
+        )*/}
       </div>
     );
   }
