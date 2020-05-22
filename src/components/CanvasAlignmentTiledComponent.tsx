@@ -1,12 +1,16 @@
 import React from "react";
-import { ISequence } from "../common/Alignment";
+import { ISequence, Alignment } from "../common/Alignment";
 import { Nucleotide, AminoAcid } from "../common/Residues";
 import { Sprite } from "@inlet/react-pixi";
-import { ICanvasAlignmentProps } from "./CanvasAlignmentComponent";
 
-import { PositionsToStyle, AlignmentTypes } from "../common/MolecularStyles";
+import {
+  PositionsToStyle,
+  AlignmentTypes,
+  IColorScheme,
+} from "../common/MolecularStyles";
+import { SequenceSorter } from "../common/AlignmentSorter";
 
-export interface ITiledImages {
+interface ITiledImages {
   targetTileWidth: number;
   targetTileHeight: number;
   lastTileWidth: number;
@@ -24,15 +28,46 @@ export interface ITiledImages {
   }[];
 }
 
+export interface ICanvasAlignmentTiledProps {
+  alignment: Alignment;
+  alignmentType: AlignmentTypes;
+  sortBy: SequenceSorter;
+  positionsToStyle: PositionsToStyle;
+  colorScheme: IColorScheme;
+  scale?: [number, number];
+  drawSequencesIndicies?: number[];
+}
+
 export class CanvasAlignmentTiled extends React.Component<
-  ICanvasAlignmentProps
+  ICanvasAlignmentTiledProps
 > {
-  shouldComponentUpdate(nextProps: ICanvasAlignmentProps) {
+  //shallow array equality
+  protected arraysEqual(
+    arr1: number[] | undefined,
+    arr2: number[] | undefined
+  ) {
+    if (arr1 === undefined || arr2 === undefined) {
+      return arr1 === arr2;
+    }
+    return (
+      arr1.length === arr2.length &&
+      arr1.every(function (element, index) {
+        return element === arr2[index];
+      })
+    );
+  }
+
+  shouldComponentUpdate(nextProps: ICanvasAlignmentTiledProps) {
     return (
       nextProps.alignment !== this.props.alignment ||
       nextProps.colorScheme !== this.props.colorScheme ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
-      nextProps.sortBy !== this.props.sortBy
+      nextProps.sortBy !== this.props.sortBy ||
+      !this.arraysEqual(nextProps.scale, this.props.scale) ||
+      !this.arraysEqual(
+        nextProps.drawSequencesIndicies,
+        this.props.drawSequencesIndicies
+      )
     );
   }
 
@@ -40,29 +75,31 @@ export class CanvasAlignmentTiled extends React.Component<
     if (!this.props.alignment) {
       return null;
     }
-
     const {
       alignment,
       alignmentType,
       colorScheme,
       positionsToStyle,
+      drawSequencesIndicies,
       sortBy,
     } = this.props;
 
     // Generate multiple tiled images from the alignment
-    const sequences = alignment.getSequences(sortBy);
+    const allSequencesSorted = alignment.getSequences(sortBy);
+    const sequences = !drawSequencesIndicies
+      ? allSequencesSorted
+      : drawSequencesIndicies.map((idx) => allSequencesSorted[idx]);
     const fullWidth = alignment.getMaxSequenceLength();
     const fullHeight = sequences.length;
 
     const sizes = {
       fullWidth,
       fullHeight,
-      targetTileWidth: Math.min(400, fullWidth),
-      targetTileHeight: Math.min(400, fullHeight),
+      targetTileWidth: Math.min(500, fullWidth),
+      targetTileHeight: Math.min(500, fullHeight),
     };
 
     const tiledImages: ITiledImages = this.initializeTiledImages(sizes);
-
     for (
       let tileYNumber = 0;
       tileYNumber < tiledImages.numYTiles;
@@ -85,7 +122,6 @@ export class CanvasAlignmentTiled extends React.Component<
       }
     }
 
-    //console.log("CANVAS rerender [" + sortBy.key + "]", sequences);
     return (
       <>
         {tiledImages.tiles.map((tile) => (
@@ -99,7 +135,11 @@ export class CanvasAlignmentTiled extends React.Component<
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
                   ${sortBy.key}_
-                  ${alignment.getName()}`}
+                  ${alignment.getName()}_
+                  ${
+                    drawSequencesIndicies ? drawSequencesIndicies.join("-") : ""
+                  }`}
+            roundPixels={true}
           ></Sprite>
         ))}
       </>
@@ -194,27 +234,30 @@ export class CanvasAlignmentTiled extends React.Component<
     letterIdx: number,
     offsets: { seqY: number; letterX: number }
   ) {
-    const { alignment, alignmentType, colorScheme } = this.props;
+    const {
+      alignment,
+      alignmentType,
+      colorScheme,
+      positionsToStyle,
+    } = this.props;
     const consensusSequence = alignment.getConsensus().statistics;
     const querySequence = alignment.getQuerySequence().sequence;
     const moleculeClass =
       alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
     let molecule = moleculeClass.UNKNOWN;
 
-    if (this.props.positionsToStyle === PositionsToStyle.ALL) {
+    if (positionsToStyle === PositionsToStyle.ALL) {
       molecule = moleculeClass.fromSingleLetterCode(letter);
     } else {
       const isConsensus =
         consensusSequence[letterIdx + offsets.letterX].letter === letter;
       const isQuery = querySequence[letterIdx + offsets.letterX] === letter;
       if (
-        (this.props.positionsToStyle === PositionsToStyle.CONSENSUS &&
-          isConsensus) ||
-        (this.props.positionsToStyle === PositionsToStyle.CONSENSUS_DIFF &&
+        (positionsToStyle === PositionsToStyle.CONSENSUS && isConsensus) ||
+        (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF &&
           !isConsensus) ||
-        (this.props.positionsToStyle === PositionsToStyle.QUERY && isQuery) ||
-        (this.props.positionsToStyle === PositionsToStyle.QUERY_DIFF &&
-          !isQuery)
+        (positionsToStyle === PositionsToStyle.QUERY && isQuery) ||
+        (positionsToStyle === PositionsToStyle.QUERY_DIFF && !isQuery)
       ) {
         molecule = moleculeClass.fromSingleLetterCode(letter);
       }
