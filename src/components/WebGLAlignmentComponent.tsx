@@ -8,7 +8,6 @@ import { SequenceSorter } from "../common/AlignmentSorter";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import { CanvasAlignmentTiled } from "./CanvasAlignmentTiledComponent";
 import { WebGLViewport } from "./WebGLViewportComponent";
-import { WebGLViewport2 } from "./WebGLViewportComponent2";
 import { WebGLScrollbar } from "./WebGLAlignmentScrollbarComponent";
 import {
   AminoAcidAlignmentStyle,
@@ -65,9 +64,6 @@ export class WebGLAlignmentComponent extends React.Component<
     this.setupResizeSensor = this.setupResizeSensor.bind(this);
     this.mouseEntered = this.mouseEntered.bind(this);
     this.mouseExited = this.mouseExited.bind(this);
-    this.scrollbarDragStart = this.scrollbarDragStart.bind(this);
-    this.scrollbarDragEnd = this.scrollbarDragEnd.bind(this);
-    this.scrollbarDragMove = this.scrollbarDragMove.bind(this);
   }
 
   /*
@@ -77,7 +73,6 @@ export class WebGLAlignmentComponent extends React.Component<
    *
    *
    */
-
   protected setupResizeSensor(ref: HTMLDivElement | null) {
     if (ref && !this.resizeSensor) {
       this.ref = ref;
@@ -111,10 +106,6 @@ export class WebGLAlignmentComponent extends React.Component<
       mouseHovering: false,
     });
   }
-
-  protected scrollbarDragStart(e: React.MouseEvent) {}
-  protected scrollbarDragEnd(e: React.MouseEvent) {}
-  protected scrollbarDragMove(e: React.MouseEvent) {}
 
   /*
    *
@@ -173,7 +164,7 @@ export class WebGLAlignmentComponent extends React.Component<
   }
 
   protected renderScrollbar() {
-    const { clientDimensions } = this.state;
+    const { clientDimensions, mouseHovering } = this.state;
     const visibleSeqs = this.getVisibleSequences();
     if (clientDimensions === undefined || visibleSeqs === undefined) {
       return null;
@@ -183,7 +174,10 @@ export class WebGLAlignmentComponent extends React.Component<
     );
 
     return (
-      <WebGLScrollbar visible={true} worldHeight={viewportSizing.worldHeight} />
+      <WebGLScrollbar
+        visible={mouseHovering}
+        worldHeight={viewportSizing.worldHeight}
+      />
     );
   }
 
@@ -226,31 +220,17 @@ export class WebGLAlignmentComponent extends React.Component<
           {(app) => (
             //entrypoint to the interaction viewport for registering scroll
             //and zoom and other events. This is not rendering anything, but
-            //is only used to calculate interaction changes and report them
+            //is used to calculate interaction changes and report them
             //back to this component.
-            /*<WebGLViewport
-                app={app}
-                screenWidth={viewportSizing.viewWidth}
-                screenHeight={viewportSizing.viewHeight}
-                worldWidth={viewportSizing.worldWidth}
-                worldHeight={viewportSizing.worldHeight}
-                onViewportYChanged={(newTop) => {
-                  this.setState({
-                    webGLViewport: {
-                      pixelsFromWorldTop: newTop,
-                    },
-                  });
-                }}
-              ></WebGLViewport>*/
-
             <Provider store={store}>
-              <WebGLViewport2
+              <WebGLViewport
+                app={app}
                 alignment={alignment}
                 screenWidth={viewportSizing.viewWidth}
                 screenHeight={viewportSizing.viewHeight}
                 worldWidth={viewportSizing.worldWidth}
                 worldHeight={viewportSizing.worldHeight}
-              ></WebGLViewport2>
+              ></WebGLViewport>
             </Provider>
           )}
         </AppContext.Consumer>

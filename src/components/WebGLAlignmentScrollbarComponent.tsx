@@ -3,8 +3,9 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import "./WebGLAlignmentScrollbarComponent.scss";
-import { store, setPixelsFromWorldTop, RootState } from "../common/ReduxStore";
-import { useSelector } from "react-redux";
+import { setPixelsFromWorldTop, RootState } from "../common/ReduxStore";
+import { useSelector, useDispatch } from "react-redux";
+import { ResizeSensor } from "css-element-queries";
 
 interface IWebGLScrollbarProps {
   visible: boolean;
@@ -12,34 +13,78 @@ interface IWebGLScrollbarProps {
 }
 
 export function WebGLScrollbar(props: IWebGLScrollbarProps) {
-  const { visible, worldHeight } = props;
-  const [scrollbarHolderProportions, setScrollbarHolderProportions] = useState({
-    height: -1,
-    top: -1,
-  });
-  const [dragging, setDragging] = useState(false);
-  const [dragStartTop, setDragStartTop] = useState(-1);
-  const [dragStartScrollbarTop, setDragStartScrollbarTop] = useState(-1);
-
-  const scrollbarHolderRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (scrollbarHolderRef.current) {
-      const rect = scrollbarHolderRef.current.getBoundingClientRect();
-      setScrollbarHolderProportions({
-        height: rect.height,
-        top: rect.top,
-      });
-    }
-  }, []); //pass array as 2nd param to only run on mount
-
   const SCROLLBAR_HOLDER_WIDTH = 16;
   const SCROLLBAR_MIN_HEIGHT = 20;
   const SCROLLBAR_WIDTH = 10;
   const SCROLLBAR_OFFSET = (SCROLLBAR_HOLDER_WIDTH - SCROLLBAR_WIDTH) / 2;
 
+  //ref to div
+  const scrollbarHolderRef = useRef<HTMLDivElement>(null);
+
+  //props
+  const { visible, worldHeight } = props;
+
+  //state
+  const dispatch = useDispatch();
+  const [dragging, setDragging] = useState(false);
+  const [dragStartTop, setDragStartTop] = useState(-1);
+  const [dragStartScrollbarTop, setDragStartScrollbarTop] = useState(-1);
+  const [scrollbarHolderProportions, setScrollbarHolderProportions] = useState({
+    height: -1,
+    top: -1,
+  });
+  const [resizeListener, setResizeListener] = useState<
+    undefined | ResizeSensor
+  >(undefined);
+
+  //redux
   const pixelsFromWorldTop = useSelector(
     (state: RootState) => state.webglViewport.pixelsFromWorldTop
   );
+
+  //sizing
+  useEffect(() => {
+    if (scrollbarHolderRef.current) {
+      setResizeListener(
+        new ResizeSensor(scrollbarHolderRef.current, () => {
+          if (scrollbarHolderRef.current) {
+            const rect = scrollbarHolderRef.current!.getBoundingClientRect();
+            if (
+              scrollbarHolderProportions.top !== rect.top ||
+              scrollbarHolderProportions.height !== rect.height
+            ) {
+              setScrollbarHolderProportions({
+                height: rect.height,
+                top: rect.top,
+              });
+            }
+          }
+        })
+      );
+    } else {
+      console.error(
+        "Unable to add resize sensor as scrollbarHolderRef.current was not defined",
+        scrollbarHolderRef
+      );
+    }
+  }, []);
+
+  const scrollbarSizing = (() => {
+    const heightInClient = Math.max(
+      SCROLLBAR_MIN_HEIGHT, //min height of scrollbar is 20
+      scrollbarHolderProportions.height *
+        (scrollbarHolderProportions.height / worldHeight)
+    );
+    const clientToWorldRatio =
+      (scrollbarHolderProportions.height - heightInClient) /
+      (worldHeight - scrollbarHolderProportions.height);
+
+    return {
+      heightInClient: heightInClient,
+      currentClientTop: clientToWorldRatio * pixelsFromWorldTop,
+      clientToWorldRatio: clientToWorldRatio,
+    };
+  })();
 
   /*
    *
@@ -48,37 +93,23 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
    *
    *
    */
-  const getScrollbarProportions = () => {
-    return {
-      scrollbarHeight: Math.max(
-        SCROLLBAR_MIN_HEIGHT, //min height of scrollbar is 20
-        scrollbarHolderProportions.height *
-          (scrollbarHolderProportions.height / worldHeight)
-      ),
-      scrollbarClientTop:
-        (pixelsFromWorldTop / worldHeight) * scrollbarHolderProportions.height,
-    };
-  };
 
   /**
    * Calculate where a
-   * @param suggestedClientTop
+   * @param suggestedScrollbarClientTop
    */
-  const getNewOffsetFromWorldTop = (suggestedClientTop: number) => {
-    let newPixelsFromWorldTop =
-      worldHeight * (suggestedClientTop / scrollbarHolderProportions.height);
-    if (
-      newPixelsFromWorldTop + scrollbarHolderProportions.height >
-      worldHeight
-    ) {
+  const getNewOffsetFromWorldTop = (suggestedScrollbarClientTop: number) => {
+    let newWorldTop =
+      (1 / scrollbarSizing.clientToWorldRatio) * suggestedScrollbarClientTop;
+    if (newWorldTop + scrollbarHolderProportions.height > worldHeight) {
       //trying to drag past the bottom of the world, fix to bottom of world
-      newPixelsFromWorldTop = worldHeight - scrollbarHolderProportions.height;
+      newWorldTop = worldHeight - scrollbarHolderProportions.height;
     }
-    //if it is below zero, set to zero
-    newPixelsFromWorldTop =
-      newPixelsFromWorldTop < 0 ? 0 : newPixelsFromWorldTop;
-
-    return newPixelsFromWorldTop;
+    if (newWorldTop < 0) {
+      //trying to drag past the top of the world, fix to top of world
+      newWorldTop = 0;
+    }
+    return newWorldTop;
   };
 
   /*
@@ -104,7 +135,7 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
       const newPixelsFromWorldTop = getNewOffsetFromWorldTop(
         delta + dragStartScrollbarTop
       );
-      store.dispatch(setPixelsFromWorldTop(newPixelsFromWorldTop));
+      dispatch(setPixelsFromWorldTop(newPixelsFromWorldTop));
     }
   };
   const scrollbarDragEnd = (e: React.MouseEvent) => {
@@ -136,17 +167,17 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
           const clientRect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
           const y = e.clientY - clientRect.top; //y position within the client element.
           const newPixelsFromWorldTop = getNewOffsetFromWorldTop(
-            y - getScrollbarProportions().scrollbarHeight / 2 //move to middle of bar
+            y - scrollbarSizing.heightInClient / 2 //move to middle of bar
           );
-          store.dispatch(setPixelsFromWorldTop(newPixelsFromWorldTop));
+          dispatch(setPixelsFromWorldTop(newPixelsFromWorldTop));
         }}
       >
         <div
           className="vertical-scrollbar"
           style={{
             left: SCROLLBAR_OFFSET,
-            top: getScrollbarProportions().scrollbarClientTop,
-            height: getScrollbarProportions().scrollbarHeight,
+            top: scrollbarSizing.currentClientTop,
+            height: scrollbarSizing.heightInClient,
             width: SCROLLBAR_WIDTH,
           }}
           //events for drag start
@@ -171,7 +202,9 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
         style={{
           display: dragging ? "block" : "none",
         }}
+        onMouseDown={scrollbarDragEnd}
         onMouseUp={scrollbarDragEnd}
+        onMouseOut={scrollbarDragEnd}
         onMouseMove={scrollbarDragMove}
       ></div>
     </>
