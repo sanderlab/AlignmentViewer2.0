@@ -1,7 +1,7 @@
 /**
  * Base react hook for a webgl detailed alignment scrollbar.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import "./WebGLAlignmentScrollbarComponent.scss";
 import { setPixelsFromWorldTop, RootState } from "../common/ReduxStore";
 import { useSelector, useDispatch } from "react-redux";
@@ -26,16 +26,15 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
 
   //state
   const dispatch = useDispatch();
-  const [dragging, setDragging] = useState(false);
-  const [dragStartTop, setDragStartTop] = useState(-1);
-  const [dragStartScrollbarTop, setDragStartScrollbarTop] = useState(-1);
+  const [dragging, setDragging] = useState<boolean>(false);
+  const [dragStartTop, setDragStartTop] = useState<number>(-1);
+  const [dragStartScrollbarTop, setDragStartScrollbarTop] = useState<number>(
+    -1
+  );
   const [scrollbarHolderProportions, setScrollbarHolderProportions] = useState({
     height: -1,
     top: -1,
   });
-  const [resizeListener, setResizeListener] = useState<
-    undefined | ResizeSensor
-  >(undefined);
 
   //redux
   const pixelsFromWorldTop = useSelector(
@@ -45,22 +44,20 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
   //sizing
   useEffect(() => {
     if (scrollbarHolderRef.current) {
-      setResizeListener(
-        new ResizeSensor(scrollbarHolderRef.current, () => {
-          if (scrollbarHolderRef.current) {
-            const rect = scrollbarHolderRef.current!.getBoundingClientRect();
-            if (
-              scrollbarHolderProportions.top !== rect.top ||
-              scrollbarHolderProportions.height !== rect.height
-            ) {
-              setScrollbarHolderProportions({
-                height: rect.height,
-                top: rect.top,
-              });
-            }
+      new ResizeSensor(scrollbarHolderRef.current, () => {
+        if (scrollbarHolderRef.current) {
+          const rect = scrollbarHolderRef.current!.getBoundingClientRect();
+          if (
+            scrollbarHolderProportions.top !== rect.top ||
+            scrollbarHolderProportions.height !== rect.height
+          ) {
+            setScrollbarHolderProportions({
+              height: rect.height,
+              top: rect.top,
+            });
           }
-        })
-      );
+        }
+      });
     } else {
       console.error(
         "Unable to add resize sensor as scrollbarHolderRef.current was not defined",
@@ -119,18 +116,10 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
    *
    *
    */
-  const scrollbarDragStart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDragging(true);
-    setDragStartTop(e.pageY);
-    setDragStartScrollbarTop(
-      (e.currentTarget as HTMLDivElement).getBoundingClientRect().top -
-        scrollbarHolderProportions.top
-    );
-  };
   const scrollbarDragMove = (e: React.MouseEvent) => {
     if (dragging && dragStartTop !== -1) {
       e.stopPropagation();
+      e.preventDefault();
       const delta = e.pageY - dragStartTop;
       const newPixelsFromWorldTop = getNewOffsetFromWorldTop(
         delta + dragStartScrollbarTop
@@ -138,9 +127,22 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
       dispatch(setPixelsFromWorldTop(newPixelsFromWorldTop));
     }
   };
+
+  const scrollbarDragStart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setDragging(true);
+    setDragStartTop(e.pageY);
+    setDragStartScrollbarTop(
+      (e.currentTarget as HTMLDivElement).getBoundingClientRect().top -
+        scrollbarHolderProportions.top
+    );
+  };
+
   const scrollbarDragEnd = (e: React.MouseEvent) => {
     if (dragging) {
       e.stopPropagation();
+      e.preventDefault();
       setDragging(false);
       setDragStartTop(-1);
       setDragStartScrollbarTop(-1);
@@ -183,12 +185,6 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
           //events for drag start
           onMouseDown={scrollbarDragStart}
           //onTouchStart={this.scrollbarDragStart}
-          // events for drag end
-          onMouseUp={scrollbarDragEnd}
-          //onTouchEnd={this.scrollbarDragEnd}
-          // events for drag move
-          onMouseMove={scrollbarDragMove}
-          //onTouchMove={this.scrollbarDragMove}
         ></div>
       </div>
 
@@ -206,6 +202,8 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
         onMouseUp={scrollbarDragEnd}
         onMouseOut={scrollbarDragEnd}
         onMouseMove={scrollbarDragMove}
+        //onTouchMove={this.scrollbarDragMove}
+        //onTouchEnd={this.scrollbarDragEnd}
       ></div>
     </>
   );
