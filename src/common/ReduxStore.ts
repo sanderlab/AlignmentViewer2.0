@@ -16,6 +16,13 @@ import {
 
 interface WebGLViewportState {
   pixelsFromWorldTop: number;
+
+  //viewport: {
+  //  firstSequenceIdx: number;
+  //  firstSequenceWorldTop: number;
+  //  residueWidth: number;
+  //  residueHeight: number;
+  //};
 }
 
 const initialState: WebGLViewportState = {

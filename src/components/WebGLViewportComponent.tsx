@@ -15,24 +15,6 @@ export interface IWebGLViewportProps {
 }
 
 export function WebGLViewport(props: IWebGLViewportProps) {
-  useEffect(() => {
-    //CRAZY - this is needed to work in safari.  Answer came from here:
-    //https://stackoverflow.com/questions/50349103
-    //I'm not sure whether this will mess up any code that embeds AV2 ...
-    //It has no effect in chrome. It messes up firefox.
-    //TODO: document / think about more / change
-    //
-    if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-      //@ts-ignore
-      window.onwheel = function (e) {
-        if ((e as WheelEvent).deltaX !== 0) {
-          return true;
-        }
-        return false;
-      };
-    }
-  });
-
   const {
     app,
     alignment,
@@ -41,6 +23,30 @@ export function WebGLViewport(props: IWebGLViewportProps) {
     worldWidth,
     worldHeight,
   } = props;
+
+  useEffect(() => {
+    //CRAZY - this is needed to work in safari.  Answer came from here:
+    //https://stackoverflow.com/questions/50349103
+    //I'm not sure whether this will mess up any code that embeds AV2 ...
+    //It throws errors in the console chrome - hence the sniffing for safari..
+    //I don't think it has any effect in firefox.
+    //
+    //TODO: document / think about more / chang
+    //
+    if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+      //@ts-ignore
+      window.onwheel = function (e) {
+        if (
+          app.view === (e as WheelEvent).srcElement &&
+          (e as WheelEvent).deltaX !== 0
+        ) {
+          return true;
+        }
+        return false;
+      };
+    }
+  }, []);
+
   const dispatch = useDispatch();
 
   let [viewport] = useState<Viewport>(
