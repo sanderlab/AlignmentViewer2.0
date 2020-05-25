@@ -47,7 +47,7 @@ export default class App extends React.Component<AppProps, AppState> {
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
       zoomLevel: 14,
       sortBy: SequenceSorter.INPUT,
-      showMiniMap: false,
+      showMiniMap: true,
       showConservationBarplot: true,
       showEntropyGapBarplot: true,
       showKLDivergenceBarplot: false,
@@ -167,37 +167,63 @@ export default class App extends React.Component<AppProps, AppState> {
         <div className="settings-box">
           <form>
             <div className="settings-header">
+              <h2>{`AlignmentViewer 2.0`}</h2>
+              <a
+                className="github-link"
+                href="https://github.com/sanderlab/AlignmentViewer2.0"
+                target="_blank"
+              >
+                <img
+                  alt="Alignment Viewer 2.0 GitHub Repo"
+                  width="16"
+                  height="16"
+                  src={`${process.env.PUBLIC_URL}/GitHub-Mark-32px.png`}
+                />
+              </a>
+
               <button
                 className={`button-link${showSettings ? " hide" : ""}`}
                 type="button"
+                style={{ padding: 0, margin: 0, border: "none" }}
                 onClick={(e) => {
                   this.setState({
                     showSettings: true,
                   });
                 }}
               >
-                Expand
+                <img
+                  alt="Show Settings Box"
+                  width="16"
+                  height="16"
+                  src={`${process.env.PUBLIC_URL}/settings_32px.png`}
+                />
               </button>
               <button
                 className={`button-link${showSettings ? "" : " hide"}`}
                 type="button"
+                style={{ padding: 0, margin: 0, border: "none" }}
                 onClick={(e) => {
                   this.setState({
                     showSettings: false,
                   });
                 }}
               >
-                Hide
+                <img
+                  alt="Hide Settings Box"
+                  width="16px"
+                  height="16px"
+                  src={`${process.env.PUBLIC_URL}/hide_contract_icon_32px.png`}
+                />
               </button>
-              <div>
-                <h2>{`AlignmentViewer 2.0 Settings Demo`}</h2>
-                {alignmentDescription}
-              </div>
+            </div>
+
+            <div className="settings-alignment-description">
+              {alignmentDescription}
             </div>
             <div
+              className="settings-parameters"
               style={{
                 display: showSettings ? "block" : "none",
-                position: "relative",
               }}
             >
               {this.renderAlignmentTypeLabel(style)}
@@ -475,6 +501,11 @@ export default class App extends React.Component<AppProps, AppState> {
                 process.env.PUBLIC_URL +
                 "/7fa1c5691376beab198788a726917d48_b0.4.a2m",
               fileName: "7fa1c5691376beab198788a726917d48_b0.4.a2m",
+            },
+            {
+              labelText: "SARS-CoV-2 Spike",
+              fileURL: process.env.PUBLIC_URL + "/Spike_Full_f05_m05_t08.a2m",
+              fileName: "Spike_Full_f05_m05_t08.a2m",
             },
           ]}
           onFileLoadStart={() => {
