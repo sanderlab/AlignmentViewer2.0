@@ -32,6 +32,10 @@ export class FastaAlignment extends Alignment {
         sequences.push(seqObj);
       }
     }
-    return new FastaAlignment(fileName, sequences);
+    try {
+      return new FastaAlignment(fileName, sequences);
+    } catch (e) {
+      throw getParseError("Fasta", e.message);
+    }
   }
 }
