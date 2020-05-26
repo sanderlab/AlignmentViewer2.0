@@ -2,6 +2,6 @@ import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlig
 
 export class AceConsensusSequenceComponent extends AceMultipleSequenceAlignmentComponent {
   getText() {
-    return this.props.alignment.getConsensus().sequence.sequence;
+    return this.props.alignment.getConsensus().sequence;
   }
 }

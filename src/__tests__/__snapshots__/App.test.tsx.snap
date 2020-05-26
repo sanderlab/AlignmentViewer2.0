@@ -12,31 +12,69 @@ exports[`App Should render within 2 minutes. 1`] = `
         <div
           className="settings-header"
         >
+          <h2>
+            AlignmentViewer 2.0
+          </h2>
+          <a
+            className="github-link"
+            href="https://github.com/sanderlab/AlignmentViewer2.0"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <img
+              alt="Alignment Viewer 2.0 GitHub Repo"
+              height="16"
+              src="/GitHub-Mark-32px.png"
+              width="16"
+            />
+          </a>
           <button
             className="button-link hide"
             onClick={[Function]}
+            style={
+              Object {
+                "border": "none",
+                "margin": 0,
+                "padding": 0,
+              }
+            }
             type="button"
           >
-            Expand
+            <img
+              alt="Show Settings Box"
+              height="16"
+              src="/settings_32px.png"
+              width="16"
+            />
           </button>
           <button
             className="button-link"
             onClick={[Function]}
+            style={
+              Object {
+                "border": "none",
+                "margin": 0,
+                "padding": 0,
+              }
+            }
             type="button"
           >
-            Hide
+            <img
+              alt="Hide Settings Box"
+              height="16px"
+              src="/hide_contract_icon_32px.png"
+              width="16px"
+            />
           </button>
-          <div>
-            <h2>
-              AlignmentViewer 2.0 Settings Demo
-            </h2>
-          </div>
         </div>
         <div
+          className="settings-alignment-description"
+        />
+        <div
+          className="settings-parameters"
           style={
             Object {
               "display": "block",
-              "position": "relative",
             }
           }
         >
@@ -252,7 +290,7 @@ exports[`App Should render within 2 minutes. 1`] = `
                 Show MiniMap:
               </strong>
               <input
-                checked={false}
+                checked={true}
                 name="showMiniMap"
                 onChange={[Function]}
                 type="checkbox"
@@ -328,6 +366,11 @@ exports[`App Should render within 2 minutes. 1`] = `
                     "fileName": "7fa1c5691376beab198788a726917d48_b0.4.a2m",
                     "fileURL": "/7fa1c5691376beab198788a726917d48_b0.4.a2m",
                     "labelText": "β-lactamase",
+                  },
+                  Object {
+                    "fileName": "Spike_Full_f05_m05_t08.a2m",
+                    "fileURL": "/Spike_Full_f05_m05_t08.a2m",
+                    "labelText": "SARS-CoV-2 Spike",
                   },
                 ]
               }

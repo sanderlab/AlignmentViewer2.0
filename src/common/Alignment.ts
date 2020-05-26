@@ -32,20 +32,17 @@ export class Alignment {
   private sequences: Map<SequenceSorter, ISequence[]>;
   private maxSequenceLength: number;
   private querySequence: ISequence;
-  private positionalLetterCounts = new Map<
-    number,
-    { [letter: string]: number }
-  >();
-  private globalAlphaLetterCounts: { [letter: string]: number } = {};
+  private positionalLetterCounts: Map<number, { [letter: string]: number }>;
+  private globalAlphaLetterCounts: { [letter: string]: number };
   private allUpperAlphaLettersInAlignmentSorted: string[];
-  private consensus: {
+  private consensus: ISequence; /*{
     sequence: ISequence;
     statistics: {
       letter: string;
       position: number;
       occurrences: number;
     }[];
-  };
+  };*/
 
   /**
    * Normalize all values in an object that contains all counts such that
@@ -87,100 +84,190 @@ export class Alignment {
     this.sequences.set(SequenceSorter.INPUT, sequencesAsInput);
     this.querySequence = sequencesAsInput[0];
     this.predictedNT = true;
-    this.maxSequenceLength = 0;
 
     //
     //generate statistics
     //
-    const start = new Date();
-    const allLettersInAlignment: { [key: string]: number } = {}; //all letters in the alignment
+    let start = new Date();
 
     // aggregate stats for each position and globally including
     // the number of time each amino acid occurs
     // ** this loop takes the bulk of the initialization time
-    for (
-      let sequenceIdx = 0;
-      sequenceIdx < sequencesAsInput.length;
-      sequenceIdx++
-    ) {
-      const seq = sequencesAsInput[sequenceIdx].sequence;
-      if (seq.length > this.maxSequenceLength) {
-        this.maxSequenceLength = seq.length;
+
+    let allUniqueCharCodes: { [charCode: string]: boolean } = {};
+    let sequenceLengths: { [length: string]: boolean } = {};
+
+    start = new Date();
+
+    //Parse everything. Work in character code space as this is much faster.
+    //Convert character codes back to letters at the end.
+    sequencesAsInput.forEach((seq) => {
+      const seqStr = seq.sequence;
+      sequenceLengths[seqStr.length] = true;
+
+      //for speed use char codes: https://stackoverflow.com/questions/4434076
+      for (
+        let positionIdx = 0, len = seqStr.length;
+        positionIdx < len;
+        positionIdx++
+      ) {
+        const charCode = seqStr.charCodeAt(positionIdx);
+
+        //note: checking whether key already exists is slower (I tested)
+        //by about 33% (i.e., 300ms vs 200ms on 10X beta lactamase)
+        allUniqueCharCodes[charCode] = true;
       }
+    });
 
-      for (let positionIdx = 0; positionIdx < seq.length; positionIdx++) {
-        const letter = seq[positionIdx];
-        const letterIsAlpha = letter.match(/[a-z]/i) ? true : false;
-        if (
-          letterIsAlpha &&
-          this.predictedNT &&
-          Nucleotide.fromSingleLetterCode(letter) === Nucleotide.UNKNOWN
-        ) {
-          this.predictedNT = false;
-        }
-
-        const position = positionIdx; // zero based
-        allLettersInAlignment[letter] = 1;
-
-        let letterCounts = this.positionalLetterCounts.get(position);
-        if (!letterCounts) {
-          letterCounts = {};
-          this.positionalLetterCounts.set(position, letterCounts);
-        }
-        if (letter in letterCounts === false) {
-          letterCounts[letter] = 0;
-        }
-        letterCounts[letter] += 1;
-
-        if (letterIsAlpha) {
-          if (letter in this.globalAlphaLetterCounts === false) {
-            this.globalAlphaLetterCounts[letter] = 0;
-          }
-          this.globalAlphaLetterCounts[letter] += 1;
-        }
-      }
+    //check whether all sequence lenghts were equal
+    if (Object.keys(sequenceLengths).length > 1) {
+      throw Error(
+        "Alignment sequences must all be the same length, but multiple sequence lengths were observed: " +
+          Object.keys(sequenceLengths).join(", ")
+      );
     }
 
-    //get a list of all the upper letters found in the alignment
-    this.allUpperAlphaLettersInAlignmentSorted = Object.keys(
-      allLettersInAlignment
-    )
-      .sort()
-      .reduce((arr: string[], value: string) => {
-        if (value.match(/[A-Z]/)) {
-          // only keep letters
-          arr.push(value);
+    //all sequences are the same length
+    this.maxSequenceLength = parseInt(Object.keys(sequenceLengths)[0]);
+
+    //initialize a character code version of positional letter counts
+    //that each contain all possible charCodes in the alignment, initialized
+    //to a count of zero.
+    const positionalCharCodeCounts = new Map<
+      number,
+      { [charCode: string]: number }
+    >();
+    for (let i = 0; i < this.maxSequenceLength; i++) {
+      positionalCharCodeCounts.set(
+        i,
+        Object.keys(allUniqueCharCodes).reduce((acc, charCode) => {
+          acc[charCode] = 0;
+          return acc;
+        }, {} as { [charCode: string]: number })
+      );
+    }
+
+    //initialize a character code version of global letter counts
+    const globalCharCodeCounts: { [charCode: string]: number } = {};
+    Object.keys(allUniqueCharCodes).forEach((charCode) => {
+      globalCharCodeCounts[charCode] = 0;
+    });
+
+    //empirically fill in character code counts from the sequences
+    sequencesAsInput.forEach((seq) => {
+      const seqStr = seq.sequence;
+      for (
+        let positionIdx = 0, len = seqStr.length;
+        positionIdx < len;
+        positionIdx++
+      ) {
+        const charCode = seqStr.charCodeAt(positionIdx);
+        globalCharCodeCounts[charCode] += 1;
+        positionalCharCodeCounts.get(positionIdx)![charCode] += 1;
+      }
+    });
+
+    //convert the character codes in globalCharCodeCounts to letters
+    this.positionalLetterCounts = Array.from(positionalCharCodeCounts).reduce(
+      (acc, [positionIdx, positionalCharCodeCounts]) => {
+        acc.set(
+          positionIdx,
+          Object.keys(positionalCharCodeCounts).reduce((acc2, charCodeStr) => {
+            if (positionalCharCodeCounts[charCodeStr]) {
+              //get rid of the zero entries
+              const letter = String.fromCharCode(parseInt(charCodeStr));
+              acc2[letter] = positionalCharCodeCounts[charCodeStr];
+            }
+            return acc2;
+          }, {} as { [letter: string]: number })
+        );
+        return acc;
+      },
+      new Map<
+        number,
+        {
+          [letter: string]: number;
+        }
+      >()
+    );
+
+    //convert the character codes in globalCharCodeCounts to letters
+    this.globalAlphaLetterCounts = Object.keys(globalCharCodeCounts).reduce(
+      (arr, charCodeStr) => {
+        if (globalCharCodeCounts[charCodeStr]) {
+          //get rid of the zero entries - unnecessary?!?
+          const letter = String.fromCharCode(parseInt(charCodeStr));
+          arr[letter] = globalCharCodeCounts[charCodeStr];
         }
         return arr;
-      }, []);
-
-    //determine consensus sequence
-    const consensusStats = Array.from(this.positionalLetterCounts).map(
-      ([position, letterCounts]) => {
-        const topLetter = Object.keys(letterCounts).reduce((a, b) => {
-          const aIsLetter = a.match(/[a-z]/i);
-          const bIsLetter = b.match(/[a-z]/i);
-          if (aIsLetter && !bIsLetter) {
-            return a;
-          }
-          if (bIsLetter && !aIsLetter) {
-            return b;
-          }
-          return letterCounts[a] > letterCounts[b] ? a : b;
-        });
-        return {
-          position: position,
-          letter: topLetter,
-          occurrences: letterCounts[topLetter],
-        };
-      }
-    );
-    this.consensus = {
-      sequence: {
-        id: "consensus",
-        sequence: consensusStats.map((s) => s.letter).join(""),
       },
-      statistics: consensusStats,
+      {} as { [letter: string]: number }
+    );
+
+    //predict whether a sequence is nt or aa - if no characters are
+    //outside the Nucleotide codes, then call nt, otherwise aa.
+    this.predictedNT = Object.keys(allUniqueCharCodes).find((charCodeStr) => {
+      const charCode = parseInt(charCodeStr);
+      const isLowerAlpha = charCode > 96 && charCode < 123;
+      const isUpperAlpha = charCode > 64 && charCode < 91;
+      if (isUpperAlpha || isLowerAlpha) {
+        return (
+          Nucleotide.fromSingleLetterCode(String.fromCharCode(charCode)) ===
+          Nucleotide.UNKNOWN
+        );
+      }
+      return false;
+    })
+      ? false
+      : true;
+
+    //extract all the upper letter characters
+    this.allUpperAlphaLettersInAlignmentSorted = Object.keys(
+      allUniqueCharCodes
+    ).reduce((acc, charCodeStr) => {
+      const charCode = parseInt(charCodeStr);
+      if (charCode > 64 && charCode < 91) {
+        acc.push(String.fromCharCode(charCode));
+      }
+      return acc;
+    }, [] as string[]);
+
+    //extract consensus
+    this.consensus = {
+      id: "consensus",
+      sequence: Array.from(this.positionalLetterCounts)
+        .map(([positionIdx, letterCounts]) => {
+          //all zero entries removed from this.positionalLetterCounts above
+          return Object.entries(letterCounts)
+            .sort((letterA, letterB) => {
+              //prefer upper case letters then lower case letters
+              const aIsLowerAlpha = letterA[0].match(/[a-z]/) ? true : false;
+              const aIsUpperAlpha = letterA[0].match(/[A-Z]/) ? true : false;
+              const bIsLowerAlpha = letterB[0].match(/[a-z]/) ? true : false;
+              const bIsUpperAlpha = letterB[0].match(/[A-Z]/) ? true : false;
+
+              if (
+                aIsLowerAlpha === bIsLowerAlpha &&
+                aIsUpperAlpha === bIsUpperAlpha
+              ) {
+                //both are the same (upper or lower or neither)
+                return letterB[1] - letterA[1];
+              }
+
+              //different case and one has a value
+              return aIsUpperAlpha
+                ? -1
+                : bIsUpperAlpha
+                ? 1
+                : aIsLowerAlpha
+                ? -1
+                : bIsLowerAlpha
+                ? 1
+                : 0;
+            })
+            .map((letter) => letter[0])[0];
+        })
+        .join(""),
     };
 
     console.log(

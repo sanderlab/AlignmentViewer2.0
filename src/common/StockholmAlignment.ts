@@ -163,9 +163,12 @@ export class StockholmAlignment extends Alignment {
           }
         }
       });
-    //console.log("metadata:", metadata);
-    //console.log("sequences:", sequences);
-    return new StockholmAlignment(fileName, sequences, metadata);
+
+    try {
+      return new StockholmAlignment(fileName, sequences, metadata);
+    } catch (e) {
+      throw getParseError("Stockholm", e.message);
+    }
   }
 
   getMetadata() {

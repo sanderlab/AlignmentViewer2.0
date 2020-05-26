@@ -21,11 +21,8 @@ exports[`MiniMap Should render with default props. 1`] = `
         "aceEditorMode": undefined,
         "allUpperAlphaLettersInAlignmentSorted": Array [],
         "consensus": Object {
-          "sequence": Object {
-            "id": "consensus",
-            "sequence": "",
-          },
-          "statistics": Array [],
+          "id": "consensus",
+          "sequence": "",
         },
         "globalAlphaLetterCounts": Object {},
         "name": "",

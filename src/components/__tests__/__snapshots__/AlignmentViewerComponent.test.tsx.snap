@@ -19,11 +19,8 @@ exports[`AlignmentViewer Should render 1`] = `
           "aceEditorMode": undefined,
           "allUpperAlphaLettersInAlignmentSorted": Array [],
           "consensus": Object {
-            "sequence": Object {
-              "id": "consensus",
-              "sequence": "",
-            },
-            "statistics": Array [],
+            "id": "consensus",
+            "sequence": "",
           },
           "globalAlphaLetterCounts": Object {},
           "name": "",
@@ -126,11 +123,8 @@ exports[`AlignmentViewer Should render 1`] = `
             "aceEditorMode": undefined,
             "allUpperAlphaLettersInAlignmentSorted": Array [],
             "consensus": Object {
-              "sequence": Object {
-                "id": "consensus",
-                "sequence": "",
-              },
-              "statistics": Array [],
+              "id": "consensus",
+              "sequence": "",
             },
             "globalAlphaLetterCounts": Object {},
             "name": "",
@@ -198,11 +192,8 @@ exports[`AlignmentViewer Should render 1`] = `
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Object {
-                "sequence": Object {
-                  "id": "consensus",
-                  "sequence": "",
-                },
-                "statistics": Array [],
+                "id": "consensus",
+                "sequence": "",
               },
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -266,11 +257,8 @@ exports[`AlignmentViewer Should render 1`] = `
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Object {
-                "sequence": Object {
-                  "id": "consensus",
-                  "sequence": "",
-                },
-                "statistics": Array [],
+                "id": "consensus",
+                "sequence": "",
               },
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -325,11 +313,8 @@ exports[`AlignmentViewer Should render 1`] = `
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Object {
-                "sequence": Object {
-                  "id": "consensus",
-                  "sequence": "",
-                },
-                "statistics": Array [],
+                "id": "consensus",
+                "sequence": "",
               },
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -384,11 +369,8 @@ exports[`AlignmentViewer Should render 1`] = `
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Object {
-                "sequence": Object {
-                  "id": "consensus",
-                  "sequence": "",
-                },
-                "statistics": Array [],
+                "id": "consensus",
+                "sequence": "",
               },
               "globalAlphaLetterCounts": Object {},
               "name": "",
@@ -443,11 +425,8 @@ exports[`AlignmentViewer Should render 1`] = `
               "aceEditorMode": undefined,
               "allUpperAlphaLettersInAlignmentSorted": Array [],
               "consensus": Object {
-                "sequence": Object {
-                  "id": "consensus",
-                  "sequence": "",
-                },
-                "statistics": Array [],
+                "id": "consensus",
+                "sequence": "",
               },
               "globalAlphaLetterCounts": Object {},
               "name": "",
