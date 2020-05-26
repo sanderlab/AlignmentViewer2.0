@@ -87,7 +87,7 @@ export class SequenceSorter {
     true,
     "both",
     (sequences, alignment) => {
-      const consensusSeq = alignment.getConsensus().sequence;
+      const consensusSeq = alignment.getConsensus();
       return sequences
         .map((s) => s)
         .sort((seq1, seq2) => {
@@ -104,7 +104,7 @@ export class SequenceSorter {
     true,
     "aminoacid",
     (sequences, alignment) => {
-      const consensusSeq = alignment.getConsensus().sequence;
+      const consensusSeq = alignment.getConsensus();
       return sequences
         .map((s) => s)
         .sort((seq1, seq2) => {

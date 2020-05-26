@@ -195,7 +195,7 @@ export class CanvasAlignmentTiled extends React.Component<
     offsets: { seqY: number; letterX: number }
   ) {
     const { alignment, alignmentType, colorScheme } = this.props;
-    const consensusSequence = alignment.getConsensus().statistics;
+    const consensusSequence = alignment.getConsensus().sequence;
     const querySequence = alignment.getQuerySequence().sequence;
     const moleculeClass =
       alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
@@ -205,7 +205,7 @@ export class CanvasAlignmentTiled extends React.Component<
       molecule = moleculeClass.fromSingleLetterCode(letter);
     } else {
       const isConsensus =
-        consensusSequence[letterIdx + offsets.letterX].letter === letter;
+        consensusSequence[letterIdx + offsets.letterX] === letter;
       const isQuery = querySequence[letterIdx + offsets.letterX] === letter;
       if (
         (this.props.positionsToStyle === PositionsToStyle.CONSENSUS &&

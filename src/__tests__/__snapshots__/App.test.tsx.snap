@@ -18,6 +18,7 @@ exports[`App Should render within 2 minutes. 1`] = `
           <a
             className="github-link"
             href="https://github.com/sanderlab/AlignmentViewer2.0"
+            rel="noopener noreferrer"
             target="_blank"
           >
             <img

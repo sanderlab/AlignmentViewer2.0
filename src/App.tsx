@@ -172,6 +172,7 @@ export default class App extends React.Component<AppProps, AppState> {
                 className="github-link"
                 href="https://github.com/sanderlab/AlignmentViewer2.0"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <img
                   alt="Alignment Viewer 2.0 GitHub Repo"
