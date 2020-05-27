@@ -12,6 +12,8 @@ describe("SequenceBarplotComponent", () => {
         positionWidth={3}
         alignment={new Alignment("", [])}
         dataSeriesSet={[SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT]}
+        scrollerLoaded={() => {}}
+        scrollerUnloaded={() => {}}
       />
     );
     expect(wrapper).toMatchSnapshot();

@@ -8,4 +8,26 @@
   bottom: 0;
   left: 0;
   right: 0;
+
+  .detailed-sequence-text-holder {
+    position: relative;
+    .detailed-sequence-text {
+      position: absolute;
+      font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
+        monospace;
+      white-space: nowrap;
+    }
+    .detailed-sequence-text.white {
+      color: white;
+    }
+  }
+
+  canvas {
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
+  }
 }

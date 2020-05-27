@@ -1,7 +1,7 @@
 /**
  * Base react hook for a webgl detailed alignment scrollbar.
  */
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./WebGLAlignmentScrollbarComponent.scss";
 import { setPixelsFromWorldTop, RootState } from "../common/ReduxStore";
 import { useSelector, useDispatch } from "react-redux";
@@ -64,7 +64,7 @@ export function WebGLScrollbar(props: IWebGLScrollbarProps) {
         scrollbarHolderRef
       );
     }
-  }, []);
+  }, [scrollbarHolderProportions]);
 
   const scrollbarSizing = (() => {
     const heightInClient = Math.max(

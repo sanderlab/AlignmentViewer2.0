@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useApp } from "@inlet/react-pixi";
 import { Viewport } from "pixi-viewport";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, setPixelsFromWorldTop } from "../common/ReduxStore";
@@ -27,25 +26,29 @@ export function WebGLViewport(props: IWebGLViewportProps) {
   useEffect(() => {
     //CRAZY - this is needed to work in safari.  Answer came from here:
     //https://stackoverflow.com/questions/50349103
+    //Basic idea: cancel the wheel event if scolling Y over the detailed
+    //            alignment - this is handled manually by my code / viewport
     //I'm not sure whether this will mess up any code that embeds AV2 ...
     //It throws errors in the console chrome - hence the sniffing for safari..
     //I don't think it has any effect in firefox.
     //
-    //TODO: document / think about more / chang
+    //TODO: document / think about more / change
     //
     if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-      //@ts-ignore
-      window.onwheel = function (e) {
+      window.onwheel = function (e: WheelEvent) {
         if (
-          app.view === (e as WheelEvent).srcElement &&
-          (e as WheelEvent).deltaX !== 0
+          e.deltaY &&
+          (app.view === e.srcElement ||
+            (e.srcElement as HTMLElement).classList.contains(
+              "detailed-sequence-text"
+            ))
         ) {
-          return true;
+          return false;
         }
-        return false;
+        return true;
       };
     }
-  }, []);
+  }, [app]);
 
   const dispatch = useDispatch();
 

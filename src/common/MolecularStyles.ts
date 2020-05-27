@@ -25,6 +25,7 @@ export interface IColorScheme {
 
 export const ALL_AMINOACID_COLORSCHEMES = assembleColorSchemes("aa");
 export const ALL_NUCLEOTIDE_COLORSCHEMES = assembleColorSchemes("nt");
+//console.log("COLOR SCHEMES:", ALL_AMINOACID_COLORSCHEMES);
 
 /**
  * Read in class names and colors for amino acid or nucleotide
@@ -36,15 +37,20 @@ export const ALL_NUCLEOTIDE_COLORSCHEMES = assembleColorSchemes("nt");
 function assembleColorSchemes(moleculeType: "aa" | "nt") {
   return Object.keys(styles).reduce((acc, styleName) => {
     if (styleName.indexOf(moleculeType + "StyClass_") !== -1) {
+      //e.g., aaStyClass_Hydrophobicity
       const colorSchemeName = styleName.split(moleculeType + "StyClass_")[1];
       const colorOrder = styles[
+        //e.g., aaStyColors_Hydrophobicity
         moleculeType + "StyColorOrder_" + colorSchemeName
       ]
         .replace(/ /g, "")
         .split(","); // "build" removes spaces, but local "run" does not
+
+      //e.g., aaStyColors_Hydrophobicity
       const hexValues = styles[moleculeType + "StyColors_" + colorSchemeName]
         .replace(/ /g, "")
         .split(","); // "build" removes spaces, but local "run" does not
+
       const description = styles[moleculeType + "StyDesc_" + colorSchemeName];
       acc.push({
         commonName: colorSchemeName,

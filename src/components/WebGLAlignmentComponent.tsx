@@ -12,6 +12,7 @@ import { WebGLScrollbar } from "./WebGLAlignmentScrollbarComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
+  ResidueStyle,
 } from "../common/MolecularStyles";
 import { ResizeSensor } from "css-element-queries";
 import { store } from "../common/ReduxStore";
@@ -22,6 +23,7 @@ export interface IWebGLAlignmentProps {
   sortBy: SequenceSorter;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   residueWidth: number;
+  fontSize: number;
 
   scrollerLoaded: (e: HTMLElement) => void;
   scrollerUnloaded: (e: HTMLElement) => void;
@@ -47,7 +49,7 @@ export class WebGLAlignmentComponent extends React.Component<
   IWebGLAlignmentProps,
   IWebGLAlignmetnState
 > {
-  protected static CHARACTER_HEIGHT_TO_WIDTH_RATIO = 2;
+  protected static CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
 
   protected app: PIXI.Application | undefined;
   protected resizeSensor?: ResizeSensor;
@@ -182,7 +184,7 @@ export class WebGLAlignmentComponent extends React.Component<
   }
 
   protected renderStage() {
-    const { alignment, alignmentStyle, sortBy } = this.props;
+    const { alignment, alignmentStyle, fontSize, sortBy } = this.props;
     const visibleSeqs = this.getVisibleSequences();
     if (visibleSeqs === undefined) {
       return null;
@@ -192,49 +194,82 @@ export class WebGLAlignmentComponent extends React.Component<
       visibleSeqs.sequenceIndiciesToDraw
     );
 
-    return (
-      <Stage
-        width={viewportSizing.viewWidth}
-        height={viewportSizing.viewHeight}
-        options={{ antialias: false, transparent: true }}
-      >
-        <AppContext.Consumer>
-          {(app) => {
-            this.app = app;
-            app.stage.scale.x = scale.x;
-            app.stage.scale.y = scale.y;
-            return (
-              <CanvasAlignmentTiled
-                alignment={alignment}
-                alignmentType={alignmentStyle.alignmentType}
-                sortBy={sortBy}
-                colorScheme={alignmentStyle.colorScheme}
-                positionsToStyle={alignmentStyle.positionsToStyle}
-                drawSequencesIndicies={visibleSeqs.sequenceIndiciesToDraw}
-              />
-            );
-          }}
-        </AppContext.Consumer>
+    const sortedSeqs = alignment.getSequences(sortBy);
 
-        <AppContext.Consumer>
-          {(app) => (
-            //entrypoint to the interaction viewport for registering scroll
-            //and zoom and other events. This is not rendering anything, but
-            //is used to calculate interaction changes and report them
-            //back to this component.
-            <Provider store={store}>
-              <WebGLViewport
-                app={app}
-                alignment={alignment}
-                screenWidth={viewportSizing.viewWidth}
-                screenHeight={viewportSizing.viewHeight}
-                worldWidth={viewportSizing.worldWidth}
-                worldHeight={viewportSizing.worldHeight}
-              ></WebGLViewport>
-            </Provider>
-          )}
-        </AppContext.Consumer>
-      </Stage>
+    return (
+      <>
+        {
+          <div className="detailed-sequence-text-holder">
+            {visibleSeqs.sequenceIndiciesToDraw.map((seqIdx, viewIdx) => {
+              const seq = sortedSeqs[seqIdx];
+              const style = { top: viewIdx * scale.y, fontSize: fontSize };
+              return (
+                <div
+                  className="detailed-sequence-text black"
+                  style={style}
+                  key={seqIdx + seq.sequence + "_b"}
+                >
+                  {seq.sequence
+                    .split("")
+                    .map((resi, idx) => {
+                      if (idx % 2) return resi; //"\u00A0";
+                      return resi;
+                    })
+                    .join("")}
+                </div>
+              );
+            })}
+          </div>
+        }
+
+        <Stage
+          width={viewportSizing.viewWidth}
+          height={viewportSizing.viewHeight}
+          options={{ antialias: false, transparent: true }}
+        >
+          <AppContext.Consumer>
+            {(app) => {
+              //app.stage.scale.x = scale.x;
+              //app.stage.scale.y = scale.y;
+              return (
+                <CanvasAlignmentTiled
+                  alignment={alignment}
+                  alignmentType={alignmentStyle.alignmentType}
+                  sortBy={sortBy}
+                  alpha={
+                    alignmentStyle.residueDetail === ResidueStyle.LIGHT
+                      ? alignmentStyle.colorScheme.backgroundAlpha * 255
+                      : 255
+                  }
+                  colorScheme={alignmentStyle.colorScheme}
+                  positionsToStyle={alignmentStyle.positionsToStyle}
+                  drawSequencesIndicies={visibleSeqs.sequenceIndiciesToDraw}
+                  scale={scale}
+                />
+              );
+            }}
+          </AppContext.Consumer>
+
+          <AppContext.Consumer>
+            {(app) => (
+              //entrypoint to the interaction viewport for registering scroll
+              //and zoom and other events. This is not rendering anything, but
+              //is used to calculate interaction changes and report them
+              //back to this component.
+              <Provider store={store}>
+                <WebGLViewport
+                  app={app}
+                  alignment={alignment}
+                  screenWidth={viewportSizing.viewWidth}
+                  screenHeight={viewportSizing.viewHeight}
+                  worldWidth={viewportSizing.worldWidth}
+                  worldHeight={viewportSizing.worldHeight}
+                ></WebGLViewport>
+              </Provider>
+            )}
+          </AppContext.Consumer>
+        </Stage>
+      </>
     );
   }
 

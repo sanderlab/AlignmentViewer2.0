@@ -611,6 +611,11 @@ export class AlignmentViewer extends React.Component<
           <WebGLAlignmentComponent
             alignment={this.props.alignment}
             alignmentStyle={this.props.style}
+            fontSize={
+              this.props.zoomLevel
+                ? this.props.zoomLevel
+                : defaultProps.zoomLevel
+            }
             residueWidth={this.state.aceCharacterWidth}
             sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
             scrollerLoaded={(scroller) => {

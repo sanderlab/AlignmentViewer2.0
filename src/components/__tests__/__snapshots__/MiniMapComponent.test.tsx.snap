@@ -25,6 +25,7 @@ exports[`MiniMap Should render with default props. 1`] = `
           "sequence": "",
         },
         "globalAlphaLetterCounts": Object {},
+        "maxSequenceLength": NaN,
         "name": "",
         "positionalLetterCounts": Map {},
         "predictedNT": true,
@@ -70,6 +71,8 @@ exports[`MiniMap Should render with default props. 1`] = `
         "description": "mock-aa-style-desc",
       }
     }
+    onClick={[Function]}
+    onIndicatorDrag={[Function]}
     positionsToStyle={
       PositionsToStyle {
         "className": undefined,

@@ -22,10 +22,10 @@ exports[`SequenceBarplotComponent Should render when given default props. 1`] = 
     style={
       Object {
         "height": "100px",
-        "width": -3,
+        "width": NaN,
       }
     }
-    viewBox="0 0 -1 100"
+    viewBox="0 0 NaN 100"
     xmlns="http://www.w3.org/2000/svg"
   />
 </div>

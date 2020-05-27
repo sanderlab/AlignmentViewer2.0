@@ -34,7 +34,8 @@ export interface ICanvasAlignmentTiledProps {
   sortBy: SequenceSorter;
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
-  scale?: [number, number];
+  alpha?: number;
+  scale?: { x: number; y: number };
   drawSequencesIndicies?: number[];
 }
 
@@ -63,7 +64,7 @@ export class CanvasAlignmentTiled extends React.Component<
       nextProps.colorScheme !== this.props.colorScheme ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
       nextProps.sortBy !== this.props.sortBy ||
-      !this.arraysEqual(nextProps.scale, this.props.scale) ||
+      nextProps.scale !== this.props.scale ||
       !this.arraysEqual(
         nextProps.drawSequencesIndicies,
         this.props.drawSequencesIndicies
@@ -81,6 +82,7 @@ export class CanvasAlignmentTiled extends React.Component<
       colorScheme,
       positionsToStyle,
       drawSequencesIndicies,
+      scale,
       sortBy,
     } = this.props;
 
@@ -127,8 +129,9 @@ export class CanvasAlignmentTiled extends React.Component<
         {tiledImages.tiles.map((tile) => (
           <Sprite
             source={tile.image}
-            x={tile.pixelX}
-            y={tile.pixelY}
+            x={tile.pixelX * (scale ? scale.x : 1)}
+            y={tile.pixelY * (scale ? scale.y : 1)}
+            scale={scale ? [scale.x, scale.y] : [1, 1]}
             key={`${tile.tileX}_
                   ${tile.tileY}_
                   ${colorScheme.commonName}_
@@ -168,7 +171,9 @@ export class CanvasAlignmentTiled extends React.Component<
         tileImageData.data[imageDataIdx] = colorScheme.rgb.red;
         tileImageData.data[imageDataIdx + 1] = colorScheme.rgb.green;
         tileImageData.data[imageDataIdx + 2] = colorScheme.rgb.blue;
-        tileImageData.data[imageDataIdx + 3] = 255; //alpha between 0 (transparent) and 255 (opaque)
+        tileImageData.data[imageDataIdx + 3] = this.props.alpha
+          ? this.props.alpha
+          : 255; //alpha between 0 (transparent) and 255 (opaque)
 
         imageDataIdx += 4;
       }

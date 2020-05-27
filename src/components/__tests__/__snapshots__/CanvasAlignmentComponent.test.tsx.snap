@@ -65,6 +65,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
         "Y": 10,
         "Z": 10,
       },
+      "maxSequenceLength": 26,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -262,7 +263,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -276,7 +277,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -346,6 +347,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
         "Y": 10,
         "Z": 10,
       },
+      "maxSequenceLength": 26,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -543,7 +545,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -557,7 +559,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -573,6 +575,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
         "sequence": "",
       },
       "globalAlphaLetterCounts": Object {},
+      "maxSequenceLength": NaN,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {},
       "predictedNT": true,
@@ -647,7 +650,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -661,7 +664,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -673,7 +676,7 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
   onMouseLeave={[Function]}
   onWheel={[Function]}
 >
-  <t
+  <x
     height={650}
     onMount={[Function]}
     onUnmount={[Function]}
@@ -692,7 +695,7 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
     <ContextConsumer>
       <Component />
     </ContextConsumer>
-  </t>
+  </x>
 </div>
 `;
 
@@ -717,6 +720,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -842,7 +846,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -856,7 +860,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -882,6 +886,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -1007,7 +1012,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -1021,7 +1026,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -1047,6 +1052,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -1172,7 +1178,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -1186,7 +1192,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -1212,6 +1218,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -1337,7 +1344,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -1351,7 +1358,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -1377,6 +1384,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -1502,7 +1510,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -1516,7 +1524,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -1542,6 +1550,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -1667,7 +1676,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -1681,7 +1690,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -1707,6 +1716,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -1832,7 +1842,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -1846,7 +1856,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -1872,6 +1882,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -1997,7 +2008,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -2011,7 +2022,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -2037,6 +2048,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -2162,7 +2174,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -2176,7 +2188,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
@@ -2202,6 +2214,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "A": 10,
         "B": 10,
       },
+      "maxSequenceLength": 2,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
@@ -2327,7 +2340,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onMouseLeave={[Function]}
     onWheel={[Function]}
   >
-    <t
+    <x
       height={650}
       onMount={[Function]}
       onUnmount={[Function]}
@@ -2341,7 +2354,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       width={485}
     >
       <canvas />
-    </t>
+    </x>
   </div>
 </CanvasAlignmentComponent>
 `;
