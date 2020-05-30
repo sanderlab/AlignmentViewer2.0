@@ -235,12 +235,8 @@ export class WebGLAlignmentComponent extends React.Component<
                 <CanvasAlignmentTiled
                   alignment={alignment}
                   alignmentType={alignmentStyle.alignmentType}
+                  residueDetail={alignmentStyle.residueDetail}
                   sortBy={sortBy}
-                  alpha={
-                    alignmentStyle.residueDetail === ResidueStyle.LIGHT
-                      ? alignmentStyle.colorScheme.backgroundAlpha * 255
-                      : 255
-                  }
                   colorScheme={alignmentStyle.colorScheme}
                   positionsToStyle={alignmentStyle.positionsToStyle}
                   drawSequencesIndicies={visibleSeqs.sequenceIndiciesToDraw}

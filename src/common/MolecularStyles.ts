@@ -21,6 +21,12 @@ export interface IColorScheme {
   colors: {
     [residueCode: string]: string;
   };
+  backgroundColorsLightTheme: {
+    [residueCode: string]: string;
+  };
+  letterColorsDarkTheme: {
+    [residueCode: string]: string;
+  };
 }
 
 export const ALL_AMINOACID_COLORSCHEMES = assembleColorSchemes("aa");
@@ -51,6 +57,20 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
         .replace(/ /g, "")
         .split(","); // "build" removes spaces, but local "run" does not
 
+      //e.g., aaStyBackgroundColorsLightTheme_Hydrophobicity
+      const backgroundColorLightTheme = styles[
+        moleculeType + "StyBackgroundColorsLightTheme_" + colorSchemeName
+      ]
+        .replace(/ /g, "")
+        .split(","); // "build" removes spaces, but local "run" does not
+
+      //e.g., aaStyBackgroundColorsLightTheme_Hydrophobicity
+      const letterColorsDarkTheme = styles[
+        moleculeType + "StyLetterColorsDarkTheme_" + colorSchemeName
+      ]
+        .replace(/ /g, "")
+        .split(","); // "build" removes spaces, but local "run" does not
+
       const description = styles[moleculeType + "StyDesc_" + colorSchemeName];
       acc.push({
         commonName: colorSchemeName,
@@ -61,6 +81,15 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
         ),
         colors: Object.fromEntries(
           colorOrder.map((_, i) => [colorOrder[i], hexValues[i]])
+        ),
+        backgroundColorsLightTheme: Object.fromEntries(
+          colorOrder.map((_, i) => [
+            colorOrder[i],
+            backgroundColorLightTheme[i],
+          ])
+        ),
+        letterColorsDarkTheme: Object.fromEntries(
+          colorOrder.map((_, i) => [colorOrder[i], letterColorsDarkTheme[i]])
         ),
       });
     }

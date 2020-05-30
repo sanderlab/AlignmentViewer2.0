@@ -1,0 +1,30 @@
+/** WebGLAlignmentComponent.scss */
+
+.alignment-details-holder .viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  canvas.stage {
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
+  }
+  .sequence-text-holder {
+    position: absolute;
+    font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
+      monospace;
+    white-space: nowrap;
+
+    .single-sequence-text {
+      position: absolute;
+    }
+  }
+}

@@ -2,7 +2,7 @@
  * Base hook for pure webgl alignment details.
  */
 import React, { useEffect, useRef, useState } from "react";
-import "./WebGLAlignmentComponent.scss";
+import "./AlignmentDetails.scss";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
 import {
@@ -110,7 +110,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   return (
     <Provider store={store}>
       <div
-        className="webgl-detailed-alignment-viewer"
+        className="alignment-details-holder"
         onMouseEnter={() => {
           setMouseHovering(true);
         }}
@@ -118,10 +118,11 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           setMouseHovering(false);
         }}
       >
-        <div ref={alignmentDetailsRef} className="webgl-detailed-alignment">
+        <div ref={alignmentDetailsRef} className="viewport">
           {!state.initialized ? null : (
             <>
               <Stage
+                className="stage"
                 style={{
                   position: "relative",
                   top: state.scrollingAdditionalVerticalOffset,
@@ -136,12 +137,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                       <CanvasAlignmentTiled
                         alignment={alignment}
                         alignmentType={alignmentStyle.alignmentType}
+                        residueDetail={alignmentStyle.residueDetail}
                         sortBy={sortBy}
-                        /*alpha={
-                          alignmentStyle.residueDetail === ResidueStyle.LIGHT
-                            ? alignmentStyle.colorScheme.backgroundAlpha * 255
-                            : 255
-                        }*/
                         colorScheme={alignmentStyle.colorScheme}
                         positionsToStyle={alignmentStyle.positionsToStyle}
                         drawSequencesIndicies={state.seqIdxsToRender}
@@ -174,9 +171,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                 </AppContext.Consumer>
               </Stage>
               <div
-                className="detailed-sequence-text-holder"
+                className="sequence-text-holder"
                 style={{
-                  position: "absolute",
                   top: state.scrollingAdditionalVerticalOffset,
                 }}
               >
@@ -188,7 +184,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   };
                   return (
                     <div
-                      className="detailed-sequence-text black"
+                      className="single-sequence-text"
                       style={style}
                       key={seqIdx + seq.sequence + "_b"}
                     >

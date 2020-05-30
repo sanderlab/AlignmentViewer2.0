@@ -7,6 +7,7 @@ import {
   PositionsToStyle,
   AlignmentTypes,
   IColorScheme,
+  ResidueStyle,
 } from "../common/MolecularStyles";
 import { SequenceSorter } from "../common/AlignmentSorter";
 
@@ -34,7 +35,7 @@ export interface ICanvasAlignmentTiledProps {
   sortBy: SequenceSorter;
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
-  alpha?: number;
+  residueDetail: ResidueStyle;
   scale?: { x: number; y: number };
   drawSequencesIndicies?: number[];
 }
@@ -82,6 +83,7 @@ export class CanvasAlignmentTiled extends React.Component<
       colorScheme,
       positionsToStyle,
       drawSequencesIndicies,
+      residueDetail,
       scale,
       sortBy,
     } = this.props;
@@ -138,6 +140,7 @@ export class CanvasAlignmentTiled extends React.Component<
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
                   ${sortBy.key}_
+                  ${residueDetail.key}_
                   ${alignment.getName()}_
                   ${
                     drawSequencesIndicies ? drawSequencesIndicies.join("-") : ""
@@ -168,12 +171,10 @@ export class CanvasAlignmentTiled extends React.Component<
           offsets
         );
 
-        tileImageData.data[imageDataIdx] = colorScheme.rgb.red;
-        tileImageData.data[imageDataIdx + 1] = colorScheme.rgb.green;
-        tileImageData.data[imageDataIdx + 2] = colorScheme.rgb.blue;
-        tileImageData.data[imageDataIdx + 3] = this.props.alpha
-          ? this.props.alpha
-          : 255; //alpha between 0 (transparent) and 255 (opaque)
+        tileImageData.data[imageDataIdx] = colorScheme.red;
+        tileImageData.data[imageDataIdx + 1] = colorScheme.green;
+        tileImageData.data[imageDataIdx + 2] = colorScheme.blue;
+        tileImageData.data[imageDataIdx + 3] = 255; //alpha between 0 (transparent) and 255 (opaque)
 
         imageDataIdx += 4;
       }
@@ -234,6 +235,7 @@ export class CanvasAlignmentTiled extends React.Component<
     };
   }
 
+  protected static WHITE_RGB = { red: 255, green: 255, blue: 255 };
   protected getCurrentMoleculeColors(
     letter: string,
     letterIdx: number,
@@ -244,6 +246,7 @@ export class CanvasAlignmentTiled extends React.Component<
       alignmentType,
       colorScheme,
       positionsToStyle,
+      residueDetail,
     } = this.props;
     const consensusSequence = alignment.getConsensus().sequence;
     const querySequence = alignment.getQuerySequence().sequence;
@@ -267,7 +270,13 @@ export class CanvasAlignmentTiled extends React.Component<
         molecule = moleculeClass.fromSingleLetterCode(letter);
       }
     }
-    return molecule.colors[colorScheme.commonName];
+
+    //TODO: ripe for speed increases / caching etc
+    return residueDetail === ResidueStyle.DARK
+      ? molecule.colors[colorScheme.commonName].default.rgb
+      : residueDetail === ResidueStyle.LIGHT
+      ? molecule.colors[colorScheme.commonName].backgroundColorOnLightTheme.rgb
+      : CanvasAlignmentTiled.WHITE_RGB;
   }
 
   protected initializeTiledImages({

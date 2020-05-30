@@ -2,7 +2,7 @@
 
 exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] = `
 <div
-  className="sequence-logo   "
+  className="sequence-logo  mock-aa-class "
 >
   <svg
     preserveAspectRatio="none"
@@ -106,7 +106,7 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
 
 exports[`SequenceLogoComponent Should render when given default props. 1`] = `
 <div
-  className="sequence-logo   "
+  className="sequence-logo  mock-aa-class "
 >
   <svg
     preserveAspectRatio="none"

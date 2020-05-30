@@ -14,6 +14,7 @@ import {
   IColorScheme,
   PositionsToStyle,
   AlignmentTypes,
+  ResidueStyle,
 } from "../common/MolecularStyles";
 
 export interface ICanvasAlignmentProps {
@@ -184,6 +185,7 @@ export class CanvasAlignmentComponent extends React.Component<
                     alignmentType={alignmentType}
                     sortBy={sortBy}
                     colorScheme={colorScheme}
+                    residueDetail={ResidueStyle.DARK}
                     positionsToStyle={positionsToStyle}
                   />
                   {rowHighlightStart !== undefined &&

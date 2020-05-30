@@ -47,12 +47,18 @@ exports[`MiniMap Should render with default props. 1`] = `
         "allColorSchemes": Array [
           Object {
             "backgroundAlpha": 0,
+            "backgroundColorsLightTheme": Object {
+              "": "",
+            },
             "className": "mock-aa-class",
             "colors": Object {
               "": "",
             },
             "commonName": "Default",
             "description": "mock-aa-style-desc",
+            "letterColorsDarkTheme": Object {
+              "": "",
+            },
           },
         ],
         "className": undefined,
@@ -63,12 +69,18 @@ exports[`MiniMap Should render with default props. 1`] = `
     colorScheme={
       Object {
         "backgroundAlpha": 0,
+        "backgroundColorsLightTheme": Object {
+          "": "",
+        },
         "className": "mock-aa-class",
         "colors": Object {
           "": "",
         },
         "commonName": "Default",
         "description": "mock-aa-style-desc",
+        "letterColorsDarkTheme": Object {
+          "": "",
+        },
       }
     }
     onClick={[Function]}

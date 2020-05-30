@@ -580,73 +580,57 @@ $ntProps: (
 
 /*
  *
- * EXPORT
- * export alignment type classes, color scheme classes, position coloring classes,
- * and then individual colors for use in javascript.
+ *
+ * FUNCTIONS
+ *
  *
  */
 
-:export {
-  acePrefix: $acePrefix;
-  preAceQueryClass: $preAceQueryClass;
-  preAceConsensusClass: $preAceConsensusClass;
-  aceQueryClass: $aceQueryClass;
-  aceConsensusClass: $aceConsensusClass;
-  aceResidueParentClass: $aceResidueParentClass;
-  darkHueClass: $darkHueClass;
-  lightHueClass: $lightHueClass;
-  lettersOnlyHueClass: $lettersOnlyHueClass;
-
-  aaAlignTypeClass: map-get($aaProps, topLevelAlignmentClass);
-  ntAlignTypeClass: map-get($ntProps, topLevelAlignmentClass);
-
-  styPosAllClass: $styPosAll;
-  styPosQueryClass: $styPosQuery;
-  styPosQueryDiffClass: $styPosQueryDiff;
-  styPosConsensusClass: $styPosConsensus;
-  styPosConsensusDiffClass: $styPosConsensusDiff;
+//get the equivalant hex color of an alpha-transformed hex.
+//see: https://makandracards.com/makandra/42500-sass-how-to-convert-an-rgba-color-to-its-rgb-look-alike
+@function getNonTransparantAlphaEquivalant($color, $alpha) {
+  @return mix($color, #fff, $alpha * 100);
 }
 
-//export coloring
-:export {
-  @each $styleName, $styleObj in map-get($aaProps, styles) {
-    #{unquote("aaStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
-    #{unquote("aaStyDesc_"+$styleName)}: unquote(
-      map-get($styleObj, description)
-    );
-    #{unquote("aaStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
-    #{unquote("aaStyColorOrder_"+$styleName)}: map-keys(
-      map-get($styleObj, colors)
-    );
-    #{unquote("aaStyColors_"+$styleName)}: map-values(
-      map-get($styleObj, colors)
+//same as getNonTransparantAlphaEquivalant but in bulk (takes a list rather
+//than a single color)
+@function getNonTransparantAlphaEquivalantList($colorsArr, $alpha) {
+  $toReturn: ();
+  @each $color in $colorsArr {
+    $toReturn: append(
+      $toReturn,
+      getNonTransparantAlphaEquivalant($color, $alpha),
+      $separator: comma
     );
   }
+  @return $toReturn;
 }
-:export {
-  @each $styleName, $styleObj in map-get($ntProps, styles) {
-    #{unquote("ntStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
-    #{unquote("ntStyDesc_"+$styleName)}: unquote(
-      map-get($styleObj, description)
-    );
-    #{unquote("ntStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
-    #{unquote("ntStyColorOrder_"+$styleName)}: map-keys(
-      map-get($styleObj, colors)
-    );
-    #{unquote("ntStyColors_"+$styleName)}: map-values(
-      map-get($styleObj, colors)
-    );
-  }
-}
-
-//
-// FUNCTIONS
-//
 
 //see https://stackoverflow.com/questions/11867545
 @function brightness($color) {
   @return ((red($color) * 299) + (green($color) * 587) + (blue($color) * 114)) /
     1000;
+}
+
+//get the letter color for the dark color scheme depending on the lightness
+//of the background: will return black if the background color is light and
+//white if the background color is dark
+@function getLetterColor($bgColor) {
+  $letterColor: white;
+  @if brightness($bgColor) > 125 {
+    $letterColor: black;
+  }
+  @return $letterColor;
+}
+
+//same as getLetterColor but in bulk (takes a list rather
+//than a single color)
+@function getLetterColors($bgColorsArr) {
+  $toReturn: ();
+  @each $bgColor in $bgColorsArr {
+    $toReturn: append($toReturn, getLetterColor($bgColor), $separator: comma);
+  }
+  @return $toReturn;
 }
 
 //
@@ -705,7 +689,7 @@ $ntProps: (
       $aceAAClass: $acePrefix + $aa;
 
       //
-      //dark hues
+      // dark hues
       //
       :global
         .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosAll}
@@ -722,14 +706,9 @@ $ntProps: (
       :global
         .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosQueryDiff}
         .#{$aceAAClass}:not(.#{$aceQueryClass}) {
-        background-color: rgba($color, 1) !important;
-
         //set letter color based on brightness of background color
-        $tmpcolor: white;
-        @if brightness($color) > 125 {
-          $tmpcolor: black;
-        }
-        color: $tmpcolor !important;
+        color: getLetterColor($color) !important;
+        background-color: $color !important;
       }
 
       //
@@ -748,16 +727,17 @@ $ntProps: (
       :global
         .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
         .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+        color: $color;
+        background-color: getNonTransparantAlphaEquivalant(
+          $color,
+          $backgroundAlpha
+        );
         @if $aa == S {
           //serine glyph needs stoke coloring also
-          color: $color;
           stroke: $color;
           fill: #ffffff;
-          background-color: rgba($color, $backgroundAlpha);
         } @else {
-          color: $color;
           fill: $color;
-          background-color: rgba($color, $backgroundAlpha);
         }
       }
 
@@ -776,5 +756,87 @@ $ntProps: (
   }
 }
 
+/*
+ *
+ *
+ * OUTPUT CSS
+ *
+ *
+ */
 @include outputMajorSelectors($aaProps);
 @include outputMajorSelectors($ntProps);
+
+/*
+ *
+ * EXPORT
+ * export alignment type classes, color scheme classes, position coloring classes,
+ * and then individual colors for use in javascript.
+ *
+ */
+:export {
+  acePrefix: $acePrefix;
+  preAceQueryClass: $preAceQueryClass;
+  preAceConsensusClass: $preAceConsensusClass;
+  aceQueryClass: $aceQueryClass;
+  aceConsensusClass: $aceConsensusClass;
+  aceResidueParentClass: $aceResidueParentClass;
+  darkHueClass: $darkHueClass;
+  lightHueClass: $lightHueClass;
+  lettersOnlyHueClass: $lettersOnlyHueClass;
+
+  aaAlignTypeClass: map-get($aaProps, topLevelAlignmentClass);
+  ntAlignTypeClass: map-get($ntProps, topLevelAlignmentClass);
+
+  styPosAllClass: $styPosAll;
+  styPosQueryClass: $styPosQuery;
+  styPosQueryDiffClass: $styPosQueryDiff;
+  styPosConsensusClass: $styPosConsensus;
+  styPosConsensusDiffClass: $styPosConsensusDiff;
+}
+
+//export colors for amino acids
+:export {
+  @each $styleName, $styleObj in map-get($aaProps, styles) {
+    #{unquote("aaStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
+    #{unquote("aaStyDesc_"+$styleName)}: unquote(
+      map-get($styleObj, description)
+    );
+    #{unquote("aaStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
+    #{unquote("aaStyColorOrder_"+$styleName)}: map-keys(
+      map-get($styleObj, colors)
+    );
+    #{unquote("aaStyColors_"+$styleName)}: map-values(
+      map-get($styleObj, colors)
+    );
+    #{unquote("aaStyBackgroundColorsLightTheme_"+$styleName)}: getNonTransparantAlphaEquivalantList(
+      map-values(map-get($styleObj, colors)),
+      map-get($styleObj, backgroundAlpha)
+    );
+    #{unquote("aaStyLetterColorsDarkTheme_"+$styleName)}: getLetterColors(
+      map-values(map-get($styleObj, colors))
+    );
+  }
+}
+//export colors for nucleotides
+:export {
+  @each $styleName, $styleObj in map-get($ntProps, styles) {
+    #{unquote("ntStyClass_"+$styleName)}: map-get($styleObj, topLevelClass);
+    #{unquote("ntStyDesc_"+$styleName)}: unquote(
+      map-get($styleObj, description)
+    );
+    #{unquote("ntStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
+    #{unquote("ntStyColorOrder_"+$styleName)}: map-keys(
+      map-get($styleObj, colors)
+    );
+    #{unquote("ntStyColors_"+$styleName)}: map-values(
+      map-get($styleObj, colors)
+    );
+    #{unquote("ntStyBackgroundColorsLightTheme_"+$styleName)}: getNonTransparantAlphaEquivalantList(
+      map-values(map-get($styleObj, colors)),
+      map-get($styleObj, backgroundAlpha)
+    );
+    #{unquote("ntStyLetterColorsDarkTheme_"+$styleName)}: getLetterColors(
+      map-values(map-get($styleObj, colors))
+    );
+  }
+}

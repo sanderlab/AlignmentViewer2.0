@@ -9,12 +9,7 @@
  * @returns An object that contains the hex and rgb values for that string
  *          Default to black (#000000) if the string is not recognized.
  */
-export function stringToColor(
-  str: string
-): {
-  hex: string;
-  rgb: { red: number; green: number; blue: number };
-} {
+export function stringToColor(str: string) {
   const ctx = document.createElement("canvas").getContext("2d");
   ctx!.fillStyle = str;
   let hex = ctx!.fillStyle!;
@@ -29,7 +24,7 @@ export function stringToColor(
 
   var rgbaResult = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)!;
   return {
-    hex: hex,
+    hexString: hex,
     rgb: {
       red: parseInt(rgbaResult[1], 16),
       green: parseInt(rgbaResult[2], 16),

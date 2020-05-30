@@ -7,13 +7,23 @@ import {
 
 interface IResidueColor {
   [colorScheme: string]: {
-    hexString: string;
-    rgb: {
-      red: number;
-      green: number;
-      blue: number;
+    default: {
+      hexString: string;
+      rgb: {
+        red: number;
+        green: number;
+        blue: number;
+      };
     };
-    backgroundAlpha: number;
+    backgroundColorOnLightTheme: {
+      hexString: string;
+      rgb: {
+        red: number;
+        green: number;
+        blue: number;
+      };
+    };
+    letterColorOnDarkTheme: string;
   };
 }
 
@@ -103,22 +113,18 @@ export class AminoAcid implements IAminoAcid {
     this.fullName = fullName;
     this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
     this.colors = ALL_AMINOACID_COLORSCHEMES.reduce((acc, cs) => {
-      const colorPair = Object.entries(cs.colors).find(([aa, color]) => {
-        if (aa === singleLetterCode) {
-          return true;
-        }
-        return false;
-      });
-
-      let colorString = "#ffffff";
-      if (colorPair) {
-        colorString = colorPair[1];
-      }
-      const colorInfo = stringToColor(colorString);
       acc[cs.commonName] = {
-        hexString: colorInfo.hex,
-        rgb: colorInfo.rgb,
-        backgroundAlpha: cs.backgroundAlpha,
+        default: stringToColor(
+          cs.colors[singleLetterCode] ? cs.colors[singleLetterCode] : "#ffffff"
+        ),
+        backgroundColorOnLightTheme: stringToColor(
+          cs.backgroundColorsLightTheme[singleLetterCode]
+            ? cs.backgroundColorsLightTheme[singleLetterCode]
+            : "#ffffff"
+        ),
+        letterColorOnDarkTheme: cs.letterColorsDarkTheme[singleLetterCode]
+          ? cs.letterColorsDarkTheme[singleLetterCode]
+          : "#000000",
       };
       return acc;
     }, {} as IResidueColor);
@@ -165,22 +171,18 @@ export class Nucleotide implements INucleotide {
     this.fullName = fullName;
     this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
     this.colors = ALL_NUCLEOTIDE_COLORSCHEMES.reduce((acc, cs) => {
-      const colorPair = Object.entries(cs.colors).find(([aa, color]) => {
-        if (aa === singleLetterCode) {
-          return true;
-        }
-        return false;
-      });
-
-      let colorString = "#ffffff";
-      if (colorPair) {
-        colorString = colorPair[1];
-      }
-      const colorInfo = stringToColor(colorString);
       acc[cs.commonName] = {
-        hexString: colorInfo.hex,
-        rgb: colorInfo.rgb,
-        backgroundAlpha: cs.backgroundAlpha,
+        default: stringToColor(
+          cs.colors[singleLetterCode] ? cs.colors[singleLetterCode] : "#ffffff"
+        ),
+        backgroundColorOnLightTheme: stringToColor(
+          cs.backgroundColorsLightTheme[singleLetterCode]
+            ? cs.backgroundColorsLightTheme[singleLetterCode]
+            : "#ffffff"
+        ),
+        letterColorOnDarkTheme: cs.letterColorsDarkTheme[singleLetterCode]
+          ? cs.letterColorsDarkTheme[singleLetterCode]
+          : "#000000",
       };
       return acc;
     }, {} as IResidueColor);

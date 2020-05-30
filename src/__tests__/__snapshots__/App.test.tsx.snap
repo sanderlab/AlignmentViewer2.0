@@ -156,7 +156,9 @@ exports[`App Should render within 2 minutes. 1`] = `
                 <option
                   key="0"
                   value={0}
-                />
+                >
+                  mock-aa-style-desc
+                </option>
               </select>
             </label>
           </div>
