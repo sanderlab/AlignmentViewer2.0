@@ -4,6 +4,7 @@ import { Ace } from "ace-builds";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
 import { ScrollSync, ScrollType } from "../common/ScrollSync";
+import { store } from "../common/ReduxStore";
 import {
   SequenceLogoComponent,
   LOGO_TYPES,
@@ -24,7 +25,9 @@ import { AceQuerySequenceComponent } from "./AceQuerySequenceComponent";
 import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
 import { IMiniMapProps } from "./MiniMapComponent";
+import { AlignmentDetails } from "./AlignmentDetailsHook";
 import { WebGLAlignmentComponent } from "./WebGLAlignmentComponent";
+import { Provider } from "react-redux";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -605,7 +608,7 @@ export class AlignmentViewer extends React.Component<
               this.renderPositionBox()
             )}
 
-        {this.renderWidget(
+        {/*this.renderWidget(
           "webgl-alignment-holder",
           "WEBGL:",
           <WebGLAlignmentComponent
@@ -625,6 +628,34 @@ export class AlignmentViewer extends React.Component<
               this.horizontalScrollSync.unRegisterElementScroller(scroller);
             }}
           />,
+          true
+          )*/}
+        {this.renderWidget(
+          "webgl-alignment-holder",
+          "WEBGL:",
+          <Provider store={store}>
+            <AlignmentDetails
+              alignment={this.props.alignment}
+              alignmentStyle={this.props.style}
+              fontSize={
+                this.props.zoomLevel
+                  ? this.props.zoomLevel
+                  : defaultProps.zoomLevel
+              }
+              residueWidth={
+                this.state.aceCharacterWidth ? this.state.aceCharacterWidth : 10
+              }
+              sortBy={
+                this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
+              }
+              scrollerLoaded={(scroller) => {
+                this.horizontalScrollSync.registerElementScroller(scroller);
+              }}
+              scrollerUnloaded={(scroller) => {
+                this.horizontalScrollSync.unRegisterElementScroller(scroller);
+              }}
+            />
+          </Provider>,
           true
         )}
 
