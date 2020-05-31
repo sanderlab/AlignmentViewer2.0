@@ -36,53 +36,6 @@ export interface IMiniMapState {
   resizedWidth?: number;
 }
 
-/*
-export function MiniMapComponent(props: IMiniMapProps) {
-  
-  //state
-  const [resizeListener, setResizeListener] = useState<
-    undefined | ResizeSensor
-  >(undefined);
-
-  //sizing
-  if (minimapHolderRef.current && !resizeListener) {
-    setResizeListener(
-      new ResizeSensor(scrollbarHolderRef.current, () => {
-        if (scrollbarHolderRef.current) {
-          const rect = scrollbarHolderRef.current!.getBoundingClientRect();
-          if (
-            scrollbarHolderProportions.top !== rect.top ||
-            scrollbarHolderProportions.height !== rect.height
-          ) {
-            setScrollbarHolderProportions({
-              height: rect.height,
-              top: rect.top,
-            });
-          }
-        }
-      })
-    );
-  }
-  
-  return (
-    <div
-      ref={this.setupResizeSensor}
-      className="minimap-holder"
-      style={{
-        ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
-        position: position,
-        width: size.frameWidth,
-        borderWidth: `${size.borderWidth}px`,
-        margin: `${size.margin}px`,
-        resize: resizable ? resizable : "none",
-        direction: alignHorizontal === "left" ? "ltr" : "rtl",
-      }}
-    >
-      {this.renderCanvasComponent()}
-    </div>
-  );
-}*/
-
 export class MiniMapComponent extends React.Component<
   IMiniMapProps,
   IMiniMapState

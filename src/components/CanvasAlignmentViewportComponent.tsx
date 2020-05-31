@@ -131,7 +131,7 @@ export const CanvasAlignmentViewport = PixiComponent<
       if (newAlignment) {
         //new alignments set zoom clamping and also force the alignment into
         //as much of a view as possible.
-        vp = vp.fitWorld(true);
+        //vp = vp.fitWorld(true); //TODO: fails with hook? I don't get it
         vp = vp.setZoom(stageDimensions.width / numColumns, false);
       } else if (
         oldProps.stageDimensions &&

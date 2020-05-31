@@ -53,7 +53,6 @@ export class CanvasAlignmentComponent extends React.Component<
   ICanvasAlignmentProps,
   ICanvasAlignmentState
 > {
-  app?: PIXI.Application;
   protected divElement: React.RefObject<HTMLInputElement>;
 
   static defaultProps = {
@@ -155,12 +154,6 @@ export class CanvasAlignmentComponent extends React.Component<
             height={stageHeight}
             options={{ transparent: true }}
           >
-            <AppContext.Consumer>
-              {(app) => {
-                this.app = app;
-                return <></>;
-              }}
-            </AppContext.Consumer>
             <AppContext.Consumer>
               {(app) => (
                 <CanvasAlignmentViewport

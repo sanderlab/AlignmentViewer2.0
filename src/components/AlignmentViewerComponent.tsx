@@ -19,12 +19,13 @@ import {
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
 import { MiniMapComponent } from "./MiniMapComponent";
+import { MiniMap } from "./MiniMapHook";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
 import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
 import { AceQuerySequenceComponent } from "./AceQuerySequenceComponent";
 import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
-import { IMiniMapProps } from "./MiniMapComponent";
+import { IMiniMapProps } from "./MiniMapHook";
 import { AlignmentDetails } from "./AlignmentDetailsHook";
 import { WebGLAlignmentComponent } from "./WebGLAlignmentComponent";
 import { Provider } from "react-redux";
@@ -494,6 +495,19 @@ export class AlignmentViewer extends React.Component<
           className="minimap"
           style={{ display: showMinimap ? "flex" : "none" }}
         >
+          {
+            <MiniMap
+              alignment={alignment}
+              alignmentStyle={style}
+              sortBy={sortBy ? sortBy : defaultProps.sortBy}
+              //exposed by prop to instantiator
+              alignHorizontal={mmOptions.alignHorizontal}
+              resizable={mmOptions.resizable}
+              startingWidth={mmOptions.startingWidth}
+              verticalHeight={mmOptions.verticalHeight}
+            />
+          }
+          {/*
           <MiniMapComponent
             //not exposed to instantiator
             alignment={alignment}
@@ -516,6 +530,7 @@ export class AlignmentViewer extends React.Component<
             onClick={this.minimapClicked}
             onIndicatorDrag={this.minimapRectHighlightMoved}
           />
+          */}
         </div>
       )
     );
