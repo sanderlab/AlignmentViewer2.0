@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Viewport } from "pixi-viewport";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, setWorldTopOffset } from "../common/ReduxStore";
@@ -73,6 +73,7 @@ export function AlignmentDetailsViewport(
         underflow: "none",
       })
   );
+
   //resize on any changes to screen or world width/height
   useEffect(() => {
     viewport.resize(screenWidth, screenHeight, worldWidth, worldHeight);
@@ -84,28 +85,19 @@ export function AlignmentDetailsViewport(
     viewport.top = worldTopOffset;
   }, [alignment, worldTopOffset, viewport]);
 
-  useEffect(() => {
-    viewport.on("moved", (data) => {
-      //@ts-ignore
-      const newTop = data.viewport.top;
-      dispatch(setWorldTopOffset(newTop));
-    });
-  }, []);
-
   //not sure the cost of adding and removing functions, but
   //this might be a place for performance improvement. It is
-  //tricky because pixelsFromWorldTop can't be queried during
+  //tricky because worldTopOffset can't be queried during
   //the event otherwise I'd only add the listener in the
   //viewport creation phase above (pixelsFromWorldTop is
   //stale if put there or in useEffect)
-  /*viewport.off("moved");
+  viewport.off("moved");
   viewport.on("moved", (data) => {
     //@ts-ignore
     const newWorldTop = Math.abs(data.viewport.top);
-    if (newWorldTop !== pixelsFromWorldTop) {
-      console.log("setWorldTopOffset: " + newWorldTop);
-      //dispatch(setWorldTopOffset(newWorldTop));
+    if (newWorldTop !== worldTopOffset) {
+      dispatch(setWorldTopOffset(newWorldTop));
     }
-  });*/
+  });
   return <></>;
 }
