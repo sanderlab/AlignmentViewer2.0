@@ -5,7 +5,6 @@ import {
   createSlice,
   PayloadAction,
 } from "@reduxjs/toolkit";
-import { Alignment } from "./Alignment";
 
 interface IAlignmentDetailsState {
   //a flag to indicate that the state has been fully calculated
@@ -68,7 +67,6 @@ const attachRenderDetails = (state: IAlignmentDetailsState) => {
     residueHeight,
     sequenceCount,
     sequenceLength,
-    worldTopOffset,
   } = state;
 
   if (
@@ -100,14 +98,25 @@ const attachRenderDetails = (state: IAlignmentDetailsState) => {
       : sequenceCount;
 
   const maxStartingSeqIdx = sequenceCount - maxSeqsToRender; //never below zero
-  if (worldTopOffset % residueHeight === 0) {
+
+  if (
+    state.worldTopOffset + maxSeqsToRender * residueHeight >=
+    state.worldHeight
+  ) {
+    //state.worldTopOffset is past the bottom of the viewport.
+    //clamp topoffset to last possible sequence
+    state.worldTopOffset = state.worldHeight - clientHeight;
+  }
+
+  if (state.worldTopOffset % residueHeight === 0) {
     //top of view is perfectly aligned with a the top of a sequence
     //1 additional sequence will be rendered, which won't be fully visible
     //as it will flow past the bottom
     state.firstFullyVisibleSeqIdx =
-      worldTopOffset / residueHeight > maxStartingSeqIdx
+      state.worldTopOffset / residueHeight > maxStartingSeqIdx
         ? maxStartingSeqIdx
-        : worldTopOffset;
+        : state.worldTopOffset / residueHeight;
+
     state.scrollingAdditionalVerticalOffset = 0;
     state.seqIdxsToRender = [
       ...Array(Math.min(maxFullyVisibleSeqs + 1, maxSeqsToRender)).keys(),
@@ -118,11 +127,11 @@ const attachRenderDetails = (state: IAlignmentDetailsState) => {
     //fully visible as the first partially flows above the viewport and
     //bottom partially below the viewport
     state.firstFullyVisibleSeqIdx =
-      Math.floor(worldTopOffset / residueHeight) > maxStartingSeqIdx
+      Math.floor(state.worldTopOffset / residueHeight) > maxStartingSeqIdx
         ? maxStartingSeqIdx
-        : Math.floor(worldTopOffset / residueHeight);
+        : Math.floor(state.worldTopOffset / residueHeight);
     state.scrollingAdditionalVerticalOffset =
-      -1 * (worldTopOffset % residueHeight);
+      -1 * (state.worldTopOffset % residueHeight);
     state.seqIdxsToRender = [
       ...Array(Math.min(maxFullyVisibleSeqs + 2, maxSeqsToRender)).keys(),
     ].map((zeroIdx) => zeroIdx + state.firstFullyVisibleSeqIdx);

@@ -54,6 +54,10 @@ export function AlignmentDetailsViewport(
 
   const dispatch = useDispatch();
 
+  const worldTopOffset = useSelector(
+    (state: RootState) => state.alignmentDetailsSlice.worldTopOffset
+  );
+
   let [viewport] = useState<Viewport>(
     new Viewport({
       noTicker: true,
@@ -69,10 +73,6 @@ export function AlignmentDetailsViewport(
         underflow: "none",
       })
   );
-  const pixelsFromWorldTop = useSelector(
-    (state: RootState) => state.webglViewport.pixelsFromWorldTop
-  );
-
   //resize on any changes to screen or world width/height
   useEffect(() => {
     viewport.resize(screenWidth, screenHeight, worldWidth, worldHeight);
@@ -81,8 +81,16 @@ export function AlignmentDetailsViewport(
   //scroll back to zero when a new alignment or new viewport is added
   //or move to theworld top pixel
   useEffect(() => {
-    viewport.top = pixelsFromWorldTop;
-  }, [alignment, pixelsFromWorldTop, viewport]);
+    viewport.top = worldTopOffset;
+  }, [alignment, worldTopOffset, viewport]);
+
+  useEffect(() => {
+    viewport.on("moved", (data) => {
+      //@ts-ignore
+      const newTop = data.viewport.top;
+      dispatch(setWorldTopOffset(newTop));
+    });
+  }, []);
 
   //not sure the cost of adding and removing functions, but
   //this might be a place for performance improvement. It is
@@ -90,13 +98,14 @@ export function AlignmentDetailsViewport(
   //the event otherwise I'd only add the listener in the
   //viewport creation phase above (pixelsFromWorldTop is
   //stale if put there or in useEffect)
-  viewport.off("moved");
+  /*viewport.off("moved");
   viewport.on("moved", (data) => {
     //@ts-ignore
     const newWorldTop = Math.abs(data.viewport.top);
     if (newWorldTop !== pixelsFromWorldTop) {
-      dispatch(setWorldTopOffset(newWorldTop));
+      console.log("setWorldTopOffset: " + newWorldTop);
+      //dispatch(setWorldTopOffset(newWorldTop));
     }
-  });
+  });*/
   return <></>;
 }
