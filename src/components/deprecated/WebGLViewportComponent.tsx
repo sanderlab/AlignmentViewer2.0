@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Viewport } from "pixi-viewport";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState, setPixelsFromWorldTop } from "../common/ReduxStore";
-import { Alignment } from "../common/Alignment";
+import { RootState, setPixelsFromWorldTop } from "../../common/ReduxStore";
+import { Alignment } from "../../common/Alignment";
 
 export interface IWebGLViewportProps {
   app: PIXI.Application;

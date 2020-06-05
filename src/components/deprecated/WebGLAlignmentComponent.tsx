@@ -3,19 +3,19 @@
  */
 import React from "react";
 import "./WebGLAlignmentComponent.scss";
-import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
+import { Alignment } from "../../common/Alignment";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 import { Stage, AppContext } from "@inlet/react-pixi";
-import { CanvasAlignmentTiled } from "./CanvasAlignmentTiledComponent";
+import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 import { WebGLViewport } from "./WebGLViewportComponent";
 import { WebGLScrollbar } from "./WebGLAlignmentScrollbarComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   ResidueStyle,
-} from "../common/MolecularStyles";
+} from "../../common/MolecularStyles";
 import { ResizeSensor } from "css-element-queries";
-import { store } from "../common/ReduxStore";
+import { store } from "../../common/ReduxStore";
 import { Provider } from "react-redux";
 
 export interface IWebGLAlignmentProps {

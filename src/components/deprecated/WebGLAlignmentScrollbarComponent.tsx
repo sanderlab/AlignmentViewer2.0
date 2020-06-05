@@ -3,7 +3,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import "./WebGLAlignmentScrollbarComponent.scss";
-import { setPixelsFromWorldTop, RootState } from "../common/ReduxStore";
+import { setPixelsFromWorldTop, RootState } from "../../common/ReduxStore";
 import { useSelector, useDispatch } from "react-redux";
 import { ResizeSensor } from "css-element-queries";
 

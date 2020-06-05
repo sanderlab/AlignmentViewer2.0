@@ -1,13 +1,13 @@
 import * as React from "react";
 import "./minimap/MiniMap.scss";
 
-import { CanvasAlignmentComponent } from "./CanvasAlignmentComponent";
-import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
+import { CanvasAlignmentComponent } from "../CanvasAlignmentComponent";
+import { Alignment } from "../../common/Alignment";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-} from "../common/MolecularStyles";
+} from "../../common/MolecularStyles";
 import { ResizeSensor } from "css-element-queries";
 
 export interface IMiniMapProps {

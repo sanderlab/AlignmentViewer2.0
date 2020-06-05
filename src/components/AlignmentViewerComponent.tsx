@@ -132,8 +132,6 @@ export class AlignmentViewer extends React.Component<
     this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
     this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
 
-    this.minimapClicked = this.minimapClicked.bind(this);
-    this.minimapRectHighlightMoved = this.minimapRectHighlightMoved.bind(this);
     this.handleCharacterSizeChanged = this.handleCharacterSizeChanged.bind(
       this
     );
@@ -216,60 +214,6 @@ export class AlignmentViewer extends React.Component<
     });
   }
 
-  /**
-   * scroll the aceEditors to a specific position when user clicks on the minimap
-   * the editor should center around the click, which will be calculated here.
-   *
-   * TODO: this might be better delt with in the scroll sync class and only have
-   *       one of the editors deal with the rectangles. It works fine right now
-   *       when there is only one vertical scroll sync and the minimap widget
-   *       spans the entire row, but it will be trickier if e.g., we have
-   *       the rectangle take up only the visible horizontal space also.
-   *
-   * @param mousePosition
-   */
-  protected minimapClicked(mousePosition: IPosition) {
-    const { aceEditors, msaEditorVewport } = this.state;
-
-    //the ace editor should center around the click. calculate height
-    const numRowsVisibleInAceEditor = msaEditorVewport
-      ? msaEditorVewport.numberVisibleRows
-      : 0;
-    let newY = Math.round(mousePosition.y - numRowsVisibleInAceEditor / 2);
-    newY = newY < 0 ? 0 : newY;
-
-    if (aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES] !== undefined) {
-      aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES]!.scrollToRow(newY);
-    }
-    if (aceEditors[ACE_EDITOR_IDS.MSA_IDS] !== undefined) {
-      aceEditors[ACE_EDITOR_IDS.MSA_IDS]!.scrollToRow(newY);
-    }
-  }
-
-  /**
-   * scroll to specific position when user moves the highlight indicator on minimap
-   * by dragging the rectangle itself.
-   *
-   * TODO: this might be better delt with in the scroll sync class and only have
-   *       one of the editors deal with the rectangles. It works fine right now
-   *       when there is only one vertical scroll sync and the minimap widget
-   *       spans the entire row, but it will be trickier if e.g., we have
-   *       the rectangle take up only the visible horizontal space also.
-   */
-  protected minimapRectHighlightMoved(
-    rectBounds: IRectangle,
-    mousePosition: IPosition
-  ) {
-    const { aceEditors } = this.state;
-
-    if (aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES] !== undefined) {
-      aceEditors[ACE_EDITOR_IDS.MSA_SEQUENCES]!.scrollToRow(rectBounds.y);
-    }
-    if (aceEditors[ACE_EDITOR_IDS.MSA_IDS] !== undefined) {
-      aceEditors[ACE_EDITOR_IDS.MSA_IDS]!.scrollToRow(rectBounds.y);
-    }
-  }
-
   /*
    *
    *
@@ -295,19 +239,7 @@ export class AlignmentViewer extends React.Component<
     return (
       <div className={`av-widget ${className}`} key={key}>
         <div className="av-annotation">{annotation}</div>
-        <div
-          className="av-content"
-          /*ref={(e) => {
-            if (e && addAsElementToScrollSync) {
-              //TODO: move into separate component .. Ref can be null here and
-              //      also good to keep track of removal / addition for scroll sync
-              //console.log("the ref is:", e);
-              this.horizontalScrollSync.registerElementScroller(e);
-            }
-          }}*/
-        >
-          {content}
-        </div>
+        <div className="av-content">{content}</div>
       </div>
     );
   }
@@ -510,30 +442,6 @@ export class AlignmentViewer extends React.Component<
               />
             </Provider>
           }
-          {/*
-          <MiniMapComponent
-            //not exposed to instantiator
-            alignment={alignment}
-            alignmentStyle={style}
-            sortBy={sortBy ? sortBy : defaultProps.sortBy}
-            highlightRows={
-              !msaEditorVewport
-                ? undefined
-                : {
-                    rowStart: msaEditorVewport.firstFullyVisibleRow,
-                    rowEnd: msaEditorVewport.lastFullyVisibleRow,
-                  }
-            }
-            //exposed by prop to instantiator
-            alignHorizontal={mmOptions.alignHorizontal}
-            resizable={mmOptions.resizable}
-            startingWidth={mmOptions.startingWidth}
-            verticalHeight={mmOptions.verticalHeight}
-            //not exposed yet to instantiator, but should in the future
-            onClick={this.minimapClicked}
-            onIndicatorDrag={this.minimapRectHighlightMoved}
-          />
-          */}
         </div>
       )
     );
@@ -626,28 +534,6 @@ export class AlignmentViewer extends React.Component<
               this.renderPositionBox()
             )}
 
-        {/*this.renderWidget(
-          "webgl-alignment-holder",
-          "WEBGL:",
-          <WebGLAlignmentComponent
-            alignment={this.props.alignment}
-            alignmentStyle={this.props.style}
-            fontSize={
-              this.props.zoomLevel
-                ? this.props.zoomLevel
-                : defaultProps.zoomLevel
-            }
-            residueWidth={this.state.aceCharacterWidth}
-            sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
-            scrollerLoaded={(scroller) => {
-              this.horizontalScrollSync.registerElementScroller(scroller);
-            }}
-            scrollerUnloaded={(scroller) => {
-              this.horizontalScrollSync.unRegisterElementScroller(scroller);
-            }}
-          />,
-          true
-          )*/}
         {this.renderWidget(
           "webgl-alignment-holder",
           "WEBGL:",
@@ -676,12 +562,6 @@ export class AlignmentViewer extends React.Component<
           </Provider>,
           true
         )}
-
-        {/*this.renderWidget(
-          "av-ace-msa-holder",
-          this.renderAlignmentAnnotationBox(),
-          this.renderAlignmentBox()
-        )*/}
       </div>
     );
   }
