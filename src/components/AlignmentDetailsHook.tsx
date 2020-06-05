@@ -2,6 +2,7 @@
  * Base hook for pure webgl alignment details.
  */
 import React, { useEffect, useRef, useState } from "react";
+import * as PIXI from "pixi.js";
 import "./AlignmentDetails.scss";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
@@ -18,13 +19,13 @@ import {
   RootState,
 } from "../common/ReduxStore";
 
+import { AlignmentDetailsViewport } from "./AlignmentDetailsViewportHook";
 import { AlignmentDetailsScrollbar } from "./AlignmentDetailsScrollbarHook";
 import { CanvasAlignmentTiled } from "./CanvasAlignmentTiledComponent";
 
 import { ResizeSensor } from "css-element-queries";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import { Provider, useDispatch, useSelector } from "react-redux";
-import { AlignmentDetailsViewport } from "./AlignmentDetailsViewportHook";
 export interface IAlignmentDetailsProps {
   alignment: Alignment;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
@@ -40,15 +41,7 @@ const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
 
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //props
-  const {
-    alignment,
-    alignmentStyle,
-    sortBy,
-    residueWidth,
-    fontSize,
-    scrollerLoaded,
-    scrollerUnloaded,
-  } = props;
+  const { alignment, alignmentStyle, sortBy, residueWidth, fontSize } = props;
 
   //ref to div
   const alignmentDetailsRef = useRef<HTMLDivElement>(null);
@@ -62,9 +55,12 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
 
   //sizing - dynamically update state when div changes size
   useEffect(() => {
+    PIXI.utils.skipHello();
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
     props.scrollerLoaded(alignmentDetailsRef.current!);
     if (alignmentDetailsRef.current) {
-      new ResizeSensor(alignmentDetailsRef.current, () => {
+      const rs = new ResizeSensor(alignmentDetailsRef.current, () => {
         if (alignmentDetailsRef.current) {
           const rect = alignmentDetailsRef.current!.getBoundingClientRect();
           if (
@@ -80,12 +76,19 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           }
         }
       });
+      return () => {
+        rs.detach();
+        props.scrollerUnloaded(alignmentDetailsRef.current!);
+      };
     } else {
       console.error(
         "Unable to add resize sensor as alignmentDetailsRef.current was not defined",
         alignmentDetailsRef
       );
     }
+    return () => {
+      props.scrollerUnloaded(alignmentDetailsRef.current!);
+    };
   }, []);
 
   useEffect(() => {
@@ -107,6 +110,19 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   }, [alignment]);
 
   const sortedSeqs = alignment.getSequences(sortBy);
+  const disableScrolling =
+    alignment.getSequenceCount() <= state.seqIdxsToRender.length;
+
+  //when switching alignments, there is a render with stale data as the
+  //redux store doesn't recalculate until setAlignmentDetails is called
+  //in useEffect above. Because of this, seqIdxsToRender can have incorrect
+  //indicies - if these indicies are invalid, set them to be empty.
+  const seqIdxsToRender =
+    alignment.getMaxSequenceLength() !== state.sequenceLength ||
+    alignment.getSequenceCount() !== state.sequenceCount
+      ? []
+      : state.seqIdxsToRender;
+
   return (
     <Provider store={store}>
       <div
@@ -119,8 +135,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         }}
       >
         <div ref={alignmentDetailsRef} className="viewport">
-          {!state.initialized ? null : (
-            <>
+          {!state.initialized ? null : ( //alignment.getMaxSequenceLength() !== state.sequenceLength || alignment.getSequenceCount() !== state.sequenceCount ||
+            <div>
               <Stage
                 className="stage"
                 style={{
@@ -141,7 +157,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                         sortBy={sortBy}
                         colorScheme={alignmentStyle.colorScheme}
                         positionsToStyle={alignmentStyle.positionsToStyle}
-                        drawSequencesIndicies={state.seqIdxsToRender}
+                        drawSequencesIndicies={seqIdxsToRender}
                         scale={{
                           x: state.residueWidth,
                           y: state.residueHeight,
@@ -150,25 +166,26 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                     );
                   }}
                 </AppContext.Consumer>
-
-                <AppContext.Consumer>
-                  {(app) => (
-                    //entrypoint to the interaction viewport for registering scroll
-                    //and zoom and other events. This is not rendering anything, but
-                    //is used to calculate interaction changes and report them
-                    //back to this component.
-                    <Provider store={store}>
-                      <AlignmentDetailsViewport
-                        app={app}
-                        alignment={alignment}
-                        screenWidth={state.viewportWidth}
-                        screenHeight={state.viewportHeight}
-                        worldWidth={state.worldWidth}
-                        worldHeight={state.worldHeight}
-                      ></AlignmentDetailsViewport>
-                    </Provider>
-                  )}
-                </AppContext.Consumer>
+                {disableScrolling ? null : (
+                  <AppContext.Consumer>
+                    {(app) => (
+                      //entrypoint to the interaction viewport for registering scroll
+                      //and zoom and other events. This is not rendering anything, but
+                      //is used to calculate interaction changes and report them
+                      //back to this component.
+                      <Provider store={store}>
+                        <AlignmentDetailsViewport
+                          app={app}
+                          alignment={alignment}
+                          screenWidth={state.clientWidth}
+                          screenHeight={state.clientHeight}
+                          worldWidth={state.worldWidth}
+                          worldHeight={state.worldHeight}
+                        ></AlignmentDetailsViewport>
+                      </Provider>
+                    )}
+                  </AppContext.Consumer>
+                )}
               </Stage>
               <div
                 className="sequence-text-holder"
@@ -176,7 +193,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   top: state.scrollingAdditionalVerticalOffset,
                 }}
               >
-                {state.seqIdxsToRender.map((seqIdx, viewIdx) => {
+                {seqIdxsToRender.map((seqIdx, viewIdx) => {
                   const seq = sortedSeqs[seqIdx];
                   const style = {
                     top: viewIdx * state.residueHeight,
@@ -199,10 +216,12 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   );
                 })}
               </div>
-            </>
+            </div>
           )}
         </div>
-        <AlignmentDetailsScrollbar visible={mouseHovering} />
+        {disableScrolling ? null : (
+          <AlignmentDetailsScrollbar visible={mouseHovering} />
+        )}
       </div>
     </Provider>
   );

@@ -22,11 +22,6 @@ interface IAlignmentDetailsState {
   //VISIBLE SEQUENCES
   //
 
-  // the first sequence completely visible in the viewport. Unless
-  // the entire alignment is being shown, there may be a sequence
-  // partially shown above this sequence.
-  firstFullyVisibleSeqIdx: number;
-
   //when scrolling, some sequences often become partially visible and
   //this controls the vertical offset one should apply to the sequences
   //when they are placed in the div.
@@ -59,6 +54,16 @@ interface IAlignmentDetailsState {
 /**
  * Calculate details required to render the alignment. Will update
  * the initialized flag to be true if all details are available.
+ *
+ * This function can adjust the following state members:
+ *     initialized
+ *     firstFullyVisibleSeqIdx
+ *     scrollingAdditionalVerticalOffset
+ *     seqIdxsToRender
+ *     viewportHeight, viewportWidth,
+ *     worldHeight, worldWidth
+ *
+ *     worldTopOffset (will only be changed if things are out of bounds)
  */
 const attachRenderDetails = (state: IAlignmentDetailsState) => {
   const {
@@ -80,62 +85,49 @@ const attachRenderDetails = (state: IAlignmentDetailsState) => {
   }
 
   state.initialized = true;
-
   state.worldHeight = sequenceCount * residueHeight;
   state.worldWidth = sequenceLength * residueWidth;
 
-  //always render 2 more than needed unless there are not 2 more.
-  const maxFullyVisibleSeqs =
-    Math.floor(clientHeight / residueHeight) < sequenceCount
-      ? Math.floor(clientHeight / residueHeight)
-      : sequenceCount;
+  if (Math.floor(clientHeight / residueHeight) >= sequenceCount) {
+    //all sequences in the alignment will fit into the client - no
+    //positioning needed
+    state.worldTopOffset = 0;
+    state.scrollingAdditionalVerticalOffset = 0;
+    state.seqIdxsToRender = [...Array(sequenceCount).keys()];
+    state.viewportWidth = sequenceLength * residueWidth;
+    state.viewportHeight = state.seqIdxsToRender.length * residueHeight;
+    return state;
+  }
 
-  const maxSeqsToRender =
-    maxFullyVisibleSeqs + 2 <= sequenceCount
-      ? maxFullyVisibleSeqs + 2
-      : maxFullyVisibleSeqs + 1 <= sequenceCount
-      ? maxFullyVisibleSeqs + 1
-      : sequenceCount;
-
-  const maxStartingSeqIdx = sequenceCount - maxSeqsToRender; //never below zero
-
-  if (
-    state.worldTopOffset + maxSeqsToRender * residueHeight >=
-    state.worldHeight
-  ) {
-    //state.worldTopOffset is past the bottom of the viewport.
-    //clamp topoffset to last possible sequence
+  if (state.worldTopOffset + clientHeight > state.worldHeight) {
     state.worldTopOffset = state.worldHeight - clientHeight;
   }
-
-  if (state.worldTopOffset % residueHeight === 0) {
-    //top of view is perfectly aligned with a the top of a sequence
-    //1 additional sequence will be rendered, which won't be fully visible
-    //as it will flow past the bottom
-    state.firstFullyVisibleSeqIdx =
-      state.worldTopOffset / residueHeight > maxStartingSeqIdx
-        ? maxStartingSeqIdx
-        : state.worldTopOffset / residueHeight;
-
-    state.scrollingAdditionalVerticalOffset = 0;
-    state.seqIdxsToRender = [
-      ...Array(Math.min(maxFullyVisibleSeqs + 1, maxSeqsToRender)).keys(),
-    ].map((zeroIdx) => zeroIdx + state.firstFullyVisibleSeqIdx);
-  } else {
-    //top of the view is scrolled partially past a sequence
-    //2 additional sequences will be rendered, neither of which will be
-    //fully visible as the first partially flows above the viewport and
-    //bottom partially below the viewport
-    state.firstFullyVisibleSeqIdx =
-      Math.floor(state.worldTopOffset / residueHeight) > maxStartingSeqIdx
-        ? maxStartingSeqIdx
-        : Math.floor(state.worldTopOffset / residueHeight);
-    state.scrollingAdditionalVerticalOffset =
-      -1 * (state.worldTopOffset % residueHeight);
-    state.seqIdxsToRender = [
-      ...Array(Math.min(maxFullyVisibleSeqs + 2, maxSeqsToRender)).keys(),
-    ].map((zeroIdx) => zeroIdx + state.firstFullyVisibleSeqIdx);
+  if (state.worldTopOffset < 0) {
+    state.worldTopOffset = 0; // I don't think this should ever happen, but just in case
   }
+
+  const topInMiddleOfResidue = state.worldTopOffset % residueHeight !== 0;
+  const bottomInMiddleOfResidue =
+    (state.worldTopOffset + clientHeight) % residueHeight !== 0;
+
+  let firstRenderedSeq = Math.ceil(state.worldTopOffset / residueHeight);
+  let numSeqsToRender = Math.floor(clientHeight / residueHeight);
+  if (topInMiddleOfResidue && firstRenderedSeq - 1 >= 0) {
+    numSeqsToRender += 1;
+    firstRenderedSeq -= 1;
+  }
+  if (
+    bottomInMiddleOfResidue &&
+    firstRenderedSeq + numSeqsToRender + 1 < sequenceCount
+  ) {
+    numSeqsToRender += 1;
+  }
+
+  state.scrollingAdditionalVerticalOffset =
+    -1 * (state.worldTopOffset % residueHeight);
+  state.seqIdxsToRender = [...Array(numSeqsToRender).keys()].map(
+    (zeroIdx) => zeroIdx + firstRenderedSeq
+  );
 
   state.viewportWidth = sequenceLength * residueWidth;
   state.viewportHeight = state.seqIdxsToRender.length * residueHeight;
@@ -162,7 +154,6 @@ export const alignmentDetailsSlice = createSlice({
     sequenceCount: -1,
     sequenceLength: -1,
 
-    firstFullyVisibleSeqIdx: -1,
     seqIdxsToRender: [],
     scrollingAdditionalVerticalOffset: -1,
   } as IAlignmentDetailsState,
@@ -205,6 +196,11 @@ export const alignmentDetailsSlice = createSlice({
 
     setWorldTopOffset: (state, action: PayloadAction<number>) => {
       state.worldTopOffset = action.payload;
+      attachRenderDetails(state);
+    },
+
+    setSequenceTopOffset: (state, action: PayloadAction<number>) => {
+      state.worldTopOffset = action.payload * state.residueHeight;
       attachRenderDetails(state);
     },
   },

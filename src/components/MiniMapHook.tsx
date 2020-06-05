@@ -1,5 +1,6 @@
 import * as React from "react";
 import "./MiniMap.scss";
+import * as PIXI from "pixi.js";
 
 import { CanvasAlignmentComponent } from "./CanvasAlignmentComponent";
 import { Alignment } from "../common/Alignment";
@@ -45,39 +46,48 @@ export function MiniMap(props: IMiniMapProps) {
   const minimapRef = useRef<HTMLDivElement>(null);
 
   //state
-  const [resizedDimensions, setResizedDimensions] = React.useState({
-    width: 0,
-    height: 0,
-  });
+  const [resizedDimensions, setResizedDimensions] = React.useState<
+    undefined | { width: number; height: number }
+  >(undefined);
 
   //sizing - dynamically update state when div changes size
   useEffect(() => {
-    new ResizeSensor(minimapRef.current!, (x) => {
-      if (minimapRef.current) {
-        if (
-          !resizedDimensions ||
-          resizedDimensions.width !== minimapRef.current.clientHeight ||
-          resizedDimensions.height !== minimapRef.current.clientWidth
-        ) {
-          setTimeout(() => {
-            //flashes (worse) without setTimeout. Safari still flashing.
-            setResizedDimensions({
-              width: minimapRef.current!.clientWidth,
-              height: minimapRef.current!.clientHeight,
+    PIXI.utils.skipHello();
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+    if (minimapRef.current) {
+      const rs = new ResizeSensor(minimapRef.current, (x) => {
+        if (minimapRef.current) {
+          if (
+            !resizedDimensions ||
+            resizedDimensions.width !== minimapRef.current.clientHeight ||
+            resizedDimensions.height !== minimapRef.current.clientWidth
+          ) {
+            setTimeout(() => {
+              //flashes (worse) without setTimeout. Safari still flashing.
+              setResizedDimensions({
+                width: minimapRef.current!.clientWidth,
+                height: minimapRef.current!.clientHeight,
+              });
             });
-          });
+          }
         }
-      }
-    });
+      });
+      return () => {
+        rs.detach();
+      };
+    } else {
+      console.error(
+        "Unable to add resize sensor as minimapRef.current was not defined",
+        minimapRef
+      );
+    }
   }, []);
 
   const sizing = (() => {
+    if (!resizedDimensions) return undefined;
     const frameBorderWidth = 1; // in pixels
     const frameMargin = 2; // in pixels
-
-    function adjustForBorderAndMargin(length: number) {
-      return length - 2 * frameMargin - 1 * frameBorderWidth;
-    }
 
     return {
       borderWidth: frameBorderWidth,
@@ -89,39 +99,40 @@ export function MiniMap(props: IMiniMapProps) {
     };
   })();
 
-  const position = props.verticalHeight === "div" ? "absolute" : "fixed";
   return (
     <div
       ref={minimapRef}
       className="minimap-holder"
       style={{
         ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
-        position: position,
-        width: sizing.frameWidth,
-        borderWidth: sizing.borderWidth,
-        margin: sizing.margin,
+        position: props.verticalHeight === "div" ? "absolute" : "fixed",
+        width: !sizing ? 0 : sizing.frameWidth,
+        borderWidth: !sizing ? 0 : sizing.borderWidth,
+        margin: !sizing ? 0 : sizing.margin,
         resize: resizable ? resizable : "none",
         direction: alignHorizontal === "left" ? "ltr" : "rtl",
       }}
     >
-      <CanvasAlignmentComponent
-        alignment={alignment}
-        alignmentType={alignmentStyle.alignmentType}
-        positionsToStyle={alignmentStyle.positionsToStyle}
-        colorScheme={alignmentStyle.colorScheme}
-        sortBy={sortBy}
-        highlightRows={undefined}
-        stageDimensions={{
-          width: sizing.frameWidth - 14, //add space for the dragger on safari
-          height: sizing.frameHeight,
-        }}
-        onClick={(pos) => {
-          console.log("CLICK");
-        }}
-        onIndicatorDrag={(bounds, pos) => {
-          console.log("DRAG");
-        }}
-      />
+      {!sizing ? null : (
+        <CanvasAlignmentComponent
+          alignment={alignment}
+          alignmentType={alignmentStyle.alignmentType}
+          positionsToStyle={alignmentStyle.positionsToStyle}
+          colorScheme={alignmentStyle.colorScheme}
+          sortBy={sortBy}
+          highlightRows={undefined}
+          stageDimensions={{
+            width: sizing.frameWidth - 14, //add space for the dragger on safari
+            height: sizing.frameHeight,
+          }}
+          onClick={(pos) => {
+            console.log("CLICK");
+          }}
+          onIndicatorDrag={(bounds, pos) => {
+            console.log("DRAG");
+          }}
+        />
+      )}
     </div>
   );
 }

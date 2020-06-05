@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Viewport } from "pixi-viewport";
+import React, { useEffect, useState } from "react";
+import { Viewport, MovedEventData } from "pixi-viewport";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, setWorldTopOffset } from "../common/ReduxStore";
 import { Alignment } from "../common/Alignment";
@@ -79,12 +79,6 @@ export function AlignmentDetailsViewport(
     viewport.resize(screenWidth, screenHeight, worldWidth, worldHeight);
   }, [viewport, screenWidth, screenHeight, worldWidth, worldHeight]);
 
-  //scroll back to zero when a new alignment or new viewport is added
-  //or move to theworld top pixel
-  useEffect(() => {
-    viewport.top = worldTopOffset;
-  }, [alignment, worldTopOffset, viewport]);
-
   //not sure the cost of adding and removing functions, but
   //this might be a place for performance improvement. It is
   //tricky because worldTopOffset can't be queried during
@@ -92,12 +86,19 @@ export function AlignmentDetailsViewport(
   //viewport creation phase above (pixelsFromWorldTop is
   //stale if put there or in useEffect)
   viewport.off("moved");
-  viewport.on("moved", (data) => {
-    //@ts-ignore
+  viewport.on("moved", (data: MovedEventData) => {
     const newWorldTop = Math.abs(data.viewport.top);
-    if (newWorldTop !== worldTopOffset) {
+    if (data.type === "wheel" && newWorldTop !== worldTopOffset) {
       dispatch(setWorldTopOffset(newWorldTop));
     }
   });
+
+  //scroll back to zero when a new alignment or new viewport is added
+  //or move to theworld top pixel
+  useEffect(() => {
+    //console.log("SETTIGN WORLD TOP: " + worldTopOffset);
+    viewport.top = worldTopOffset;
+  }, [alignment, worldTopOffset, viewport]);
+
   return <></>;
 }

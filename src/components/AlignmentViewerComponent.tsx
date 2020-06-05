@@ -18,7 +18,6 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
-import { MiniMapComponent } from "./MiniMapComponent";
 import { MiniMap } from "./MiniMapHook";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
 import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
@@ -27,7 +26,6 @@ import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
 import { IMiniMapProps } from "./MiniMapHook";
 import { AlignmentDetails } from "./AlignmentDetailsHook";
-import { WebGLAlignmentComponent } from "./WebGLAlignmentComponent";
 import { Provider } from "react-redux";
 
 export type IAlignmentViewerProps = {
@@ -482,7 +480,6 @@ export class AlignmentViewer extends React.Component<
 
   protected renderMiniMap() {
     const { alignment, showMinimap, sortBy, style } = this.props;
-    const { msaEditorVewport } = this.state;
 
     let mmOptions = this.props.minimapOptions
       ? this.props.minimapOptions

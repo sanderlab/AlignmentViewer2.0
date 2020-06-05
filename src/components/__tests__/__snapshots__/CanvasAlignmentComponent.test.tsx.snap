@@ -728,9 +728,6 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
     <ContextConsumer>
       <Component />
     </ContextConsumer>
-    <ContextConsumer>
-      <Component />
-    </ContextConsumer>
   </x>
 </div>
 `;

@@ -2,7 +2,7 @@
  * Base react hook for a webgl detailed alignment scrollbar.
  */
 import React, { useEffect, useRef, useState } from "react";
-import "./WebGLAlignmentScrollbarComponent.scss";
+import "./AlignmentDetails.scss";
 import { ResizeSensor } from "css-element-queries";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, setWorldTopOffset } from "../common/ReduxStore";
@@ -45,7 +45,7 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
   //         spacing that the scrollbar consumes.
   useEffect(() => {
     if (scrollbarHolderRef.current) {
-      new ResizeSensor(scrollbarHolderRef.current, () => {
+      const rs = new ResizeSensor(scrollbarHolderRef.current, () => {
         if (scrollbarHolderRef.current) {
           const rect = scrollbarHolderRef.current!.getBoundingClientRect();
           if (
@@ -59,6 +59,9 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
           }
         }
       });
+      return () => {
+        rs.detach();
+      };
     } else {
       console.error(
         "Unable to add resize sensor as scrollbarHolderRef.current was not defined",
@@ -100,17 +103,6 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
   const getNewOffsetFromWorldTop = (suggestedScrollbarClientTop: number) => {
     let newWorldTop =
       (1 / scrollbarSizing.clientToWorldRatio) * suggestedScrollbarClientTop;
-    if (
-      newWorldTop + scrollbarHolderProportions.height >
-      dimensions.worldHeight
-    ) {
-      //trying to drag past the bottom of the world, fix to bottom of world
-      newWorldTop = dimensions.worldHeight - scrollbarHolderProportions.height;
-    }
-    if (newWorldTop < 0) {
-      //trying to drag past the top of the world, fix to top of world
-      newWorldTop = 0;
-    }
     return newWorldTop;
   };
 
@@ -167,7 +159,7 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
   const renderFullpageDragDiv = () => {
     return (
       <div
-        className="vertical-scrollbar-fullpage-drag "
+        className="vertical-scrollbar-fullpage-drag"
         style={{
           display: dragging ? "block" : "none",
         }}
