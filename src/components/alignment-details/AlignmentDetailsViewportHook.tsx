@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Viewport, MovedEventData } from "pixi-viewport";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState, setWorldTopOffset } from "../common/ReduxStore";
-import { Alignment } from "../common/Alignment";
+import { RootState, setWorldTopOffset } from "../../common/ReduxStore";
+import { Alignment } from "../../common/Alignment";
 
 export interface IAlignmentDetailsViewportProps {
   app: PIXI.Application;

@@ -18,14 +18,14 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
-import { MiniMap } from "./MiniMapHook";
+import { MiniMap } from "./minimap/MiniMapHook";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
 import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
 import { AceQuerySequenceComponent } from "./AceQuerySequenceComponent";
 import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
 import { AceEditorComponent } from "./AceEditorComponent";
-import { IMiniMapProps } from "./MiniMapHook";
-import { AlignmentDetails } from "./AlignmentDetailsHook";
+import { IMiniMapProps } from "./minimap/MiniMapHook";
+import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { Provider } from "react-redux";
 
 export type IAlignmentViewerProps = {

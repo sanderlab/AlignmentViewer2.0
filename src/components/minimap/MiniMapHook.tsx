@@ -2,13 +2,13 @@ import * as React from "react";
 import "./MiniMap.scss";
 import * as PIXI from "pixi.js";
 
-import { CanvasAlignmentComponent } from "./CanvasAlignmentComponent";
-import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
+import { CanvasAlignmentComponent } from "../CanvasAlignmentComponent";
+import { Alignment } from "../../common/Alignment";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-} from "../common/MolecularStyles";
+} from "../../common/MolecularStyles";
 import { ResizeSensor } from "css-element-queries";
 import { useRef, useEffect } from "react";
 

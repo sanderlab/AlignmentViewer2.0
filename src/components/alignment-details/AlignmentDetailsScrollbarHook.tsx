@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./AlignmentDetails.scss";
 import { ResizeSensor } from "css-element-queries";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, setWorldTopOffset } from "../common/ReduxStore";
+import { RootState, setWorldTopOffset } from "../../common/ReduxStore";
 
 interface IWebGLScrollbarProps {
   visible: boolean;

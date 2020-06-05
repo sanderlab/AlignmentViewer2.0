@@ -4,12 +4,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
 import "./AlignmentDetails.scss";
-import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
+import { Alignment } from "../../common/Alignment";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-} from "../common/MolecularStyles";
+} from "../../common/MolecularStyles";
 
 import {
   store,
@@ -17,11 +17,11 @@ import {
   setResidueDimensions,
   setViewportDimensions,
   RootState,
-} from "../common/ReduxStore";
+} from "../../common/ReduxStore";
 
 import { AlignmentDetailsViewport } from "./AlignmentDetailsViewportHook";
 import { AlignmentDetailsScrollbar } from "./AlignmentDetailsScrollbarHook";
-import { CanvasAlignmentTiled } from "./CanvasAlignmentTiledComponent";
+import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
 import { ResizeSensor } from "css-element-queries";
 import { Stage, AppContext } from "@inlet/react-pixi";

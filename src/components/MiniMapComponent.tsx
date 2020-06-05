@@ -1,5 +1,5 @@
 import * as React from "react";
-import "./MiniMap.scss";
+import "./minimap/MiniMap.scss";
 
 import { CanvasAlignmentComponent } from "./CanvasAlignmentComponent";
 import { Alignment } from "../common/Alignment";
