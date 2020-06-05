@@ -27,10 +27,8 @@ export interface ICanvasAlignmentProps {
     rowStart: number;
     rowEnd: number;
   };
-  stageDimensions?: {
-    width: number;
-    height: number;
-  };
+  stageWidth: number;
+  stageHeight: number;
   viewportProps?: Partial<ICanvasAlignmentViewportProps>;
 
   onClick?(mousePosition: IPosition): void;
@@ -104,7 +102,8 @@ export class CanvasAlignmentComponent extends React.Component<
       onClick,
       positionsToStyle,
       sortBy,
-      stageDimensions,
+      stageWidth,
+      stageHeight,
       viewportProps,
     } = this.props;
     const { dragging, dragPositions } = this.state;
@@ -131,13 +130,6 @@ export class CanvasAlignmentComponent extends React.Component<
           : highlightRows.rowStart;
       rowHighlightStart = rowHighlightStart > 0 ? rowHighlightStart : 0;
     }
-
-    //const stageHeight =
-    //  this.divElement.current && this.divElement.current.clientHeight // can be zero. this is kind of hacky
-    //    ? this.divElement.current.clientHeight
-    //    : stageDimensions?.height;
-    const stageHeight = stageDimensions?.height;
-    const stageWidth = stageDimensions?.width;
 
     return (
       <div
@@ -170,7 +162,8 @@ export class CanvasAlignmentComponent extends React.Component<
                   numColumns={maxSeqLength}
                   numRows={numSequences}
                   onMouseClick={onClick}
-                  stageDimensions={stageDimensions!}
+                  stageWidth={stageWidth}
+                  stageHeight={stageHeight}
                   {...viewportProps}
                 >
                   <CanvasAlignmentTiled

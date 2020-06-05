@@ -7,10 +7,8 @@ export interface ICanvasAlignmentViewportProps {
   numRows: number;
   app: PIXI.Application;
   onMouseClick?: (mousePosition: IPosition) => void;
-  stageDimensions: {
-    width: number;
-    height: number;
-  };
+  stageWidth: number;
+  stageHeight: number;
   ensureVisible?: {
     y: number;
     height: number;
@@ -24,7 +22,7 @@ export const CanvasAlignmentViewport = PixiComponent<
   any
 >("CanvasAlignmentViewport", {
   create(props: ICanvasAlignmentViewportProps) {
-    const { app, numColumns, numRows, stageDimensions } = props;
+    const { app, numColumns, numRows, stageWidth, stageHeight } = props;
     app.renderer.backgroundColor = 0xffffff;
 
     const useDrag = true; // Allows the user to drag the viewport around.
@@ -32,8 +30,8 @@ export const CanvasAlignmentViewport = PixiComponent<
     const useWheel = true; // Allows the user to use a mouse wheel to zoom.
 
     let vp = new Viewport({
-      screenWidth: stageDimensions.width,
-      //screenHeight: stageDimensions.height,
+      screenWidth: stageWidth,
+      //screenHeight: stageHeight,
       worldWidth: numColumns,
       worldHeight: numRows,
       interaction: app.renderer.plugins.interaction,
@@ -70,7 +68,13 @@ export const CanvasAlignmentViewport = PixiComponent<
     oldProps: ICanvasAlignmentViewportProps,
     newProps: ICanvasAlignmentViewportProps
   ) {
-    const { onMouseClick, numRows, numColumns, stageDimensions } = newProps;
+    const {
+      onMouseClick,
+      numRows,
+      numColumns,
+      stageWidth,
+      stageHeight,
+    } = newProps;
 
     if (oldProps.onMouseClick !== onMouseClick) {
       vp.off("clicked"); //I tested and adding this line keeps us from getting multiple click listners
@@ -83,9 +87,8 @@ export const CanvasAlignmentViewport = PixiComponent<
 
     //deal with resizing events and new alignments
     const resizedStage =
-      !oldProps.stageDimensions ||
-      oldProps.stageDimensions.height !== stageDimensions.height ||
-      oldProps.stageDimensions.width !== stageDimensions.width;
+      oldProps.stageWidth !== stageWidth ||
+      oldProps.stageHeight !== stageHeight;
     const newAlignment =
       !oldProps.numColumns ||
       !oldProps.numRows ||
@@ -93,12 +96,8 @@ export const CanvasAlignmentViewport = PixiComponent<
       oldProps.numRows !== numRows;
 
     if (resizedStage || newAlignment) {
-      vp.resize(
-        stageDimensions.width,
-        stageDimensions.height,
-        numColumns,
-        numRows
-      );
+      vp.resize(stageWidth, stageHeight, numColumns, numRows);
+      newProps.app.render(); //stops flicker on safari.
 
       //set the clamp based on the current stage height/width
       let clampWidthMax, clampHeightMax;
@@ -106,10 +105,7 @@ export const CanvasAlignmentViewport = PixiComponent<
         ? newProps.ensureVisible.height
         : undefined;
 
-      if (
-        numColumns / stageDimensions.width >
-        numRows / stageDimensions.height
-      ) {
+      if (numColumns / stageWidth > numRows / stageHeight) {
         //width is more important
         clampWidthMax = numColumns + OVERFLOW_ZOOM_ALLOWED * numColumns;
         vp = vp.clampZoom({
@@ -132,37 +128,32 @@ export const CanvasAlignmentViewport = PixiComponent<
         //new alignments set zoom clamping and also force the alignment into
         //as much of a view as possible.
         //vp = vp.fitWorld(true); //TODO: fails with hook? I don't get it
-        vp = vp.setZoom(stageDimensions.width / numColumns, false);
-      } else if (
-        oldProps.stageDimensions &&
-        oldProps.stageDimensions.width !== stageDimensions.width
-      ) {
+        vp = vp.setZoom(stageWidth / numColumns, false);
+      } else if (oldProps.stageWidth !== stageWidth) {
         //the viewport is being resized horizontally (likely by user dragging)
         //  1. compress if the resize is making pushing the alignment off the screen
         //  2. scale alignment if the resize is expanding
 
-        if (oldProps.stageDimensions.width > stageDimensions.width) {
+        if (oldProps.stageWidth > stageWidth) {
           //viewport is shrinking horizontally
-          if (vp.scale.x * numColumns > stageDimensions.width) {
+          if (vp.scale.x * numColumns > stageWidth) {
             //it is pushing the current alignment off the screen, force
             //the alignment to stay the same size as the viewport
-            vp = vp.setZoom(stageDimensions.width / numColumns, false);
+            vp = vp.setZoom(stageWidth / numColumns, false);
           }
         } else {
           //viewport is expanding horizontally
 
           //detect new zoom level. this is pretty crude. is there a better way?
-          let newZoomLevel =
-            vp.scale.x *
-            (stageDimensions.width / oldProps.stageDimensions.width);
+          let newZoomLevel = vp.scale.x * (stageWidth / oldProps.stageWidth);
 
           if (
             (clampWidthMax &&
               (newZoomLevel * numColumns < clampWidthMax ||
-                numColumns > stageDimensions.width)) ||
+                numColumns > stageWidth)) ||
             (clampHeightMax &&
               (newZoomLevel * numRows < clampHeightMax ||
-                numRows > stageDimensions.height))
+                numRows > stageHeight))
           ) {
             vp = vp.setZoom(newZoomLevel, false);
           }

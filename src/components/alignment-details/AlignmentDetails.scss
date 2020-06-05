@@ -10,6 +10,7 @@
   right: 0;
 
   canvas.stage {
+    position: relative;
     image-rendering: optimizeSpeed;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;

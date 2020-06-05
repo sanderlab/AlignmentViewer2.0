@@ -121,10 +121,8 @@ export class MiniMapComponent extends React.Component<
         positionsToStyle={alignmentStyle.positionsToStyle}
         colorScheme={alignmentStyle.colorScheme}
         sortBy={sortBy}
-        stageDimensions={{
-          width: size.frameWidth - 14, //add space for the dragger on safari
-          height: size.frameHeight,
-        }}
+        stageWidth={size.frameWidth - 14}
+        stageHeight={size.frameHeight}
         highlightRows={highlightRows}
         onClick={(pos) => {
           if (this.props.onClick) {

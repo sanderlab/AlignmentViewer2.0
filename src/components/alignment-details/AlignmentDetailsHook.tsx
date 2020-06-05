@@ -26,6 +26,7 @@ import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 import { ResizeSensor } from "css-element-queries";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import { Provider, useDispatch, useSelector } from "react-redux";
+import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 export interface IAlignmentDetailsProps {
   alignment: Alignment;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
@@ -57,6 +58,11 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   useEffect(() => {
     PIXI.utils.skipHello();
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+    //fix safari-specific bug - this function will tell the window to stop
+    //blocking scroll events on the "single-sequence-text" class
+    stopSafariFromBlockingWindowWheel("single-sequence-text");
+    stopSafariFromBlockingWindowWheel("stage");
 
     props.scrollerLoaded(alignmentDetailsRef.current!);
     if (alignmentDetailsRef.current) {
@@ -139,10 +145,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
             <div>
               <Stage
                 className="stage"
-                style={{
-                  position: "relative",
-                  top: state.scrollingAdditionalVerticalOffset,
-                }}
                 width={state.viewportWidth}
                 height={state.viewportHeight}
                 options={{ antialias: false, transparent: true }}
@@ -162,6 +164,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                           x: state.residueWidth,
                           y: state.residueHeight,
                         }}
+                        translateY={state.scrollingAdditionalVerticalOffset}
                       />
                     );
                   }}
@@ -176,6 +179,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                       <Provider store={store}>
                         <AlignmentDetailsViewport
                           app={app}
+                          parentElement={alignmentDetailsRef.current!}
                           alignment={alignment}
                           screenWidth={state.clientWidth}
                           screenHeight={state.clientHeight}
