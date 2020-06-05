@@ -276,7 +276,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -286,7 +286,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -570,7 +570,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -580,7 +580,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -687,7 +687,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -697,7 +697,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -713,7 +713,7 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
   onWheel={[Function]}
 >
   <x
-    height={650}
+    height={600}
     onMount={[Function]}
     onUnmount={[Function]}
     options={
@@ -723,7 +723,7 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
     }
     raf={true}
     renderOnComponentChange={true}
-    width={485}
+    width={800}
   >
     <ContextConsumer>
       <Component />
@@ -892,7 +892,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -902,7 +902,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -1070,7 +1070,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1080,7 +1080,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -1248,7 +1248,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1258,7 +1258,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -1426,7 +1426,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1436,7 +1436,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -1604,7 +1604,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1614,7 +1614,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -1782,7 +1782,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1792,7 +1792,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -1960,7 +1960,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1970,7 +1970,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -2138,7 +2138,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -2148,7 +2148,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -2316,7 +2316,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -2326,7 +2326,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>
@@ -2494,7 +2494,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={650}
+      height={600}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -2504,7 +2504,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={485}
+      width={800}
     >
       <canvas />
     </x>

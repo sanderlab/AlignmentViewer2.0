@@ -31,6 +31,9 @@ import { Provider } from "react-redux";
 export type IAlignmentViewerProps = {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+
+  //event reporting
+  minimapClicked?(mousePosition: IPosition): void;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
@@ -493,16 +496,19 @@ export class AlignmentViewer extends React.Component<
           style={{ display: showMinimap ? "flex" : "none" }}
         >
           {
-            <MiniMap
-              alignment={alignment}
-              alignmentStyle={style}
-              sortBy={sortBy ? sortBy : defaultProps.sortBy}
-              //exposed by prop to instantiator
-              alignHorizontal={mmOptions.alignHorizontal}
-              resizable={mmOptions.resizable}
-              startingWidth={mmOptions.startingWidth}
-              verticalHeight={mmOptions.verticalHeight}
-            />
+            <Provider store={store}>
+              <MiniMap
+                alignment={alignment}
+                alignmentStyle={style}
+                sortBy={sortBy ? sortBy : defaultProps.sortBy}
+                //exposed by prop to instantiator
+                alignHorizontal={mmOptions.alignHorizontal}
+                resizable={mmOptions.resizable}
+                startingWidth={mmOptions.startingWidth}
+                verticalHeight={mmOptions.verticalHeight}
+                onClick={this.props.minimapClicked}
+              />
+            </Provider>
           }
           {/*
           <MiniMapComponent

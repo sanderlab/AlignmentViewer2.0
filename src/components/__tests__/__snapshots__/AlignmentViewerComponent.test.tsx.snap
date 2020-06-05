@@ -12,37 +12,69 @@ exports[`AlignmentViewer Should render 1`] = `
       }
     }
   >
-    <MiniMap
-      alignHorizontal="right"
-      alignment={
-        Alignment {
-          "aceEditorMode": undefined,
-          "allUpperAlphaLettersInAlignmentSorted": Array [],
-          "consensus": Object {
-            "id": "consensus",
-            "sequence": "",
-          },
-          "globalAlphaLetterCounts": Object {},
-          "maxSequenceLength": NaN,
-          "name": "",
-          "positionalLetterCounts": Map {},
-          "predictedNT": true,
-          "querySequence": undefined,
-          "sequences": Map {
-            SequenceSorter {
-              "description": "As input",
-              "isQuerySequenceDependent": false,
-              "key": "as-input",
-              "sortFn": [Function],
-              "targetAlignmentType": "both",
-            } => Array [],
-          },
-          "uuid": "10000000-1000-4000-8000-100000000000",
+    <Provider
+      store={
+        Object {
+          "dispatch": [Function],
+          "getState": [Function],
+          "replaceReducer": [Function],
+          "subscribe": [Function],
+          Symbol(observable): [Function],
         }
       }
-      alignmentStyle={
-        NucleotideAlignmentStyle {
-          "alignmentType": AlignmentTypes {
+    >
+      <MiniMap
+        alignHorizontal="right"
+        alignment={
+          Alignment {
+            "aceEditorMode": undefined,
+            "allUpperAlphaLettersInAlignmentSorted": Array [],
+            "consensus": Object {
+              "id": "consensus",
+              "sequence": "",
+            },
+            "globalAlphaLetterCounts": Object {},
+            "maxSequenceLength": NaN,
+            "name": "",
+            "positionalLetterCounts": Map {},
+            "predictedNT": true,
+            "querySequence": undefined,
+            "sequences": Map {
+              SequenceSorter {
+                "description": "As input",
+                "isQuerySequenceDependent": false,
+                "key": "as-input",
+                "sortFn": [Function],
+                "targetAlignmentType": "both",
+              } => Array [],
+            },
+            "uuid": "10000000-1000-4000-8000-100000000000",
+          }
+        }
+        alignmentStyle={
+          NucleotideAlignmentStyle {
+            "alignmentType": AlignmentTypes {
+              "allColorSchemes": Array [
+                Object {
+                  "backgroundAlpha": NaN,
+                  "backgroundColorsLightTheme": Object {
+                    "": "",
+                  },
+                  "className": "mock-nt-class",
+                  "colors": Object {
+                    "": "",
+                  },
+                  "commonName": "Default",
+                  "description": "mock-nt-style-desc",
+                  "letterColorsDarkTheme": Object {
+                    "": "",
+                  },
+                },
+              ],
+              "className": undefined,
+              "description": "Nucleotide Sequences",
+              "key": "nucleotide-alignment",
+            },
             "allColorSchemes": Array [
               Object {
                 "backgroundAlpha": NaN,
@@ -60,12 +92,7 @@ exports[`AlignmentViewer Should render 1`] = `
                 },
               },
             ],
-            "className": undefined,
-            "description": "Nucleotide Sequences",
-            "key": "nucleotide-alignment",
-          },
-          "allColorSchemes": Array [
-            Object {
+            "colorScheme": Object {
               "backgroundAlpha": NaN,
               "backgroundColorsLightTheme": Object {
                 "": "",
@@ -80,47 +107,32 @@ exports[`AlignmentViewer Should render 1`] = `
                 "": "",
               },
             },
-          ],
-          "colorScheme": Object {
-            "backgroundAlpha": NaN,
-            "backgroundColorsLightTheme": Object {
-              "": "",
+            "positionsToStyle": PositionsToStyle {
+              "className": undefined,
+              "description": "All",
+              "key": "all",
             },
-            "className": "mock-nt-class",
-            "colors": Object {
-              "": "",
+            "residueDetail": ResidueStyle {
+              "className": undefined,
+              "description": "Light",
+              "key": "light",
             },
-            "commonName": "Default",
-            "description": "mock-nt-style-desc",
-            "letterColorsDarkTheme": Object {
-              "": "",
-            },
-          },
-          "positionsToStyle": PositionsToStyle {
-            "className": undefined,
-            "description": "All",
-            "key": "all",
-          },
-          "residueDetail": ResidueStyle {
-            "className": undefined,
-            "description": "Light",
-            "key": "light",
-          },
+          }
         }
-      }
-      resizable="horizontal"
-      sortBy={
-        SequenceSorter {
-          "description": "As input",
-          "isQuerySequenceDependent": false,
-          "key": "as-input",
-          "sortFn": [Function],
-          "targetAlignmentType": "both",
+        resizable="horizontal"
+        sortBy={
+          SequenceSorter {
+            "description": "As input",
+            "isQuerySequenceDependent": false,
+            "key": "as-input",
+            "sortFn": [Function],
+            "targetAlignmentType": "both",
+          }
         }
-      }
-      startingWidth={100}
-      verticalHeight="div"
-    />
+        startingWidth={100}
+        verticalHeight="div"
+      />
+    </Provider>
   </div>
   <div
     className="av-widget av-barplot-holder"

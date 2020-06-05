@@ -103,10 +103,12 @@ exports[`MiniMap Should render with default props. 1`] = `
     }
     stageDimensions={
       Object {
-        "height": 768,
-        "width": 101,
+        "height": 650,
+        "width": 485,
       }
     }
+    stageHeight={768}
+    stageWidth={101}
   />
 </div>
 `;

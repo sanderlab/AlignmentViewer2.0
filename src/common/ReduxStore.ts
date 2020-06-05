@@ -216,6 +216,7 @@ export const alignmentDetailsSlice = createSlice({
 export const {
   setAlignmentDetails,
   setResidueDimensions,
+  setSequenceTopOffset,
   setViewportDimensions,
   setWorldTopOffset,
 } = alignmentDetailsSlice.actions;

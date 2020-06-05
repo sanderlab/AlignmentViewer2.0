@@ -12,9 +12,12 @@ import {
 import { ResizeSensor } from "css-element-queries";
 import { useRef, useEffect } from "react";
 import { Stage, AppContext } from "@inlet/react-pixi";
-import { CanvasAlignmentViewport } from "../CanvasAlignmentViewportComponent";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
+import { MiniMapViewport } from "./MiniMapViewportComponent";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, setSequenceTopOffset } from "../../common/ReduxStore";
+import { CanvasAlignmentHighlighter } from "../CanvasAlignmentHighlighterComponent";
 
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
@@ -54,9 +57,19 @@ export function MiniMap(props: IMiniMapProps) {
   const minimapRef = useRef<HTMLDivElement>(null);
 
   //state
+  const [dragging, setDragging] = React.useState(false);
+  const [dragStartOffset, setDragStartOffset] = React.useState<
+    undefined | { left: number; top: number }
+  >(undefined);
   const [resizedDimensions, setResizedDimensions] = React.useState<
     undefined | { width: number; height: number }
   >(undefined);
+
+  //redux
+  const dispatch = useDispatch();
+  const alignmentDetails = useSelector(
+    (state: RootState) => state.alignmentDetailsSlice
+  );
 
   //sizing - dynamically update state when div changes size
   useEffect(() => {
@@ -96,7 +109,7 @@ export function MiniMap(props: IMiniMapProps) {
     }
   }, []);
 
-  const sizing = (() => {
+  const frameSizing = (() => {
     if (!resizedDimensions) return undefined;
     const frameBorderWidth = 1; // in pixels
     const frameMargin = 2; // in pixels
@@ -117,43 +130,51 @@ export function MiniMap(props: IMiniMapProps) {
         className="alignment-canvas"
         onWheel={(e) => {
           //e.stopPropagation();
-          //console.log("minimap:  WHEEL");
+          console.log("minimap:  WHEEL");
           //e.preventDefault();
         }}
         onMouseEnter={(e) => {
           //e.stopPropagation();
-          //console.log("minimap:  mouse enter");
+          console.log("minimap:  mouse enter");
         }}
         onMouseLeave={(e) => {
           //e.stopPropagation();
-          //console.log("minimap: mouse leave");
+          console.log("minimap: mouse leave");
         }}
       >
         <Stage
           width={frameWidth - 14} //add space for the dragger on safari
           height={frameHeight}
-          options={{ transparent: true }}
+          options={{ transparent: false }}
           className="minimap-canvas"
         >
           <AppContext.Consumer>
             {(app) => (
-              <CanvasAlignmentViewport
+              <MiniMapViewport
                 app={app}
-                /*ensureVisible={
-              rowHighlightStart === undefined ||
-              rowHighlighterHeight === undefined
-                ? undefined
-                : {
-                    y: rowHighlightStart,
-                    height: rowHighlighterHeight,
-                  }
-            }*/
+                //ensureVisible={
+                //rowHighlightStart === undefined ||
+                //rowHighlighterHeight === undefined
+                // ? undefined
+                // : {
+                //     y: rowHighlightStart,
+                //     height: rowHighlighterHeight,
+                //   }
+                //}
                 numColumns={alignment.getMaxSequenceLength()}
                 numRows={alignment.getSequenceCount()}
-                onMouseClick={props.onClick}
+                onMouseClick={(mousePosition) => {
+                  const newY = Math.round(
+                    mousePosition.y -
+                      alignmentDetails.seqIdxsToRender.length / 2
+                  );
+                  dispatch(setSequenceTopOffset(newY));
+                  if (props.onClick) {
+                    props.onClick(mousePosition);
+                  }
+                }}
                 stageWidth={frameWidth}
                 stageHeight={frameHeight}
-                {...props}
               >
                 <CanvasAlignmentTiled
                   alignment={alignment}
@@ -163,59 +184,53 @@ export function MiniMap(props: IMiniMapProps) {
                   sortBy={sortBy}
                   residueDetail={ResidueStyle.DARK}
                 />
-                {/*rowHighlightStart !== undefined &&
-            rowHighlighterHeight !== undefined &&
-            rowHighlighterHeight < alignment.getSequenceCount() ? (
-              <CanvasAlignmentHighlighter
-                fillColor={0xff0000}
-                fillAlpha={0.25}
-                x={0}
-                y={rowHighlightStart}
-                width={maxSeqLength}
-                height={rowHighlighterHeight}
-                dragFunctions={{
-                  onDragStart: (e, parent) => {
-                    const startPosition = e.data.getLocalPosition(
-                      parent
-                    );
-                    this.setState({
-                      dragging: true,
-                      dragPositions: {
-                        startOffset: {
+                {alignmentDetails.initialized !== true ||
+                alignmentDetails.seqIdxsToRender.length < 1 ||
+                alignmentDetails.sequenceCount <=
+                  alignmentDetails.seqIdxsToRender.length ? (
+                  <></>
+                ) : (
+                  <CanvasAlignmentHighlighter
+                    fillColor={0xff0000}
+                    fillAlpha={dragging ? 0.75 : 0.25}
+                    x={0}
+                    y={alignmentDetails.seqIdxsToRender[0]}
+                    width={alignmentDetails.sequenceLength}
+                    height={alignmentDetails.seqIdxsToRender.length}
+                    dragFunctions={{
+                      onDragStart: (e, parent) => {
+                        const startPosition = e.data.getLocalPosition(parent);
+                        setDragging(true);
+                        setDragStartOffset({
                           left: startPosition.x - 0,
-                          top: startPosition.y - rowHighlightStart!,
-                        },
-                        current: startPosition,
+                          top:
+                            startPosition.y -
+                            alignmentDetails.seqIdxsToRender[0],
+                        });
                       },
-                    });
-                  },
-                  onDragEnd: (e, parent) => {
-                    this.setState({ dragging: false });
-                    this.informParentOfIndicatorDragged(
-                      e.data.getLocalPosition(parent)
-                    );
-                  },
-                  onDragMove: (e, parent) => {
-                    if (dragging) {
-                      const newPosition = e.data.getLocalPosition(
-                        parent
-                      );
-  
-                      this.setState({
-                        dragPositions: {
-                          startOffset: dragPositions!.startOffset,
-                          current: newPosition,
-                        },
-                      });
-                      this.informParentOfIndicatorDragged(newPosition);
-                    }
-                  },
-                }}
-              />
-            ) : (
-              <></>
-            )*/}
-              </CanvasAlignmentViewport>
+                      onDragEnd: (e, parent) => {
+                        setDragging(false);
+                        const finalPosition = e.data.getLocalPosition(parent);
+                        dispatch(
+                          setSequenceTopOffset(
+                            Math.round(finalPosition.y - dragStartOffset!.top)
+                          )
+                        );
+                      },
+                      onDragMove: (e, parent) => {
+                        if (dragging) {
+                          const newPosition = e.data.getLocalPosition(parent);
+                          dispatch(
+                            setSequenceTopOffset(
+                              Math.round(newPosition.y - dragStartOffset!.top)
+                            )
+                          );
+                        }
+                      },
+                    }}
+                  />
+                )}
+              </MiniMapViewport>
             )}
           </AppContext.Consumer>
         </Stage>
@@ -230,16 +245,18 @@ export function MiniMap(props: IMiniMapProps) {
       style={{
         ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
         position: verticalHeight === "div" ? "absolute" : "fixed",
-        width: !sizing ? 0 : sizing.frameWidth,
-        borderWidth: !sizing ? 0 : sizing.borderWidth,
-        margin: !sizing ? 0 : sizing.margin,
+        width: !frameSizing ? 0 : frameSizing.frameWidth,
+        borderWidth: !frameSizing ? 0 : frameSizing.borderWidth,
+        margin: !frameSizing ? 0 : frameSizing.margin,
         resize: resizable ? resizable : "none",
         direction: alignHorizontal === "left" ? "ltr" : "rtl",
       }}
     >
-      {!sizing ? null : renderAlignment(sizing.frameWidth, sizing.frameHeight)}
+      {!frameSizing
+        ? null
+        : renderAlignment(frameSizing.frameWidth, frameSizing.frameHeight)}
 
-      {!sizing ? null : (
+      {!frameSizing ? null : (
         <></>
         /*
         <CanvasAlignmentComponent
