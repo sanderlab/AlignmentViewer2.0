@@ -17,6 +17,7 @@ export interface IColorScheme {
   commonName: string;
   description: string;
   backgroundAlpha: number;
+  defaultLetterColor: string;
   className: string;
   colors: {
     [residueCode: string]: string;
@@ -77,8 +78,10 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
         description: description,
         className: styles[styleName],
         backgroundAlpha: parseFloat(
-          styles[moleculeType + "StyBGAlpha_" + colorSchemeName]
+          styles[moleculeType + "StyBackgroundAlpha_" + colorSchemeName]
         ),
+        defaultLetterColor:
+          styles[moleculeType + "StyDefaultLetterColor_" + colorSchemeName],
         colors: Object.fromEntries(
           colorOrder.map((_, i) => [colorOrder[i], hexValues[i]])
         ),

@@ -801,7 +801,14 @@ $ntProps: (
     #{unquote("aaStyDesc_"+$styleName)}: unquote(
       map-get($styleObj, description)
     );
-    #{unquote("aaStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
+    #{unquote("aaStyDefaultLetterColor_"+$styleName)}: map-get(
+      $styleObj,
+      defaultLetterColor
+    );
+    #{unquote("aaStyBackgroundAlpha_"+$styleName)}: map-get(
+      $styleObj,
+      backgroundAlpha
+    );
     #{unquote("aaStyColorOrder_"+$styleName)}: map-keys(
       map-get($styleObj, colors)
     );
@@ -824,7 +831,14 @@ $ntProps: (
     #{unquote("ntStyDesc_"+$styleName)}: unquote(
       map-get($styleObj, description)
     );
-    #{unquote("ntStyBGAlpha_"+$styleName)}: map-get($styleObj, backgroundAlpha);
+    #{unquote("aaStyDefaultLetterColor_"+$styleName)}: map-get(
+      $styleObj,
+      defaultLetterColor
+    );
+    #{unquote("ntStyBackgroundAlpha_"+$styleName)}: map-get(
+      $styleObj,
+      backgroundAlpha
+    );
     #{unquote("ntStyColorOrder_"+$styleName)}: map-keys(
       map-get($styleObj, colors)
     );

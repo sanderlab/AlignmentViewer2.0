@@ -5,25 +5,29 @@ import {
   ALL_NUCLEOTIDE_COLORSCHEMES,
 } from "./MolecularStyles";
 
+interface ICombinedColor {
+  hexString: string;
+  rgb: {
+    red: number;
+    green: number;
+    blue: number;
+  };
+}
+
 interface IResidueColor {
   [colorScheme: string]: {
-    default: {
-      hexString: string;
-      rgb: {
-        red: number;
-        green: number;
-        blue: number;
-      };
+    lightTheme: {
+      letterColor: ICombinedColor;
+      backgroundColor: ICombinedColor;
     };
-    backgroundColorOnLightTheme: {
-      hexString: string;
-      rgb: {
-        red: number;
-        green: number;
-        blue: number;
-      };
+    darkTheme: {
+      letterColor: ICombinedColor;
+      backgroundColor: ICombinedColor;
     };
-    letterColorOnDarkTheme: string;
+    lettersOnlyTheme: {
+      letterColor: ICombinedColor;
+      backgroundColor: ICombinedColor;
+    };
   };
 }
 
@@ -114,17 +118,38 @@ export class AminoAcid implements IAminoAcid {
     this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
     this.colors = ALL_AMINOACID_COLORSCHEMES.reduce((acc, cs) => {
       acc[cs.commonName] = {
-        default: stringToColor(
-          cs.colors[singleLetterCode] ? cs.colors[singleLetterCode] : "#ffffff"
-        ),
-        backgroundColorOnLightTheme: stringToColor(
-          cs.backgroundColorsLightTheme[singleLetterCode]
-            ? cs.backgroundColorsLightTheme[singleLetterCode]
-            : "#ffffff"
-        ),
-        letterColorOnDarkTheme: cs.letterColorsDarkTheme[singleLetterCode]
-          ? cs.letterColorsDarkTheme[singleLetterCode]
-          : "#000000",
+        lightTheme: {
+          letterColor: stringToColor(
+            cs.colors[singleLetterCode]
+              ? cs.colors[singleLetterCode]
+              : cs.defaultLetterColor
+          ),
+          backgroundColor: stringToColor(
+            cs.backgroundColorsLightTheme[singleLetterCode]
+              ? cs.backgroundColorsLightTheme[singleLetterCode]
+              : "#ffffff"
+          ),
+        },
+        darkTheme: {
+          letterColor: stringToColor(
+            cs.letterColorsDarkTheme[singleLetterCode]
+              ? cs.letterColorsDarkTheme[singleLetterCode]
+              : cs.defaultLetterColor
+          ),
+          backgroundColor: stringToColor(
+            cs.colors[singleLetterCode]
+              ? cs.colors[singleLetterCode]
+              : "#ffffff"
+          ),
+        },
+        lettersOnlyTheme: {
+          letterColor: stringToColor(
+            cs.colors[singleLetterCode]
+              ? cs.colors[singleLetterCode]
+              : cs.defaultLetterColor
+          ),
+          backgroundColor: stringToColor("#ffffff"),
+        },
       };
       return acc;
     }, {} as IResidueColor);
@@ -172,6 +197,40 @@ export class Nucleotide implements INucleotide {
     this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
     this.colors = ALL_NUCLEOTIDE_COLORSCHEMES.reduce((acc, cs) => {
       acc[cs.commonName] = {
+        lightTheme: {
+          letterColor: stringToColor(
+            cs.colors[singleLetterCode]
+              ? cs.colors[singleLetterCode]
+              : cs.defaultLetterColor
+          ),
+          backgroundColor: stringToColor(
+            cs.backgroundColorsLightTheme[singleLetterCode]
+              ? cs.backgroundColorsLightTheme[singleLetterCode]
+              : "#ffffff"
+          ),
+        },
+        darkTheme: {
+          letterColor: stringToColor(
+            cs.letterColorsDarkTheme[singleLetterCode]
+              ? cs.letterColorsDarkTheme[singleLetterCode]
+              : cs.defaultLetterColor
+          ),
+          backgroundColor: stringToColor(
+            cs.colors[singleLetterCode]
+              ? cs.colors[singleLetterCode]
+              : "#ffffff"
+          ),
+        },
+        lettersOnlyTheme: {
+          letterColor: stringToColor(
+            cs.colors[singleLetterCode]
+              ? cs.colors[singleLetterCode]
+              : cs.defaultLetterColor
+          ),
+          backgroundColor: stringToColor("#ffffff"),
+        },
+
+        /*
         default: stringToColor(
           cs.colors[singleLetterCode] ? cs.colors[singleLetterCode] : "#ffffff"
         ),
@@ -182,7 +241,7 @@ export class Nucleotide implements INucleotide {
         ),
         letterColorOnDarkTheme: cs.letterColorsDarkTheme[singleLetterCode]
           ? cs.letterColorsDarkTheme[singleLetterCode]
-          : "#000000",
+          : "#000000",*/
       };
       return acc;
     }, {} as IResidueColor);

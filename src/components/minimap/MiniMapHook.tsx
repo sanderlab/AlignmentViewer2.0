@@ -130,16 +130,16 @@ export function MiniMap(props: IMiniMapProps) {
         className="alignment-canvas"
         onWheel={(e) => {
           //e.stopPropagation();
-          console.log("minimap:  WHEEL");
+          //console.log("minimap:  WHEEL");
           //e.preventDefault();
         }}
         onMouseEnter={(e) => {
           //e.stopPropagation();
-          console.log("minimap:  mouse enter");
+          //console.log("minimap:  mouse enter");
         }}
         onMouseLeave={(e) => {
           //e.stopPropagation();
-          console.log("minimap: mouse leave");
+          //console.log("minimap: mouse leave");
         }}
       >
         <Stage
@@ -255,29 +255,6 @@ export function MiniMap(props: IMiniMapProps) {
       {!frameSizing
         ? null
         : renderAlignment(frameSizing.frameWidth, frameSizing.frameHeight)}
-
-      {!frameSizing ? null : (
-        <></>
-        /*
-        <CanvasAlignmentComponent
-          alignment={alignment}
-          alignmentType={alignmentStyle.alignmentType}
-          positionsToStyle={alignmentStyle.positionsToStyle}
-          colorScheme={alignmentStyle.colorScheme}
-          sortBy={sortBy}
-          highlightRows={undefined}
-          stageDimensions={{
-            width: sizing.frameWidth - 14, //add space for the dragger on safari
-            height: sizing.frameHeight,
-          }}
-          onClick={(pos) => {
-            console.log("CLICK");
-          }}
-          onIndicatorDrag={(bounds, pos) => {
-            console.log("DRAG");
-          }}
-        />*/
-      )}
     </div>
   );
 }

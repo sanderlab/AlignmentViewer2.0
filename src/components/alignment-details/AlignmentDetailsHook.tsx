@@ -24,6 +24,7 @@ import {
 
 import { AlignmentDetailsViewport } from "./AlignmentDetailsViewportHook";
 import { AlignmentDetailsScrollbar } from "./AlignmentDetailsScrollbarHook";
+import { AlignmentDetailsLetters } from "./AlignmentDetailsLettersHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
 import { ResizeSensor } from "css-element-queries";
@@ -138,42 +139,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     return sortedSeqs[seqIdx].sequence;
   });
 
-  const getLetterColor = (letter: string, positionIdx: number) => {
-    const moleculeClass =
-      alignmentStyle.alignmentType === AlignmentTypes.AMINOACID
-        ? AminoAcid
-        : Nucleotide;
-    let molecule = moleculeClass.UNKNOWN;
-
-    if (alignmentStyle.positionsToStyle === PositionsToStyle.ALL) {
-      molecule = moleculeClass.fromSingleLetterCode(letter);
-    } else {
-      const isConsensus =
-        alignment.getConsensus().sequence[positionIdx] === letter;
-      const isQuery =
-        alignment.getQuerySequence().sequence[positionIdx] === letter;
-      if (
-        (alignmentStyle.positionsToStyle === PositionsToStyle.CONSENSUS &&
-          isConsensus) ||
-        (alignmentStyle.positionsToStyle === PositionsToStyle.CONSENSUS_DIFF &&
-          !isConsensus) ||
-        (alignmentStyle.positionsToStyle === PositionsToStyle.QUERY &&
-          isQuery) ||
-        (alignmentStyle.positionsToStyle === PositionsToStyle.QUERY_DIFF &&
-          !isQuery)
-      ) {
-        molecule = moleculeClass.fromSingleLetterCode(letter);
-      }
-    }
-    return alignmentStyle.residueDetail === ResidueStyle.DARK
-      ? molecule.colors[alignmentStyle.colorScheme.commonName]
-          .letterColorOnDarkTheme
-      : alignmentStyle.residueDetail === ResidueStyle.LIGHT ||
-        alignmentStyle.residueDetail === ResidueStyle.NO_BACKGROUND
-      ? molecule.colors[alignmentStyle.colorScheme.commonName].default.hexString
-      : "#cccccc";
-  };
-
   /**
    *
    *
@@ -237,89 +202,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     );
   };
 
-  /**
-   *
-   *
-   *
-   * Render the letters in the alignment
-   *
-   *
-   *
-   */
-  const renderLetters = () => {
-    //each sequence style will be rendered as a single separate div
-    //munge the data first
-
-    const letterColorToLocations = {} as {
-      [letterColor: string]: { [seqId: number]: number[] };
-    };
-    for (let seqId = 0; seqId < seqsToRender.length; seqId++) {
-      const seqStr = seqsToRender[seqId];
-      for (let colIdx = 0; colIdx < seqStr.length; colIdx++) {
-        const letter = seqStr[colIdx];
-        const color = getLetterColor(letter, colIdx);
-        if (!letterColorToLocations[color]) {
-          letterColorToLocations[color] = {};
-        }
-        if (!letterColorToLocations[color][seqId]) {
-          letterColorToLocations[color][seqId] = [];
-        }
-        letterColorToLocations[color][seqId].push(colIdx);
-      }
-    }
-
-    //Array of JSX elements - one for each letter color. Each contains
-    //a character for every position in the rendered sequences, (each
-    //position will be blank for all except one of the elemnets)
-    const colorsToDivs = Object.entries(letterColorToLocations).map(
-      ([color, locations]) => {
-        const colorString = seqsToRender
-          .map((seqStr, seqIdx) => {
-            return seqStr
-              .split("")
-              .map((letter, colIdx) => {
-                if (
-                  seqIdx in locations &&
-                  locations[seqIdx].indexOf(colIdx) >= 0
-                ) {
-                  return letter;
-                }
-                return "\u00A0";
-              })
-              .join("");
-          })
-          .join("\n");
-        return (
-          <div
-            className={"styled-residues"}
-            style={{ color: color }}
-            key={color}
-          >
-            <pre style={{ fontSize: fontSize }}>{colorString}</pre>
-          </div>
-        );
-      }
-    );
-    return (
-      <div
-        className="sequence-text-holder"
-        style={{
-          top: state.scrollingAdditionalVerticalOffset,
-        }}
-      >
-        {colorsToDivs}
-        <pre
-          style={{ fontSize: fontSize }}
-          className="hidden-residues-for-copy-paste"
-        >
-          {seqsToRender.map((seqStr) => {
-            return seqStr + "\n";
-          })}
-        </pre>
-      </div>
-    );
-  };
-
   return (
     <Provider store={store}>
       <div
@@ -335,7 +217,20 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           {!state.initialized ? null : (
             <>
               {renderBackgroundRectangles()}
-              {renderLetters()}
+              <div
+                className="sequence-text-holder"
+                style={{
+                  top: state.scrollingAdditionalVerticalOffset,
+                }}
+              >
+                <AlignmentDetailsLetters
+                  sequencesToRender={seqsToRender}
+                  consensusSequence={alignment.getConsensus().sequence}
+                  querySequence={alignment.getQuerySequence().sequence}
+                  alignmentStyle={alignmentStyle}
+                  fontSize={fontSize}
+                ></AlignmentDetailsLetters>
+              </div>
             </>
           )}
         </div>

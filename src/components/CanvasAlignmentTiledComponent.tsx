@@ -277,9 +277,9 @@ export class CanvasAlignmentTiled extends React.Component<
 
     //TODO: ripe for speed increases / caching etc
     return residueDetail === ResidueStyle.DARK
-      ? molecule.colors[colorScheme.commonName].default.rgb
+      ? molecule.colors[colorScheme.commonName].darkTheme.backgroundColor.rgb
       : residueDetail === ResidueStyle.LIGHT
-      ? molecule.colors[colorScheme.commonName].backgroundColorOnLightTheme.rgb
+      ? molecule.colors[colorScheme.commonName].lightTheme.backgroundColor.rgb
       : CanvasAlignmentTiled.WHITE_RGB;
   }
 
