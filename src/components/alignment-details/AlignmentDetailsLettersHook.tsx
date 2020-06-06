@@ -114,7 +114,6 @@ export function AlignmentDetailsLetters(props: {
       letterColorToLocations[color.hexString][seqId].push(positionIdx);
     }
   }
-  console.log(letterColorToLocations);
 
   //Array of JSX elements - one for each letter color. Each contains
   //a character for every position in the rendered sequences, (each
