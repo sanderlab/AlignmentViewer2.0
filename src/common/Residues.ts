@@ -229,19 +229,6 @@ export class Nucleotide implements INucleotide {
           ),
           backgroundColor: stringToColor("#ffffff"),
         },
-
-        /*
-        default: stringToColor(
-          cs.colors[singleLetterCode] ? cs.colors[singleLetterCode] : "#ffffff"
-        ),
-        backgroundColorOnLightTheme: stringToColor(
-          cs.backgroundColorsLightTheme[singleLetterCode]
-            ? cs.backgroundColorsLightTheme[singleLetterCode]
-            : "#ffffff"
-        ),
-        letterColorOnDarkTheme: cs.letterColorsDarkTheme[singleLetterCode]
-          ? cs.letterColorsDarkTheme[singleLetterCode]
-          : "#000000",*/
       };
       return acc;
     }, {} as IResidueColor);
