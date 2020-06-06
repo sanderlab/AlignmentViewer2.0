@@ -24,8 +24,21 @@
       monospace;
     white-space: nowrap;
 
-    .single-sequence-text {
+    .styled-residues {
       position: absolute;
+      top: 0;
+      left: 0;
+    }
+    pre.hidden-residues-for-copy-paste {
+      position: absolute;
+      top: 0;
+      left: 0;
+      color: rgba(0, 0, 0, 0);
+    }
+    pre {
+      font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
+        monospace;
+      margin: 0;
     }
   }
 }

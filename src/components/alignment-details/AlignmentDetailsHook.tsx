@@ -9,6 +9,9 @@ import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
+  ResidueStyle,
+  AlignmentTypes,
+  PositionsToStyle,
 } from "../../common/MolecularStyles";
 
 import {
@@ -27,6 +30,7 @@ import { ResizeSensor } from "css-element-queries";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
+import { AminoAcid, Nucleotide } from "../../common/Residues";
 export interface IAlignmentDetailsProps {
   alignment: Alignment;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
@@ -63,6 +67,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     //blocking scroll events on the "single-sequence-text" class
     stopSafariFromBlockingWindowWheel("single-sequence-text");
     stopSafariFromBlockingWindowWheel("stage");
+    stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
 
     props.scrollerLoaded(alignmentDetailsRef.current!);
     if (alignmentDetailsRef.current) {
@@ -129,6 +134,192 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       ? []
       : state.seqIdxsToRender;
 
+  const seqsToRender = seqIdxsToRender.map((seqIdx) => {
+    return sortedSeqs[seqIdx].sequence;
+  });
+
+  const getLetterColor = (letter: string, positionIdx: number) => {
+    const moleculeClass =
+      alignmentStyle.alignmentType === AlignmentTypes.AMINOACID
+        ? AminoAcid
+        : Nucleotide;
+    let molecule = moleculeClass.UNKNOWN;
+
+    if (alignmentStyle.positionsToStyle === PositionsToStyle.ALL) {
+      molecule = moleculeClass.fromSingleLetterCode(letter);
+    } else {
+      const isConsensus =
+        alignment.getConsensus().sequence[positionIdx] === letter;
+      const isQuery =
+        alignment.getQuerySequence().sequence[positionIdx] === letter;
+      if (
+        (alignmentStyle.positionsToStyle === PositionsToStyle.CONSENSUS &&
+          isConsensus) ||
+        (alignmentStyle.positionsToStyle === PositionsToStyle.CONSENSUS_DIFF &&
+          !isConsensus) ||
+        (alignmentStyle.positionsToStyle === PositionsToStyle.QUERY &&
+          isQuery) ||
+        (alignmentStyle.positionsToStyle === PositionsToStyle.QUERY_DIFF &&
+          !isQuery)
+      ) {
+        molecule = moleculeClass.fromSingleLetterCode(letter);
+      }
+    }
+    return alignmentStyle.residueDetail === ResidueStyle.DARK
+      ? molecule.colors[alignmentStyle.colorScheme.commonName]
+          .letterColorOnDarkTheme
+      : alignmentStyle.residueDetail === ResidueStyle.LIGHT ||
+        alignmentStyle.residueDetail === ResidueStyle.NO_BACKGROUND
+      ? molecule.colors[alignmentStyle.colorScheme.commonName].default.hexString
+      : "#cccccc";
+  };
+
+  /**
+   *
+   *
+   *
+   * Render the background colored rectangles using webgl.
+   * (or not if letter only residue style is selected)
+   *
+   *
+   *
+   */
+  const renderBackgroundRectangles = () => {
+    return (
+      <Stage
+        className="stage"
+        width={state.viewportWidth}
+        height={state.viewportHeight}
+        options={{ antialias: false, transparent: true }}
+      >
+        <AppContext.Consumer>
+          {(app) => {
+            return (
+              <CanvasAlignmentTiled
+                alignment={alignment}
+                alignmentType={alignmentStyle.alignmentType}
+                residueDetail={alignmentStyle.residueDetail}
+                sortBy={sortBy}
+                colorScheme={alignmentStyle.colorScheme}
+                positionsToStyle={alignmentStyle.positionsToStyle}
+                drawSequencesIndicies={seqIdxsToRender}
+                scale={{
+                  x: state.residueWidth,
+                  y: state.residueHeight,
+                }}
+                translateY={state.scrollingAdditionalVerticalOffset}
+              />
+            );
+          }}
+        </AppContext.Consumer>
+        {disableScrolling ? null : (
+          <AppContext.Consumer>
+            {(app) => (
+              //entrypoint to the interaction viewport for registering scroll
+              //and zoom and other events. This is not rendering anything, but
+              //is used to calculate interaction changes and report them
+              //back to this component.
+              <Provider store={store}>
+                <AlignmentDetailsViewport
+                  app={app}
+                  parentElement={alignmentDetailsRef.current!}
+                  alignment={alignment}
+                  screenWidth={state.clientWidth}
+                  screenHeight={state.clientHeight}
+                  worldWidth={state.worldWidth}
+                  worldHeight={state.worldHeight}
+                ></AlignmentDetailsViewport>
+              </Provider>
+            )}
+          </AppContext.Consumer>
+        )}
+      </Stage>
+    );
+  };
+
+  /**
+   *
+   *
+   *
+   * Render the letters in the alignment
+   *
+   *
+   *
+   */
+  const renderLetters = () => {
+    //each sequence style will be rendered as a single separate div
+    //munge the data first
+
+    const letterColorToLocations = {} as {
+      [letterColor: string]: { [seqId: number]: number[] };
+    };
+    for (let seqId = 0; seqId < seqsToRender.length; seqId++) {
+      const seqStr = seqsToRender[seqId];
+      for (let colIdx = 0; colIdx < seqStr.length; colIdx++) {
+        const letter = seqStr[colIdx];
+        const color = getLetterColor(letter, colIdx);
+        if (!letterColorToLocations[color]) {
+          letterColorToLocations[color] = {};
+        }
+        if (!letterColorToLocations[color][seqId]) {
+          letterColorToLocations[color][seqId] = [];
+        }
+        letterColorToLocations[color][seqId].push(colIdx);
+      }
+    }
+
+    //Array of JSX elements - one for each letter color. Each contains
+    //a character for every position in the rendered sequences, (each
+    //position will be blank for all except one of the elemnets)
+    const colorsToDivs = Object.entries(letterColorToLocations).map(
+      ([color, locations]) => {
+        const colorString = seqsToRender
+          .map((seqStr, seqIdx) => {
+            return seqStr
+              .split("")
+              .map((letter, colIdx) => {
+                if (
+                  seqIdx in locations &&
+                  locations[seqIdx].indexOf(colIdx) >= 0
+                ) {
+                  return letter;
+                }
+                return "\u00A0";
+              })
+              .join("");
+          })
+          .join("\n");
+        return (
+          <div
+            className={"styled-residues"}
+            style={{ color: color }}
+            key={color}
+          >
+            <pre style={{ fontSize: fontSize }}>{colorString}</pre>
+          </div>
+        );
+      }
+    );
+    return (
+      <div
+        className="sequence-text-holder"
+        style={{
+          top: state.scrollingAdditionalVerticalOffset,
+        }}
+      >
+        {colorsToDivs}
+        <pre
+          style={{ fontSize: fontSize }}
+          className="hidden-residues-for-copy-paste"
+        >
+          {seqsToRender.map((seqStr) => {
+            return seqStr + "\n";
+          })}
+        </pre>
+      </div>
+    );
+  };
+
   return (
     <Provider store={store}>
       <div
@@ -141,86 +332,11 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         }}
       >
         <div ref={alignmentDetailsRef} className="viewport">
-          {!state.initialized ? null : ( //alignment.getMaxSequenceLength() !== state.sequenceLength || alignment.getSequenceCount() !== state.sequenceCount ||
-            <div>
-              <Stage
-                className="stage"
-                width={state.viewportWidth}
-                height={state.viewportHeight}
-                options={{ antialias: false, transparent: true }}
-              >
-                <AppContext.Consumer>
-                  {(app) => {
-                    return (
-                      <CanvasAlignmentTiled
-                        alignment={alignment}
-                        alignmentType={alignmentStyle.alignmentType}
-                        residueDetail={alignmentStyle.residueDetail}
-                        sortBy={sortBy}
-                        colorScheme={alignmentStyle.colorScheme}
-                        positionsToStyle={alignmentStyle.positionsToStyle}
-                        drawSequencesIndicies={seqIdxsToRender}
-                        scale={{
-                          x: state.residueWidth,
-                          y: state.residueHeight,
-                        }}
-                        translateY={state.scrollingAdditionalVerticalOffset}
-                      />
-                    );
-                  }}
-                </AppContext.Consumer>
-                {disableScrolling ? null : (
-                  <AppContext.Consumer>
-                    {(app) => (
-                      //entrypoint to the interaction viewport for registering scroll
-                      //and zoom and other events. This is not rendering anything, but
-                      //is used to calculate interaction changes and report them
-                      //back to this component.
-                      <Provider store={store}>
-                        <AlignmentDetailsViewport
-                          app={app}
-                          parentElement={alignmentDetailsRef.current!}
-                          alignment={alignment}
-                          screenWidth={state.clientWidth}
-                          screenHeight={state.clientHeight}
-                          worldWidth={state.worldWidth}
-                          worldHeight={state.worldHeight}
-                        ></AlignmentDetailsViewport>
-                      </Provider>
-                    )}
-                  </AppContext.Consumer>
-                )}
-              </Stage>
-              <div
-                className="sequence-text-holder"
-                style={{
-                  top: state.scrollingAdditionalVerticalOffset,
-                }}
-              >
-                {seqIdxsToRender.map((seqIdx, viewIdx) => {
-                  const seq = sortedSeqs[seqIdx];
-                  const style = {
-                    top: viewIdx * state.residueHeight,
-                    fontSize: fontSize,
-                  };
-                  return (
-                    <div
-                      className="single-sequence-text"
-                      style={style}
-                      key={seqIdx + seq.sequence + "_b"}
-                    >
-                      {seq.sequence
-                        .split("")
-                        .map((resi, idx) => {
-                          if (idx % 2) return resi; //"\u00A0";
-                          return resi;
-                        })
-                        .join("")}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          {!state.initialized ? null : (
+            <>
+              {renderBackgroundRectangles()}
+              {renderLetters()}
+            </>
           )}
         </div>
         {disableScrolling ? null : (

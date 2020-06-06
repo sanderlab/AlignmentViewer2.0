@@ -69,11 +69,13 @@ export function AlignmentDetailsViewport(
     const newWorldTop = data.viewport.top;
     if (data.type === "wheel" && newWorldTop !== worldTopOffset) {
       dispatch(setWorldTopOffset(newWorldTop));
+      app.render(); //stops flicker on safari.
     }
   });
 
   if (viewport.top !== worldTopOffset) {
     viewport.top = worldTopOffset;
+    app.render(); //stops flicker on safari.
   }
 
   return <></>;
