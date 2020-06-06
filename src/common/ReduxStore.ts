@@ -177,8 +177,12 @@ export const alignmentDetailsSlice = createSlice({
         residueHeight: number;
       }>
     ) => {
+      const startResidueTop = state.worldTopOffset / state.residueHeight;
       state.residueHeight = action.payload.residueHeight;
       state.residueWidth = action.payload.residueWidth;
+
+      //try to maintain the same residue at the top
+      state.worldTopOffset = startResidueTop * action.payload.residueHeight;
       attachRenderDetails(state);
     },
 
