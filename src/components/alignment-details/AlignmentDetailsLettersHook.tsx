@@ -13,14 +13,6 @@ import {
 } from "../../common/MolecularStyles";
 import { AminoAcid, Nucleotide } from "../../common/Residues";
 
-interface IAlignmentDetailsProps {
-  sequencesToRender: string[];
-  consensusSequence: string;
-  querySequence: string;
-  alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  fontSize: number;
-}
-
 /**
  * Get the color of a single letter.
  * @param letter
@@ -80,6 +72,7 @@ export function AlignmentDetailsLetters(props: {
   querySequence: string;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   fontSize: number;
+  lineHeight: number;
 }) {
   const {
     sequencesToRender,
@@ -87,6 +80,7 @@ export function AlignmentDetailsLetters(props: {
     querySequence,
     alignmentStyle,
     fontSize,
+    lineHeight,
   } = props;
 
   //each sequence style will be rendered as a single separate div.
@@ -118,55 +112,62 @@ export function AlignmentDetailsLetters(props: {
   //Array of JSX elements - one for each letter color. Each contains
   //a character for every position in the rendered sequences, (each
   //position will be blank for all except one of the elemnets)
-  const colorDivs = Object.entries(letterColorToLocations).map(
+  const individualColors = Object.entries(letterColorToLocations).map(
     ([color, locations]) => {
-      const colorString = sequencesToRender
-        .map((seqStr, seqIdx) => {
-          return seqStr
-            .split("")
-            .map((letter, colIdx) => {
-              if (
-                seqIdx in locations &&
-                locations[seqIdx].indexOf(colIdx) >= 0
-              ) {
-                return letter;
-              }
-              return "\u00A0";
-            })
-            .join("");
-        })
-        .join("\n");
+      const colorStrings = sequencesToRender.map((seqStr, seqIdx) => {
+        return seqStr
+          .split("")
+          .map((letter, colIdx) => {
+            if (seqIdx in locations && locations[seqIdx].indexOf(colIdx) >= 0) {
+              return letter;
+            }
+            return "\u00A0";
+          })
+          .join("");
+      });
+
       return (
         <div
-          className={`styled-residues`}
+          className={`letters-with-specific-color`}
           style={{ color: color }}
-          key={`${color}_${colorString}`}
+          key={`${color}_${colorStrings.join("")}`}
         >
-          <pre style={{ fontSize: fontSize }}>{colorString}</pre>
+          {colorStrings.map((seqStr, idx) => {
+            return (
+              <React.Fragment key={idx + seqStr}>
+                {seqStr}
+                <br />
+              </React.Fragment>
+            );
+          })}
         </div>
       );
     }
   );
 
   return (
-    <>
+    <div
+      className="letters-viewport"
+      style={{ fontSize: fontSize, lineHeight: lineHeight + "px" }}
+    >
       {
         //output each color separately
       }
-      {colorDivs}
+      {individualColors}
 
       {
         // add a hidden interaction element that contains all the displayed sequences
         // so users can copy paste
       }
-      <pre
-        style={{ fontSize: fontSize }}
-        className="hidden-residues-for-copy-paste"
-      >
-        {sequencesToRender.map((seqStr) => {
-          return seqStr + "\n";
+      <div className={`hidden-residues-for-copy-paste`}>
+        {sequencesToRender.map((seqStr, idx) => {
+          return (
+            <React.Fragment key={idx + seqStr}>
+              {seqStr} <br />
+            </React.Fragment>
+          );
         })}
-      </pre>
-    </>
+      </div>
+    </div>
   );
 }

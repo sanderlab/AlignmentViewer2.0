@@ -31,7 +31,7 @@ import { ResizeSensor } from "css-element-queries";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
-import { AminoAcid, Nucleotide } from "../../common/Residues";
+
 export interface IAlignmentDetailsProps {
   alignment: Alignment;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
@@ -107,7 +107,9 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     dispatch(
       setResidueDimensions({
         residueWidth: residueWidth,
-        residueHeight: residueWidth * CHARACTER_HEIGHT_TO_WIDTH_RATIO,
+        residueHeight: Math.round(
+          residueWidth * CHARACTER_HEIGHT_TO_WIDTH_RATIO
+        ),
       })
     );
   }, [residueWidth]);
@@ -202,6 +204,15 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     );
   };
 
+  /**
+   *
+   *
+   *
+   * Render the entire
+   *
+   *
+   *
+   */
   return (
     <Provider store={store}>
       <div
@@ -229,6 +240,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   querySequence={alignment.getQuerySequence().sequence}
                   alignmentStyle={alignmentStyle}
                   fontSize={fontSize}
+                  lineHeight={state.residueHeight}
                 ></AlignmentDetailsLetters>
               </div>
             </>
