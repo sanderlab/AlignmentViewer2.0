@@ -1,5 +1,5 @@
 import * as React from "react";
-import "./FileInput.scss";
+import "./AlignmentFileLoader.scss";
 import { Alignment } from "../common/Alignment";
 import { AlignmentLoader, AlignmentLoadError } from "../common/AlignmentLoader";
 
