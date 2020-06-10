@@ -107,6 +107,27 @@ export function getParseError(parserName: string, errorMessage: string) {
 }
 
 /**
+ * Get the
+ * see https://stackoverflow.com/questions/118241
+ */
+let fontInfo: undefined | {} = undefined;
+export function getAlignmentFontDetails() {
+  if (!fontInfo) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw Error("Internal error: Unable to calculate font dimensions.");
+    }
+    context.font = "14px Monaco";
+    //"14px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;";
+    var metrics = context.measureText("a");
+    fontInfo = metrics;
+  }
+
+  return fontInfo;
+}
+
+/**
  * CRAZY: safari puts an onwheel event onto the window. This disrupts
  * a lot of the wheel interactions we use on webgl components and the
  * viewport. To fix,

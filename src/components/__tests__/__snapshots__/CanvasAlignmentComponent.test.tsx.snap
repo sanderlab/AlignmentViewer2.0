@@ -209,7 +209,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": 0,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -218,6 +218,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-aa-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -231,7 +232,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
   }
   colorScheme={
     Object {
-      "backgroundAlpha": 0,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -240,6 +241,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-aa-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -503,7 +505,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": NaN,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -512,6 +514,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-nt-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -525,7 +528,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
   }
   colorScheme={
     Object {
-      "backgroundAlpha": NaN,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -534,6 +537,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-nt-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -620,7 +624,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": 0,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -629,6 +633,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-aa-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -642,7 +647,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
   }
   colorScheme={
     Object {
-      "backgroundAlpha": 0,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -651,6 +656,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-aa-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -825,7 +831,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": 0,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -834,6 +840,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-aa-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -847,7 +854,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": 0,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -856,6 +863,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-aa-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -1003,7 +1011,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": NaN,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -1012,6 +1020,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-nt-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -1025,7 +1034,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": NaN,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -1034,6 +1043,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-nt-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -1181,7 +1191,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": 0,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -1190,6 +1200,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-aa-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -1203,7 +1214,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": 0,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -1212,6 +1223,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-aa-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -1359,7 +1371,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": NaN,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -1368,6 +1380,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-nt-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -1381,7 +1394,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": NaN,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -1390,6 +1403,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-nt-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -1537,7 +1551,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": 0,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -1546,6 +1560,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-aa-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -1559,7 +1574,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": 0,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -1568,6 +1583,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-aa-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -1715,7 +1731,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": NaN,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -1724,6 +1740,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-nt-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -1737,7 +1754,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": NaN,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -1746,6 +1763,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-nt-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -1893,7 +1911,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": 0,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -1902,6 +1920,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-aa-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -1915,7 +1934,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": 0,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -1924,6 +1943,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-aa-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -2071,7 +2091,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": NaN,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -2080,6 +2100,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-nt-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -2093,7 +2114,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": NaN,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -2102,6 +2123,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-nt-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -2249,7 +2271,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": 0,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -2258,6 +2280,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-aa-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -2271,7 +2294,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": 0,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -2280,6 +2303,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-aa-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",
@@ -2427,7 +2451,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     AlignmentTypes {
       "allColorSchemes": Array [
         Object {
-          "backgroundAlpha": NaN,
+          "backgroundAlpha": 0.25,
           "backgroundColorsLightTheme": Object {
             "": "",
           },
@@ -2436,6 +2460,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
             "": "",
           },
           "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
           "description": "mock-nt-style-desc",
           "letterColorsDarkTheme": Object {
             "": "",
@@ -2449,7 +2474,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   }
   colorScheme={
     Object {
-      "backgroundAlpha": NaN,
+      "backgroundAlpha": 0.25,
       "backgroundColorsLightTheme": Object {
         "": "",
       },
@@ -2458,6 +2483,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
         "": "",
       },
       "commonName": "Default",
+      "defaultLetterColor": "#ffffff",
       "description": "mock-nt-style-desc",
       "letterColorsDarkTheme": Object {
         "": "",

@@ -19,11 +19,11 @@ import {
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
 import { MiniMap } from "./minimap/MiniMapHook";
-import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
-import { AceConsensusSequenceComponent } from "./AceConsensusSequenceComponent";
-import { AceQuerySequenceComponent } from "./AceQuerySequenceComponent";
-import { AceTextualRulerComponent } from "./AceTextualRulerComponent";
-import { AceEditorComponent } from "./AceEditorComponent";
+import { AceMultipleSequenceAlignmentComponent } from "./ace/AceMultipleSequenceAlignmentComponent";
+import { AceConsensusSequenceComponent } from "./ace/AceConsensusSequenceComponent";
+import { AceQuerySequenceComponent } from "./ace/AceQuerySequenceComponent";
+import { AceTextualRulerComponent } from "./ace/AceTextualRulerComponent";
+import { AceEditorComponent } from "./ace/AceEditorComponent";
 import { IMiniMapProps } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { Provider } from "react-redux";

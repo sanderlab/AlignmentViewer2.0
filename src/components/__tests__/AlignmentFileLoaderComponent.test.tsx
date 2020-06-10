@@ -9,14 +9,16 @@ import { AlignmentFileLoaderComponent } from "../AlignmentFileLoaderComponent";
 // https://github.com/facebook/jest/issues/3094
 jest.mock("../MolecularStyles.module.scss", () => {
   return {
-    aaStyBGAlpha_Default: 0,
+    aaStyBackgroundAlpha_Default: 0.25,
+    aaStyDefaultLetterColor_Default: "#ffffff",
     aaStyClass_Default: "mock-aa-class",
     aaStyColorOrder_Default: "",
     aaStyColors_Default: "",
     aaStyBackgroundColorsLightTheme_Default: "",
     aaStyLetterColorsDarkTheme_Default: "",
     aaStyDesc_Default: "mock-aa-style-desc",
-    ntStyBGAlpha_Default: "",
+    ntStyBackgroundAlpha_Default: 0.25,
+    ntStyDefaultLetterColor_Default: "#ffffff",
     ntStyClass_Default: "mock-nt-class",
     ntStyColorOrder_Default: "",
     ntStyColors_Default: "",

@@ -1,5 +1,5 @@
-import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
+import { Alignment } from "../../common/Alignment";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 import { AceEditorComponent, IAceEditorProps } from "./AceEditorComponent";
 
 export interface IAceMultipleSequenceAlignmentProps extends IAceEditorProps {
