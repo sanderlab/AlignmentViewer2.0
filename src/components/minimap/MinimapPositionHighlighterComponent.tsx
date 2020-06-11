@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { PixiComponent } from "@inlet/react-pixi";
 import { Graphics } from "pixi.js";
 
-interface IAlignmentHighlighterProps {
+interface IMinimapPositionHighlighterProps {
   x: number;
   y: number;
   width: number;
@@ -25,10 +25,10 @@ interface IAlignmentHighlighterProps {
   };
 }
 
-export const CanvasAlignmentHighlighter = PixiComponent(
-  "CanvasAlignmentHighlighter",
+export const MinimapPositionHighlighter = PixiComponent(
+  "MinimapPositionHighlighter",
   {
-    create: (props: IAlignmentHighlighterProps) => {
+    create: (props: IMinimapPositionHighlighterProps) => {
       const toReturn = new Graphics();
       toReturn.interactive = true;
       return toReturn;

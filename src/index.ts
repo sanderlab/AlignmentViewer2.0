@@ -1,4 +1,3 @@
-export * from "./common/AceAlignmentMode.js";
 export * from "./common/Alignment.js";
 export * from "./common/AlignmentLoader.js";
 export * from "./common/AlignmentSorter.js";
@@ -19,8 +18,6 @@ export * from "./components/ace/AceQuerySequenceComponent.js";
 export * from "./components/ace/AceTextualRulerComponent.js";
 export * from "./components/AlignmentFileLoaderComponent.js";
 export * from "./components/AlignmentViewerComponent.js";
-export * from "./components/CanvasAlignmentHighlighterComponent.js";
-export * from "./components/CanvasAlignmentTiledComponent.js";
 export * from "./components/SequenceBarplotComponent.js";
 export * from "./components/SequenceLogoComponent.js";
 
@@ -30,3 +27,4 @@ export * from "./components/alignment-details/AlignmentDetailsViewportHook.js";
 
 export * from "./components/minimap/MiniMapHook";
 export * from "./components/minimap/MiniMapViewportComponent.js";
+export * from "./components/minimap/MinimapPositionHighlighterComponent.js";

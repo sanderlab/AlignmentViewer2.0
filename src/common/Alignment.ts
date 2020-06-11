@@ -1,5 +1,5 @@
 import { generateUUIDv4 } from "./Utils";
-import { defineNewAlignmentMode } from "./AceAlignmentMode";
+import { defineNewAlignmentMode } from "../components/ace/AceAlignmentMode";
 import { Nucleotide } from "./Residues";
 import { SequenceSorter } from "./AlignmentSorter";
 import {

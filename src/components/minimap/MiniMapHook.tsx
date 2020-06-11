@@ -17,7 +17,7 @@ import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 import { MiniMapViewport } from "./MiniMapViewportComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, setSequenceTopOffset } from "../../common/ReduxStore";
-import { CanvasAlignmentHighlighter } from "../CanvasAlignmentHighlighterComponent";
+import { MinimapPositionHighlighter } from "./MinimapPositionHighlighterComponent";
 
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
@@ -193,7 +193,7 @@ export function MiniMap(props: IMiniMapProps) {
                   alignmentDetails.seqIdxsToRender.length ? (
                   <></>
                 ) : (
-                  <CanvasAlignmentHighlighter
+                  <MinimapPositionHighlighter
                     fillColor={0xff0000}
                     fillAlpha={dragging ? 0.75 : 0.25}
                     x={0}

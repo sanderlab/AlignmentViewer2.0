@@ -1,21 +1,21 @@
 import React from "react";
-import { Alignment } from "../../common/Alignment";
-import { SequenceSorter } from "../../common/AlignmentSorter";
+import { Alignment } from "../common/Alignment";
+import { SequenceSorter } from "../common/AlignmentSorter";
 import * as PIXI from "pixi.js";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import {
   CanvasAlignmentViewport,
   ICanvasAlignmentViewportProps,
 } from "./CanvasAlignmentViewportComponent";
-import { CanvasAlignmentHighlighter } from "../CanvasAlignmentHighlighterComponent";
-import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
+import { MinimapPositionHighlighter } from "../components/minimap/MinimapPositionHighlighterComponent";
+import { CanvasAlignmentTiled } from "../components/CanvasAlignmentTiledComponent";
 
 import {
   IColorScheme,
   PositionsToStyle,
   AlignmentTypes,
   ResidueStyle,
-} from "../../common/MolecularStyles";
+} from "../common/MolecularStyles";
 
 export interface ICanvasAlignmentProps {
   alignment: Alignment;
@@ -180,7 +180,7 @@ export class CanvasAlignmentComponent extends React.Component<
                   {rowHighlightStart !== undefined &&
                   rowHighlighterHeight !== undefined &&
                   rowHighlighterHeight < alignment.getSequenceCount() ? (
-                    <CanvasAlignmentHighlighter
+                    <MinimapPositionHighlighter
                       fillColor={0xff0000}
                       fillAlpha={0.25}
                       x={0}

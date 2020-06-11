@@ -18,5 +18,11 @@
     "noEmit": true
   },
   "exclude": ["**/__tests__/**"],
-  "include": ["src/components", "src/common", "src/index.ts", "types"]
+  "include": [
+    "src/components",
+    "src/common",
+    "src/index.ts",
+    "types",
+    "src/components/ace/AceAlignmentMode.ts"
+  ]
 }
