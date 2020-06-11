@@ -27,6 +27,7 @@ import { AceEditorComponent } from "./ace/AceEditorComponent";
 import { IMiniMapProps } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { Provider } from "react-redux";
+import { getAlignmentFontDetails } from "../common/Utils";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -98,7 +99,6 @@ enum ACE_EDITOR_IDS {
 }
 
 interface IAlignmentViewerState {
-  aceCharacterWidth: number;
   aceEditors: { [editorId: string]: Ace.Editor };
   msaEditorVewport?: {
     numberVisibleRows: number;
@@ -107,7 +107,6 @@ interface IAlignmentViewerState {
   };
 
   windowWidth: number;
-  //windowHeight: number;
 }
 
 export class AlignmentViewer extends React.Component<
@@ -124,27 +123,14 @@ export class AlignmentViewer extends React.Component<
 
     this.state = {
       aceEditors: {},
-      aceCharacterWidth: 0,
       windowWidth: window.innerWidth,
-      //windowHeight: window.innerHeight,
     };
 
     this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
     this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
 
-    this.handleCharacterSizeChanged = this.handleCharacterSizeChanged.bind(
-      this
-    );
     this.aceEditorLoaded = this.aceEditorLoaded.bind(this);
     this.windowDimensionsUpdated = this.windowDimensionsUpdated.bind(this);
-  }
-
-  private handleCharacterSizeChanged(newCharSize: number) {
-    if (this.state.aceCharacterWidth !== newCharSize) {
-      this.setState({
-        aceCharacterWidth: newCharSize,
-      });
-    }
   }
 
   /**
@@ -178,7 +164,6 @@ export class AlignmentViewer extends React.Component<
       newAceEditors[id] = editor;
 
       return {
-        aceCharacterWidth: editor.renderer.characterWidth, //todo: check if the same always.
         aceEditors: newAceEditors,
       };
     });
@@ -244,7 +229,7 @@ export class AlignmentViewer extends React.Component<
     );
   }
 
-  protected renderSequenceLogo = () => {
+  protected renderSequenceLogo = (residueWidth: number) => {
     const { alignment, logoOptions, style } = this.props;
     const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
 
@@ -252,7 +237,7 @@ export class AlignmentViewer extends React.Component<
       <SequenceLogoComponent
         alignment={alignment}
         style={style}
-        glyphWidth={this.state.aceCharacterWidth}
+        glyphWidth={residueWidth}
         logoType={logoOpts.logoType}
         tooltipPlacement={logoOpts.tooltipPlacement}
         height={logoOpts.height}
@@ -266,13 +251,16 @@ export class AlignmentViewer extends React.Component<
     );
   };
 
-  protected renderBarplot = (barplotProps: IBarplotExposedProps) => {
+  protected renderBarplot = (
+    barplotProps: IBarplotExposedProps,
+    residueWidth: number
+  ) => {
     return (
       <SequenceBarplotComponent
         alignment={this.props.alignment}
         tooltipPlacement={barplotProps.tooltipPlacement}
         dataSeriesSet={barplotProps.dataSeriesSet}
-        positionWidth={this.state.aceCharacterWidth}
+        positionWidth={residueWidth}
         height={barplotProps.height}
         scrollerLoaded={(scroller) => {
           this.horizontalScrollSync.registerElementScroller(scroller);
@@ -325,7 +313,6 @@ export class AlignmentViewer extends React.Component<
           this.props.style.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
-        characterSizeChanged={this.handleCharacterSizeChanged}
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             ACE_EDITOR_IDS.QUERY,
@@ -375,7 +362,6 @@ export class AlignmentViewer extends React.Component<
           this.props.style.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
-        characterSizeChanged={this.handleCharacterSizeChanged}
         editorLoaded={(editor, parentElem) => {
           this.aceEditorLoaded(
             ACE_EDITOR_IDS.MSA_SEQUENCES,
@@ -454,7 +440,6 @@ export class AlignmentViewer extends React.Component<
    *
    *
    */
-
   componentDidMount() {
     window.addEventListener("resize", this.windowDimensionsUpdated);
   }
@@ -471,6 +456,7 @@ export class AlignmentViewer extends React.Component<
       showConsensus,
       showQuery,
       showRuler,
+      zoomLevel,
     } = this.props;
     if (!alignment) {
       return null;
@@ -480,6 +466,10 @@ export class AlignmentViewer extends React.Component<
     if (!showAnnotations) {
       classes.push("annotation-closed");
     }
+
+    const residueWidth = getAlignmentFontDetails(
+      zoomLevel !== undefined ? zoomLevel : defaultProps.zoomLevel
+    ).width;
 
     return (
       <div className={classes.join(" ")}>
@@ -493,7 +483,7 @@ export class AlignmentViewer extends React.Component<
               this.renderWidget(
                 "av-barplot-holder",
                 barplot.dataSeriesSet.map((series) => series.name).join(" / "),
-                this.renderBarplot(barplot),
+                this.renderBarplot(barplot, residueWidth),
                 true,
                 `${idx}-${barplot.dataSeriesSet
                   .map((dataseries) => dataseries.id)
@@ -506,7 +496,7 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-sequence-logo-holder",
               "Logo:",
-              this.renderSequenceLogo(),
+              this.renderSequenceLogo(residueWidth),
               true
             )}
 
@@ -535,8 +525,8 @@ export class AlignmentViewer extends React.Component<
             )}
 
         {this.renderWidget(
-          "webgl-alignment-holder",
-          "WEBGL:",
+          "alignment-details-holder",
+          "details:",
           <Provider store={store}>
             <AlignmentDetails
               alignment={this.props.alignment}
@@ -546,9 +536,7 @@ export class AlignmentViewer extends React.Component<
                   ? this.props.zoomLevel
                   : defaultProps.zoomLevel
               }
-              residueWidth={
-                this.state.aceCharacterWidth ? this.state.aceCharacterWidth : 10
-              }
+              residueWidth={residueWidth}
               sortBy={
                 this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
               }

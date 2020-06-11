@@ -107,24 +107,43 @@ export function getParseError(parserName: string, errorMessage: string) {
 }
 
 /**
- * Get the
- * see https://stackoverflow.com/questions/118241
+ * Get the font family, width and height of the fixed width font used for the
+ * alignments
+ * inspired by https://stackoverflow.com/questions/118241
  */
-let fontInfo: undefined | {} = undefined;
-export function getAlignmentFontDetails() {
-  if (!fontInfo) {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (!context) {
-      throw Error("Internal error: Unable to calculate font dimensions.");
-    }
-    context.font = "14px Monaco";
-    //"14px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;";
-    var metrics = context.measureText("a");
-    fontInfo = metrics;
+const FONT_FAMILY =
+  'Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace';
+let HIDDEN_DIV: undefined | HTMLDivElement = undefined;
+const FONT_DETAILS_CACHE: Map<
+  number,
+  {
+    fontFamily: string;
+    fontSize: number;
+    width: number;
+    height: number;
   }
-
-  return fontInfo;
+> = new Map();
+export function getAlignmentFontDetails(fontSize: number) {
+  if (!FONT_DETAILS_CACHE.has(fontSize)) {
+    if (!HIDDEN_DIV) {
+      HIDDEN_DIV = document.createElement("div");
+      document.body.appendChild(HIDDEN_DIV);
+      HIDDEN_DIV.style.position = "absolute";
+      HIDDEN_DIV.style.fontFamily = FONT_FAMILY;
+      HIDDEN_DIV.style.left = "-1000px";
+      HIDDEN_DIV.style.top = "-1000px";
+      HIDDEN_DIV.innerHTML = "X";
+    }
+    HIDDEN_DIV.style.fontSize = fontSize + "px";
+    const boundingRect = HIDDEN_DIV.getBoundingClientRect();
+    FONT_DETAILS_CACHE.set(fontSize, {
+      fontFamily: FONT_FAMILY,
+      fontSize: fontSize,
+      width: boundingRect.width,
+      height: boundingRect.height,
+    });
+  }
+  return FONT_DETAILS_CACHE.get(fontSize)!;
 }
 
 /**
