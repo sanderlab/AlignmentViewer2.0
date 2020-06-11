@@ -30,14 +30,14 @@ interface ITiledImages {
 }
 
 export interface ICanvasAlignmentTiledProps {
-  alignment: Alignment;
+  sequences: string[];
+  consensusSequence: string;
+  querySequence: string;
   alignmentType: AlignmentTypes;
-  sortBy: SequenceSorter;
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
   residueDetail: ResidueStyle;
   scale?: { x: number; y: number };
-  drawSequencesIndicies?: number[];
   translateY?: number;
 }
 
@@ -46,15 +46,15 @@ export class CanvasAlignmentTiled extends React.Component<
 > {
   //shallow array equality
   protected arraysEqual(
-    arr1: number[] | undefined,
-    arr2: number[] | undefined
+    arr1: number[] | string[] | undefined,
+    arr2: number[] | string[] | undefined
   ) {
     if (arr1 === undefined || arr2 === undefined) {
       return arr1 === arr2;
     }
     return (
       arr1.length === arr2.length &&
-      arr1.every(function (element, index) {
+      arr1.every((element: string | number, index: number) => {
         return element === arr2[index];
       })
     );
@@ -62,39 +62,27 @@ export class CanvasAlignmentTiled extends React.Component<
 
   shouldComponentUpdate(nextProps: ICanvasAlignmentTiledProps) {
     return (
-      nextProps.alignment !== this.props.alignment ||
+      !this.arraysEqual(nextProps.sequences, this.props.sequences) ||
+      nextProps.consensusSequence !== this.props.consensusSequence ||
+      nextProps.querySequence !== this.props.querySequence ||
       nextProps.colorScheme !== this.props.colorScheme ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
-      nextProps.sortBy !== this.props.sortBy ||
-      nextProps.scale !== this.props.scale ||
-      !this.arraysEqual(
-        nextProps.drawSequencesIndicies,
-        this.props.drawSequencesIndicies
-      )
+      nextProps.scale !== this.props.scale
     );
   }
 
   render() {
-    if (!this.props.alignment) {
-      return null;
-    }
     const {
-      alignment,
+      sequences,
       alignmentType,
       colorScheme,
       positionsToStyle,
-      drawSequencesIndicies,
       residueDetail,
       scale,
-      sortBy,
     } = this.props;
 
     // Generate multiple tiled images from the alignment
-    const allSequencesSorted = alignment.getSequences(sortBy);
-    const sequences = !drawSequencesIndicies
-      ? allSequencesSorted
-      : drawSequencesIndicies.map((idx) => allSequencesSorted[idx]);
-    const fullWidth = alignment.getMaxSequenceLength();
+    const fullWidth = sequences.length > 0 ? sequences[0].length : 0;
     const fullHeight = sequences.length;
 
     const sizes = {
@@ -143,12 +131,8 @@ export class CanvasAlignmentTiled extends React.Component<
                   ${colorScheme.commonName}_
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
-                  ${sortBy.key}_
                   ${residueDetail.key}_
-                  ${alignment.getName()}_
-                  ${
-                    drawSequencesIndicies ? drawSequencesIndicies.join("-") : ""
-                  }`}
+                  ${sequences.join("")}`}
             roundPixels={true}
           ></Sprite>
         ))}
@@ -160,7 +144,7 @@ export class CanvasAlignmentTiled extends React.Component<
     tileImageData: ImageData,
     tileCanvasContext: CanvasRenderingContext2D,
     tileCanvas: HTMLCanvasElement,
-    sequences: ISequence[],
+    sequences: string[],
     offsets: { seqY: number; letterX: number }
   ) {
     let imageDataIdx = 0;
@@ -168,7 +152,7 @@ export class CanvasAlignmentTiled extends React.Component<
     for (let seqIdx = 0; seqIdx < tileCanvas.height; seqIdx++) {
       const seq = sequences[seqIdx + offsets.seqY];
       for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
-        const letter = seq.sequence[letterIdx + offsets.letterX];
+        const letter = seq[letterIdx + offsets.letterX];
         const colorScheme = this.getCurrentMoleculeColors(
           letter,
           letterIdx,
@@ -192,7 +176,7 @@ export class CanvasAlignmentTiled extends React.Component<
     targetTileWidth: number,
     targetTileHeight: number,
     tiledImages: ITiledImages,
-    sequences: ISequence[]
+    sequences: string[]
   ) {
     const tileCanvas = document.createElement("canvas") as HTMLCanvasElement;
     tileCanvas.height =
@@ -246,14 +230,14 @@ export class CanvasAlignmentTiled extends React.Component<
     offsets: { seqY: number; letterX: number }
   ) {
     const {
-      alignment,
+      sequences,
+      consensusSequence,
+      querySequence,
       alignmentType,
       colorScheme,
       positionsToStyle,
       residueDetail,
     } = this.props;
-    const consensusSequence = alignment.getConsensus().sequence;
-    const querySequence = alignment.getQuerySequence().sequence;
     const moleculeClass =
       alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
     let molecule = moleculeClass.UNKNOWN;

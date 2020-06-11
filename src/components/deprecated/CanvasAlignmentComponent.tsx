@@ -1,21 +1,21 @@
 import React from "react";
-import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
+import { Alignment } from "../../common/Alignment";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 import * as PIXI from "pixi.js";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import {
   CanvasAlignmentViewport,
   ICanvasAlignmentViewportProps,
 } from "./CanvasAlignmentViewportComponent";
-import { CanvasAlignmentHighlighter } from "./CanvasAlignmentHighlighterComponent";
-import { CanvasAlignmentTiled } from "./CanvasAlignmentTiledComponent";
+import { CanvasAlignmentHighlighter } from "../CanvasAlignmentHighlighterComponent";
+import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
 import {
   IColorScheme,
   PositionsToStyle,
   AlignmentTypes,
   ResidueStyle,
-} from "../common/MolecularStyles";
+} from "../../common/MolecularStyles";
 
 export interface ICanvasAlignmentProps {
   alignment: Alignment;
@@ -167,9 +167,12 @@ export class CanvasAlignmentComponent extends React.Component<
                   {...viewportProps}
                 >
                   <CanvasAlignmentTiled
-                    alignment={alignment}
+                    sequences={alignment
+                      .getSequences(sortBy)
+                      .map((seq) => seq.sequence)}
+                    consensusSequence={alignment.getConsensus().sequence}
+                    querySequence={alignment.getQuerySequence().sequence}
                     alignmentType={alignmentType}
-                    sortBy={sortBy}
                     colorScheme={colorScheme}
                     residueDetail={ResidueStyle.DARK}
                     positionsToStyle={positionsToStyle}

@@ -9,9 +9,6 @@ import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-  ResidueStyle,
-  AlignmentTypes,
-  PositionsToStyle,
 } from "../../common/MolecularStyles";
 
 import {
@@ -163,13 +160,13 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           {(app) => {
             return (
               <CanvasAlignmentTiled
-                alignment={alignment}
+                sequences={seqsToRender}
+                consensusSequence={alignment.getConsensus().sequence}
+                querySequence={alignment.getQuerySequence().sequence}
                 alignmentType={alignmentStyle.alignmentType}
                 residueDetail={alignmentStyle.residueDetail}
-                sortBy={sortBy}
                 colorScheme={alignmentStyle.colorScheme}
                 positionsToStyle={alignmentStyle.positionsToStyle}
-                drawSequencesIndicies={seqIdxsToRender}
                 scale={{
                   x: state.residueWidth,
                   y: state.residueHeight,
@@ -190,7 +187,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                 <AlignmentDetailsViewport
                   app={app}
                   parentElement={alignmentDetailsRef.current!}
-                  alignment={alignment}
                   screenWidth={state.clientWidth}
                   screenHeight={state.clientHeight}
                   worldWidth={state.worldWidth}

@@ -19,10 +19,8 @@ export * from "./components/ace/AceQuerySequenceComponent.js";
 export * from "./components/ace/AceTextualRulerComponent.js";
 export * from "./components/AlignmentFileLoaderComponent.js";
 export * from "./components/AlignmentViewerComponent.js";
-export * from "./components/CanvasAlignmentComponent.js";
 export * from "./components/CanvasAlignmentHighlighterComponent.js";
 export * from "./components/CanvasAlignmentTiledComponent.js";
-export * from "./components/CanvasAlignmentViewportComponent.js";
 export * from "./components/SequenceBarplotComponent.js";
 export * from "./components/SequenceLogoComponent.js";
 

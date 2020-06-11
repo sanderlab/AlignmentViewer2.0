@@ -35,14 +35,7 @@ export class Alignment {
   private positionalLetterCounts: Map<number, { [letter: string]: number }>;
   private globalAlphaLetterCounts: { [letter: string]: number };
   private allUpperAlphaLettersInAlignmentSorted: string[];
-  private consensus: ISequence; /*{
-    sequence: ISequence;
-    statistics: {
-      letter: string;
-      position: number;
-      occurrences: number;
-    }[];
-  };*/
+  private consensus: ISequence;
 
   /**
    * Normalize all values in an object that contains all counts such that

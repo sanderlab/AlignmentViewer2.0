@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Viewport, MovedEventData } from "pixi-viewport";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, setWorldTopOffset } from "../../common/ReduxStore";
-import { Alignment } from "../../common/Alignment";
 
 export interface IAlignmentDetailsViewportProps {
   app: PIXI.Application;
-  alignment: Alignment;
   //the parentElement is used to constrain the wheel events, otherwise when
   //e.g., the minimap on positioned above the viewport, the wheel events
   //propogate through to the viewport

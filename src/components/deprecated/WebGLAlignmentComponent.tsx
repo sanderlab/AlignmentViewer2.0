@@ -231,15 +231,18 @@ export class WebGLAlignmentComponent extends React.Component<
             {(app) => {
               //app.stage.scale.x = scale.x;
               //app.stage.scale.y = scale.y;
+              const allSeqs = alignment.getSequences(sortBy);
               return (
                 <CanvasAlignmentTiled
-                  alignment={alignment}
+                  sequences={visibleSeqs.sequenceIndiciesToDraw.map(
+                    (idx) => allSeqs[idx].sequence
+                  )}
+                  consensusSequence={alignment.getConsensus().sequence}
+                  querySequence={alignment.getQuerySequence().sequence}
                   alignmentType={alignmentStyle.alignmentType}
                   residueDetail={alignmentStyle.residueDetail}
-                  sortBy={sortBy}
                   colorScheme={alignmentStyle.colorScheme}
                   positionsToStyle={alignmentStyle.positionsToStyle}
-                  drawSequencesIndicies={visibleSeqs.sequenceIndiciesToDraw}
                   scale={scale}
                 />
               );

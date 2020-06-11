@@ -270,6 +270,8 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -278,7 +280,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -288,7 +290,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot for a large 
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -566,6 +568,8 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -574,7 +578,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -584,7 +588,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot when doing a
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -600,14 +604,35 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
       "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "",
+        "sequence": "atgc",
       },
-      "globalAlphaLetterCounts": Object {},
-      "maxSequenceLength": NaN,
+      "globalAlphaLetterCounts": Object {
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
+      },
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
-      "positionalLetterCounts": Map {},
+      "positionalLetterCounts": Map {
+        0 => Object {
+          "a": 1,
+        },
+        1 => Object {
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
+        },
+      },
       "predictedNT": true,
-      "querySequence": undefined,
+      "querySequence": Object {
+        "id": "id",
+        "sequence": "atgc",
+      },
       "sequences": Map {
         SequenceSorter {
           "description": "As input",
@@ -615,7 +640,12 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
           "key": "as-input",
           "sortFn": [Function],
           "targetAlignmentType": "both",
-        } => Array [],
+        } => Array [
+          Object {
+            "id": "id",
+            "sequence": "atgc",
+          },
+        ],
       },
       "uuid": "10000000-1000-4000-8000-100000000000",
     }
@@ -685,6 +715,8 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -693,7 +725,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -703,7 +735,7 @@ exports[`CanvasAlignmentComponent Should match the mounted snapshot. 1`] = `
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -719,7 +751,7 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
   onWheel={[Function]}
 >
   <x
-    height={600}
+    height={1}
     onMount={[Function]}
     onUnmount={[Function]}
     options={
@@ -729,7 +761,7 @@ exports[`CanvasAlignmentComponent Should match the shallow snapshot. 1`] = `
     }
     raf={true}
     renderOnComponentChange={true}
-    width={800}
+    width={1}
   >
     <ContextConsumer>
       <Component />
@@ -747,32 +779,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -783,44 +820,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -892,6 +893,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -900,7 +903,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -910,7 +913,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -927,32 +930,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -963,44 +971,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -1072,6 +1044,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -1080,7 +1054,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1090,7 +1064,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -1107,32 +1081,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -1143,44 +1122,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -1252,6 +1195,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -1260,7 +1205,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1270,7 +1215,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -1287,32 +1232,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -1323,44 +1273,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -1432,6 +1346,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -1440,7 +1356,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1450,7 +1366,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -1467,32 +1383,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -1503,44 +1424,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -1612,6 +1497,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -1620,7 +1507,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1630,7 +1517,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -1647,32 +1534,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -1683,44 +1575,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -1792,6 +1648,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -1800,7 +1658,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1810,7 +1668,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -1827,32 +1685,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -1863,44 +1726,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -1972,6 +1799,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -1980,7 +1809,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -1990,7 +1819,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -2007,32 +1836,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -2043,44 +1877,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -2152,6 +1950,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -2160,7 +1960,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -2170,7 +1970,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -2187,32 +1987,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -2223,44 +2028,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -2332,6 +2101,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -2340,7 +2111,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -2350,7 +2121,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>
@@ -2367,32 +2138,37 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
   alignment={
     Alignment {
       "aceEditorMode": undefined,
-      "allUpperAlphaLettersInAlignmentSorted": Array [
-        "A",
-        "B",
-      ],
+      "allUpperAlphaLettersInAlignmentSorted": Array [],
       "consensus": Object {
         "id": "consensus",
-        "sequence": "AB",
+        "sequence": "atgc",
       },
       "globalAlphaLetterCounts": Object {
-        "A": 10,
-        "B": 10,
+        "a": 1,
+        "c": 1,
+        "g": 1,
+        "t": 1,
       },
-      "maxSequenceLength": 2,
+      "maxSequenceLength": 4,
       "name": "My-Alignment",
       "positionalLetterCounts": Map {
         0 => Object {
-          "A": 10,
+          "a": 1,
         },
         1 => Object {
-          "B": 10,
+          "t": 1,
+        },
+        2 => Object {
+          "g": 1,
+        },
+        3 => Object {
+          "c": 1,
         },
       },
-      "predictedNT": false,
+      "predictedNT": true,
       "querySequence": Object {
-        "id": "sequence-0",
-        "sequence": "AB",
+        "id": "id",
+        "sequence": "atgc",
       },
       "sequences": Map {
         SequenceSorter {
@@ -2403,44 +2179,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
           "targetAlignmentType": "both",
         } => Array [
           Object {
-            "id": "sequence-0",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-1",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-2",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-3",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-4",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-5",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-6",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-7",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-8",
-            "sequence": "AB",
-          },
-          Object {
-            "id": "sequence-9",
-            "sequence": "AB",
+            "id": "id",
+            "sequence": "atgc",
           },
         ],
       },
@@ -2512,6 +2252,8 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       "width": 485,
     }
   }
+  stageHeight={1}
+  stageWidth={1}
 >
   <div
     className="alignment-canvas"
@@ -2520,7 +2262,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
     onWheel={[Function]}
   >
     <x
-      height={600}
+      height={1}
       onMount={[Function]}
       onUnmount={[Function]}
       options={
@@ -2530,7 +2272,7 @@ exports[`CanvasAlignmentComponent Should match the snapshot when styling the Pos
       }
       raf={true}
       renderOnComponentChange={true}
-      width={800}
+      width={1}
     >
       <canvas />
     </x>

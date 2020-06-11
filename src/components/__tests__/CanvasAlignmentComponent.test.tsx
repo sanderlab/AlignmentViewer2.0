@@ -4,7 +4,7 @@ import * as React from "react";
 import { mount, shallow } from "enzyme";
 
 import { Alignment } from "../../common/Alignment";
-import { CanvasAlignmentComponent } from "../../components/CanvasAlignmentComponent";
+import { CanvasAlignmentComponent } from "../../components/deprecated/CanvasAlignmentComponent";
 import {
   AlignmentTypes,
   PositionsToStyle,
@@ -51,11 +51,15 @@ describe("CanvasAlignmentComponent", () => {
   it("Should match the shallow snapshot.", () => {
     const wrapper = shallow(
       <CanvasAlignmentComponent
-        alignment={new Alignment("My-Alignment", [])}
+        alignment={
+          new Alignment("My-Alignment", [{ id: "id", sequence: "atgc" }])
+        }
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
         sortBy={SequenceSorter.INPUT}
+        stageWidth={1}
+        stageHeight={1}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -64,11 +68,15 @@ describe("CanvasAlignmentComponent", () => {
   it("Should match the mounted snapshot.", () => {
     const wrapper = mount(
       <CanvasAlignmentComponent
-        alignment={new Alignment("My-Alignment", [])}
+        alignment={
+          new Alignment("My-Alignment", [{ id: "id", sequence: "atgc" }])
+        }
         alignmentType={AlignmentTypes.AMINOACID}
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
         sortBy={SequenceSorter.INPUT}
+        stageWidth={1}
+        stageHeight={1}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -86,6 +94,8 @@ describe("CanvasAlignmentComponent", () => {
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
         sortBy={SequenceSorter.INPUT}
+        stageWidth={1}
+        stageHeight={1}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -106,20 +116,28 @@ describe("CanvasAlignmentComponent", () => {
       }
       const aminoWrapper = mount(
         <CanvasAlignmentComponent
-          alignment={new Alignment("My-Alignment", sequences)}
+          alignment={
+            new Alignment("My-Alignment", [{ id: "id", sequence: "atgc" }])
+          }
           alignmentType={AlignmentTypes.AMINOACID}
           positionsToStyle={positionsToStyle}
           colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
           sortBy={SequenceSorter.INPUT}
+          stageWidth={1}
+          stageHeight={1}
         />
       );
       const nucleotideWrapper = mount(
         <CanvasAlignmentComponent
-          alignment={new Alignment("My-Alignment", sequences)}
+          alignment={
+            new Alignment("My-Alignment", [{ id: "id", sequence: "atgc" }])
+          }
           alignmentType={AlignmentTypes.NUCLEOTIDE}
           positionsToStyle={positionsToStyle}
           colorScheme={ALL_NUCLEOTIDE_COLORSCHEMES[0]}
           sortBy={SequenceSorter.INPUT}
+          stageWidth={1}
+          stageHeight={1}
         />
       );
       expect(aminoWrapper).toMatchSnapshot();
@@ -139,31 +157,10 @@ describe("CanvasAlignmentComponent", () => {
         positionsToStyle={PositionsToStyle.ALL}
         colorScheme={ALL_NUCLEOTIDE_COLORSCHEMES[0]}
         sortBy={SequenceSorter.INPUT}
+        stageWidth={1}
+        stageHeight={1}
       />
     );
     expect(wrapper).toMatchSnapshot();
-  });
-
-  // Skipping for performance!
-  it.skip("Should handle a supersized sequence.", () => {
-    const sequences = new Array();
-    const expectedHeight = 1000;
-    const expectedWidth = 1000;
-    for (let i = 0; i < expectedHeight; ++i) {
-      sequences.push(generateSequence(`big-sequence-${i}`, expectedWidth));
-    }
-    const wrapper = mount(
-      <CanvasAlignmentComponent
-        alignment={new Alignment("My-Alignment", sequences)}
-        alignmentType={AlignmentTypes.AMINOACID}
-        positionsToStyle={PositionsToStyle.ALL}
-        colorScheme={ALL_AMINOACID_COLORSCHEMES[0]}
-        sortBy={SequenceSorter.INPUT}
-      />
-    );
-    const instance = wrapper.instance() as CanvasAlignmentComponent;
-    expect(instance.app).not.toBeUndefined();
-    expect(instance.app.stage.width).toEqual(expectedWidth);
-    expect(instance.app.stage.height).toEqual(expectedHeight);
   });
 });

@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./minimap/MiniMap.scss";
 
-import { CanvasAlignmentComponent } from "../CanvasAlignmentComponent";
+import { CanvasAlignmentComponent } from "./CanvasAlignmentComponent";
 import { Alignment } from "../../common/Alignment";
 import { SequenceSorter } from "../../common/AlignmentSorter";
 import {

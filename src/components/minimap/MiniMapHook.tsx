@@ -177,11 +177,14 @@ export function MiniMap(props: IMiniMapProps) {
                 stageHeight={frameHeight}
               >
                 <CanvasAlignmentTiled
-                  alignment={alignment}
+                  sequences={alignment
+                    .getSequences(sortBy)
+                    .map((seq) => seq.sequence)}
+                  consensusSequence={alignment.getConsensus().sequence}
+                  querySequence={alignment.getQuerySequence().sequence}
                   alignmentType={alignmentStyle.alignmentType}
                   positionsToStyle={alignmentStyle.positionsToStyle}
                   colorScheme={alignmentStyle.colorScheme}
-                  sortBy={sortBy}
                   residueDetail={ResidueStyle.DARK}
                 />
                 {alignmentDetails.initialized !== true ||
