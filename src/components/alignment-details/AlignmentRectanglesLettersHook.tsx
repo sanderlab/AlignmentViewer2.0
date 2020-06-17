@@ -1,17 +1,18 @@
 /**
  * Base hook for pure webgl alignment details.
  */
-import React from "react";
+import React, { useState } from "react";
 import "./AlignmentDetails.scss";
 
-import {
-  AlignmentDetailsViewport,
-  IAlignmentDetailsViewportProps,
-} from "./AlignmentDetailsViewportHook";
 import { AlignmentDetailsLetters } from "./AlignmentDetailsLettersHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
-import { Stage, AppContext } from "@inlet/react-pixi";
+import {
+  AlignmentDetailsViewport2,
+  IAlignmentDetailsViewportProps,
+} from "./AlignmentDetailsViewportComponent";
+
+import { Stage, AppContext, Sprite } from "@inlet/react-pixi";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -20,12 +21,14 @@ import { Provider } from "react-redux";
 import { EnhancedStore } from "@reduxjs/toolkit";
 
 interface IAlignmentRectanglesAndLettersProps {
-  //sequencest to render
+  render: "letters" | "rectangles" | "letters_and_rectangles";
+
+  //sequences to render
   sequences: string[];
   consensusSequence: string;
   querySequence: string;
 
-  //add an additional offset
+  //offsets
   additionalVerticalOffset: number;
 
   //style
@@ -47,13 +50,13 @@ interface IAlignmentRectanglesAndLettersProps {
       };
 }
 
-const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
-
 export function AlignmentRectanglesAndLetters(
   props: IAlignmentRectanglesAndLettersProps
 ) {
   //props
   const {
+    render,
+
     sequences,
     consensusSequence,
     querySequence,
@@ -69,6 +72,42 @@ export function AlignmentRectanglesAndLetters(
 
     viewport,
   } = props;
+
+  /**
+   *
+   *
+   *
+   * Render the background colored rectangles using webgl.
+   * (or not if letter only residue style is selected)
+   *
+   *
+   *
+   */
+  const renderViewport = () => {
+    return (
+      <Stage
+        className="interaction-viewport stage"
+        width={stageWidth}
+        height={stageHeight}
+        options={{ transparent: true }}
+      >
+        <AppContext.Consumer>
+          {(app) => (
+            //entrypoint to the interaction viewport for registering scroll
+            //and zoom and other events. This is not rendering anything, but
+            //is used to calculate interaction changes and report them
+            //back to this component.
+            <Provider store={viewport!.store}>
+              <AlignmentDetailsViewport2
+                app={app}
+                {...viewport!.props}
+              ></AlignmentDetailsViewport2>
+            </Provider>
+          )}
+        </AppContext.Consumer>
+      </Stage>
+    );
+  };
 
   /**
    *
@@ -108,22 +147,6 @@ export function AlignmentRectanglesAndLetters(
             );
           }}
         </AppContext.Consumer>
-        {!viewport ? null : (
-          <AppContext.Consumer>
-            {(app) => (
-              //entrypoint to the interaction viewport for registering scroll
-              //and zoom and other events. This is not rendering anything, but
-              //is used to calculate interaction changes and report them
-              //back to this component.
-              <Provider store={viewport.store}>
-                <AlignmentDetailsViewport
-                  app={app}
-                  {...viewport.props}
-                ></AlignmentDetailsViewport>
-              </Provider>
-            )}
-          </AppContext.Consumer>
-        )}
       </Stage>
     );
   };
@@ -139,21 +162,15 @@ export function AlignmentRectanglesAndLetters(
    */
   const renderLetters = () => {
     return (
-      <div
-        className="sequence-text-holder"
-        style={{
-          top: additionalVerticalOffset,
-        }}
-      >
-        <AlignmentDetailsLetters
-          sequencesToRender={sequences}
-          consensusSequence={consensusSequence}
-          querySequence={querySequence}
-          alignmentStyle={alignmentStyle}
-          fontSize={fontSize}
-          lineHeight={residueHeight}
-        ></AlignmentDetailsLetters>
-      </div>
+      <AlignmentDetailsLetters
+        sequencesToRender={sequences}
+        consensusSequence={consensusSequence}
+        querySequence={querySequence}
+        alignmentStyle={alignmentStyle}
+        fontSize={fontSize}
+        lineHeight={residueHeight}
+        verticalOffset={additionalVerticalOffset}
+      ></AlignmentDetailsLetters>
     );
   };
 
@@ -161,15 +178,20 @@ export function AlignmentRectanglesAndLetters(
    *
    *
    *
-   * Render the entire
+   * Render the entire set of
    *
    *
    *
    */
   return (
     <>
-      {renderRectangles()}
-      {renderLetters()}
+      {render === "rectangles" || render === "letters_and_rectangles"
+        ? renderRectangles()
+        : null}
+      {render === "letters" || render === "letters_and_rectangles"
+        ? renderLetters()
+        : null}
+      {!viewport ? null : renderViewport()}
     </>
   );
 }

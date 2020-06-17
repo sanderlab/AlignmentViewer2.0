@@ -175,5 +175,7 @@ if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
 }
 
 export function stopSafariFromBlockingWindowWheel(cssClass: string) {
-  validCSSScrollClasses.push(cssClass);
+  if (!validCSSScrollClasses.includes(cssClass)) {
+    validCSSScrollClasses.push(cssClass);
+  }
 }

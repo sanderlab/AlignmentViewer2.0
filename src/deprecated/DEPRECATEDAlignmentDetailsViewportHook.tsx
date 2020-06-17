@@ -1,7 +1,10 @@
+//DEPRECATED: this hook wasn't capturing mouse and other events. I spent a while
+//trying to solve, but couldn't figure it out. Switched to standard react pixi component
+//which doesn't have the same issues.
+
 import React, { useEffect, useState } from "react";
 import { Viewport, MovedEventData } from "pixi-viewport";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, setWorldTopOffset } from "../../common/ReduxStore";
+import * as PIXI from "pixi.js";
 
 export interface IAlignmentDetailsViewportProps {
   app: PIXI.Application;
@@ -33,7 +36,7 @@ export function AlignmentDetailsViewport(
 
   let [viewport] = useState<Viewport>(
     new Viewport({
-      noTicker: true,
+      //noTicker: true,
       screenWidth: screenWidth,
       screenHeight: screenHeight,
       worldWidth: worldWidth,

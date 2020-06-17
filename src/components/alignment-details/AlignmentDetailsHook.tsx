@@ -185,6 +185,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           !reduxState.initialized ||
           !alignmentDetailsRef.current ? null : (
             <AlignmentRectanglesAndLetters
+              render="letters_and_rectangles"
               sequences={seqsToRender}
               consensusSequence={alignment.getConsensus().sequence}
               querySequence={alignment.getQuerySequence().sequence}
@@ -206,11 +207,16 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   worldWidth: reduxState.worldWidth,
                   worldHeight: reduxState.worldHeight,
                   worldTopOffset: reduxState.worldTopOffset,
+                  residueWidth: reduxState.residueWidth,
+                  residueHeight: reduxState.residueHeight,
                   viewportMoved: (newWorldTop) => {
                     dispatch(
                       setWorldTopOffset({ id: id, worldTopOffset: newWorldTop })
                     );
                   },
+                  //mouseMoved: (e) => {
+                  //  console.log("mose moved:", e);
+                  //},
                 },
               }}
             ></AlignmentRectanglesAndLetters>

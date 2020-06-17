@@ -73,6 +73,7 @@ export function AlignmentDetailsLetters(props: {
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   fontSize: number;
   lineHeight: number;
+  verticalOffset: number;
 }) {
   const {
     sequencesToRender,
@@ -81,6 +82,7 @@ export function AlignmentDetailsLetters(props: {
     alignmentStyle,
     fontSize,
     lineHeight,
+    verticalOffset,
   } = props;
 
   //each sequence style will be rendered as a single separate div.
@@ -147,26 +149,33 @@ export function AlignmentDetailsLetters(props: {
 
   return (
     <div
-      className="letters-viewport"
-      style={{ fontSize: fontSize, lineHeight: lineHeight + "px" }}
+      className="sequence-text-holder"
+      style={{
+        top: verticalOffset,
+      }}
     >
-      {
-        //output each color separately
-      }
-      {individualColors}
+      <div
+        className="letters-viewport"
+        style={{ fontSize: fontSize, lineHeight: lineHeight + "px" }}
+      >
+        {
+          //output each color separately
+        }
+        {individualColors}
 
-      {
-        // add a hidden interaction element that contains all the displayed sequences
-        // so users can copy paste
-      }
-      <div className={`hidden-residues-for-copy-paste`}>
-        {sequencesToRender.map((seqStr, idx) => {
-          return (
-            <React.Fragment key={idx + seqStr}>
-              {seqStr} <br />
-            </React.Fragment>
-          );
-        })}
+        {
+          // add a hidden interaction element that contains all the displayed sequences
+          // so users can copy paste
+        }
+        <div className={`hidden-residues-for-copy-paste`}>
+          {sequencesToRender.map((seqStr, idx) => {
+            return (
+              <React.Fragment key={idx + seqStr}>
+                {seqStr} <br />
+              </React.Fragment>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
