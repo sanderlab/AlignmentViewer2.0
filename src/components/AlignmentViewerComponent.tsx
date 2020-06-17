@@ -425,6 +425,8 @@ export class AlignmentViewer extends React.Component<
                 startingWidth={mmOptions.startingWidth}
                 verticalHeight={mmOptions.verticalHeight}
                 onClick={this.props.minimapClicked}
+                //sync
+                syncWithAlignmentDetailsId="full-alignment-details"
               />
             </Provider>
           }
@@ -529,6 +531,7 @@ export class AlignmentViewer extends React.Component<
           "details:",
           <Provider store={store}>
             <AlignmentDetails
+              id="full-alignment-details"
               alignment={this.props.alignment}
               alignmentStyle={this.props.style}
               fontSize={

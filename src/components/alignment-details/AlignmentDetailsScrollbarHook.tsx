@@ -9,13 +9,23 @@ import { RootState, setWorldTopOffset } from "../../common/ReduxStore";
 
 interface IWebGLScrollbarProps {
   visible: boolean;
+  worldHeight: number;
+  worldTopOffset: number;
+  width?: number;
+  minHeight?: number;
+  scrollbarMoved(newWorldTop: number): void;
 }
 
 export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
-  const SCROLLBAR_HOLDER_WIDTH = 16;
-  const SCROLLBAR_MIN_HEIGHT = 20;
-  const SCROLLBAR_WIDTH = 10;
-  const SCROLLBAR_OFFSET = (SCROLLBAR_HOLDER_WIDTH - SCROLLBAR_WIDTH) / 2;
+  const {
+    width = 10,
+    minHeight = 20,
+    scrollbarMoved,
+    worldHeight,
+    worldTopOffset,
+  } = props;
+  const SCROLLBAR_HOLDER_WIDTH = width + 6;
+  const SCROLLBAR_OFFSET = (SCROLLBAR_HOLDER_WIDTH - width) / 2;
 
   //ref to div
   const scrollbarHolderRef = useRef<HTMLDivElement>(null);
@@ -36,9 +46,6 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
 
   //redux
   const dispatch = useDispatch();
-  const dimensions = useSelector(
-    (state: RootState) => state.alignmentDetailsSlice
-  );
 
   //sizing - could be passed as a prop, but doing this calculation here in case
   //         the parent does something odd with css and messes up the actual
@@ -73,17 +80,17 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
   //calculate all sizing into one variable
   const scrollbarSizing = (() => {
     const heightInClient = Math.max(
-      SCROLLBAR_MIN_HEIGHT, //min height of scrollbar is 20
+      minHeight, //min height of scrollbar is 20
       scrollbarHolderProportions.height *
-        (scrollbarHolderProportions.height / dimensions.worldHeight)
+        (scrollbarHolderProportions.height / worldHeight)
     );
     const clientToWorldRatio =
       (scrollbarHolderProportions.height - heightInClient) /
-      (dimensions.worldHeight - scrollbarHolderProportions.height);
+      (worldHeight - scrollbarHolderProportions.height);
 
     return {
       heightInClient: heightInClient,
-      currentClientTop: clientToWorldRatio * dimensions.worldTopOffset,
+      currentClientTop: clientToWorldRatio * worldTopOffset,
       clientToWorldRatio: clientToWorldRatio,
     };
   })();
@@ -121,7 +128,7 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
       const newPixelsFromWorldTop = getNewOffsetFromWorldTop(
         delta + dragStartScrollbarTop
       );
-      dispatch(setWorldTopOffset(newPixelsFromWorldTop));
+      scrollbarMoved(newPixelsFromWorldTop);
     }
   };
 
@@ -181,7 +188,7 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
           left: SCROLLBAR_OFFSET,
           top: scrollbarSizing.currentClientTop,
           height: scrollbarSizing.heightInClient,
-          width: SCROLLBAR_WIDTH,
+          width: width,
         }}
         //events for drag start
         onMouseDown={scrollbarDragStart}
@@ -212,7 +219,7 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
           const newPixelsFromWorldTop = getNewOffsetFromWorldTop(
             y - scrollbarSizing.heightInClient / 2 //move to middle of bar
           );
-          dispatch(setWorldTopOffset(newPixelsFromWorldTop));
+          scrollbarMoved(newPixelsFromWorldTop);
         }}
       >
         {renderDragger()}

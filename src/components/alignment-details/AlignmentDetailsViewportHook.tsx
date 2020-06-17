@@ -13,6 +13,8 @@ export interface IAlignmentDetailsViewportProps {
   screenHeight: number;
   worldWidth: number;
   worldHeight: number;
+  worldTopOffset: number;
+  viewportMoved(newWorldTop: number): void;
 }
 
 export function AlignmentDetailsViewport(
@@ -20,18 +22,14 @@ export function AlignmentDetailsViewport(
 ) {
   const {
     app,
+    parentElement,
     screenWidth,
     screenHeight,
     worldWidth,
     worldHeight,
-    parentElement,
+    worldTopOffset,
+    viewportMoved,
   } = props;
-
-  const dispatch = useDispatch();
-
-  const worldTopOffset = useSelector(
-    (state: RootState) => state.alignmentDetailsSlice.worldTopOffset
-  );
 
   let [viewport] = useState<Viewport>(
     new Viewport({
@@ -66,7 +64,7 @@ export function AlignmentDetailsViewport(
   viewport.on("moved", (data: MovedEventData) => {
     const newWorldTop = data.viewport.top;
     if (data.type === "wheel" && newWorldTop !== worldTopOffset) {
-      dispatch(setWorldTopOffset(newWorldTop));
+      viewportMoved(newWorldTop);
       app.render(); //stops flicker on safari.
     }
   });

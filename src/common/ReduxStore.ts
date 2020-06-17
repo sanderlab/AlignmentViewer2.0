@@ -6,7 +6,7 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 
-interface IAlignmentDetailsState {
+export interface IAlignmentDetailsState {
   //a flag to indicate that the state has been fully calculated
   //and has enough info to render the msa
   initialized: boolean;
@@ -52,6 +52,43 @@ interface IAlignmentDetailsState {
 }
 
 /**
+ * Initialize a particular instance of the alignment details. If the id
+ * already exists, nothing is done. If the id doesn't exist in the state
+ * then it is created.
+ * @param id
+ * @param state
+ * @returns a copy of the state
+ */
+const initializeNewIdAsNeeded = (
+  id: string,
+  state: { [id: string]: IAlignmentDetailsState }
+) => {
+  if (id in state === false) {
+    state[id] = {
+      initialized: false,
+
+      worldTopOffset: 0,
+
+      residueHeight: -1,
+      residueWidth: -1,
+      clientHeight: -1,
+      clientWidth: -1,
+      viewportWidth: -1,
+      viewportHeight: -1,
+      worldWidth: -1,
+      worldHeight: -1,
+
+      sequenceCount: -1,
+      sequenceLength: -1,
+
+      seqIdxsToRender: [],
+      scrollingAdditionalVerticalOffset: -1,
+    } as IAlignmentDetailsState;
+  }
+  return state; // no need to copy, nothing done.
+};
+
+/**
  * Calculate details required to render the alignment. Will update
  * the initialized flag to be true if all details are available.
  *
@@ -65,14 +102,16 @@ interface IAlignmentDetailsState {
  *
  *     worldTopOffset (will only be changed if things are out of bounds)
  */
-const attachRenderDetails = (state: IAlignmentDetailsState) => {
+const attachRenderDetails = (
+  particularAlignmentDetailsState: IAlignmentDetailsState
+) => {
   const {
     clientHeight,
     residueWidth,
     residueHeight,
     sequenceCount,
     sequenceLength,
-  } = state;
+  } = particularAlignmentDetailsState;
 
   if (
     clientHeight === -1 ||
@@ -81,36 +120,49 @@ const attachRenderDetails = (state: IAlignmentDetailsState) => {
     sequenceCount === -1 ||
     sequenceLength === -1
   ) {
-    return;
+    return particularAlignmentDetailsState; // no need to copy
   }
 
-  state.initialized = true;
-  state.worldHeight = sequenceCount * residueHeight;
-  state.worldWidth = sequenceLength * residueWidth;
+  particularAlignmentDetailsState.initialized = true;
+  particularAlignmentDetailsState.worldHeight = sequenceCount * residueHeight;
+  particularAlignmentDetailsState.worldWidth = sequenceLength * residueWidth;
 
   if (Math.floor(clientHeight / residueHeight) >= sequenceCount) {
     //all sequences in the alignment will fit into the client - no
     //positioning needed
-    state.worldTopOffset = 0;
-    state.scrollingAdditionalVerticalOffset = 0;
-    state.seqIdxsToRender = [...Array(sequenceCount).keys()];
-    state.viewportWidth = sequenceLength * residueWidth;
-    state.viewportHeight = state.seqIdxsToRender.length * residueHeight;
-    return state;
+    particularAlignmentDetailsState.worldTopOffset = 0;
+    particularAlignmentDetailsState.scrollingAdditionalVerticalOffset = 0;
+    particularAlignmentDetailsState.seqIdxsToRender = [
+      ...Array(sequenceCount).keys(),
+    ];
+    particularAlignmentDetailsState.viewportWidth =
+      sequenceLength * residueWidth;
+    particularAlignmentDetailsState.viewportHeight =
+      particularAlignmentDetailsState.seqIdxsToRender.length * residueHeight;
+    return particularAlignmentDetailsState;
   }
 
-  if (state.worldTopOffset + clientHeight > state.worldHeight) {
-    state.worldTopOffset = state.worldHeight - clientHeight;
+  if (
+    particularAlignmentDetailsState.worldTopOffset + clientHeight >
+    particularAlignmentDetailsState.worldHeight
+  ) {
+    particularAlignmentDetailsState.worldTopOffset =
+      particularAlignmentDetailsState.worldHeight - clientHeight;
   }
-  if (state.worldTopOffset < 0) {
-    state.worldTopOffset = 0; // I don't think this should ever happen, but just in case
+  if (particularAlignmentDetailsState.worldTopOffset < 0) {
+    particularAlignmentDetailsState.worldTopOffset = 0; // I don't think this should ever happen, but just in case
   }
 
-  const topInMiddleOfResidue = state.worldTopOffset % residueHeight !== 0;
+  const topInMiddleOfResidue =
+    particularAlignmentDetailsState.worldTopOffset % residueHeight !== 0;
   const bottomInMiddleOfResidue =
-    (state.worldTopOffset + clientHeight) % residueHeight !== 0;
+    (particularAlignmentDetailsState.worldTopOffset + clientHeight) %
+      residueHeight !==
+    0;
 
-  let firstRenderedSeq = Math.ceil(state.worldTopOffset / residueHeight);
+  let firstRenderedSeq = Math.ceil(
+    particularAlignmentDetailsState.worldTopOffset / residueHeight
+  );
   let numSeqsToRender = Math.floor(clientHeight / residueHeight);
   if (topInMiddleOfResidue && firstRenderedSeq - 1 >= 0) {
     numSeqsToRender += 1;
@@ -123,97 +175,99 @@ const attachRenderDetails = (state: IAlignmentDetailsState) => {
     numSeqsToRender += 1;
   }
 
-  state.scrollingAdditionalVerticalOffset =
-    -1 * (state.worldTopOffset % residueHeight);
-  state.seqIdxsToRender = [...Array(numSeqsToRender).keys()].map(
-    (zeroIdx) => zeroIdx + firstRenderedSeq
-  );
+  particularAlignmentDetailsState.scrollingAdditionalVerticalOffset =
+    -1 * (particularAlignmentDetailsState.worldTopOffset % residueHeight);
+  particularAlignmentDetailsState.seqIdxsToRender = [
+    ...Array(numSeqsToRender).keys(),
+  ].map((zeroIdx) => zeroIdx + firstRenderedSeq);
 
-  state.viewportWidth = sequenceLength * residueWidth;
-  state.viewportHeight = state.seqIdxsToRender.length * residueHeight;
+  particularAlignmentDetailsState.viewportWidth = sequenceLength * residueWidth;
+  particularAlignmentDetailsState.viewportHeight =
+    particularAlignmentDetailsState.seqIdxsToRender.length * residueHeight;
 
-  return state;
+  return particularAlignmentDetailsState;
 };
 
 export const alignmentDetailsSlice = createSlice({
   name: "alignment-details",
-  initialState: {
-    initialized: false,
+  initialState: {} as { [id: string]: IAlignmentDetailsState },
 
-    worldTopOffset: 0,
-
-    residueHeight: -1,
-    residueWidth: -1,
-    clientHeight: -1,
-    clientWidth: -1,
-    viewportWidth: -1,
-    viewportHeight: -1,
-    worldWidth: -1,
-    worldHeight: -1,
-
-    sequenceCount: -1,
-    sequenceLength: -1,
-
-    seqIdxsToRender: [],
-    scrollingAdditionalVerticalOffset: -1,
-  } as IAlignmentDetailsState,
   reducers: {
     setAlignmentDetails: (
       state,
       action: PayloadAction<{
+        id: string;
         sequenceCount: number;
         sequenceLength: number;
       }>
     ) => {
-      state.sequenceCount = action.payload.sequenceCount;
-      state.sequenceLength = action.payload.sequenceLength;
-      attachRenderDetails(state);
+      const { id, sequenceCount, sequenceLength } = action.payload;
+      state = initializeNewIdAsNeeded(id, state);
+      state[id].sequenceCount = sequenceCount;
+      state[id].sequenceLength = sequenceLength;
+      state[id] = attachRenderDetails(state[id]);
+      return state;
     },
 
     setResidueDimensions: (
       state,
       action: PayloadAction<{
+        id: string;
         residueWidth: number;
         residueHeight: number;
       }>
     ) => {
-      const startResidueTop = state.worldTopOffset / state.residueHeight;
-      state.residueHeight = action.payload.residueHeight;
-      state.residueWidth = action.payload.residueWidth;
+      const { id, residueWidth, residueHeight } = action.payload;
+      state = initializeNewIdAsNeeded(id, state);
+      const startResidueTop =
+        state[id].worldTopOffset / state[id].residueHeight;
+      state[id].residueHeight = residueHeight;
+      state[id].residueWidth = residueWidth;
 
       //try to maintain the same residue at the top
-      state.worldTopOffset = startResidueTop * action.payload.residueHeight;
-      attachRenderDetails(state);
+      state[id].worldTopOffset = startResidueTop * residueHeight;
+
+      state[id] = attachRenderDetails(state[id]);
+      return state;
     },
 
     setViewportDimensions: (
       state,
       action: PayloadAction<{
+        id: string;
         clientWidth: number;
         clientHeight: number;
       }>
     ) => {
-      state.clientWidth = action.payload.clientWidth;
-      state.clientHeight = action.payload.clientHeight;
-      attachRenderDetails(state);
+      const { id, clientWidth, clientHeight } = action.payload;
+      state = initializeNewIdAsNeeded(id, state);
+      state[id].clientWidth = clientWidth;
+      state[id].clientHeight = clientHeight;
+      state[id] = attachRenderDetails(state[id]);
+      return state;
     },
 
-    setWorldTopOffset: (state, action: PayloadAction<number>) => {
-      state.worldTopOffset = action.payload;
-      attachRenderDetails(state);
+    setWorldTopOffset: (
+      state,
+      action: PayloadAction<{ id: string; worldTopOffset: number }>
+    ) => {
+      const { id, worldTopOffset } = action.payload;
+      state = initializeNewIdAsNeeded(id, state);
+      state[id].worldTopOffset = worldTopOffset;
+      state[id] = attachRenderDetails(state[id]);
+      return state;
     },
 
-    setSequenceTopOffset: (state, action: PayloadAction<number>) => {
-      state.worldTopOffset = action.payload * state.residueHeight;
-      attachRenderDetails(state);
+    setSequenceTopOffset: (
+      state,
+      action: PayloadAction<{ id: string; sequenceTopOffset: number }>
+    ) => {
+      const { id, sequenceTopOffset } = action.payload;
+      state = initializeNewIdAsNeeded(id, state);
+      state[id].worldTopOffset = sequenceTopOffset * state[id].residueHeight;
+      state[id] = attachRenderDetails(state[id]);
+      return state;
     },
-  },
-  extraReducers: (builder) => {
-    //builder.addCase(minimapTopOffsetChanged, (state, action) => {
-    //  const worldTopOffset = action.payload * state.residueHeight;
-    //  state.firstFullyVisibleSequenceIdx = action.payload;
-    //  state.visibleSequenceOffset = 0;
-    //});
   },
 });
 
@@ -228,35 +282,6 @@ export const {
 /*
  *
  *
- * WebGL detailed alignment view viewport location
- *
- *
- */
-
-interface WebGLViewportState {
-  pixelsFromWorldTop: number;
-}
-
-const initialWebGLViewportState: WebGLViewportState = {
-  pixelsFromWorldTop: 0,
-};
-
-export const webGLViewportSlice = createSlice({
-  name: "webgl-viewport",
-  initialState: initialWebGLViewportState,
-  reducers: {
-    // Use the PayloadAction type to declare the contents of `action.payload`
-    setPixelsFromWorldTop: (state, action: PayloadAction<number>) => {
-      state.pixelsFromWorldTop = action.payload;
-    },
-  },
-});
-
-export const { setPixelsFromWorldTop } = webGLViewportSlice.actions;
-
-/*
- *
- *
  * main store
  *
  *
@@ -264,8 +289,6 @@ export const { setPixelsFromWorldTop } = webGLViewportSlice.actions;
 
 export const store = configureStore({
   reducer: {
-    webglViewport: webGLViewportSlice.reducer,
-    //alignmentSlice: alignmentSlice.reducer,
     alignmentDetailsSlice: alignmentDetailsSlice.reducer,
   },
 });

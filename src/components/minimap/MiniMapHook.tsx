@@ -31,13 +31,21 @@ export interface IMiniMapProps {
   resizable?: "none" | "horizontal";
   verticalHeight?: "div" | "window";
 
+  //???
+  syncWithAlignmentDetailsId?: string;
+
   //events for parents
   onClick?(mousePosition: IPosition): void;
   //onIndicatorDrag?(indicatorBounds: IRectangle, mousePosition: IPosition): void;
 }
 
 export function MiniMap(props: IMiniMapProps) {
-  const { alignment, sortBy, alignmentStyle } = props;
+  const {
+    alignment,
+    sortBy,
+    alignmentStyle,
+    syncWithAlignmentDetailsId,
+  } = props;
 
   //default props
   const alignHorizontal: IMiniMapProps["alignHorizontal"] = props.alignHorizontal
@@ -67,8 +75,10 @@ export function MiniMap(props: IMiniMapProps) {
 
   //redux
   const dispatch = useDispatch();
-  const alignmentDetails = useSelector(
-    (state: RootState) => state.alignmentDetailsSlice
+  const syncedAlignmentDetails = useSelector((state: RootState) =>
+    !syncWithAlignmentDetailsId
+      ? undefined
+      : state.alignmentDetailsSlice[syncWithAlignmentDetailsId]
   );
 
   //sizing - dynamically update state when div changes size
@@ -164,11 +174,18 @@ export function MiniMap(props: IMiniMapProps) {
                 numColumns={alignment.getMaxSequenceLength()}
                 numRows={alignment.getSequenceCount()}
                 onMouseClick={(mousePosition) => {
-                  const newY = Math.round(
-                    mousePosition.y -
-                      alignmentDetails.seqIdxsToRender.length / 2
-                  );
-                  dispatch(setSequenceTopOffset(newY));
+                  if (syncedAlignmentDetails) {
+                    const newY = Math.round(
+                      mousePosition.y -
+                        syncedAlignmentDetails.seqIdxsToRender.length / 2
+                    );
+                    dispatch(
+                      setSequenceTopOffset({
+                        id: syncWithAlignmentDetailsId!,
+                        sequenceTopOffset: newY,
+                      })
+                    );
+                  }
                   if (props.onClick) {
                     props.onClick(mousePosition);
                   }
@@ -187,19 +204,20 @@ export function MiniMap(props: IMiniMapProps) {
                   colorScheme={alignmentStyle.colorScheme}
                   residueDetail={ResidueStyle.DARK}
                 />
-                {alignmentDetails.initialized !== true ||
-                alignmentDetails.seqIdxsToRender.length < 1 ||
-                alignmentDetails.sequenceCount <=
-                  alignmentDetails.seqIdxsToRender.length ? (
+                {!syncedAlignmentDetails ||
+                syncedAlignmentDetails.initialized !== true ||
+                syncedAlignmentDetails.seqIdxsToRender.length < 1 ||
+                syncedAlignmentDetails.sequenceCount <=
+                  syncedAlignmentDetails.seqIdxsToRender.length ? (
                   <></>
                 ) : (
                   <MinimapPositionHighlighter
                     fillColor={0xff0000}
                     fillAlpha={dragging ? 0.75 : 0.25}
                     x={0}
-                    y={alignmentDetails.seqIdxsToRender[0]}
-                    width={alignmentDetails.sequenceLength}
-                    height={alignmentDetails.seqIdxsToRender.length}
+                    y={syncedAlignmentDetails.seqIdxsToRender[0]}
+                    width={syncedAlignmentDetails.sequenceLength}
+                    height={syncedAlignmentDetails.seqIdxsToRender.length}
                     dragFunctions={{
                       onDragStart: (e, parent) => {
                         const startPosition = e.data.getLocalPosition(parent);
@@ -208,25 +226,31 @@ export function MiniMap(props: IMiniMapProps) {
                           left: startPosition.x - 0,
                           top:
                             startPosition.y -
-                            alignmentDetails.seqIdxsToRender[0],
+                            syncedAlignmentDetails.seqIdxsToRender[0],
                         });
                       },
                       onDragEnd: (e, parent) => {
                         setDragging(false);
                         const finalPosition = e.data.getLocalPosition(parent);
                         dispatch(
-                          setSequenceTopOffset(
-                            Math.round(finalPosition.y - dragStartOffset!.top)
-                          )
+                          setSequenceTopOffset({
+                            id: syncWithAlignmentDetailsId!,
+                            sequenceTopOffset: Math.round(
+                              finalPosition.y - dragStartOffset!.top
+                            ),
+                          })
                         );
                       },
                       onDragMove: (e, parent) => {
                         if (dragging) {
                           const newPosition = e.data.getLocalPosition(parent);
                           dispatch(
-                            setSequenceTopOffset(
-                              Math.round(newPosition.y - dragStartOffset!.top)
-                            )
+                            setSequenceTopOffset({
+                              id: syncWithAlignmentDetailsId!,
+                              sequenceTopOffset: Math.round(
+                                newPosition.y - dragStartOffset!.top
+                              ),
+                            })
                           );
                         }
                       },
