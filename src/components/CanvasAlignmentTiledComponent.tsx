@@ -10,6 +10,7 @@ import {
   ResidueStyle,
 } from "../common/MolecularStyles";
 import { SequenceSorter } from "../common/AlignmentSorter";
+import { generateUUIDv4 } from "../common/Utils";
 
 interface ITiledImages {
   targetTileWidth: number;
@@ -132,7 +133,16 @@ export class CanvasAlignmentTiled extends React.Component<
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
                   ${residueDetail.key}_
-                  ${sequences.join("")}`}
+                  ${
+                    //outputting all sequences leads to huge memory usage!
+                    //outputting ids may cause duplicates if changes sequences
+                    //TODO: modify to return same value based on seq - but shorter. unclear how.
+                    //   maybe "uuid-by-string" library (https://www.npmjs.com/package/uuid-by-string?
+                    //   or add uuid to ISequence an output here (probably not as one could
+                    //   presumably cut up sequences before, e.g., if we don't output
+                    //   complete sequences, but only viewport sequences, in the future?
+                    generateUUIDv4() /*sequences.map((seq, idx) => idx).join("")*/
+                  }`}
             roundPixels={true}
           ></Sprite>
         ))}

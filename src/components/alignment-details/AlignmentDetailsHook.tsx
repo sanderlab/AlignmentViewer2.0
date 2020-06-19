@@ -11,8 +11,6 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 import { AlignmentDetailsScrollbar } from "./AlignmentDetailsScrollbarHook";
 import { AlignmentRectanglesAndLetters } from "./AlignmentRectanglesLettersHook";
 
-import { Alignment } from "../../common/Alignment";
-import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -29,12 +27,14 @@ import {
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 
 export interface IAlignmentDetailsProps {
-  alignment: Alignment;
+  id: string;
+  className?: string;
+  sequences: string[];
+  consensusSequence: string;
+  querySequence: string;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  sortBy: SequenceSorter;
   residueWidth: number;
   fontSize: number;
-  id: string;
 
   scrollerLoaded: (e: HTMLElement) => void;
   scrollerUnloaded: (e: HTMLElement) => void;
@@ -45,10 +45,12 @@ const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //props
   const {
-    alignment,
-    alignmentStyle,
     id,
-    sortBy,
+    className,
+    sequences,
+    consensusSequence,
+    querySequence,
+    alignmentStyle,
     residueWidth,
     fontSize,
   } = props;
@@ -130,20 +132,21 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     );
   }, [residueWidth]);
 
+  const sequenceCount = sequences.length;
+  const sequenceLength = sequenceCount > 0 ? sequences[0].length : 0;
   useEffect(() => {
     dispatch(
       setAlignmentDetails({
         id: id,
-        sequenceCount: alignment.getSequenceCount(),
-        sequenceLength: alignment.getMaxSequenceLength(),
+        sequenceCount: sequenceCount,
+        sequenceLength: sequenceLength,
       })
     );
-  }, [alignment]);
+  }, [sequenceCount, sequenceLength]);
 
-  const sortedSeqs = alignment.getSequences(sortBy);
   const disableScrolling = !reduxState
     ? true
-    : alignment.getSequenceCount() <= reduxState.seqIdxsToRender.length;
+    : sequenceCount <= reduxState.seqIdxsToRender.length;
 
   //when switching alignments, there is a render with stale data as the
   //redux store doesn't recalculate until setAlignmentDetails is called
@@ -151,14 +154,16 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //indicies - if these indicies are invalid, set them to be empty.
   const seqIdxsToRender =
     !reduxState ||
-    alignment.getMaxSequenceLength() !== reduxState.sequenceLength ||
-    alignment.getSequenceCount() !== reduxState.sequenceCount
+    sequenceLength !== reduxState.sequenceLength ||
+    sequenceCount !== reduxState.sequenceCount
       ? []
       : reduxState.seqIdxsToRender;
 
   const seqsToRender = seqIdxsToRender.map((seqIdx) => {
-    return sortedSeqs[seqIdx].sequence;
+    return sequences[seqIdx];
   });
+
+  const additionalClassName = className ? " " + className : "";
 
   /**
    *
@@ -172,7 +177,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   return (
     <Provider store={store}>
       <div
-        className="alignment-details-holder"
+        className={`alignment-details-holder${additionalClassName}`}
         onMouseEnter={() => {
           setMouseHovering(true);
         }}
@@ -187,8 +192,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
             <AlignmentRectanglesAndLetters
               render="letters_and_rectangles"
               sequences={seqsToRender}
-              consensusSequence={alignment.getConsensus().sequence}
-              querySequence={alignment.getQuerySequence().sequence}
+              consensusSequence={consensusSequence}
+              querySequence={querySequence}
               additionalVerticalOffset={
                 reduxState.scrollingAdditionalVerticalOffset
               }
@@ -202,7 +207,9 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                 store: store,
                 props: {
                   parentElement: alignmentDetailsRef.current,
-                  screenWidth: reduxState.clientWidth,
+                  //!important: width is rendered fully - if set to clientWidth, then the viewport
+                  //doesn't notify of scrolling on the rendered-but-hidden area (right side)
+                  screenWidth: reduxState.worldWidth,
                   screenHeight: reduxState.clientHeight,
                   worldWidth: reduxState.worldWidth,
                   worldHeight: reduxState.worldHeight,

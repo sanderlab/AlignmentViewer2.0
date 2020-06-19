@@ -19,9 +19,6 @@ import {
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
 import { MiniMap } from "./minimap/MiniMapHook";
-import { AceMultipleSequenceAlignmentComponent } from "./ace/AceMultipleSequenceAlignmentComponent";
-import { AceConsensusSequenceComponent } from "./ace/AceConsensusSequenceComponent";
-import { AceQuerySequenceComponent } from "./ace/AceQuerySequenceComponent";
 import { AceTextualRulerComponent } from "./ace/AceTextualRulerComponent";
 import { AceEditorComponent } from "./ace/AceEditorComponent";
 import { IMiniMapProps } from "./minimap/MiniMapHook";
@@ -91,8 +88,6 @@ const defaultProps = {
 };
 
 enum ACE_EDITOR_IDS {
-  QUERY = "QUERY",
-  CONSENSUS = "CONSENSUS",
   POSITIONAL_RULER = "POSITIONAL_RULER",
   MSA_SEQUENCES = "MSA_SEQUENCES",
   MSA_IDS = "MSA_IDS",
@@ -272,59 +267,6 @@ export class AlignmentViewer extends React.Component<
     );
   };
 
-  protected renderConsensusQueryBox = () => (
-    <div className="consensusseq-box">
-      <AceConsensusSequenceComponent
-        alignment={this.props.alignment}
-        fontSize={
-          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
-        }
-        classNames={[
-          "ace-consensusseq",
-          this.props.style.residueDetail.className,
-          this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
-          this.props.style.colorScheme.className,
-        ].join(" ")}
-        editorLoaded={(editor, parentElem) => {
-          this.aceEditorLoaded(
-            ACE_EDITOR_IDS.CONSENSUS,
-            editor,
-            parentElem,
-            ScrollType.horizontal
-          );
-        }}
-      ></AceConsensusSequenceComponent>
-    </div>
-  );
-
-  protected renderQuerySeqBox = () => (
-    <div className="queryseq-box">
-      <AceQuerySequenceComponent
-        alignment={this.props.alignment}
-        fontSize={
-          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
-        }
-        sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
-        classNames={[
-          "ace-queryseq",
-          this.props.style.residueDetail.className,
-          this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
-          this.props.style.colorScheme.className,
-        ].join(" ")}
-        editorLoaded={(editor, parentElem) => {
-          this.aceEditorLoaded(
-            ACE_EDITOR_IDS.QUERY,
-            editor,
-            parentElem,
-            ScrollType.horizontal
-          );
-        }}
-      ></AceQuerySequenceComponent>
-    </div>
-  );
-
   protected renderPositionBox = () => (
     <div className="position-box">
       {
@@ -344,33 +286,6 @@ export class AlignmentViewer extends React.Component<
           }}
         />
       }
-    </div>
-  );
-
-  protected renderAlignmentBox = () => (
-    <div className="alignment-box">
-      <AceMultipleSequenceAlignmentComponent
-        alignment={this.props.alignment}
-        fontSize={
-          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
-        }
-        sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
-        classNames={[
-          "ace-alignment",
-          this.props.style.residueDetail.className,
-          this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
-          this.props.style.colorScheme.className,
-        ].join(" ")}
-        editorLoaded={(editor, parentElem) => {
-          this.aceEditorLoaded(
-            ACE_EDITOR_IDS.MSA_SEQUENCES,
-            editor,
-            parentElem,
-            ScrollType.both
-          );
-        }}
-      ></AceMultipleSequenceAlignmentComponent>
     </div>
   );
 
@@ -507,7 +422,35 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-consensus-seq-holder",
               "Consensus:",
-              this.renderConsensusQueryBox()
+
+              <Provider store={store}>
+                <AlignmentDetails
+                  id="consensus-alignment-details"
+                  className="consensus-alignment-details"
+                  sequences={[this.props.alignment.getConsensus().sequence]}
+                  consensusSequence={
+                    this.props.alignment.getConsensus().sequence
+                  }
+                  querySequence={
+                    this.props.alignment.getQuerySequence().sequence
+                  }
+                  alignmentStyle={this.props.style}
+                  fontSize={
+                    this.props.zoomLevel
+                      ? this.props.zoomLevel
+                      : defaultProps.zoomLevel
+                  }
+                  residueWidth={residueWidth}
+                  scrollerLoaded={(scroller) => {
+                    this.horizontalScrollSync.registerElementScroller(scroller);
+                  }}
+                  scrollerUnloaded={(scroller) => {
+                    this.horizontalScrollSync.unRegisterElementScroller(
+                      scroller
+                    );
+                  }}
+                />
+              </Provider>
             )}
 
         {!showQuery
@@ -515,7 +458,35 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-query-seq-holder",
               "Query:",
-              this.renderQuerySeqBox()
+
+              <Provider store={store}>
+                <AlignmentDetails
+                  id="query-alignment-details"
+                  className="query-alignment-details"
+                  sequences={[this.props.alignment.getQuerySequence().sequence]}
+                  consensusSequence={
+                    this.props.alignment.getConsensus().sequence
+                  }
+                  querySequence={
+                    this.props.alignment.getQuerySequence().sequence
+                  }
+                  alignmentStyle={this.props.style}
+                  fontSize={
+                    this.props.zoomLevel
+                      ? this.props.zoomLevel
+                      : defaultProps.zoomLevel
+                  }
+                  residueWidth={residueWidth}
+                  scrollerLoaded={(scroller) => {
+                    this.horizontalScrollSync.registerElementScroller(scroller);
+                  }}
+                  scrollerUnloaded={(scroller) => {
+                    this.horizontalScrollSync.unRegisterElementScroller(
+                      scroller
+                    );
+                  }}
+                />
+              </Provider>
             )}
 
         {!showRuler
@@ -532,7 +503,14 @@ export class AlignmentViewer extends React.Component<
           <Provider store={store}>
             <AlignmentDetails
               id="full-alignment-details"
-              alignment={this.props.alignment}
+              className="full-alignment-details"
+              sequences={this.props.alignment
+                .getSequences(
+                  this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
+                )
+                .map((iseq) => iseq.sequence)}
+              consensusSequence={this.props.alignment.getConsensus().sequence}
+              querySequence={this.props.alignment.getQuerySequence().sequence}
               alignmentStyle={this.props.style}
               fontSize={
                 this.props.zoomLevel
@@ -540,9 +518,6 @@ export class AlignmentViewer extends React.Component<
                   : defaultProps.zoomLevel
               }
               residueWidth={residueWidth}
-              sortBy={
-                this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
-              }
               scrollerLoaded={(scroller) => {
                 this.horizontalScrollSync.registerElementScroller(scroller);
               }}

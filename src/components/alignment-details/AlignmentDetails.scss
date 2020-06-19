@@ -1,5 +1,13 @@
 /** WebGLAlignmentComponent.scss */
 
+// make scrollbar transparent on query and consensus sequences
+.alignment-details-holder.query-alignment-details .viewport::-webkit-scrollbar,
+.alignment-details-holder.consensus-alignment-details
+  .viewport::-webkit-scrollbar {
+  background: transparent;
+  height: 0;
+}
+
 .alignment-details-holder .viewport {
   overflow-x: auto;
   overflow-y: hidden;
@@ -32,6 +40,13 @@
       position: absolute;
       top: 0;
       left: 0;
+
+      //disallow selection: https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
     .hidden-residues-for-copy-paste {
       position: absolute;
