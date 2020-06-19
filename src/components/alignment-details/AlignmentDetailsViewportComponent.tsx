@@ -27,10 +27,10 @@ export interface IAlignmentDetailsViewportProps {
   clicked?(event: IMouseLocation): void;
 }
 
-export const AlignmentDetailsViewport2 = PixiComponent<
+export const AlignmentDetailsViewport = PixiComponent<
   IAlignmentDetailsViewportProps,
   any
->("AlignmentDetailsViewport2", {
+>("AlignmentDetailsViewport", {
   create(props: IAlignmentDetailsViewportProps) {
     const {
       app,

@@ -81,7 +81,7 @@ export class CanvasAlignmentComponent extends React.Component<
         {
           x: 0,
           y: Math.round(newMousePosition.y - dragPositions!.startOffset.top),
-          width: alignment.getMaxSequenceLength(),
+          width: alignment.getSequenceLength(),
           height: 0,
         },
         newMousePosition
@@ -109,7 +109,7 @@ export class CanvasAlignmentComponent extends React.Component<
     const { dragging, dragPositions } = this.state;
 
     const numSequences = alignment.getSequenceCount();
-    const maxSeqLength = alignment.getMaxSequenceLength();
+    const maxSeqLength = alignment.getSequenceLength();
 
     PIXI.utils.skipHello();
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST; //

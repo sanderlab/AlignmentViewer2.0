@@ -37,7 +37,7 @@ export class AceTextualRulerComponent extends AceEditorComponent<
 
   getText(): string {
     return AceTextualRulerComponent.generateTextualRuler(
-      this.props.alignment.getMaxSequenceLength()
+      this.props.alignment.getSequenceLength()
     );
   }
   getEditorMode() {

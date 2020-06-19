@@ -382,7 +382,7 @@ export class Alignment {
    * during stat generation.
    * @returns the length of the largest sequence in this alignment
    */
-  getMaxSequenceLength(): number {
+  getSequenceLength(): number {
     return this.maxSequenceLength;
   }
 

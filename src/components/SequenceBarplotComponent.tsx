@@ -146,7 +146,7 @@ export class SequenceBarplotComponent extends React.Component<
         al.getAllUpperAlphaLettersInAlignmentSorted()
       );
 
-      const maxSeqLength = al.getMaxSequenceLength();
+      const maxSeqLength = al.getSequenceLength();
       for (let i = 0; i < maxSeqLength; i++) {
         const singlePlc = plc.get(i);
         if (!singlePlc || Object.keys(singlePlc).length === 0) {
@@ -216,7 +216,7 @@ export class SequenceBarplotComponent extends React.Component<
       const qk = al.getGlobalAlphaLetterCounts(true, allLetters);
 
       const toReturn: ISingleBarDetails[] = [];
-      const maxSeqLength = al.getMaxSequenceLength();
+      const maxSeqLength = al.getSequenceLength();
       for (let i = 0; i < maxSeqLength; i++) {
         const positionsPk = pk.get(i);
         if (!positionsPk || Object.keys(positionsPk).length === 0) {
@@ -253,7 +253,7 @@ export class SequenceBarplotComponent extends React.Component<
     },
     getBars: (al) => {
       const toReturn: ISingleBarDetails[] = [];
-      const maxSeqLength = al.getMaxSequenceLength();
+      const maxSeqLength = al.getSequenceLength();
       for (let i = 0; i < maxSeqLength; i++) {
         const gapCount = al.getGapCountAtColumn(i);
         toReturn.push({
@@ -523,7 +523,7 @@ export class SequenceBarplotComponent extends React.Component<
     const { alignment, positionWidth, height } = this.props;
     const { hoverKey } = this.state;
 
-    const maxSeqLength = alignment.getMaxSequenceLength();
+    const maxSeqLength = alignment.getSequenceLength();
     const totalWidth = positionWidth * maxSeqLength;
 
     const barsObj = this.getBars();

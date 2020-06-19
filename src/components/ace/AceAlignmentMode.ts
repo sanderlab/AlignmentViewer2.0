@@ -54,10 +54,10 @@ export function defineNewAlignmentMode(mode: string, alignment: Alignment) {
         //      memory footprint drastically.
         const re = /./;
         const statePrefix = "p";
-        for (let i = 0; i < alignment.getMaxSequenceLength(); i++) {
+        for (let i = 0; i < alignment.getSequenceLength(); i++) {
           const stateName = i === 0 ? "start" : statePrefix + i;
           const nextStateName =
-            i === alignment.getMaxSequenceLength() - 1
+            i === alignment.getSequenceLength() - 1
               ? "start"
               : statePrefix + (i + 1);
 

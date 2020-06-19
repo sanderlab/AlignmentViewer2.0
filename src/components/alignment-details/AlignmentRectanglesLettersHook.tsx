@@ -8,7 +8,7 @@ import { AlignmentDetailsLetters } from "./AlignmentDetailsLettersHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
 import {
-  AlignmentDetailsViewport2,
+  AlignmentDetailsViewport,
   IAlignmentDetailsViewportProps,
 } from "./AlignmentDetailsViewportComponent";
 
@@ -98,10 +98,10 @@ export function AlignmentRectanglesAndLetters(
             //is used to calculate interaction changes and report them
             //back to this component.
             <Provider store={viewport!.store}>
-              <AlignmentDetailsViewport2
+              <AlignmentDetailsViewport
                 app={app}
                 {...viewport!.props}
-              ></AlignmentDetailsViewport2>
+              ></AlignmentDetailsViewport>
             </Provider>
           )}
         </AppContext.Consumer>

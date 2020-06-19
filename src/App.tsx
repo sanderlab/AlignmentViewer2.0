@@ -154,7 +154,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const alignmentDescription = alignment ? (
       <div>
         <h3>{alignment.getName()}</h3>
-        <h4>{`${alignment.getSequenceCount()} sequences (rows) and ${alignment.getMaxSequenceLength()} positions (columns) `}</h4>
+        <h4>{`${alignment.getSequenceCount()} sequences (rows) and ${alignment.getSequenceLength()} positions (columns) `}</h4>
       </div>
     ) : (
       <></>

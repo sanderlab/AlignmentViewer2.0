@@ -171,7 +171,7 @@ export function MiniMap(props: IMiniMapProps) {
                 //     height: rowHighlighterHeight,
                 //   }
                 //}
-                numColumns={alignment.getMaxSequenceLength()}
+                numColumns={alignment.getSequenceLength()}
                 numRows={alignment.getSequenceCount()}
                 onMouseClick={(mousePosition) => {
                   if (syncedAlignmentDetails) {
