@@ -1,7 +1,4 @@
 /** AlignmentViewer.scss */
-$annotationContentRightGapSize: 20px;
-$aceEditorLineHeight: 20px;
-
 .alignment-viewer.annotation-closed .av-widget .av-annotation {
   display: none;
 }
@@ -19,11 +16,7 @@ $aceEditorLineHeight: 20px;
   .av-widget.av-consensus-seq-holder,
   .av-widget.av-query-seq-holder,
   .av-widget.av-position-indicator-holder {
-    height: $aceEditorLineHeight;
-
-    .ace_editor {
-      line-height: $aceEditorLineHeight;
-    }
+    height: 24px; //default, but this is set as a style
   }
 
   //the main ace editor
@@ -34,37 +27,27 @@ $aceEditorLineHeight: 20px;
 
   .av-widget {
     display: flex;
-    margin: 4px 8px;
+    margin: 2px 4px;
 
     .av-annotation,
     .av-content {
       display: flex;
-      //overflow: auto;
     }
     .av-annotation {
       flex: 0 1 15%;
       justify-content: flex-end;
       align-items: center;
+
       // bit of a hack to put space between annotation and content
-      margin-right: $annotationContentRightGapSize;
+      margin-right: 12px;
       font-weight: bold;
-      text-align: right;
-      position: relative;
+      font-size: 14px; //default, but this is set as a style
     }
 
     .av-content {
       flex: 1 0 85%; //annotations take up 15%
       position: relative;
       align-items: center;
-      overflow: hidden;
-    }
-
-    .ace_editor {
-      position: absolute;
-      top: 0px;
-      left: 0px;
-      right: 0px;
-      bottom: 0px;
       overflow: hidden;
     }
   }

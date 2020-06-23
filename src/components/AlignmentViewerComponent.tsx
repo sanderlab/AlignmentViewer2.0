@@ -1,10 +1,10 @@
 import React from "react";
 import "./AlignmentViewer.scss";
-import { Ace } from "ace-builds";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
 import { ScrollSync, ScrollType } from "../common/ScrollSync";
 import { store } from "../common/ReduxStore";
+import { PositionalAxis } from "./PositionalAxisHook";
 import {
   SequenceLogoComponent,
   LOGO_TYPES,
@@ -19,8 +19,6 @@ import {
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
 import { MiniMap } from "./minimap/MiniMapHook";
-import { AceTextualRulerComponent } from "./ace/AceTextualRulerComponent";
-import { AceEditorComponent } from "./ace/AceEditorComponent";
 import { IMiniMapProps } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { Provider } from "react-redux";
@@ -87,14 +85,7 @@ const defaultProps = {
   ] as undefined | IBarplotExposedProps[],
 };
 
-enum ACE_EDITOR_IDS {
-  POSITIONAL_RULER = "POSITIONAL_RULER",
-  MSA_SEQUENCES = "MSA_SEQUENCES",
-  MSA_IDS = "MSA_IDS",
-}
-
 interface IAlignmentViewerState {
-  aceEditors: { [editorId: string]: Ace.Editor };
   msaEditorVewport?: {
     numberVisibleRows: number;
     firstFullyVisibleRow: number;
@@ -103,6 +94,9 @@ interface IAlignmentViewerState {
 
   windowWidth: number;
 }
+
+const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
+const DEFAULT_SINGLE_SEQUENCE_HEIGHT = 20;
 
 export class AlignmentViewer extends React.Component<
   IAlignmentViewerProps,
@@ -117,71 +111,13 @@ export class AlignmentViewer extends React.Component<
     super(props);
 
     this.state = {
-      aceEditors: {},
       windowWidth: window.innerWidth,
     };
 
     this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
     this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
 
-    this.aceEditorLoaded = this.aceEditorLoaded.bind(this);
     this.windowDimensionsUpdated = this.windowDimensionsUpdated.bind(this);
-  }
-
-  /**
-   * Handle new ace editor. Add it to scroll sync.
-   * @param id
-   * @param editor
-   * @param parentElem
-   * @param scrollSyncDirection
-   */
-  private aceEditorLoaded(
-    id: ACE_EDITOR_IDS,
-    editor: Ace.Editor,
-    parentElem: HTMLDivElement,
-    scrollSyncDirection: ScrollType
-  ) {
-    if (
-      scrollSyncDirection === ScrollType.horizontal ||
-      scrollSyncDirection === ScrollType.both
-    ) {
-      this.horizontalScrollSync.registerAceScroller(editor, parentElem);
-    }
-    if (
-      scrollSyncDirection === ScrollType.vertical ||
-      scrollSyncDirection === ScrollType.both
-    ) {
-      this.verticalScrollSync.registerAceScroller(editor, parentElem);
-    }
-
-    this.setState((startState) => {
-      const newAceEditors = { ...startState.aceEditors };
-      newAceEditors[id] = editor;
-
-      return {
-        aceEditors: newAceEditors,
-      };
-    });
-
-    //track visible rows to show in canvas MSA
-    if (id === ACE_EDITOR_IDS.MSA_SEQUENCES) {
-      editor.renderer.on("afterRender", () => {
-        // BREAKS LOGO, rerenders everything below and kills performance. React lifecycle stuff.
-        //setTimeout(() => {
-
-        this.setState({
-          msaEditorVewport: {
-            numberVisibleRows:
-              editor.renderer.getLastFullyVisibleRow() -
-              editor.renderer.getFirstFullyVisibleRow() +
-              1,
-            firstFullyVisibleRow: editor.renderer.getFirstFullyVisibleRow(),
-            lastFullyVisibleRow: editor.renderer.getLastFullyVisibleRow(),
-          },
-        });
-        //});
-      });
-    }
   }
 
   /**
@@ -202,6 +138,14 @@ export class AlignmentViewer extends React.Component<
    *
    */
 
+  protected getFontSize(forAnnotation?: boolean) {
+    const fontSize = this.props.zoomLevel
+      ? this.props.zoomLevel
+      : defaultProps.zoomLevel;
+
+    return forAnnotation ? fontSize + 4 : fontSize;
+  }
+
   /**
    * Generate a single widget that contains an annotation and content
    * @param className
@@ -213,12 +157,17 @@ export class AlignmentViewer extends React.Component<
     className: string,
     annotation: string | JSX.Element,
     content: JSX.Element | null,
-    addAsElementToScrollSync?: boolean,
+    style?: React.CSSProperties,
     key?: string
   ) {
     return (
-      <div className={`av-widget ${className}`} key={key}>
-        <div className="av-annotation">{annotation}</div>
+      <div className={`av-widget ${className}`} key={key} style={style}>
+        <div
+          className="av-annotation"
+          style={{ fontSize: this.getFontSize(true) }}
+        >
+          {annotation}
+        </div>
         <div className="av-content">{content}</div>
       </div>
     );
@@ -267,51 +216,8 @@ export class AlignmentViewer extends React.Component<
     );
   };
 
-  protected renderPositionBox = () => (
-    <div className="position-box">
-      {
-        <AceTextualRulerComponent
-          classNames="ace-positions"
-          alignment={this.props.alignment}
-          fontSize={
-            this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
-          }
-          editorLoaded={(editor, parentElem) => {
-            this.aceEditorLoaded(
-              ACE_EDITOR_IDS.POSITIONAL_RULER,
-              editor,
-              parentElem,
-              ScrollType.horizontal
-            );
-          }}
-        />
-      }
-    </div>
-  );
-
   protected renderAlignmentAnnotationBox = () => (
-    <div className="alignment-metadata-box">
-      <AceEditorComponent
-        classNames="ace-alignment-metadata"
-        text={this.props.alignment
-          .getSequences(
-            this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
-          )
-          .map((x) => x.id)
-          .join("\n")}
-        fontSize={
-          this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
-        }
-        editorLoaded={(editor, parentElem) => {
-          this.aceEditorLoaded(
-            ACE_EDITOR_IDS.MSA_IDS,
-            editor,
-            parentElem,
-            ScrollType.vertical
-          );
-        }}
-      ></AceEditorComponent>
-    </div>
+    <div className="alignment-metadata-box"></div>
   );
 
   protected renderMiniMap() {
@@ -384,9 +290,15 @@ export class AlignmentViewer extends React.Component<
       classes.push("annotation-closed");
     }
 
-    const residueWidth = getAlignmentFontDetails(
-      zoomLevel !== undefined ? zoomLevel : defaultProps.zoomLevel
-    ).width;
+    const fontSize = this.getFontSize();
+    const residueWidth = getAlignmentFontDetails(fontSize).width;
+    const residueHeight = Math.round(
+      residueWidth * CHARACTER_HEIGHT_TO_WIDTH_RATIO
+    );
+    const singleSeqDivHeight = residueHeight;
+    /*DEFAULT_SINGLE_SEQUENCE_HEIGHT < residueHeight
+        ? residueHeight
+        : DEFAULT_SINGLE_SEQUENCE_HEIGHT;*/
 
     return (
       <div className={classes.join(" ")}>
@@ -399,9 +311,10 @@ export class AlignmentViewer extends React.Component<
           : barplots.map((barplot, idx) =>
               this.renderWidget(
                 "av-barplot-holder",
-                barplot.dataSeriesSet.map((series) => series.name).join(" / "),
+                barplot.dataSeriesSet.map((series) => series.name).join(" / ") +
+                  ":",
                 this.renderBarplot(barplot, residueWidth),
-                true,
+                undefined,
                 `${idx}-${barplot.dataSeriesSet
                   .map((dataseries) => dataseries.id)
                   .join("|")}`
@@ -413,8 +326,7 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-sequence-logo-holder",
               "Logo:",
-              this.renderSequenceLogo(residueWidth),
-              true
+              this.renderSequenceLogo(residueWidth)
             )}
 
         {!showConsensus
@@ -422,7 +334,6 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-consensus-seq-holder",
               "Consensus:",
-
               <Provider store={store}>
                 <AlignmentDetails
                   id="consensus-alignment-details"
@@ -435,11 +346,8 @@ export class AlignmentViewer extends React.Component<
                     this.props.alignment.getQuerySequence().sequence
                   }
                   alignmentStyle={this.props.style}
-                  fontSize={
-                    this.props.zoomLevel
-                      ? this.props.zoomLevel
-                      : defaultProps.zoomLevel
-                  }
+                  fontSize={fontSize}
+                  residueHeight={residueHeight}
                   residueWidth={residueWidth}
                   scrollerLoaded={(scroller) => {
                     this.horizontalScrollSync.registerElementScroller(scroller);
@@ -450,7 +358,8 @@ export class AlignmentViewer extends React.Component<
                     );
                   }}
                 />
-              </Provider>
+              </Provider>,
+              { height: singleSeqDivHeight }
             )}
 
         {!showQuery
@@ -458,7 +367,6 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-query-seq-holder",
               "Query:",
-
               <Provider store={store}>
                 <AlignmentDetails
                   id="query-alignment-details"
@@ -471,11 +379,8 @@ export class AlignmentViewer extends React.Component<
                     this.props.alignment.getQuerySequence().sequence
                   }
                   alignmentStyle={this.props.style}
-                  fontSize={
-                    this.props.zoomLevel
-                      ? this.props.zoomLevel
-                      : defaultProps.zoomLevel
-                  }
+                  fontSize={fontSize}
+                  residueHeight={residueHeight}
                   residueWidth={residueWidth}
                   scrollerLoaded={(scroller) => {
                     this.horizontalScrollSync.registerElementScroller(scroller);
@@ -486,7 +391,8 @@ export class AlignmentViewer extends React.Component<
                     );
                   }}
                 />
-              </Provider>
+              </Provider>,
+              { height: singleSeqDivHeight }
             )}
 
         {!showRuler
@@ -494,7 +400,21 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-position-indicator-holder",
               "Position:",
-              this.renderPositionBox()
+              <div className="position-box">
+                <PositionalAxis
+                  positions={[alignment.getSequenceLength()]}
+                  fontSize={fontSize}
+                  scrollerLoaded={(scroller) => {
+                    this.horizontalScrollSync.registerElementScroller(scroller);
+                  }}
+                  scrollerUnloaded={(scroller) => {
+                    this.horizontalScrollSync.unRegisterElementScroller(
+                      scroller
+                    );
+                  }}
+                />
+              </div>,
+              { height: singleSeqDivHeight }
             )}
 
         {this.renderWidget(
@@ -512,11 +432,8 @@ export class AlignmentViewer extends React.Component<
               consensusSequence={this.props.alignment.getConsensus().sequence}
               querySequence={this.props.alignment.getQuerySequence().sequence}
               alignmentStyle={this.props.style}
-              fontSize={
-                this.props.zoomLevel
-                  ? this.props.zoomLevel
-                  : defaultProps.zoomLevel
-              }
+              fontSize={fontSize}
+              residueHeight={residueHeight}
               residueWidth={residueWidth}
               scrollerLoaded={(scroller) => {
                 this.horizontalScrollSync.registerElementScroller(scroller);
@@ -526,7 +443,7 @@ export class AlignmentViewer extends React.Component<
               }}
             />
           </Provider>,
-          true
+          { height: singleSeqDivHeight }
         )}
       </div>
     );

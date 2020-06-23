@@ -175,6 +175,10 @@ const attachRenderDetails = (
     numSeqsToRender += 1;
   }
 
+  //edge case: client height < 1 sequence. Show at least one in that case.
+  numSeqsToRender =
+    numSeqsToRender < 1 && sequenceCount > 0 ? 1 : numSeqsToRender;
+
   particularAlignmentDetailsState.scrollingAdditionalVerticalOffset =
     -1 * (particularAlignmentDetailsState.worldTopOffset % residueHeight);
   particularAlignmentDetailsState.seqIdxsToRender = [

@@ -33,14 +33,13 @@ export interface IAlignmentDetailsProps {
   consensusSequence: string;
   querySequence: string;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  residueHeight: number;
   residueWidth: number;
   fontSize: number;
 
   scrollerLoaded: (e: HTMLElement) => void;
   scrollerUnloaded: (e: HTMLElement) => void;
 }
-
-const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
 
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //props
@@ -51,6 +50,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     consensusSequence,
     querySequence,
     alignmentStyle,
+    residueHeight,
     residueWidth,
     fontSize,
   } = props;
@@ -67,7 +67,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   const reduxState: IAlignmentDetailsState | undefined = useSelector(
     (rootState: RootState) => rootState.alignmentDetailsSlice[id]
   );
-  //console.log("reduxState:", reduxState);
+  //console.log(id + " :: reduxState:", reduxState);
 
   //sizing - dynamically update state when div changes size
   useEffect(() => {
@@ -84,8 +84,9 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     stopSafariFromBlockingWindowWheel("stage");
     stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
 
-    props.scrollerLoaded(alignmentDetailsRef.current!);
     if (alignmentDetailsRef.current) {
+      props.scrollerLoaded(alignmentDetailsRef.current);
+
       const rs = new ResizeSensor(alignmentDetailsRef.current, () => {
         if (alignmentDetailsRef.current) {
           const rect = alignmentDetailsRef.current!.getBoundingClientRect();
@@ -115,9 +116,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         alignmentDetailsRef
       );
     }
-    return () => {
-      props.scrollerUnloaded(alignmentDetailsRef.current!);
-    };
   }, [reduxState !== undefined]);
 
   useEffect(() => {
@@ -125,12 +123,10 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       setResidueDimensions({
         id: id,
         residueWidth: residueWidth,
-        residueHeight: Math.round(
-          residueWidth * CHARACTER_HEIGHT_TO_WIDTH_RATIO
-        ),
+        residueHeight: residueHeight,
       })
     );
-  }, [residueWidth]);
+  }, [residueHeight, residueWidth]);
 
   const sequenceCount = sequences.length;
   const sequenceLength = sequenceCount > 0 ? sequences[0].length : 0;

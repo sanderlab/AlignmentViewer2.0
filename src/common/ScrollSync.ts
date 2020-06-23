@@ -1,18 +1,15 @@
-import { Ace } from "ace-builds";
-
 /**
  * ScrollSync.ts
- * This helper is used to synchronize the different ace and div scrolling
- * scrolling.
+ * This helper is used to synchronize the different div scrollers.
  *
  * Example usage:
  *     import ScrollSync from './ScrollSync';
  *     let scrollSyncV = new ScrollSync(ScrollType.vertical);
  *     scrollSyncV.registerScroller(domElement);
- *     scrollSyncV.registerScroller(aceEditor);
  *
- * Ideas adapted to work with both dom elements and ace from 2 projects
- * (each of which are aimed at dom elements):
+ * Originally made to work with ace editors as well, but now removed
+ *
+ * Ideas adapted to work  from 2 projects (each of which are aimed at dom elements):
  *   https://github.com/okonet/react-scroll-sync
  *   https://github.com/AhmadMHawwash/scroll-sync-react
  */
@@ -23,17 +20,14 @@ export enum ScrollType {
 }
 
 export class ScrollSync {
+  private ticking = false;
   private scrollDirection: ScrollType.vertical | ScrollType.horizontal;
-  private aceEditorDirection: "changeScrollLeft" | "changeScrollTop";
-  private scrollers: (Ace.Editor | HTMLElement)[];
+  private scrollers: HTMLElement[];
   private scrollerMouseEnterListeners = new Map<HTMLElement, () => void>();
   private scrollerMouseLeaveListeners = new Map<HTMLElement, () => void>();
 
-  //reuse the same scroll functions for each element / ace editor
-  private scrollFnHandles: Map<
-    Ace.Editor | HTMLElement,
-    (this: HTMLElement) => any
-  >;
+  //reuse the same scroll functions for each element
+  private scrollFnHandles: Map<HTMLElement, (this: HTMLElement) => any>;
 
   /*
    *
@@ -44,15 +38,8 @@ export class ScrollSync {
    */
   constructor(scrollDirection: ScrollType.vertical | ScrollType.horizontal) {
     this.scrollDirection = scrollDirection;
-    this.aceEditorDirection =
-      scrollDirection === ScrollType.horizontal
-        ? "changeScrollLeft"
-        : "changeScrollTop";
     this.scrollers = [];
-    this.scrollFnHandles = new Map<
-      Ace.Editor | HTMLElement,
-      (this: HTMLElement) => any
-    >();
+    this.scrollFnHandles = new Map<HTMLElement, (this: HTMLElement) => any>();
   }
 
   /**
@@ -104,38 +91,6 @@ export class ScrollSync {
     this.removeScrollEvents(scrollerToRemove);
   }
 
-  /**
-   * Register a scroller with this scroll sync. By attaching
-   * the scroll events only when a scroll is possible, we avoid
-   * ths jerky-ness and potential forever loop of one scroll
-   * updating another back and forth.
-   * Note - the ace editor doesn't have a native mouseenter/leave
-   * so we need to use the parent element's event listeners.
-   * @param scroller
-   */
-  registerAceScroller(scroller: Ace.Editor, parentElem: HTMLElement) {
-    if (!this.scrollers.includes(scroller)) {
-      this.scrollers.push(scroller);
-
-      parentElem.addEventListener("mouseenter", () => {
-        this.addScrollEvents(scroller);
-      });
-      parentElem.addEventListener("mouseleave", () => {
-        this.removeScrollEvents(scroller);
-      });
-    }
-  }
-
-  /**
-   * Deregister a scroller with this scroll sync
-   * Requires removal of mouse events also ..
-   * @param scroller
-   */
-  //unRegisterScroller(scroller: HTMLElement | Ace.Editor) {
-  //  this.scrollers = this.scrollers.filter((s) => s !== scroller);
-  //  this.removeScrollEvents(scroller);
-  //}
-
   /*
    *
    *
@@ -143,29 +98,38 @@ export class ScrollSync {
    *
    *
    */
-  private isAceEditor(x: Ace.Editor | HTMLElement): x is Ace.Editor {
-    return "renderer" in x;
-  }
 
   /**
    * Execute the scroll changes to all group scrollers.
    *
    * Note: the reason for jumpy scrolling I think is due
    * to easing from the scroller, that doesn't happen with the
-   * scrollSibling. I'm not sure how to fix (one thought was
-   * to cancel the scroll event and set the position myself,
-   * but one can't cancel a scroll event).
+   * scrollSibling.
+   *
+   * Update: I've partially fixed by setting all the sibilingScrollers
+   * in a single animation frame. This makes all the siblings move
+   * en mass. Unfortunately, the element being scrolled still is
+   * always a bit different than its siblings - it looks like it is
+   * just a bit ahead.
+   *
+   * I'm not sure how to fix - the best would be to put current
+   * scroller into the same animation frame, but it is impossible
+   * to cancel the current scroll event, and I'm unsure whether it
+   * is even possible.
    */
-  private handleScroll = (
-    scroller: Ace.Editor | HTMLElement,
-    event?: Event
-  ) => {
-    const siblingScrollers = this.scrollers.filter(
-      (possibleSib) => possibleSib !== scroller
-    );
-    siblingScrollers.forEach((siblingScroller) => {
-      this.syncScrollPosition(scroller, siblingScroller);
-    });
+  private handleScroll = (scroller: HTMLElement, event?: Event) => {
+    if (!this.ticking) {
+      requestAnimationFrame(() => {
+        const siblingScrollers = this.scrollers.filter(
+          (possibleSib) => possibleSib !== scroller
+        );
+        siblingScrollers.forEach((siblingScroller) => {
+          this.syncScrollPosition(scroller, siblingScroller);
+        });
+        this.ticking = false;
+      });
+      this.ticking = true;
+    }
   };
 
   /**
@@ -174,31 +138,18 @@ export class ScrollSync {
    * @param siblingScroller
    */
   private syncScrollPosition(
-    scroller: Ace.Editor | HTMLElement,
-    siblingScroller: Ace.Editor | HTMLElement
+    scroller: HTMLElement,
+    siblingScroller: HTMLElement
   ) {
     if (this.scrollDirection === ScrollType.horizontal) {
-      const newScrollLeft = this.isAceEditor(scroller)
-        ? scroller.session.getScrollLeft()
-        : scroller.scrollLeft;
+      const newScrollLeft = scroller.scrollLeft;
 
-      if (this.isAceEditor(siblingScroller)) {
-        if (siblingScroller.session.getScrollLeft() !== newScrollLeft) {
-          siblingScroller.session.setScrollLeft(newScrollLeft);
-        }
-      } else if (siblingScroller.scrollLeft !== newScrollLeft) {
+      if (siblingScroller.scrollLeft !== newScrollLeft) {
         siblingScroller.scrollLeft = newScrollLeft;
       }
     } else {
-      const newScrollTop = this.isAceEditor(scroller)
-        ? scroller.session.getScrollTop()
-        : scroller.scrollTop;
-
-      if (this.isAceEditor(siblingScroller)) {
-        if (siblingScroller.session.getScrollTop() !== newScrollTop) {
-          siblingScroller.session.setScrollTop(newScrollTop);
-        }
-      } else if (siblingScroller.scrollTop !== newScrollTop) {
+      const newScrollTop = scroller.scrollTop;
+      if (siblingScroller.scrollTop !== newScrollTop) {
         siblingScroller.scrollTop = newScrollTop;
       }
     }
@@ -208,7 +159,7 @@ export class ScrollSync {
    * Add event listeners and functions from a particular scroller
    * @param scroller
    */
-  private addScrollEvents(scroller: Ace.Editor | HTMLElement) {
+  private addScrollEvents(scroller: HTMLElement) {
     if (!this.scrollFnHandles.has(scroller)) {
       this.scrollFnHandles.set(
         scroller,
@@ -217,25 +168,20 @@ export class ScrollSync {
     }
 
     const scrollFn = this.scrollFnHandles.get(scroller)!;
-    if (this.isAceEditor(scroller)) {
-      scroller.session.on(this.aceEditorDirection, scrollFn);
-    } else {
-      scroller.addEventListener("scroll", scrollFn);
-    }
+    scroller.addEventListener("scroll", scrollFn, {
+      capture: false,
+      passive: true,
+    });
   }
 
   /**
    * Remove event listeners and functions from a particular scroller
    * @param scroller
    */
-  private removeScrollEvents(scroller: Ace.Editor | HTMLElement) {
+  private removeScrollEvents(scroller: HTMLElement) {
     const scrollFn = this.scrollFnHandles.get(scroller);
     if (scrollFn) {
-      if (this.isAceEditor(scroller)) {
-        scroller.session.off(this.aceEditorDirection, scrollFn);
-      } else {
-        scroller.removeEventListener("scroll", scrollFn);
-      }
+      scroller.removeEventListener("scroll", scrollFn);
     }
   }
 }

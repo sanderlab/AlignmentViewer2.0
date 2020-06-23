@@ -497,7 +497,7 @@ export default class App extends React.Component<AppProps, AppState> {
             {zoomLevel}
             <button
               type="button"
-              disabled={zoomLevel > 15}
+              disabled={zoomLevel > 19}
               onClick={(e) => {
                 this.setState({
                   zoomLevel: zoomLevel + 1,
