@@ -1,5 +1,4 @@
 import { generateUUIDv4 } from "./Utils";
-import { defineNewAlignmentMode } from "../components/ace/AceAlignmentMode";
 import { Nucleotide } from "./Residues";
 import { SequenceSorter } from "./AlignmentSorter";
 import {
@@ -26,9 +25,10 @@ export interface ISequence {
  */
 export class Alignment {
   private uuid: string;
-  private aceEditorMode: string | undefined;
   private name: string;
   private predictedNT: boolean;
+  private numberDuplicateSequencesInAlignment: number;
+  private numberRemovedDuplicateSequences: number;
   private sequences: Map<SequenceSorter, ISequence[]>;
   private maxSequenceLength: number;
   private querySequence: ISequence;
@@ -68,20 +68,60 @@ export class Alignment {
    * Create a new Alignment object. The default query sequence will
    * be set to the first sequence in sequences. This can be changed
    * by calling setQuerySequence() after creation
-   * @param sequences
+   *
+   *
+   * @param name Give the alignment a name
+   * @param sequencesAsInput The raw sequences ordered as in a fasta file or
+   *                         provided by the use
+   * @param removeDuplicateSequences remove all duplicate sequences. the retained
+   *                                 sequence will be the first in order
    */
-  public constructor(name: string, sequencesAsInput: ISequence[]) {
+  public constructor(
+    name: string,
+    sequencesAsInput: ISequence[],
+    removeDuplicateSequences: boolean
+  ) {
     this.uuid = generateUUIDv4();
     this.name = name;
     this.sequences = new Map<SequenceSorter, ISequence[]>();
-    this.sequences.set(SequenceSorter.INPUT, sequencesAsInput);
-    this.querySequence = sequencesAsInput[0];
-    this.predictedNT = true;
 
     //
-    //generate statistics
+    //remove duplicates, pull out query, generate statistics, generate
     //
     let start = new Date();
+
+    //get alignment with duplicates removed - the calculation
+    //happens regardless of whether prop requested in order to
+    //report # duplicates
+    let numberDuplicateSequences = 0;
+    console.log("sequencesAsInput:", sequencesAsInput);
+    const sequencesWithoutDuplicates = Array.from(
+      sequencesAsInput
+        .reduce((acc, iseq, idx) => {
+          if (!acc.has(iseq.sequence)) {
+            acc.set(iseq.sequence, iseq);
+          } else {
+            numberDuplicateSequences += 1;
+          }
+          return acc;
+        }, new Map<string, ISequence>())
+        .values()
+    );
+
+    if (removeDuplicateSequences) {
+      this.numberDuplicateSequencesInAlignment = 0;
+      this.numberRemovedDuplicateSequences = numberDuplicateSequences;
+      this.sequences.set(SequenceSorter.INPUT, sequencesWithoutDuplicates);
+    } else {
+      this.numberDuplicateSequencesInAlignment = numberDuplicateSequences;
+      this.numberRemovedDuplicateSequences = 0;
+      this.sequences.set(SequenceSorter.INPUT, sequencesAsInput);
+    }
+
+    //reset sequences as input in case duplicates have been removed
+    const finalInputSequences = this.sequences.get(SequenceSorter.INPUT)!;
+    this.querySequence = finalInputSequences[0];
+    this.predictedNT = true;
 
     // aggregate stats for each position and globally including
     // the number of time each amino acid occurs
@@ -94,7 +134,7 @@ export class Alignment {
 
     //Parse everything. Work in character code space as this is much faster.
     //Convert character codes back to letters at the end.
-    sequencesAsInput.forEach((seq) => {
+    finalInputSequences.forEach((seq) => {
       const seqStr = seq.sequence;
       sequenceLengths[seqStr.length] = true;
 
@@ -147,7 +187,7 @@ export class Alignment {
     });
 
     //empirically fill in character code counts from the sequences
-    sequencesAsInput.forEach((seq) => {
+    finalInputSequences.forEach((seq) => {
       const seqStr = seq.sequence;
       for (
         let positionIdx = 0, len = seqStr.length;
@@ -271,6 +311,21 @@ export class Alignment {
   }
 
   /**
+   * Returns the number of sequences in the alignment that are duplicates
+   */
+  getNumberDuplicateSequencesInAlignment() {
+    return this.numberDuplicateSequencesInAlignment;
+  }
+
+  /**
+   * Returns the number of sequences that were duplicates in the uploaded
+   * alignment that were subsequeently removed
+   */
+  getNumberRemovedDuplicateSequences() {
+    return this.numberRemovedDuplicateSequences;
+  }
+
+  /**
    * Is this alignment predicted to be nucleotides?
    * @returns true if it is predicted to be nucleotide sequences.
    */
@@ -304,19 +359,6 @@ export class Alignment {
    */
   getName() {
     return this.name;
-  }
-
-  /**
-   * Get an ace editor mode for this alignemnt. If one doesn't exist
-   * then it will be defined.
-   * @returns the ace editor mode for this alignment
-   */
-  getAceEditorMode() {
-    if (!this.aceEditorMode) {
-      this.aceEditorMode = "ace/mode/" + this.uuid;
-      defineNewAlignmentMode(this.aceEditorMode, this);
-    }
-    return this.aceEditorMode;
   }
 
   /**

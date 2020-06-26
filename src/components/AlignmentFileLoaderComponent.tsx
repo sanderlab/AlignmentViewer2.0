@@ -19,9 +19,14 @@ export interface IAlignmentLoaderProps {
   onFileLoadStart?: () => void; //notify on begin loading
 }
 
+interface IAlignmentLoaderState {
+  removeDuplicateSequences: boolean;
+}
+
 // Inspired by https://reactjs.org/docs/uncontrolled-components.html
 export class AlignmentFileLoaderComponent extends React.Component<
-  IAlignmentLoaderProps
+  IAlignmentLoaderProps,
+  IAlignmentLoaderState
 > {
   public static defaultProps = {
     fileSelectorLabelText: "Upload:",
@@ -39,6 +44,8 @@ export class AlignmentFileLoaderComponent extends React.Component<
       this
     );
     this.fileInput = React.createRef();
+
+    this.state = { removeDuplicateSequences: true };
   }
 
   /*
@@ -88,6 +95,7 @@ export class AlignmentFileLoaderComponent extends React.Component<
         const file = this.fileInput.current!.files![0];
         AlignmentLoader.loadAlignmentFromFile(
           file,
+          this.state.removeDuplicateSequences,
           this.alignmentLoaded,
           onAlignmenLoadError
         );
@@ -136,6 +144,7 @@ export class AlignmentFileLoaderComponent extends React.Component<
                 }
                 AlignmentLoader.loadAlignmentFromURL(
                   ef.fileURL,
+                  this.state.removeDuplicateSequences,
                   this.alignmentLoaded,
                   onAlignmenLoadError,
                   ef.fileName
@@ -146,6 +155,22 @@ export class AlignmentFileLoaderComponent extends React.Component<
             </button>
           );
         })}
+      </label>
+    );
+  }
+
+  private renderRemoveDuplicatesCheckbox() {
+    return (
+      <label>
+        <strong>Remove Duplicate Sequences on Load:</strong>
+        <input
+          name="Remove Duplicates"
+          type="checkbox"
+          checked={this.state.removeDuplicateSequences}
+          onChange={(e) => {
+            this.setState({ removeDuplicateSequences: e.target.checked });
+          }}
+        />
       </label>
     );
   }
@@ -162,6 +187,9 @@ export class AlignmentFileLoaderComponent extends React.Component<
       <div className="alignment-file-loader">
         <div className="file-upload-input">{this.renderFileUpload()}</div>
         <div className="example-files">{this.renderExampleFiles()}</div>
+        <div className="remove-duplicates">
+          {this.renderRemoveDuplicatesCheckbox()}
+        </div>
       </div>
     );
   }

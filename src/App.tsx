@@ -68,6 +68,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
       AlignmentLoader.loadAlignmentFromURL(
         params.get(URL_PARAM_NAMES.ALIGNMENT_URL),
+        true, // remove duplicates by default
         this.onAlignmentReceived,
         this.onAlignmentLoadError
       );
@@ -154,7 +155,17 @@ export default class App extends React.Component<AppProps, AppState> {
     const alignmentDescription = alignment ? (
       <div>
         <h3>{alignment.getName()}</h3>
-        <h4>{`${alignment.getSequenceCount()} sequences (rows) and ${alignment.getSequenceLength()} positions (columns) `}</h4>
+        <h4>
+          {`${alignment.getSequenceCount()} sequences (rows) and ${alignment.getSequenceLength()} positions (columns)`}
+          {alignment.getNumberRemovedDuplicateSequences() > 0 ||
+          alignment.getNumberDuplicateSequencesInAlignment() > 0 ? (
+            <span className="duplicates-removed">
+              {alignment.getNumberRemovedDuplicateSequences() > 0
+                ? `${"\u2605"} ${alignment.getNumberRemovedDuplicateSequences()} duplicate sequences were removed`
+                : `${"\u2605"} alignment contains ${alignment.getNumberDuplicateSequencesInAlignment()} duplicate sequences`}
+            </span>
+          ) : null}
+        </h4>
       </div>
     ) : (
       <></>

@@ -23,6 +23,16 @@ export class AceMultipleSequenceAlignmentComponent extends AceEditorComponent<
       .join("\n");
   }
   getEditorMode() {
-    return this.props.alignment.getAceEditorMode();
+    //return this.props.alignment.getAceEditorMode();
+    //getAceEditorMode is now deprectated. looked like:
+    //getAceEditorMode() {
+    //  if (!this.aceEditorMode) {
+    //    this.aceEditorMode = "ace/mode/" + this.uuid;
+    //    defineNewAlignmentMode(this.aceEditorMode, this);
+    //  }
+    //  return this.aceEditorMode;
+    //}
+    throw Error("getEditorMode is deprecated. This call failed!");
+    return "never";
   }
 }

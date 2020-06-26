@@ -44,6 +44,10 @@ body {
       }
       h4 {
         margin-top: 0;
+        .duplicates-removed {
+          display: block;
+          font-weight: normal;
+        }
       }
 
       .settings-header {
@@ -75,12 +79,12 @@ body {
         position: relative;
 
         label strong {
-          width: 200px;
+          width: 225px;
           display: inline-block;
         }
         label select,
         label .zoom-level {
-          width: 200px;
+          width: 225px;
           display: inline-block;
         }
 

@@ -54,9 +54,10 @@ export class StockholmAlignment extends Alignment {
   public constructor(
     name: string,
     sequencesAsInput: ISequence[],
-    metadata: IStockholmAlignmentMetadata
+    metadata: IStockholmAlignmentMetadata,
+    removeDuplicateSequences: boolean
   ) {
-    super(name, sequencesAsInput);
+    super(name, sequencesAsInput, removeDuplicateSequences);
     this.metadata = metadata;
   }
 
@@ -69,7 +70,8 @@ export class StockholmAlignment extends Alignment {
    */
   static fromFileContents(
     fileName: string,
-    fileContents: string
+    fileContents: string,
+    removeDuplicateSequences: boolean
   ): StockholmAlignment {
     const trimmedAndSplit = fileContents.trim().split(/\r?\n/);
 
@@ -165,7 +167,12 @@ export class StockholmAlignment extends Alignment {
       });
 
     try {
-      return new StockholmAlignment(fileName, sequences, metadata);
+      return new StockholmAlignment(
+        fileName,
+        sequences,
+        metadata,
+        removeDuplicateSequences
+      );
     } catch (e) {
       throw getParseError("Stockholm", e.message);
     }
