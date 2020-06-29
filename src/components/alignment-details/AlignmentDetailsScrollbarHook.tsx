@@ -4,8 +4,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./AlignmentDetails.scss";
 import { ResizeSensor } from "css-element-queries";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, setWorldTopOffset } from "../../common/ReduxStore";
 
 interface IWebGLScrollbarProps {
   visible: boolean;
@@ -43,9 +41,6 @@ export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
     height: 100,
     top: 0,
   });
-
-  //redux
-  const dispatch = useDispatch();
 
   //sizing - could be passed as a prop, but doing this calculation here in case
   //         the parent does something odd with css and messes up the actual

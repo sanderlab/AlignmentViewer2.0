@@ -1,5 +1,4 @@
 import React from "react";
-import { ISequence, Alignment } from "../common/Alignment";
 import { Nucleotide, AminoAcid } from "../common/Residues";
 import { Sprite } from "@inlet/react-pixi";
 
@@ -9,7 +8,6 @@ import {
   IColorScheme,
   ResidueStyle,
 } from "../common/MolecularStyles";
-import { SequenceSorter } from "../common/AlignmentSorter";
 import { generateUUIDv4 } from "../common/Utils";
 
 interface ITiledImages {
@@ -240,7 +238,6 @@ export class CanvasAlignmentTiled extends React.Component<
     offsets: { seqY: number; letterX: number }
   ) {
     const {
-      sequences,
       consensusSequence,
       querySequence,
       alignmentType,

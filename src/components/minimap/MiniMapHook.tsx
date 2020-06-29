@@ -16,7 +16,7 @@ import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 import { MiniMapViewport } from "./MiniMapViewportComponent";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, setSequenceTopOffset } from "../../common/ReduxStore";
+import { RootState, setRowTopOffset } from "../../common/ReduxStore";
 import { MinimapPositionHighlighter } from "./MinimapPositionHighlighterComponent";
 
 export interface IMiniMapProps {
@@ -78,7 +78,7 @@ export function MiniMap(props: IMiniMapProps) {
   const syncedAlignmentDetails = useSelector((state: RootState) =>
     !syncWithAlignmentDetailsId
       ? undefined
-      : state.alignmentDetailsSlice[syncWithAlignmentDetailsId]
+      : state.virtualizedMatrixSlice[syncWithAlignmentDetailsId]
   );
 
   //sizing - dynamically update state when div changes size
@@ -117,7 +117,7 @@ export function MiniMap(props: IMiniMapProps) {
         minimapRef
       );
     }
-  }, []);
+  }, [resizedDimensions]);
 
   const frameSizing = (() => {
     if (!resizedDimensions) return undefined;
@@ -177,12 +177,12 @@ export function MiniMap(props: IMiniMapProps) {
                   if (syncedAlignmentDetails) {
                     const newY = Math.round(
                       mousePosition.y -
-                        syncedAlignmentDetails.seqIdxsToRender.length / 2
+                        syncedAlignmentDetails.rowIdxsToRender.length / 2
                     );
                     dispatch(
-                      setSequenceTopOffset({
+                      setRowTopOffset({
                         id: syncWithAlignmentDetailsId!,
-                        sequenceTopOffset: newY,
+                        lineTopOffset: newY,
                       })
                     );
                   }
@@ -206,18 +206,18 @@ export function MiniMap(props: IMiniMapProps) {
                 />
                 {!syncedAlignmentDetails ||
                 syncedAlignmentDetails.initialized !== true ||
-                syncedAlignmentDetails.seqIdxsToRender.length < 1 ||
-                syncedAlignmentDetails.sequenceCount <=
-                  syncedAlignmentDetails.seqIdxsToRender.length ? (
+                syncedAlignmentDetails.rowIdxsToRender.length < 1 ||
+                syncedAlignmentDetails.rowCount <=
+                  syncedAlignmentDetails.rowIdxsToRender.length ? (
                   <></>
                 ) : (
                   <MinimapPositionHighlighter
                     fillColor={0xff0000}
                     fillAlpha={dragging ? 0.75 : 0.25}
                     x={0}
-                    y={syncedAlignmentDetails.seqIdxsToRender[0]}
-                    width={syncedAlignmentDetails.sequenceLength}
-                    height={syncedAlignmentDetails.seqIdxsToRender.length}
+                    y={syncedAlignmentDetails.rowIdxsToRender[0]}
+                    width={syncedAlignmentDetails.columnCount}
+                    height={syncedAlignmentDetails.rowIdxsToRender.length}
                     dragFunctions={{
                       onDragStart: (e, parent) => {
                         const startPosition = e.data.getLocalPosition(parent);
@@ -226,16 +226,16 @@ export function MiniMap(props: IMiniMapProps) {
                           left: startPosition.x - 0,
                           top:
                             startPosition.y -
-                            syncedAlignmentDetails.seqIdxsToRender[0],
+                            syncedAlignmentDetails.rowIdxsToRender[0],
                         });
                       },
                       onDragEnd: (e, parent) => {
                         setDragging(false);
                         const finalPosition = e.data.getLocalPosition(parent);
                         dispatch(
-                          setSequenceTopOffset({
+                          setRowTopOffset({
                             id: syncWithAlignmentDetailsId!,
-                            sequenceTopOffset: Math.round(
+                            lineTopOffset: Math.round(
                               finalPosition.y - dragStartOffset!.top
                             ),
                           })
@@ -245,9 +245,9 @@ export function MiniMap(props: IMiniMapProps) {
                         if (dragging) {
                           const newPosition = e.data.getLocalPosition(parent);
                           dispatch(
-                            setSequenceTopOffset({
+                            setRowTopOffset({
                               id: syncWithAlignmentDetailsId!,
-                              sequenceTopOffset: Math.round(
+                              lineTopOffset: Math.round(
                                 newPosition.y - dragStartOffset!.top
                               ),
                             })

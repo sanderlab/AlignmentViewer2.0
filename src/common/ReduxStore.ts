@@ -6,7 +6,7 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 
-export interface IAlignmentDetailsState {
+export interface IVirtualizedMatrixState {
   //a flag to indicate that the state has been fully calculated
   //and has enough info to render the msa
   initialized: boolean;
@@ -14,25 +14,24 @@ export interface IAlignmentDetailsState {
   //the number of pixels from the world top where the viewport should start
   worldTopOffset: number;
 
-  //the dimension scale for individual residues
-  residueWidth: number;
-  residueHeight: number;
+  //the scale
+  columnWidth: number;
+  rowHeight: number;
 
   //
-  //VISIBLE SEQUENCES
+  //VISIBLE ROWS
   //
 
-  //when scrolling, some sequences often become partially visible and
-  //this controls the vertical offset one should apply to the sequences
+  //when scrolling, some lines often become partially visible and
+  //this controls the vertical offset one should apply to the lines
   //when they are placed in the div.
   //It will always be negative or zero
-  //or zero
   scrollingAdditionalVerticalOffset: number;
 
-  // the actual number of sequences that should be rendered taking into
+  // the actual number of lines that should be rendered taking into
   // account the viewport location (top, bottom, in the middle) and
-  // sequence offsets
-  seqIdxsToRender: number[];
+  // line offsets
+  rowIdxsToRender: number[];
 
   //the surrounding div dimensions
   clientWidth: number;
@@ -46,9 +45,9 @@ export interface IAlignmentDetailsState {
   worldWidth: number;
   worldHeight: number;
 
-  //info about alignment
-  sequenceCount: number;
-  sequenceLength: number;
+  //info about the matrix
+  rowCount: number;
+  columnCount: number;
 }
 
 /**
@@ -61,7 +60,7 @@ export interface IAlignmentDetailsState {
  */
 const initializeNewIdAsNeeded = (
   id: string,
-  state: { [id: string]: IAlignmentDetailsState }
+  state: { [id: string]: IVirtualizedMatrixState }
 ) => {
   if (id in state === false) {
     state[id] = {
@@ -69,8 +68,8 @@ const initializeNewIdAsNeeded = (
 
       worldTopOffset: 0,
 
-      residueHeight: -1,
-      residueWidth: -1,
+      rowHeight: -1,
+      columnWidth: -1,
       clientHeight: -1,
       clientWidth: -1,
       viewportWidth: -1,
@@ -78,158 +77,133 @@ const initializeNewIdAsNeeded = (
       worldWidth: -1,
       worldHeight: -1,
 
-      sequenceCount: -1,
-      sequenceLength: -1,
+      rowCount: -1,
+      columnCount: -1,
 
-      seqIdxsToRender: [],
+      rowIdxsToRender: [],
       scrollingAdditionalVerticalOffset: -1,
-    } as IAlignmentDetailsState;
+    } as IVirtualizedMatrixState;
   }
   return state; // no need to copy, nothing done.
 };
 
 /**
- * Calculate details required to render the alignment. Will update
+ * Calculate details required to render the matrix. Will update
  * the initialized flag to be true if all details are available.
  *
  * This function can adjust the following state members:
  *     initialized
- *     firstFullyVisibleSeqIdx
  *     scrollingAdditionalVerticalOffset
- *     seqIdxsToRender
+ *     rowIdxsToRender
  *     viewportHeight, viewportWidth,
  *     worldHeight, worldWidth
  *
  *     worldTopOffset (will only be changed if things are out of bounds)
  */
-const attachRenderDetails = (
-  particularAlignmentDetailsState: IAlignmentDetailsState
-) => {
-  const {
-    clientHeight,
-    residueWidth,
-    residueHeight,
-    sequenceCount,
-    sequenceLength,
-  } = particularAlignmentDetailsState;
+const attachRenderDetails = (state: IVirtualizedMatrixState) => {
+  const { clientHeight, columnWidth, rowHeight, rowCount, columnCount } = state;
 
   if (
     clientHeight === -1 ||
-    residueWidth === -1 ||
-    residueHeight === -1 ||
-    sequenceCount === -1 ||
-    sequenceLength === -1
+    columnWidth === -1 ||
+    rowHeight === -1 ||
+    rowCount === -1 ||
+    columnCount === -1
   ) {
-    return particularAlignmentDetailsState; // no need to copy
+    return state; // no need to copy
   }
 
-  particularAlignmentDetailsState.initialized = true;
-  particularAlignmentDetailsState.worldHeight = sequenceCount * residueHeight;
-  particularAlignmentDetailsState.worldWidth = sequenceLength * residueWidth;
+  state.initialized = true;
+  state.worldHeight = rowCount * rowHeight;
+  state.worldWidth = columnCount * columnWidth;
 
-  if (Math.floor(clientHeight / residueHeight) >= sequenceCount) {
-    //all sequences in the alignment will fit into the client - no
-    //positioning needed
-    particularAlignmentDetailsState.worldTopOffset = 0;
-    particularAlignmentDetailsState.scrollingAdditionalVerticalOffset = 0;
-    particularAlignmentDetailsState.seqIdxsToRender = [
-      ...Array(sequenceCount).keys(),
-    ];
-    particularAlignmentDetailsState.viewportWidth =
-      sequenceLength * residueWidth;
-    particularAlignmentDetailsState.viewportHeight =
-      particularAlignmentDetailsState.seqIdxsToRender.length * residueHeight;
-    return particularAlignmentDetailsState;
+  if (Math.floor(clientHeight / rowHeight) >= rowCount) {
+    //all lines in the text will fit into the client - no offset positioning needed
+    state.worldTopOffset = 0;
+    state.scrollingAdditionalVerticalOffset = 0;
+    state.rowIdxsToRender = [...Array(rowCount).keys()];
+    state.viewportWidth = columnCount * columnWidth;
+    state.viewportHeight = state.rowIdxsToRender.length * rowHeight;
+    return state;
   }
 
+  if (state.worldTopOffset + clientHeight > state.worldHeight) {
+    state.worldTopOffset = state.worldHeight - clientHeight;
+  }
+  if (state.worldTopOffset < 0) {
+    state.worldTopOffset = 0; // I don't think this should ever happen, but just in case
+  }
+
+  const topInMiddleOfLine = state.worldTopOffset % rowHeight !== 0;
+  const bottomInMiddleOfLine =
+    (state.worldTopOffset + clientHeight) % rowHeight !== 0;
+
+  let firstRenderedLine = Math.ceil(state.worldTopOffset / rowHeight);
+  let numLinesToRender = Math.floor(clientHeight / rowHeight);
+  if (topInMiddleOfLine && firstRenderedLine - 1 >= 0) {
+    numLinesToRender += 1;
+    firstRenderedLine -= 1;
+  }
   if (
-    particularAlignmentDetailsState.worldTopOffset + clientHeight >
-    particularAlignmentDetailsState.worldHeight
+    bottomInMiddleOfLine &&
+    firstRenderedLine + numLinesToRender + 1 < rowCount
   ) {
-    particularAlignmentDetailsState.worldTopOffset =
-      particularAlignmentDetailsState.worldHeight - clientHeight;
-  }
-  if (particularAlignmentDetailsState.worldTopOffset < 0) {
-    particularAlignmentDetailsState.worldTopOffset = 0; // I don't think this should ever happen, but just in case
+    numLinesToRender += 1;
   }
 
-  const topInMiddleOfResidue =
-    particularAlignmentDetailsState.worldTopOffset % residueHeight !== 0;
-  const bottomInMiddleOfResidue =
-    (particularAlignmentDetailsState.worldTopOffset + clientHeight) %
-      residueHeight !==
-    0;
+  //edge case: client height < 1 line. Show at least one in that case.
+  numLinesToRender =
+    numLinesToRender < 1 && rowCount > 0 ? 1 : numLinesToRender;
 
-  let firstRenderedSeq = Math.ceil(
-    particularAlignmentDetailsState.worldTopOffset / residueHeight
+  state.scrollingAdditionalVerticalOffset =
+    -1 * (state.worldTopOffset % rowHeight);
+  state.rowIdxsToRender = [...Array(numLinesToRender).keys()].map(
+    (zeroIdx) => zeroIdx + firstRenderedLine
   );
-  let numSeqsToRender = Math.floor(clientHeight / residueHeight);
-  if (topInMiddleOfResidue && firstRenderedSeq - 1 >= 0) {
-    numSeqsToRender += 1;
-    firstRenderedSeq -= 1;
-  }
-  if (
-    bottomInMiddleOfResidue &&
-    firstRenderedSeq + numSeqsToRender + 1 < sequenceCount
-  ) {
-    numSeqsToRender += 1;
-  }
 
-  //edge case: client height < 1 sequence. Show at least one in that case.
-  numSeqsToRender =
-    numSeqsToRender < 1 && sequenceCount > 0 ? 1 : numSeqsToRender;
+  state.viewportWidth = columnCount * columnWidth;
+  state.viewportHeight = state.rowIdxsToRender.length * rowHeight;
 
-  particularAlignmentDetailsState.scrollingAdditionalVerticalOffset =
-    -1 * (particularAlignmentDetailsState.worldTopOffset % residueHeight);
-  particularAlignmentDetailsState.seqIdxsToRender = [
-    ...Array(numSeqsToRender).keys(),
-  ].map((zeroIdx) => zeroIdx + firstRenderedSeq);
-
-  particularAlignmentDetailsState.viewportWidth = sequenceLength * residueWidth;
-  particularAlignmentDetailsState.viewportHeight =
-    particularAlignmentDetailsState.seqIdxsToRender.length * residueHeight;
-
-  return particularAlignmentDetailsState;
+  return state;
 };
 
-export const alignmentDetailsSlice = createSlice({
-  name: "alignment-details",
-  initialState: {} as { [id: string]: IAlignmentDetailsState },
+export const virtualizedMatrixSlice = createSlice({
+  name: "virtualized-matrix",
+  initialState: {} as { [id: string]: IVirtualizedMatrixState },
 
   reducers: {
-    setAlignmentDetails: (
+    setMatrixSize: (
       state,
       action: PayloadAction<{
         id: string;
-        sequenceCount: number;
-        sequenceLength: number;
+        rowCount: number;
+        columnCount: number;
       }>
     ) => {
-      const { id, sequenceCount, sequenceLength } = action.payload;
+      const { id, rowCount, columnCount } = action.payload;
       state = initializeNewIdAsNeeded(id, state);
-      state[id].sequenceCount = sequenceCount;
-      state[id].sequenceLength = sequenceLength;
+      state[id].rowCount = rowCount;
+      state[id].columnCount = columnCount;
       state[id] = attachRenderDetails(state[id]);
       return state;
     },
 
-    setResidueDimensions: (
+    setMatrixDimensions: (
       state,
       action: PayloadAction<{
         id: string;
-        residueWidth: number;
-        residueHeight: number;
+        columnWidth: number;
+        rowHeight: number;
       }>
     ) => {
-      const { id, residueWidth, residueHeight } = action.payload;
+      const { id, columnWidth, rowHeight } = action.payload;
       state = initializeNewIdAsNeeded(id, state);
-      const startResidueTop =
-        state[id].worldTopOffset / state[id].residueHeight;
-      state[id].residueHeight = residueHeight;
-      state[id].residueWidth = residueWidth;
+      const startLineTop = state[id].worldTopOffset / state[id].rowHeight;
+      state[id].rowHeight = rowHeight;
+      state[id].columnWidth = columnWidth;
 
-      //try to maintain the same residue at the top
-      state[id].worldTopOffset = startResidueTop * residueHeight;
+      //try to maintain the same line at the top
+      state[id].worldTopOffset = startLineTop * rowHeight;
 
       state[id] = attachRenderDetails(state[id]);
       return state;
@@ -262,13 +236,13 @@ export const alignmentDetailsSlice = createSlice({
       return state;
     },
 
-    setSequenceTopOffset: (
+    setRowTopOffset: (
       state,
-      action: PayloadAction<{ id: string; sequenceTopOffset: number }>
+      action: PayloadAction<{ id: string; lineTopOffset: number }>
     ) => {
-      const { id, sequenceTopOffset } = action.payload;
+      const { id, lineTopOffset } = action.payload;
       state = initializeNewIdAsNeeded(id, state);
-      state[id].worldTopOffset = sequenceTopOffset * state[id].residueHeight;
+      state[id].worldTopOffset = lineTopOffset * state[id].rowHeight;
       state[id] = attachRenderDetails(state[id]);
       return state;
     },
@@ -276,12 +250,12 @@ export const alignmentDetailsSlice = createSlice({
 });
 
 export const {
-  setAlignmentDetails,
-  setResidueDimensions,
-  setSequenceTopOffset,
+  setMatrixDimensions,
+  setMatrixSize,
+  setRowTopOffset,
   setViewportDimensions,
   setWorldTopOffset,
-} = alignmentDetailsSlice.actions;
+} = virtualizedMatrixSlice.actions;
 
 /*
  *
@@ -293,7 +267,7 @@ export const {
 
 export const store = configureStore({
   reducer: {
-    alignmentDetailsSlice: alignmentDetailsSlice.reducer,
+    virtualizedMatrixSlice: virtualizedMatrixSlice.reducer,
   },
 });
 

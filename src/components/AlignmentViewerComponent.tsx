@@ -96,7 +96,6 @@ interface IAlignmentViewerState {
 }
 
 const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
-const DEFAULT_SINGLE_SEQUENCE_HEIGHT = 20;
 
 export class AlignmentViewer extends React.Component<
   IAlignmentViewerProps,
@@ -279,7 +278,6 @@ export class AlignmentViewer extends React.Component<
       showConsensus,
       showQuery,
       showRuler,
-      zoomLevel,
     } = this.props;
     if (!alignment) {
       return null;

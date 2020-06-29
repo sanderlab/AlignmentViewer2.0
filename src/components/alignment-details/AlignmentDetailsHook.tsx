@@ -17,11 +17,11 @@ import {
 } from "../../common/MolecularStyles";
 import {
   store,
-  setAlignmentDetails,
-  setResidueDimensions,
+  setMatrixSize,
+  setMatrixDimensions,
   setViewportDimensions,
   RootState,
-  IAlignmentDetailsState,
+  IVirtualizedMatrixState,
   setWorldTopOffset,
 } from "../../common/ReduxStore";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
@@ -64,8 +64,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
 
   //redux
   const dispatch = useDispatch();
-  const reduxState: IAlignmentDetailsState | undefined = useSelector(
-    (rootState: RootState) => rootState.alignmentDetailsSlice[id]
+  const reduxState: IVirtualizedMatrixState | undefined = useSelector(
+    (rootState: RootState) => rootState.virtualizedMatrixSlice[id]
   );
   //console.log(id + " :: reduxState:", reduxState);
 
@@ -120,10 +120,10 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
 
   useEffect(() => {
     dispatch(
-      setResidueDimensions({
+      setMatrixDimensions({
         id: id,
-        residueWidth: residueWidth,
-        residueHeight: residueHeight,
+        columnWidth: residueWidth,
+        rowHeight: residueHeight,
       })
     );
   }, [residueHeight, residueWidth]);
@@ -132,17 +132,17 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   const sequenceLength = sequenceCount > 0 ? sequences[0].length : 0;
   useEffect(() => {
     dispatch(
-      setAlignmentDetails({
+      setMatrixSize({
         id: id,
-        sequenceCount: sequenceCount,
-        sequenceLength: sequenceLength,
+        rowCount: sequenceCount,
+        columnCount: sequenceLength,
       })
     );
   }, [sequenceCount, sequenceLength]);
 
   const disableScrolling = !reduxState
     ? true
-    : sequenceCount <= reduxState.seqIdxsToRender.length;
+    : sequenceCount <= reduxState.rowIdxsToRender.length;
 
   //when switching alignments, there is a render with stale data as the
   //redux store doesn't recalculate until setAlignmentDetails is called
@@ -150,10 +150,10 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //indicies - if these indicies are invalid, set them to be empty.
   const seqIdxsToRender =
     !reduxState ||
-    sequenceLength !== reduxState.sequenceLength ||
-    sequenceCount !== reduxState.sequenceCount
+    sequenceLength !== reduxState.columnCount ||
+    sequenceCount !== reduxState.rowCount
       ? []
-      : reduxState.seqIdxsToRender;
+      : reduxState.rowIdxsToRender;
 
   const seqsToRender = seqIdxsToRender.map((seqIdx) => {
     return sequences[seqIdx];
@@ -196,7 +196,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
               alignmentStyle={alignmentStyle}
               fontSize={fontSize}
               residueWidth={residueWidth}
-              residueHeight={reduxState.residueHeight}
+              residueHeight={reduxState.rowHeight}
               stageWidth={reduxState.viewportWidth}
               stageHeight={reduxState.viewportHeight}
               viewport={{
@@ -210,8 +210,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   worldWidth: reduxState.worldWidth,
                   worldHeight: reduxState.worldHeight,
                   worldTopOffset: reduxState.worldTopOffset,
-                  residueWidth: reduxState.residueWidth,
-                  residueHeight: reduxState.residueHeight,
+                  columnWidth: reduxState.columnWidth,
+                  rowHeight: reduxState.rowHeight,
                   viewportMoved: (newWorldTop) => {
                     dispatch(
                       setWorldTopOffset({ id: id, worldTopOffset: newWorldTop })

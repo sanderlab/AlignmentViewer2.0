@@ -20,8 +20,8 @@ export interface IAlignmentDetailsViewportProps {
   worldWidth: number;
   worldHeight: number;
   worldTopOffset: number;
-  residueWidth: number;
-  residueHeight: number;
+  columnWidth: number;
+  rowHeight: number;
   viewportMoved(newWorldTop: number): void;
   mouseMoved?(event: IMouseLocation): void;
   clicked?(event: IMouseLocation): void;
@@ -66,8 +66,8 @@ export const AlignmentDetailsViewport = PixiComponent<
       app,
       screenWidth,
       screenHeight,
-      residueWidth,
-      residueHeight,
+      columnWidth,
+      rowHeight,
       worldWidth,
       worldHeight,
       worldTopOffset,
@@ -117,8 +117,8 @@ export const AlignmentDetailsViewport = PixiComponent<
             mouseMoved({
               worldX: event.data.global.x,
               worldY: event.data.global.y,
-              sequenceIdx: Math.floor(event.data.global.y / residueHeight),
-              residueIdx: Math.floor(event.data.global.x / residueWidth),
+              sequenceIdx: Math.floor(event.data.global.y / rowHeight),
+              residueIdx: Math.floor(event.data.global.x / columnWidth),
             });
           }
         });
@@ -137,8 +137,8 @@ export const AlignmentDetailsViewport = PixiComponent<
           clicked({
             worldX: event.world.x,
             worldY: event.world.y,
-            sequenceIdx: Math.floor(event.world.y / residueHeight),
-            residueIdx: Math.floor(event.world.x / residueWidth),
+            sequenceIdx: Math.floor(event.world.y / rowHeight),
+            residueIdx: Math.floor(event.world.x / columnWidth),
           });
         });
       }

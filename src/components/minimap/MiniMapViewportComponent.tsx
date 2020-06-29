@@ -21,7 +21,7 @@ export const MiniMapViewport = PixiComponent<IMiniMapViewportProps, any>(
   "MiniMapViewport",
   {
     create(props: IMiniMapViewportProps) {
-      const { app, numColumns, numRows, stageWidth, stageHeight } = props;
+      const { app, numColumns, numRows, stageWidth } = props;
       app.renderer.backgroundColor = 0xffffff;
 
       const useDrag = true; // Allows the user to drag the viewport around.

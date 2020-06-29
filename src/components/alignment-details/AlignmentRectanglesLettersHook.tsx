@@ -1,7 +1,7 @@
 /**
  * Base hook for pure webgl alignment details.
  */
-import React, { useState } from "react";
+import React from "react";
 import "./AlignmentDetails.scss";
 
 import { AlignmentDetailsLetters } from "./AlignmentDetailsLettersHook";
@@ -12,7 +12,7 @@ import {
   IAlignmentDetailsViewportProps,
 } from "./AlignmentDetailsViewportComponent";
 
-import { Stage, AppContext, Sprite } from "@inlet/react-pixi";
+import { Stage, AppContext } from "@inlet/react-pixi";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
