@@ -1,11 +1,11 @@
 /**
- * Base react hook for a webgl detailed alignment scrollbar.
+ * Base react hook for a virtual vertical scrollbar.
  */
+import "./VirtualScrollbars.scss";
 import React, { useEffect, useRef, useState } from "react";
-import "./AlignmentDetails.scss";
 import { ResizeSensor } from "css-element-queries";
 
-interface IWebGLScrollbarProps {
+interface IVirtualScrollbarProps {
   visible: boolean;
   worldHeight: number;
   worldTopOffset: number;
@@ -14,7 +14,7 @@ interface IWebGLScrollbarProps {
   scrollbarMoved(newWorldTop: number): void;
 }
 
-export function AlignmentDetailsScrollbar(props: IWebGLScrollbarProps) {
+export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
   const {
     width = 10,
     minHeight = 20,

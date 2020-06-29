@@ -8,7 +8,7 @@ import * as PIXI from "pixi.js";
 import { ResizeSensor } from "css-element-queries";
 import { Provider, useDispatch, useSelector } from "react-redux";
 
-import { AlignmentDetailsScrollbar } from "./AlignmentDetailsScrollbarHook";
+import { VirtualVerticalScrollbar } from "../virtualization/VirtualVerticalScrollbarHook";
 import { AlignmentRectanglesAndLetters } from "./AlignmentRectanglesLettersHook";
 
 import {
@@ -226,7 +226,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           )}
         </div>
         {disableScrolling ? null : (
-          <AlignmentDetailsScrollbar
+          <VirtualVerticalScrollbar
             visible={mouseHovering}
             worldHeight={reduxState.worldHeight}
             worldTopOffset={reduxState.worldTopOffset}
