@@ -2,8 +2,8 @@
  * Base react hook for a virtual vertical scrollbar.
  */
 import "./VirtualScrollbars.scss";
-import React, { useEffect, useRef, useState } from "react";
-import { ResizeSensor } from "css-element-queries";
+import React, { useState } from "react";
+import { ReactResizeSensor } from "../ResizeSensorHook";
 
 interface IVirtualScrollbarProps {
   visible: boolean;
@@ -25,9 +25,6 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
   const SCROLLBAR_HOLDER_WIDTH = width + 6;
   const SCROLLBAR_OFFSET = (SCROLLBAR_HOLDER_WIDTH - width) / 2;
 
-  //ref to div
-  const scrollbarHolderRef = useRef<HTMLDivElement>(null);
-
   //props
   const { visible } = props;
 
@@ -41,36 +38,6 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
     height: 100,
     top: 0,
   });
-
-  //sizing - could be passed as a prop, but doing this calculation here in case
-  //         the parent does something odd with css and messes up the actual
-  //         spacing that the scrollbar consumes.
-  useEffect(() => {
-    if (scrollbarHolderRef.current) {
-      const rs = new ResizeSensor(scrollbarHolderRef.current, () => {
-        if (scrollbarHolderRef.current) {
-          const rect = scrollbarHolderRef.current!.getBoundingClientRect();
-          if (
-            scrollbarHolderProportions.top !== rect.top ||
-            scrollbarHolderProportions.height !== rect.height
-          ) {
-            setScrollbarHolderProportions({
-              height: rect.height,
-              top: rect.top,
-            });
-          }
-        }
-      });
-      return () => {
-        rs.detach();
-      };
-    } else {
-      console.error(
-        "Unable to add resize sensor as scrollbarHolderRef.current was not defined",
-        scrollbarHolderRef
-      );
-    }
-  }, [scrollbarHolderProportions]);
 
   //calculate all sizing into one variable
   const scrollbarSizing = (() => {
@@ -202,7 +169,6 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
   return (
     <>
       <div
-        ref={scrollbarHolderRef}
         className="vertical-scrollbar-holder"
         style={{
           width: SCROLLBAR_HOLDER_WIDTH,
@@ -217,6 +183,23 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
           scrollbarMoved(newPixelsFromWorldTop);
         }}
       >
+        <ReactResizeSensor
+          onSizeChanged={(bounds) => {
+            //sizing - could be passed as a prop, but doing this calculation here in case
+            //         the parent does something odd with css and messes up the actual
+            //         spacing that the scrollbar consumes.
+            if (
+              !scrollbarHolderProportions ||
+              scrollbarHolderProportions.top !== bounds.top ||
+              scrollbarHolderProportions.height !== bounds.height
+            ) {
+              setScrollbarHolderProportions({
+                height: bounds.height,
+                top: bounds.top,
+              });
+            }
+          }}
+        />
         {renderDragger()}
       </div>
       {renderFullpageDragDiv()}

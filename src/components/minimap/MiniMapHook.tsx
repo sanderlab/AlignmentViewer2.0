@@ -1,6 +1,14 @@
 import * as React from "react";
 import "./MiniMap.scss";
 import * as PIXI from "pixi.js";
+import { useRef, useEffect } from "react";
+import { Stage, AppContext } from "@inlet/react-pixi";
+import { useDispatch, useSelector } from "react-redux";
+
+import { MiniMapViewport } from "./MiniMapViewportComponent";
+import { MinimapPositionHighlighter } from "./MinimapPositionHighlighterComponent";
+
+import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
 import { Alignment } from "../../common/Alignment";
 import { SequenceSorter } from "../../common/AlignmentSorter";
@@ -9,15 +17,9 @@ import {
   NucleotideAlignmentStyle,
   ResidueStyle,
 } from "../../common/MolecularStyles";
-import { ResizeSensor } from "css-element-queries";
-import { useRef, useEffect } from "react";
-import { Stage, AppContext } from "@inlet/react-pixi";
-import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
-import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
-import { MiniMapViewport } from "./MiniMapViewportComponent";
-import { useDispatch, useSelector } from "react-redux";
 import { RootState, setRowTopOffset } from "../../common/ReduxStore";
-import { MinimapPositionHighlighter } from "./MinimapPositionHighlighterComponent";
+import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
+import { ReactResizeSensor } from "../ResizeSensorHook";
 
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
@@ -81,7 +83,7 @@ export function MiniMap(props: IMiniMapProps) {
       : state.virtualizedMatrixSlice[syncWithAlignmentDetailsId]
   );
 
-  //sizing - dynamically update state when div changes size
+  //effects
   useEffect(() => {
     PIXI.utils.skipHello();
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -89,35 +91,7 @@ export function MiniMap(props: IMiniMapProps) {
     //fix safari-specific bug - this function will tell the window to stop
     //blocking scroll events on the "minimap-canvas" class
     stopSafariFromBlockingWindowWheel("minimap-canvas");
-
-    if (minimapRef.current) {
-      const rs = new ResizeSensor(minimapRef.current, (x) => {
-        if (minimapRef.current) {
-          if (
-            !resizedDimensions ||
-            resizedDimensions.width !== minimapRef.current.clientHeight ||
-            resizedDimensions.height !== minimapRef.current.clientWidth
-          ) {
-            setTimeout(() => {
-              //flashes (worse) without setTimeout. Safari still flashing.
-              setResizedDimensions({
-                width: minimapRef.current!.clientWidth,
-                height: minimapRef.current!.clientHeight,
-              });
-            });
-          }
-        }
-      });
-      return () => {
-        rs.detach();
-      };
-    } else {
-      console.error(
-        "Unable to add resize sensor as minimapRef.current was not defined",
-        minimapRef
-      );
-    }
-  }, [resizedDimensions]);
+  }, []);
 
   const frameSizing = (() => {
     if (!resizedDimensions) return undefined;
@@ -279,9 +253,29 @@ export function MiniMap(props: IMiniMapProps) {
         direction: alignHorizontal === "left" ? "ltr" : "rtl",
       }}
     >
-      {!frameSizing
-        ? null
-        : renderAlignment(frameSizing.frameWidth, frameSizing.frameHeight)}
+      <ReactResizeSensor
+        onSizeChanged={(bounds) => {
+          if (
+            !resizedDimensions ||
+            resizedDimensions.width !== bounds.width ||
+            resizedDimensions.height !== bounds.height
+          ) {
+            //setTimeout(() => {
+            //flashes (worse) without setTimeout. Safari still flashing.
+            //seems fixed by putting into the resize component - left for
+            //info in case you notice flashing in the future
+            setResizedDimensions({
+              width: minimapRef.current!.clientWidth,
+              height: minimapRef.current!.clientHeight,
+            });
+            //});
+          }
+        }}
+      >
+        {!frameSizing
+          ? null
+          : renderAlignment(frameSizing.frameWidth, frameSizing.frameHeight)}
+      </ReactResizeSensor>
     </div>
   );
 }

@@ -7,18 +7,11 @@ import "./AlignmentDetails.scss";
 import { AlignmentDetailsLetters } from "./AlignmentDetailsLettersHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
-import {
-  AlignmentDetailsViewport,
-  IAlignmentDetailsViewportProps,
-} from "./AlignmentDetailsViewportComponent";
-
 import { Stage, AppContext } from "@inlet/react-pixi";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
 } from "../../common/MolecularStyles";
-import { Provider } from "react-redux";
-import { EnhancedStore } from "@reduxjs/toolkit";
 
 interface IAlignmentRectanglesAndLettersProps {
   render: "letters" | "rectangles" | "letters_and_rectangles";
@@ -40,14 +33,6 @@ interface IAlignmentRectanglesAndLettersProps {
   residueHeight: number;
   stageWidth: number;
   stageHeight: number;
-
-  //viewport
-  viewport?:
-    | undefined
-    | {
-        store: EnhancedStore;
-        props: Omit<IAlignmentDetailsViewportProps, "app">;
-      };
 }
 
 export function AlignmentRectanglesAndLetters(
@@ -69,45 +54,7 @@ export function AlignmentRectanglesAndLetters(
     residueHeight,
     stageWidth,
     stageHeight,
-
-    viewport,
   } = props;
-
-  /**
-   *
-   *
-   *
-   * Render the background colored rectangles using webgl.
-   * (or not if letter only residue style is selected)
-   *
-   *
-   *
-   */
-  const renderViewport = () => {
-    return (
-      <Stage
-        className="interaction-viewport stage"
-        width={stageWidth}
-        height={stageHeight}
-        options={{ transparent: true }}
-      >
-        <AppContext.Consumer>
-          {(app) => (
-            //entrypoint to the interaction viewport for registering scroll
-            //and zoom and other events. This is not rendering anything, but
-            //is used to calculate interaction changes and report them
-            //back to this component.
-            <Provider store={viewport!.store}>
-              <AlignmentDetailsViewport
-                app={app}
-                {...viewport!.props}
-              ></AlignmentDetailsViewport>
-            </Provider>
-          )}
-        </AppContext.Consumer>
-      </Stage>
-    );
-  };
 
   /**
    *
@@ -191,7 +138,6 @@ export function AlignmentRectanglesAndLetters(
       {render === "letters" || render === "letters_and_rectangles"
         ? renderLetters()
         : null}
-      {!viewport ? null : renderViewport()}
     </>
   );
 }

@@ -1,7 +1,7 @@
 /**
  * Hook for rendering the position axis
  */
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useCallback } from "react";
 import "./PositionalAxis.scss";
 
 /**
@@ -42,29 +42,23 @@ export function PositionalAxis(props: {
 }) {
   const { fontSize, positions, scrollerLoaded, scrollerUnloaded } = props;
 
-  //ref to div
-  const positionalAxisRef = useRef<HTMLDivElement>(null);
-
-  //sizing - dynamically update state when div changes size
-  useEffect(() => {
-    if (scrollerLoaded && positionalAxisRef.current) {
-      scrollerLoaded(positionalAxisRef.current);
-      return () => {
-        if (!positionalAxisRef.current) {
-          console.error(
-            "References to positional axis is not availalbe:",
-            positionalAxisRef
-          );
-        } else {
-          scrollerUnloaded(positionalAxisRef.current);
-        }
-      };
-    }
-  }, [scrollerLoaded]);
+  //ref
+  const ref = useRef<HTMLDivElement>();
+  const refCallback = useCallback(
+    (node) => {
+      if (!node && ref.current) {
+        scrollerUnloaded(ref.current);
+      } else {
+        scrollerLoaded(node);
+      }
+      ref.current = node;
+    },
+    [scrollerLoaded, scrollerUnloaded]
+  );
 
   return (
     <div
-      ref={positionalAxisRef}
+      ref={refCallback}
       className="positional-axis"
       style={{ fontSize: fontSize }}
     >

@@ -22,7 +22,6 @@ export * from "./components/SequenceBarplotComponent.js";
 export * from "./components/SequenceLogoComponent.js";
 
 export * from "./components/alignment-details/AlignmentDetailsHook.js";
-export * from "./components/alignment-details/AlignmentDetailsScrollbarHook.js";
 export * from "./components/alignment-details/AlignmentDetailsViewportComponent.js";
 
 export * from "./components/minimap/MiniMapHook";

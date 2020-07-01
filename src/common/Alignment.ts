@@ -94,7 +94,6 @@ export class Alignment {
     //happens regardless of whether prop requested in order to
     //report # duplicates
     let numberDuplicateSequences = 0;
-    console.log("sequencesAsInput:", sequencesAsInput);
     const sequencesWithoutDuplicates = Array.from(
       sequencesAsInput
         .reduce((acc, iseq, idx) => {

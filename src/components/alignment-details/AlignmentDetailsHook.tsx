@@ -1,11 +1,10 @@
 /**
  * Base hook for pure webgl alignment details.
  */
-import React, { useEffect, useRef, useState } from "react";
 import "./AlignmentDetails.scss";
-
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import * as PIXI from "pixi.js";
-import { ResizeSensor } from "css-element-queries";
+
 import { Provider, useDispatch, useSelector } from "react-redux";
 
 import { VirtualVerticalScrollbar } from "../virtualization/VirtualVerticalScrollbarHook";
@@ -25,6 +24,9 @@ import {
   setWorldTopOffset,
 } from "../../common/ReduxStore";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
+import { ReactResizeSensor } from "../ResizeSensorHook";
+import { Stage, AppContext } from "@inlet/react-pixi";
+import { AlignmentDetailsViewport } from "./AlignmentDetailsViewportComponent";
 
 export interface IAlignmentDetailsProps {
   id: string;
@@ -52,14 +54,36 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     alignmentStyle,
     residueHeight,
     residueWidth,
+    scrollerLoaded,
+    scrollerUnloaded,
     fontSize,
   } = props;
 
-  //ref to div
-  const alignmentDetailsRef = useRef<HTMLDivElement>(null);
+  //scroller ref
+  const scrollerRef = useRef<HTMLElement>();
+  const scrollerRefCallback = useCallback(
+    (node) => {
+      if (!node && scrollerRef.current) {
+        //unmounting
+        scrollerUnloaded(scrollerRef.current);
+      } else {
+        PIXI.utils.skipHello();
+        PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+        //fix safari-specific bug - this function will tell the window to stop
+        //blocking scroll events on the "single-sequence-text" class
+        stopSafariFromBlockingWindowWheel("single-sequence-text");
+        stopSafariFromBlockingWindowWheel("stage");
+        stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
+
+        scrollerLoaded(node);
+      }
+      scrollerRef.current = node;
+    },
+    [scrollerLoaded, scrollerUnloaded]
+  );
 
   //state
-  const [resizeSensor, setResizeSensor] = useState<ResizeSensor | null>(null);
   const [mouseHovering, setMouseHovering] = useState<boolean>(false);
 
   //redux
@@ -67,57 +91,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   const reduxState: IVirtualizedMatrixState | undefined = useSelector(
     (rootState: RootState) => rootState.virtualizedMatrixSlice[id]
   );
-  //console.log(id + " :: reduxState:", reduxState);
 
-  //sizing - dynamically update state when div changes size
-  useEffect(() => {
-    if (!reduxState || resizeSensor) {
-      //only setup one time.
-      return;
-    }
-    PIXI.utils.skipHello();
-    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-
-    //fix safari-specific bug - this function will tell the window to stop
-    //blocking scroll events on the "single-sequence-text" class
-    stopSafariFromBlockingWindowWheel("single-sequence-text");
-    stopSafariFromBlockingWindowWheel("stage");
-    stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
-
-    if (alignmentDetailsRef.current) {
-      props.scrollerLoaded(alignmentDetailsRef.current);
-
-      const rs = new ResizeSensor(alignmentDetailsRef.current, () => {
-        if (alignmentDetailsRef.current) {
-          const rect = alignmentDetailsRef.current!.getBoundingClientRect();
-          if (
-            reduxState.clientWidth !== rect.width ||
-            reduxState.clientHeight !== rect.height
-          ) {
-            dispatch(
-              setViewportDimensions({
-                id: id,
-                clientWidth: rect.width,
-                clientHeight: rect.height,
-              })
-            );
-          }
-        }
-      });
-      setResizeSensor(rs);
-      return () => {
-        rs.detach();
-        setResizeSensor(null);
-        props.scrollerUnloaded(alignmentDetailsRef.current!);
-      };
-    } else {
-      console.error(
-        "Unable to add resize sensor as alignmentDetailsRef.current was not defined",
-        alignmentDetailsRef
-      );
-    }
-  }, [reduxState !== undefined]);
-
+  //effects
   useEffect(() => {
     dispatch(
       setMatrixDimensions({
@@ -126,7 +101,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         rowHeight: residueHeight,
       })
     );
-  }, [residueHeight, residueWidth]);
+  }, [dispatch, id, residueHeight, residueWidth]);
 
   const sequenceCount = sequences.length;
   const sequenceLength = sequenceCount > 0 ? sequences[0].length : 0;
@@ -138,7 +113,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         columnCount: sequenceLength,
       })
     );
-  }, [sequenceCount, sequenceLength]);
+  }, [dispatch, id, sequenceCount, sequenceLength]);
 
   const disableScrolling = !reduxState
     ? true
@@ -181,62 +156,96 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           setMouseHovering(false);
         }}
       >
-        <div ref={alignmentDetailsRef} className="viewport">
-          {!reduxState ||
-          !reduxState.initialized ||
-          !alignmentDetailsRef.current ? null : (
-            <AlignmentRectanglesAndLetters
-              render="letters_and_rectangles"
-              sequences={seqsToRender}
-              consensusSequence={consensusSequence}
-              querySequence={querySequence}
-              additionalVerticalOffset={
-                reduxState.scrollingAdditionalVerticalOffset
-              }
-              alignmentStyle={alignmentStyle}
-              fontSize={fontSize}
-              residueWidth={residueWidth}
-              residueHeight={reduxState.rowHeight}
-              stageWidth={reduxState.viewportWidth}
-              stageHeight={reduxState.viewportHeight}
-              viewport={{
-                store: store,
-                props: {
-                  parentElement: alignmentDetailsRef.current,
-                  //!important: width is rendered fully - if set to clientWidth, then the viewport
-                  //doesn't notify of scrolling on the rendered-but-hidden area (right side)
-                  screenWidth: reduxState.worldWidth,
-                  screenHeight: reduxState.clientHeight,
-                  worldWidth: reduxState.worldWidth,
-                  worldHeight: reduxState.worldHeight,
-                  worldTopOffset: reduxState.worldTopOffset,
-                  columnWidth: reduxState.columnWidth,
-                  rowHeight: reduxState.rowHeight,
-                  viewportMoved: (newWorldTop) => {
-                    dispatch(
-                      setWorldTopOffset({ id: id, worldTopOffset: newWorldTop })
-                    );
-                  },
-                  //mouseMoved: (e) => {
-                  //  console.log("mose moved:", e);
-                  //},
-                },
+        <ReactResizeSensor
+          onSizeChanged={(bounds) => {
+            dispatch(
+              setViewportDimensions({
+                id: id,
+                clientWidth: bounds.width,
+                clientHeight: bounds.height,
+              })
+            );
+          }}
+        >
+          <div className="viewport" ref={scrollerRefCallback}>
+            {!reduxState ||
+            !reduxState.initialized ||
+            !scrollerRef.current ? null : (
+              <>
+                <AlignmentRectanglesAndLetters
+                  render="letters_and_rectangles"
+                  sequences={seqsToRender}
+                  consensusSequence={consensusSequence}
+                  querySequence={querySequence}
+                  additionalVerticalOffset={
+                    reduxState.scrollingAdditionalVerticalOffset
+                  }
+                  alignmentStyle={alignmentStyle}
+                  fontSize={fontSize}
+                  residueWidth={residueWidth}
+                  residueHeight={reduxState.rowHeight}
+                  stageWidth={reduxState.viewportWidth}
+                  stageHeight={reduxState.viewportHeight}
+                ></AlignmentRectanglesAndLetters>
+
+                <Stage
+                  className="interaction-viewport stage"
+                  width={reduxState.viewportWidth}
+                  height={reduxState.viewportHeight}
+                  options={{ transparent: true }}
+                >
+                  <AppContext.Consumer>
+                    {(app) => (
+                      //entrypoint to the interaction viewport for registering scroll
+                      //and zoom and other events. This is not rendering anything, but
+                      //is used to calculate interaction changes and report them
+                      //back to this component.
+                      <Provider store={store}>
+                        <AlignmentDetailsViewport
+                          app={app}
+                          parentElement={scrollerRef.current!}
+                          //!important: width is rendered fully - if set to clientWidth, then the viewport
+                          //doesn't notify of scrolling on the rendered-but-hidden area (right side)
+                          screenWidth={reduxState.worldWidth}
+                          screenHeight={reduxState.clientHeight}
+                          worldWidth={reduxState.worldWidth}
+                          worldHeight={reduxState.worldHeight}
+                          worldTopOffset={reduxState.worldTopOffset}
+                          columnWidth={reduxState.columnWidth}
+                          rowHeight={reduxState.rowHeight}
+                          viewportMoved={(newWorldTop) => {
+                            dispatch(
+                              setWorldTopOffset({
+                                id: id,
+                                worldTopOffset: newWorldTop,
+                              })
+                            );
+                          }}
+                          //mouseMoved: (e) => {
+                          //  console.log("mose moved:", e);
+                          //},
+                        ></AlignmentDetailsViewport>
+                      </Provider>
+                    )}
+                  </AppContext.Consumer>
+                </Stage>
+              </>
+            )}
+          </div>
+
+          {disableScrolling ? null : (
+            <VirtualVerticalScrollbar
+              visible={mouseHovering}
+              worldHeight={reduxState.worldHeight}
+              worldTopOffset={reduxState.worldTopOffset}
+              scrollbarMoved={(newWorldTop) => {
+                dispatch(
+                  setWorldTopOffset({ id: id, worldTopOffset: newWorldTop })
+                );
               }}
-            ></AlignmentRectanglesAndLetters>
+            />
           )}
-        </div>
-        {disableScrolling ? null : (
-          <VirtualVerticalScrollbar
-            visible={mouseHovering}
-            worldHeight={reduxState.worldHeight}
-            worldTopOffset={reduxState.worldTopOffset}
-            scrollbarMoved={(newWorldTop) => {
-              dispatch(
-                setWorldTopOffset({ id: id, worldTopOffset: newWorldTop })
-              );
-            }}
-          />
-        )}
+        </ReactResizeSensor>
       </div>
     </Provider>
   );
