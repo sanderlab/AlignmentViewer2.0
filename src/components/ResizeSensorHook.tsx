@@ -14,8 +14,6 @@ export interface IAlignmentMetadataProps {
     height: number;
     left: number;
     top: number;
-    x: number;
-    y: number;
   }): void;
   children?: ReactNode;
 }
@@ -27,6 +25,9 @@ export function ReactResizeSensor(props: IAlignmentMetadataProps) {
   //main ref
   const hiddenMeasuringDivRef = useRef<HTMLDivElement>();
   const resizeSensor = useRef<ResizeSensor>();
+
+  //ref for last sizing
+  const lastBounds = useRef<DOMRect>();
 
   //callback executed whenever ref changes
   const resizeSensorRefCallback = useCallback(
@@ -42,7 +43,16 @@ export function ReactResizeSensor(props: IAlignmentMetadataProps) {
         // You can now do what you need to, addEventListeners, measure, etc.
         resizeSensor.current = new ResizeSensor(node, (dimensions) => {
           const rect = node.getBoundingClientRect() as DOMRect;
-          onSizeChanged(rect);
+          if (
+            !lastBounds.current ||
+            lastBounds.current.left !== rect.left ||
+            lastBounds.current.top !== rect.top ||
+            lastBounds.current.width !== rect.width ||
+            lastBounds.current.height !== rect.height
+          ) {
+            lastBounds.current = rect;
+            onSizeChanged(rect);
+          }
         });
       }
 
