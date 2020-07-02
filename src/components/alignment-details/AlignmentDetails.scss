@@ -1,15 +1,14 @@
 /** WebGLAlignmentComponent.scss */
 
 // make scrollbar transparent on query and consensus sequences
-.alignment-details-holder.query-alignment-details .viewport::-webkit-scrollbar,
-.alignment-details-holder.consensus-alignment-details
-  .viewport::-webkit-scrollbar {
+.query-alignment-details .av-viewport::-webkit-scrollbar,
+.consensus-alignment-details .av-viewport::-webkit-scrollbar {
   background: transparent;
   height: 0;
 }
 
-.alignment-details-holder .viewport {
-  overflow-x: auto;
+.av-viewport {
+  overflow-x: hidden;
   overflow-y: hidden;
   position: absolute;
   top: 0;

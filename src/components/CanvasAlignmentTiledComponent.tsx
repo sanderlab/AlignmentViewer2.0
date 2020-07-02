@@ -38,6 +38,7 @@ export interface ICanvasAlignmentTiledProps {
   residueDetail: ResidueStyle;
   scale?: { x: number; y: number };
   translateY?: number;
+  translateX?: number;
 }
 
 export class CanvasAlignmentTiled extends React.Component<
@@ -119,7 +120,10 @@ export class CanvasAlignmentTiled extends React.Component<
         {tiledImages.tiles.map((tile) => (
           <Sprite
             source={tile.image}
-            x={tile.pixelX * (scale ? scale.x : 1)}
+            x={
+              tile.pixelX * (scale ? scale.x : 1) +
+              (this.props.translateX ? this.props.translateX : 0)
+            }
             y={
               tile.pixelY * (scale ? scale.y : 1) +
               (this.props.translateY ? this.props.translateY : 0)

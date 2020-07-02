@@ -134,8 +134,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     return sequences[seqIdx];
   });
 
-  const additionalClassName = className ? " " + className : "";
-
   /**
    *
    *
@@ -148,7 +146,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   return (
     <Provider store={store}>
       <div
-        className={`alignment-details-holder${additionalClassName}`}
+        className={className}
         onMouseEnter={() => {
           setMouseHovering(true);
         }}
@@ -167,7 +165,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
             );
           }}
         >
-          <div className="viewport" ref={scrollerRefCallback}>
+          <div className="av-viewport" ref={scrollerRefCallback}>
             {!reduxState ||
             !reduxState.initialized ||
             !scrollerRef.current ? null : (
@@ -192,6 +190,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   className="interaction-viewport stage"
                   width={reduxState.viewportWidth}
                   height={reduxState.viewportHeight}
+                  raf={false}
                   options={{ transparent: true }}
                 >
                   <AppContext.Consumer>

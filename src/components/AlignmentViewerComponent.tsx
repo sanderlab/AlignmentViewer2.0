@@ -21,6 +21,7 @@ import {
 import { MiniMap } from "./minimap/MiniMapHook";
 import { IMiniMapProps } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
+import { AlignmentDetailsNew } from "./alignment-details/AlignmentDetailsNEW";
 import { Provider } from "react-redux";
 import { getAlignmentFontDetails } from "../common/Utils";
 
@@ -419,9 +420,8 @@ export class AlignmentViewer extends React.Component<
           "alignment-details-holder",
           "details:",
           <Provider store={store}>
-            <AlignmentDetails
+            <AlignmentDetailsNew
               id="full-alignment-details"
-              className="full-alignment-details"
               sequences={this.props.alignment
                 .getSequences(
                   this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
@@ -433,13 +433,7 @@ export class AlignmentViewer extends React.Component<
               fontSize={fontSize}
               residueHeight={residueHeight}
               residueWidth={residueWidth}
-              scrollerLoaded={(scroller) => {
-                this.horizontalScrollSync.registerElementScroller(scroller);
-              }}
-              scrollerUnloaded={(scroller) => {
-                this.horizontalScrollSync.unRegisterElementScroller(scroller);
-              }}
-            />
+            ></AlignmentDetailsNew>
           </Provider>,
           { height: singleSeqDivHeight }
         )}

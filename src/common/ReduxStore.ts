@@ -11,8 +11,9 @@ export interface IVirtualizedMatrixState {
   //and has enough info to render the msa
   initialized: boolean;
 
-  //the number of pixels from the world top where the viewport should start
+  //the number of pixels from the world top and world left where the viewport should start
   worldTopOffset: number;
+  worldLeftOffset: number;
 
   //the scale
   columnWidth: number;
@@ -23,15 +24,17 @@ export interface IVirtualizedMatrixState {
   //
 
   //when scrolling, some lines often become partially visible and
-  //this controls the vertical offset one should apply to the lines
-  //when they are placed in the div.
+  //this controls the vertical/horizontal offset one should apply to the
+  //lines/columns when they are placed in the div.
   //It will always be negative or zero
   scrollingAdditionalVerticalOffset: number;
+  scrollingAdditionalHorizontalOffset: number;
 
-  // the actual number of lines that should be rendered taking into
+  // the actual number of lines and columns that should be rendered taking into
   // account the viewport location (top, bottom, in the middle) and
   // line offsets
   rowIdxsToRender: number[];
+  columnIdxsToRender: number[];
 
   //the surrounding div dimensions
   clientWidth: number;
@@ -67,6 +70,7 @@ const initializeNewIdAsNeeded = (
       initialized: false,
 
       worldTopOffset: 0,
+      worldLeftOffset: 0,
 
       rowHeight: -1,
       columnWidth: -1,
@@ -81,7 +85,9 @@ const initializeNewIdAsNeeded = (
       columnCount: -1,
 
       rowIdxsToRender: [],
+      columnIdxsToRender: [],
       scrollingAdditionalVerticalOffset: -1,
+      scrollingAdditionalHorizontalOffset: -1,
     } as IVirtualizedMatrixState;
   }
   return state; // no need to copy, nothing done.
@@ -101,10 +107,18 @@ const initializeNewIdAsNeeded = (
  *     worldTopOffset (will only be changed if things are out of bounds)
  */
 const attachRenderDetails = (state: IVirtualizedMatrixState) => {
-  const { clientHeight, columnWidth, rowHeight, rowCount, columnCount } = state;
+  const {
+    clientHeight,
+    clientWidth,
+    columnWidth,
+    rowHeight,
+    rowCount,
+    columnCount,
+  } = state;
 
   if (
     clientHeight === -1 ||
+    clientWidth === -1 ||
     columnWidth === -1 ||
     rowHeight === -1 ||
     rowCount === -1 ||
@@ -117,23 +131,48 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
   state.worldHeight = rowCount * rowHeight;
   state.worldWidth = columnCount * columnWidth;
 
+  //easiest case -- everything fits into the visible screen
+  let allRowsFitInClient = false;
+  let allColumnsFitInClient = false;
   if (Math.floor(clientHeight / rowHeight) >= rowCount) {
     //all lines in the text will fit into the client - no offset positioning needed
     state.worldTopOffset = 0;
     state.scrollingAdditionalVerticalOffset = 0;
     state.rowIdxsToRender = [...Array(rowCount).keys()];
-    state.viewportWidth = columnCount * columnWidth;
     state.viewportHeight = state.rowIdxsToRender.length * rowHeight;
+    allRowsFitInClient = true;
+  }
+  if (Math.floor(clientWidth / columnWidth) >= columnCount) {
+    //all columns in the text will fit into the client - no offset positioning needed
+    state.worldLeftOffset = 0;
+    state.scrollingAdditionalHorizontalOffset = 0;
+    state.columnIdxsToRender = [...Array(columnCount).keys()];
+    state.viewportWidth = state.columnIdxsToRender.length * columnWidth;
+    allColumnsFitInClient = true;
+  }
+  if (allRowsFitInClient && allColumnsFitInClient) {
     return state;
   }
 
+  //clamp out of bounds
   if (state.worldTopOffset + clientHeight > state.worldHeight) {
     state.worldTopOffset = state.worldHeight - clientHeight;
   }
   if (state.worldTopOffset < 0) {
-    state.worldTopOffset = 0; // I don't think this should ever happen, but just in case
+    state.worldTopOffset = 0;
+  }
+  if (state.worldLeftOffset + clientWidth > state.worldWidth) {
+    state.worldLeftOffset = state.worldWidth - clientWidth;
+  }
+  if (state.worldLeftOffset < 0) {
+    state.worldLeftOffset = 0;
   }
 
+  //
+  //
+  // vertical offsets
+  //
+  //
   const topInMiddleOfLine = state.worldTopOffset % rowHeight !== 0;
   const bottomInMiddleOfLine =
     (state.worldTopOffset + clientHeight) % rowHeight !== 0;
@@ -160,9 +199,40 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
   state.rowIdxsToRender = [...Array(numLinesToRender).keys()].map(
     (zeroIdx) => zeroIdx + firstRenderedLine
   );
-
-  state.viewportWidth = columnCount * columnWidth;
   state.viewportHeight = state.rowIdxsToRender.length * rowHeight;
+
+  //
+  //
+  // horizontal offsets
+  //
+  //
+  const leftInMiddleOfColumn = state.worldLeftOffset % columnWidth !== 0;
+  const rightInMiddleOfColumn =
+    (state.worldLeftOffset + clientWidth) % columnWidth !== 0;
+
+  let firstRenderedColumn = Math.ceil(state.worldLeftOffset / columnWidth);
+  let numColumnsToRender = Math.floor(clientWidth / columnWidth);
+  if (leftInMiddleOfColumn && firstRenderedColumn - 1 >= 0) {
+    numColumnsToRender += 1;
+    firstRenderedColumn -= 1;
+  }
+  if (
+    rightInMiddleOfColumn &&
+    firstRenderedColumn + numColumnsToRender + 1 < columnCount
+  ) {
+    numColumnsToRender += 1;
+  }
+
+  //edge case: client width < 1 line. Show at least one in that case.
+  numColumnsToRender =
+    numColumnsToRender < 1 && columnCount > 0 ? 1 : numColumnsToRender;
+
+  state.scrollingAdditionalHorizontalOffset =
+    -1 * (state.worldLeftOffset % columnWidth);
+  state.columnIdxsToRender = [...Array(numColumnsToRender).keys()].map(
+    (zeroIdx) => zeroIdx + firstRenderedColumn
+  );
+  state.viewportWidth = state.columnIdxsToRender.length * columnWidth;
 
   return state;
 };
@@ -236,6 +306,17 @@ export const virtualizedMatrixSlice = createSlice({
       return state;
     },
 
+    setWorldLeftOffset: (
+      state,
+      action: PayloadAction<{ id: string; worldLeftOffset: number }>
+    ) => {
+      const { id, worldLeftOffset } = action.payload;
+      state = initializeNewIdAsNeeded(id, state);
+      state[id].worldLeftOffset = worldLeftOffset;
+      state[id] = attachRenderDetails(state[id]);
+      return state;
+    },
+
     setRowTopOffset: (
       state,
       action: PayloadAction<{ id: string; lineTopOffset: number }>
@@ -255,6 +336,7 @@ export const {
   setRowTopOffset,
   setViewportDimensions,
   setWorldTopOffset,
+  setWorldLeftOffset,
 } = virtualizedMatrixSlice.actions;
 
 /*

@@ -74,6 +74,7 @@ export function AlignmentDetailsLetters(props: {
   fontSize: number;
   lineHeight: number;
   verticalOffset: number;
+  horizontalOffset?: number;
 }) {
   const {
     sequencesToRender,
@@ -83,6 +84,7 @@ export function AlignmentDetailsLetters(props: {
     fontSize,
     lineHeight,
     verticalOffset,
+    horizontalOffset,
   } = props;
 
   //each sequence style will be rendered as a single separate div.
@@ -152,6 +154,7 @@ export function AlignmentDetailsLetters(props: {
       className="sequence-text-holder"
       style={{
         top: verticalOffset,
+        left: horizontalOffset,
       }}
     >
       <div
