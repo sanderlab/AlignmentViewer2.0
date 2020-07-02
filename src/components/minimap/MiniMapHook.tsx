@@ -129,6 +129,7 @@ export function MiniMap(props: IMiniMapProps) {
         <Stage
           width={frameWidth - 14} //add space for the dragger on safari
           height={frameHeight}
+          raf={false}
           options={{ transparent: false }}
           className="minimap-canvas"
         >

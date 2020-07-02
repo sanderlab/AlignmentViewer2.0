@@ -72,6 +72,7 @@ export function AlignmentRectanglesAndLetters(
         className="stage"
         width={stageWidth}
         height={stageHeight}
+        raf={false}
         options={{ antialias: false, transparent: true }}
       >
         <AppContext.Consumer>
