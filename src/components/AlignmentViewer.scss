@@ -12,16 +12,15 @@
   right: 0;
   bottom: 0;
 
-  //single row ace editors
+  //single row editors
   .av-widget.av-consensus-seq-holder,
   .av-widget.av-query-seq-holder,
   .av-widget.av-position-indicator-holder {
     height: 24px; //default, but this is set as a style
   }
 
-  //the main ace editor
-  .av-widget.alignment-details-holder,
-  .av-widget.av-ace-msa-holder {
+  //the main editor
+  .av-widget.alignment-details-holder {
     flex-grow: 4;
   }
 
