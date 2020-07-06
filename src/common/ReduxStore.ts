@@ -327,6 +327,32 @@ export const virtualizedMatrixSlice = createSlice({
       state[id] = attachRenderDetails(state[id]);
       return state;
     },
+
+    batchSetWorldLeftOffset: (
+      state,
+      action: PayloadAction<{ id: string; newOffset: number }[]>
+    ) => {
+      action.payload.forEach((obj) => {
+        const { id, newOffset } = obj;
+        state = initializeNewIdAsNeeded(id, state);
+        state[id].worldLeftOffset = newOffset;
+        state[id] = attachRenderDetails(state[id]);
+      });
+      return state;
+    },
+
+    batchSetWorldTopOffset: (
+      state,
+      action: PayloadAction<{ id: string; newOffset: number }[]>
+    ) => {
+      action.payload.forEach((obj) => {
+        const { id, newOffset } = obj;
+        state = initializeNewIdAsNeeded(id, state);
+        state[id].worldTopOffset = newOffset;
+        state[id] = attachRenderDetails(state[id]);
+      });
+      return state;
+    },
   },
 });
 
@@ -337,6 +363,8 @@ export const {
   setViewportDimensions,
   setWorldTopOffset,
   setWorldLeftOffset,
+  batchSetWorldLeftOffset,
+  batchSetWorldTopOffset,
 } = virtualizedMatrixSlice.actions;
 
 /*

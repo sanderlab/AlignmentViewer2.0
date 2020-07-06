@@ -1,7 +1,7 @@
 import {
   store,
-  setWorldTopOffset,
-  setWorldLeftOffset,
+  batchSetWorldTopOffset,
+  batchSetWorldLeftOffset,
   IVirtualizedMatrixState,
 } from "../../common/ReduxStore";
 
@@ -16,7 +16,7 @@ import {
  *
  * Originally made to work with ace editors as well, but now removed
  *
- * Ideas adapted to work  from 2 projects (each of which are aimed at dom elements):
+ * Ideas adapted to work from 2 projects (each of which are aimed at dom elements):
  *   https://github.com/okonet/react-scroll-sync
  *   https://github.com/AhmadMHawwash/scroll-sync-react
  */
@@ -37,6 +37,7 @@ export class VirtualizedScrollSync {
     | VirtualizedScrollType.vertical
     | VirtualizedScrollType.horizontal;
   private scrollers: string[];
+  private offsetPropName: "worldLeftOffset" | "worldTopOffset";
 
   /*
    *
@@ -52,6 +53,11 @@ export class VirtualizedScrollSync {
   ) {
     this.scrollDirection = scrollDirection;
     this.scrollers = [];
+
+    this.offsetPropName =
+      this.scrollDirection === VirtualizedScrollType.horizontal
+        ? "worldLeftOffset"
+        : "worldTopOffset";
 
     store.subscribe(this.stateChanged);
   }
@@ -91,11 +97,6 @@ export class VirtualizedScrollSync {
     const oldState = this.currentState;
     this.currentState = store.getState().virtualizedMatrixSlice;
 
-    const offsetPropName =
-      this.scrollDirection === VirtualizedScrollType.horizontal
-        ? "worldLeftOffset"
-        : "worldTopOffset";
-
     //determine whether any scrollers had their offsets changed
     const changedScrollerId = this.scrollers.find((scrollerId) => {
       if (!this.currentState) {
@@ -108,7 +109,7 @@ export class VirtualizedScrollSync {
         //first time
         if (
           this.currentState[scrollerId] &&
-          !isNaN(this.currentState[scrollerId][offsetPropName])
+          !isNaN(this.currentState[scrollerId][this.offsetPropName])
         ) {
           return true;
         }
@@ -116,41 +117,41 @@ export class VirtualizedScrollSync {
         if (
           oldState[scrollerId] &&
           this.currentState[scrollerId] &&
-          oldState[scrollerId][offsetPropName] !==
-            this.currentState[scrollerId][offsetPropName]
+          oldState[scrollerId][this.offsetPropName] !==
+            this.currentState[scrollerId][this.offsetPropName]
         ) {
           return true;
         }
       }
       return false;
     });
-    //console.log("changedScrollerId:" + changedScrollerId);
 
     if (changedScrollerId) {
       //the offset did change on one of the scrollers
-      const newOffset = this.currentState[changedScrollerId][offsetPropName];
+      const newOffset = this.currentState[changedScrollerId][
+        this.offsetPropName
+      ];
+      const updatePayload: { id: string; newOffset: number }[] = [];
       this.scrollers.forEach((scrollerId) => {
         if (scrollerId !== changedScrollerId) {
           if (
             !this.currentState ||
             !this.currentState[scrollerId] ||
-            this.currentState[scrollerId][offsetPropName] !== newOffset
+            this.currentState[scrollerId][this.offsetPropName] !== newOffset
           ) {
-            if (this.scrollDirection === VirtualizedScrollType.horizontal) {
-              store.dispatch(
-                setWorldLeftOffset({
-                  id: scrollerId,
-                  worldLeftOffset: newOffset,
-                })
-              );
-            } else {
-              store.dispatch(
-                setWorldTopOffset({ id: scrollerId, worldTopOffset: newOffset })
-              );
-            }
+            updatePayload.push({ id: scrollerId, newOffset: newOffset });
           }
         }
       });
+
+      //do in one batch to avoid cycling
+      if (updatePayload.length > 0) {
+        if (this.scrollDirection === VirtualizedScrollType.horizontal) {
+          store.dispatch(batchSetWorldLeftOffset(updatePayload));
+        } else {
+          store.dispatch(batchSetWorldTopOffset(updatePayload));
+        }
+      }
     }
   };
 }
