@@ -1,8 +1,9 @@
 /**
  * Hook for rendering the position axis
  */
-import React, { useRef, useCallback } from "react";
 import "./PositionalAxis.scss";
+import React from "react";
+import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 /**
  * Generate a string axis (positional information) with one character per position
@@ -34,35 +35,34 @@ function generateTextualRuler(maxLength: number): string {
  * @param props
  */
 export function PositionalAxis(props: {
-  positions: number[];
+  id: string;
   fontSize: number;
-
-  scrollerLoaded: (e: HTMLElement) => void;
-  scrollerUnloaded: (e: HTMLElement) => void;
+  positions: number[];
+  residueHeight: number;
+  residueWidth: number;
 }) {
-  const { fontSize, positions, scrollerLoaded, scrollerUnloaded } = props;
-
-  //ref
-  const ref = useRef<HTMLDivElement>();
-  const refCallback = useCallback(
-    (node) => {
-      if (!node && ref.current) {
-        scrollerUnloaded(ref.current);
-      } else {
-        scrollerLoaded(node);
-      }
-      ref.current = node;
-    },
-    [scrollerLoaded, scrollerUnloaded]
-  );
+  const { id, fontSize, positions, residueHeight, residueWidth } = props;
 
   return (
-    <div
-      ref={refCallback}
-      className="positional-axis"
-      style={{ fontSize: fontSize }}
-    >
-      {generateTextualRuler(Math.max(...positions))}
-    </div>
+    <VirtualizedMatrixViewer
+      id={id}
+      columnCount={positions.length}
+      columnWidth={residueWidth}
+      rowCount={1}
+      rowHeight={residueHeight}
+      autoOffset={true}
+      getData={(rowIdxsToRender, colIdxsToRender) => {
+        const fullRuler = generateTextualRuler(Math.max(...positions));
+        return (
+          <div className="positional-axis" style={{ fontSize: fontSize }}>
+            {colIdxsToRender
+              .map((colIdx) => {
+                return fullRuler[colIdx];
+              })
+              .join("")}
+          </div>
+        );
+      }}
+    />
   );
 }

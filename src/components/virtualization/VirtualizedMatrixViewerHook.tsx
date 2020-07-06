@@ -35,10 +35,19 @@ interface IVirtualizedMatrixiewerProps {
   rowCount: number;
   columnWidth: number;
   rowHeight: number;
+  autoOffset: boolean;
 }
 
 export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
-  const { id, getData, columnCount, rowCount, columnWidth, rowHeight } = props;
+  const {
+    id,
+    autoOffset,
+    getData,
+    columnCount,
+    rowCount,
+    columnWidth,
+    rowHeight,
+  } = props;
 
   //ref
   const ref = useRef<HTMLDivElement>(null);
@@ -78,6 +87,16 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     [dispatch, id]
   );
 
+  const viewportSizeChanged = useCallback((bounds) => {
+    dispatch(
+      setViewportDimensions({
+        id: id,
+        clientWidth: bounds.width,
+        clientHeight: bounds.height,
+      })
+    );
+  }, []);
+
   //useEffect
   useEffect(() => {
     PIXI.utils.skipHello();
@@ -85,9 +104,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
     //fix safari-specific bug - this function will tell the window to stop
     //blocking scroll events on the "single-sequence-text" class
-    stopSafariFromBlockingWindowWheel("single-sequence-text");
-    stopSafariFromBlockingWindowWheel("stage");
-    stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
+    stopSafariFromBlockingWindowWheel("virtualized-matrix");
   }, []);
 
   useEffect(() => {
@@ -149,21 +166,21 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
           setMouseHovering(false);
         }}
       >
-        <ReactResizeSensor
-          onSizeChanged={(bounds) => {
-            dispatch(
-              setViewportDimensions({
-                id: id,
-                clientWidth: bounds.width,
-                clientHeight: bounds.height,
-              })
-            );
-          }}
-        >
+        <ReactResizeSensor onSizeChanged={viewportSizeChanged}>
           <div className="virtualized-matrix" ref={ref}>
             {!ref || !reduxState || !reduxState.initialized ? null : (
               <>
-                <div className="data">
+                <div
+                  className="data"
+                  style={{
+                    top: autoOffset
+                      ? reduxState.scrollingAdditionalVerticalOffset
+                      : undefined,
+                    left: autoOffset
+                      ? reduxState.scrollingAdditionalHorizontalOffset
+                      : undefined,
+                  }}
+                >
                   {getData(
                     rowIdxsToRender,
                     colIdxsToRender,

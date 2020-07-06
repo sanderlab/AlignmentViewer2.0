@@ -25,8 +25,8 @@ export interface IVirtualizedViewportProps {
   rowHeight: number;
   viewportMovedVertically(newWorldTop: number): void;
   viewportMovedHorizontally(newWorldLeft: number): void;
-  mouseMoved?(event: IMouseLocation): void;
-  clicked?(event: IMouseLocation): void;
+  //mouseMoved?(event: IMouseLocation): void;
+  //clicked?(event: IMouseLocation): void;
 }
 
 export const VirtualizedViewport = PixiComponent<
@@ -71,7 +71,6 @@ export const VirtualizedViewport = PixiComponent<
       worldHeight,
       worldLeftOffset,
       worldTopOffset,
-      mouseMoved,
       viewportMovedVertically,
       viewportMovedHorizontally,
     } = newProps;
@@ -117,6 +116,7 @@ export const VirtualizedViewport = PixiComponent<
       }
     });
 
+    /*
     if (mouseMoved !== oldProps.mouseMoved) {
       vp.off("mousemove");
       if (mouseMoved) {
@@ -131,7 +131,7 @@ export const VirtualizedViewport = PixiComponent<
           }
         });
       }
-    }
+    }*/
 
     //warning - clicked interferes with the letter selection. We need to use
     //"pointer-events: none" on the letter div, but it only partially works

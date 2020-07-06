@@ -49,9 +49,12 @@
     }
     .hidden-residues-for-copy-paste {
       position: absolute;
+      overflow-x: hidden;
+      overflow-y: hidden;
       top: 0;
       left: 0;
       color: rgba(0, 0, 0, 0);
+      pointer-events: all;
     }
   }
 }

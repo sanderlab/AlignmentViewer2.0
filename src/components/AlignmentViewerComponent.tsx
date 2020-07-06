@@ -1,9 +1,6 @@
-import React from "react";
 import "./AlignmentViewer.scss";
-import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
-import { ScrollSync, ScrollType } from "../common/ScrollSync";
-import { store } from "../common/ReduxStore";
+import React from "react";
+import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
 import {
   SequenceLogoComponent,
@@ -14,16 +11,22 @@ import {
   SequenceBarplotComponent,
   ISequenceBarplotProps,
 } from "./SequenceBarplotComponent";
+import { MiniMap } from "./minimap/MiniMapHook";
+import { IMiniMapProps } from "./minimap/MiniMapHook";
+import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
+import { Alignment } from "../common/Alignment";
+import { SequenceSorter } from "../common/AlignmentSorter";
+import { ScrollSync, ScrollType } from "../common/ScrollSync";
+import { store } from "../common/ReduxStore";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
-import { MiniMap } from "./minimap/MiniMapHook";
-import { IMiniMapProps } from "./minimap/MiniMapHook";
-import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
-import { AlignmentDetailsNew } from "./alignment-details/AlignmentDetailsNEW";
-import { Provider } from "react-redux";
 import { getAlignmentFontDetails } from "../common/Utils";
+import {
+  VirtualizedScrollSync,
+  VirtualizedScrollType,
+} from "../components/virtualization/VirtualizedScrollSync";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -93,7 +96,7 @@ interface IAlignmentViewerState {
     lastFullyVisibleRow: number;
   };
 
-  windowWidth: number;
+  //windowWidth: number;
 }
 
 const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
@@ -102,7 +105,16 @@ export class AlignmentViewer extends React.Component<
   IAlignmentViewerProps,
   IAlignmentViewerState
 > {
-  private verticalScrollSync: ScrollSync;
+  private static SCROLLER_COMPONENT_IDS = {
+    FULL_MSA: "full-alignment-details",
+    QUERY: "query-alignment-details",
+    CONSENSUS: "consensus-alignment-details",
+    POSITIONAL_AXIS: "positional-axis",
+  };
+
+  private verticalVirtualizedScrollSync: VirtualizedScrollSync;
+  private horizontalVirtualizedScrollSync: VirtualizedScrollSync;
+
   private horizontalScrollSync: ScrollSync;
 
   static defaultProps = defaultProps;
@@ -111,13 +123,25 @@ export class AlignmentViewer extends React.Component<
     super(props);
 
     this.state = {
-      windowWidth: window.innerWidth,
+      //windowWidth: window.innerWidth,
     };
-
-    this.verticalScrollSync = new ScrollSync(ScrollType.vertical);
     this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
 
     this.windowDimensionsUpdated = this.windowDimensionsUpdated.bind(this);
+
+    this.verticalVirtualizedScrollSync = new VirtualizedScrollSync(
+      VirtualizedScrollType.vertical
+    );
+    this.horizontalVirtualizedScrollSync = new VirtualizedScrollSync(
+      VirtualizedScrollType.horizontal
+    );
+
+    this.horizontalVirtualizedScrollSync.registerScrollers([
+      AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA,
+      AlignmentViewer.SCROLLER_COMPONENT_IDS.QUERY,
+      AlignmentViewer.SCROLLER_COMPONENT_IDS.CONSENSUS,
+      AlignmentViewer.SCROLLER_COMPONENT_IDS.POSITIONAL_AXIS,
+    ]);
   }
 
   /**
@@ -125,7 +149,7 @@ export class AlignmentViewer extends React.Component<
    */
   protected windowDimensionsUpdated() {
     this.setState({
-      windowWidth: window.innerWidth,
+      //windowWidth: window.innerWidth,
       //windowHeight: window.innerHeight,
     });
   }
@@ -264,11 +288,11 @@ export class AlignmentViewer extends React.Component<
    *
    */
   componentDidMount() {
-    window.addEventListener("resize", this.windowDimensionsUpdated);
+    //window.addEventListener("resize", this.windowDimensionsUpdated);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.windowDimensionsUpdated);
+    //window.removeEventListener("resize", this.windowDimensionsUpdated);
   }
 
   render() {
@@ -331,12 +355,11 @@ export class AlignmentViewer extends React.Component<
         {!showConsensus
           ? null
           : this.renderWidget(
-              "av-consensus-seq-holder",
+              "consensus-seq-holder",
               "Consensus:",
               <Provider store={store}>
                 <AlignmentDetails
-                  id="consensus-alignment-details"
-                  className="consensus-alignment-details"
+                  id={AlignmentViewer.SCROLLER_COMPONENT_IDS.CONSENSUS}
                   sequences={[this.props.alignment.getConsensus().sequence]}
                   consensusSequence={
                     this.props.alignment.getConsensus().sequence
@@ -348,14 +371,6 @@ export class AlignmentViewer extends React.Component<
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
-                  scrollerLoaded={(scroller) => {
-                    this.horizontalScrollSync.registerElementScroller(scroller);
-                  }}
-                  scrollerUnloaded={(scroller) => {
-                    this.horizontalScrollSync.unRegisterElementScroller(
-                      scroller
-                    );
-                  }}
                 />
               </Provider>,
               { height: singleSeqDivHeight }
@@ -364,12 +379,11 @@ export class AlignmentViewer extends React.Component<
         {!showQuery
           ? null
           : this.renderWidget(
-              "av-query-seq-holder",
+              "query-seq-holder",
               "Query:",
               <Provider store={store}>
                 <AlignmentDetails
-                  id="query-alignment-details"
-                  className="query-alignment-details"
+                  id={AlignmentViewer.SCROLLER_COMPONENT_IDS.QUERY}
                   sequences={[this.props.alignment.getQuerySequence().sequence]}
                   consensusSequence={
                     this.props.alignment.getConsensus().sequence
@@ -381,14 +395,6 @@ export class AlignmentViewer extends React.Component<
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
-                  scrollerLoaded={(scroller) => {
-                    this.horizontalScrollSync.registerElementScroller(scroller);
-                  }}
-                  scrollerUnloaded={(scroller) => {
-                    this.horizontalScrollSync.unRegisterElementScroller(
-                      scroller
-                    );
-                  }}
                 />
               </Provider>,
               { height: singleSeqDivHeight }
@@ -397,22 +403,19 @@ export class AlignmentViewer extends React.Component<
         {!showRuler
           ? null
           : this.renderWidget(
-              "av-position-indicator-holder",
+              "position-indicator-holder",
               "Position:",
-              <div className="position-box">
-                <PositionalAxis
-                  positions={[alignment.getSequenceLength()]}
-                  fontSize={fontSize}
-                  scrollerLoaded={(scroller) => {
-                    this.horizontalScrollSync.registerElementScroller(scroller);
-                  }}
-                  scrollerUnloaded={(scroller) => {
-                    this.horizontalScrollSync.unRegisterElementScroller(
-                      scroller
-                    );
-                  }}
-                />
-              </div>,
+              <Provider store={store}>
+                <div className="position-box">
+                  <PositionalAxis
+                    id={AlignmentViewer.SCROLLER_COMPONENT_IDS.POSITIONAL_AXIS}
+                    positions={[...Array(alignment.getSequenceLength()).keys()]}
+                    fontSize={fontSize}
+                    residueHeight={residueHeight}
+                    residueWidth={residueWidth}
+                  />
+                </div>
+              </Provider>,
               { height: singleSeqDivHeight }
             )}
 
@@ -420,8 +423,8 @@ export class AlignmentViewer extends React.Component<
           "alignment-details-holder",
           "details:",
           <Provider store={store}>
-            <AlignmentDetailsNew
-              id="full-alignment-details"
+            <AlignmentDetails
+              id={AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA}
               sequences={this.props.alignment
                 .getSequences(
                   this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
@@ -433,7 +436,7 @@ export class AlignmentViewer extends React.Component<
               fontSize={fontSize}
               residueHeight={residueHeight}
               residueWidth={residueWidth}
-            ></AlignmentDetailsNew>
+            ></AlignmentDetails>
           </Provider>,
           { height: singleSeqDivHeight }
         )}

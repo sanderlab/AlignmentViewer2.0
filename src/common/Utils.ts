@@ -149,19 +149,23 @@ export function getAlignmentFontDetails(fontSize: number) {
 /**
  * CRAZY: safari puts an onwheel event onto the window. This disrupts
  * a lot of the wheel interactions we use on webgl components and the
- * viewport. To fix,
- * CRAZY - this is needed to work in safari.  Answer came from here:
+ * viewport.
+ * CRAZY - this is needed to work in safari and fixes some weird interactions
+ * in firefox also.  Answer came from here:
  * https://stackoverflow.com/questions/50349103
- * Basic idea: cancel the wheel event if scolling Y over particular
+ * Basic idea: cancel the wheel event if scolling Y or X over particular
  *             elements  - this is handled manually by my code / viewport
  * I'm not sure whether this will mess up any code that embeds AV2 ...
  * It throws errors in the console chrome - hence the sniffing for safari..
  * I don't think it has any effect in firefox.
  */
 const validCSSScrollClasses: string[] = [];
-if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+var isChrome =
+  /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+
+if (!isChrome) {
   window.onwheel = (e: WheelEvent) => {
-    if (e.deltaY) {
+    if (e.deltaY || e.deltaX) {
       if (
         validCSSScrollClasses.find((item) => {
           return (e.srcElement as HTMLElement).classList.contains(item);

@@ -2,7 +2,7 @@
  * Base react hook for a virtual vertical scrollbar.
  */
 import "./VirtualScrollbars.scss";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { ReactResizeSensor } from "../ResizeSensorHook";
 
 interface IVirtualScrollbarProps {
@@ -38,6 +38,23 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
     height: 100,
     top: 0,
   });
+
+  //useCallback
+  const scrollbarHolderSizeChanged = useCallback((bounds) => {
+    //sizing - could be passed as a prop, but doing this calculation here in case
+    //         the parent does something odd with css and messes up the actual
+    //         spacing that the scrollbar consumes.
+    if (
+      !scrollbarHolderProportions ||
+      scrollbarHolderProportions.top !== bounds.top ||
+      scrollbarHolderProportions.height !== bounds.height
+    ) {
+      setScrollbarHolderProportions({
+        height: bounds.height,
+        top: bounds.top,
+      });
+    }
+  }, []);
 
   //calculate all sizing into one variable
   const scrollbarSizing = (() => {
@@ -183,23 +200,7 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
           scrollbarMoved(newPixelsFromWorldTop);
         }}
       >
-        <ReactResizeSensor
-          onSizeChanged={(bounds) => {
-            //sizing - could be passed as a prop, but doing this calculation here in case
-            //         the parent does something odd with css and messes up the actual
-            //         spacing that the scrollbar consumes.
-            if (
-              !scrollbarHolderProportions ||
-              scrollbarHolderProportions.top !== bounds.top ||
-              scrollbarHolderProportions.height !== bounds.height
-            ) {
-              setScrollbarHolderProportions({
-                height: bounds.height,
-                top: bounds.top,
-              });
-            }
-          }}
-        />
+        <ReactResizeSensor onSizeChanged={scrollbarHolderSizeChanged} />
         {renderDragger()}
       </div>
       {renderFullpageDragDiv()}

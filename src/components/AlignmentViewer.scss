@@ -13,9 +13,9 @@
   bottom: 0;
 
   //single row editors
-  .av-widget.av-consensus-seq-holder,
-  .av-widget.av-query-seq-holder,
-  .av-widget.av-position-indicator-holder {
+  .av-widget.consensus-seq-holder,
+  .av-widget.query-seq-holder,
+  .av-widget.position-indicator-holder {
     height: 24px; //default, but this is set as a style
   }
 

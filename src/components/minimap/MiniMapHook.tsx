@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./MiniMap.scss";
 import * as PIXI from "pixi.js";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { Stage, AppContext } from "@inlet/react-pixi";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -82,6 +82,25 @@ export function MiniMap(props: IMiniMapProps) {
       ? undefined
       : state.virtualizedMatrixSlice[syncWithAlignmentDetailsId]
   );
+
+  //callbacks
+  const viewportResized = useCallback((bounds) => {
+    if (
+      !resizedDimensions ||
+      resizedDimensions.width !== bounds.width ||
+      resizedDimensions.height !== bounds.height
+    ) {
+      //setTimeout(() => {
+      //flashes (worse) without setTimeout. Safari still flashing.
+      //seems fixed by putting into the resize component - left for
+      //info in case you notice flashing in the future
+      setResizedDimensions({
+        width: minimapRef.current!.clientWidth,
+        height: minimapRef.current!.clientHeight,
+      });
+      //});
+    }
+  }, []);
 
   //effects
   useEffect(() => {
@@ -254,25 +273,7 @@ export function MiniMap(props: IMiniMapProps) {
         direction: alignHorizontal === "left" ? "ltr" : "rtl",
       }}
     >
-      <ReactResizeSensor
-        onSizeChanged={(bounds) => {
-          if (
-            !resizedDimensions ||
-            resizedDimensions.width !== bounds.width ||
-            resizedDimensions.height !== bounds.height
-          ) {
-            //setTimeout(() => {
-            //flashes (worse) without setTimeout. Safari still flashing.
-            //seems fixed by putting into the resize component - left for
-            //info in case you notice flashing in the future
-            setResizedDimensions({
-              width: minimapRef.current!.clientWidth,
-              height: minimapRef.current!.clientHeight,
-            });
-            //});
-          }
-        }}
-      >
+      <ReactResizeSensor onSizeChanged={viewportResized}>
         {!frameSizing
           ? null
           : renderAlignment(frameSizing.frameWidth, frameSizing.frameHeight)}
