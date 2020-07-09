@@ -14,6 +14,7 @@ import {
 import { MiniMap } from "./minimap/MiniMapHook";
 import { IMiniMapProps } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
+import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
 import { ScrollSync, ScrollType } from "../common/ScrollSync";
@@ -110,6 +111,7 @@ export class AlignmentViewer extends React.Component<
     QUERY: "query-alignment-details",
     CONSENSUS: "consensus-alignment-details",
     POSITIONAL_AXIS: "positional-axis",
+    FULL_MSA_METADATA_IDS: "full-alignment-metadata-ids",
   };
 
   private verticalVirtualizedScrollSync: VirtualizedScrollSync;
@@ -132,10 +134,14 @@ export class AlignmentViewer extends React.Component<
     this.verticalVirtualizedScrollSync = new VirtualizedScrollSync(
       VirtualizedScrollType.vertical
     );
+    this.verticalVirtualizedScrollSync.registerScrollers([
+      AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA,
+      AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA_METADATA_IDS,
+    ]);
+
     this.horizontalVirtualizedScrollSync = new VirtualizedScrollSync(
       VirtualizedScrollType.horizontal
     );
-
     this.horizontalVirtualizedScrollSync.registerScrollers([
       AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA,
       AlignmentViewer.SCROLLER_COMPONENT_IDS.QUERY,
@@ -240,10 +246,6 @@ export class AlignmentViewer extends React.Component<
     );
   };
 
-  protected renderAlignmentAnnotationBox = () => (
-    <div className="alignment-metadata-box"></div>
-  );
-
   protected renderMiniMap() {
     const { alignment, showMinimap, sortBy, style } = this.props;
 
@@ -319,9 +321,6 @@ export class AlignmentViewer extends React.Component<
       residueWidth * CHARACTER_HEIGHT_TO_WIDTH_RATIO
     );
     const singleSeqDivHeight = residueHeight;
-    /*DEFAULT_SINGLE_SEQUENCE_HEIGHT < residueHeight
-        ? residueHeight
-        : DEFAULT_SINGLE_SEQUENCE_HEIGHT;*/
 
     return (
       <div className={classes.join(" ")}>
@@ -421,7 +420,23 @@ export class AlignmentViewer extends React.Component<
 
         {this.renderWidget(
           "alignment-details-holder",
-          "details:",
+          <Provider store={store}>
+            <div className="alignment-metadata-box">
+              <AlignmentTextualMetadata
+                id={
+                  AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA_METADATA_IDS
+                }
+                textForEachSeq={this.props.alignment
+                  .getSequences(
+                    this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
+                  )
+                  .map((iseq) => iseq.id)}
+                fontSize={fontSize}
+                letterHeight={residueHeight}
+                letterWidth={residueWidth}
+              />
+            </div>
+          </Provider>,
           <Provider store={store}>
             <AlignmentDetails
               id={AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA}

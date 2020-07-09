@@ -105,6 +105,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     //fix safari-specific bug - this function will tell the window to stop
     //blocking scroll events on the "single-sequence-text" class
     stopSafariFromBlockingWindowWheel("virtualized-matrix");
+    stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
   }, []);
 
   useEffect(() => {

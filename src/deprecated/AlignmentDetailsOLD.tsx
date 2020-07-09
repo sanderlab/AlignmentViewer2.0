@@ -7,13 +7,13 @@ import * as PIXI from "pixi.js";
 
 import { Provider, useDispatch, useSelector } from "react-redux";
 
-import { VirtualVerticalScrollbar } from "../virtualization/VirtualVerticalScrollbarHook";
-import { AlignmentRectanglesAndLetters } from "./AlignmentRectanglesLettersHook";
+import { VirtualVerticalScrollbar } from "../components/virtualization/VirtualVerticalScrollbarHook";
+import { AlignmentRectanglesAndLetters } from "../components/alignment-details/AlignmentRectanglesLettersHook";
 
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-} from "../../common/MolecularStyles";
+} from "../common/MolecularStyles";
 import {
   store,
   setMatrixSize,
@@ -22,11 +22,11 @@ import {
   RootState,
   IVirtualizedMatrixState,
   setWorldTopOffset,
-} from "../../common/ReduxStore";
-import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
-import { ReactResizeSensor } from "../ResizeSensorHook";
+} from "../common/ReduxStore";
+import { stopSafariFromBlockingWindowWheel } from "../common/Utils";
+import { ReactResizeSensor } from "../components/ResizeSensorHook";
 import { Stage, AppContext } from "@inlet/react-pixi";
-import { AlignmentDetailsViewport } from "./AlignmentDetailsViewportComponent";
+import { AlignmentDetailsViewport } from "../components/alignment-details/AlignmentDetailsViewportComponent";
 
 export interface IAlignmentDetailsProps {
   id: string;

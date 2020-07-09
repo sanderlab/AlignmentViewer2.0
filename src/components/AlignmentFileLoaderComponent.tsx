@@ -138,7 +138,8 @@ export class AlignmentFileLoaderComponent extends React.Component<
               type="button"
               className="button-link"
               key={ef.fileURL}
-              onClick={async (e) => {
+              onClick={(e) => {
+                e.preventDefault();
                 if (onFileLoadStart) {
                   onFileLoadStart();
                 }

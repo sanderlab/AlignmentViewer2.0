@@ -31,6 +31,7 @@
     .av-annotation,
     .av-content {
       display: flex;
+      position: relative;
     }
     .av-annotation {
       flex: 0 1 15%;

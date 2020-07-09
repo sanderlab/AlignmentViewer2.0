@@ -1,0 +1,20 @@
+/** PositionalAxis.scss */
+
+.alignment-textual-metadata {
+  font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
+    monospace;
+  white-space: nowrap;
+  font-weight: normal;
+
+  overflow-x: hidden;
+  overflow-y: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.alignment-textual-metadataaxis::-webkit-scrollbar {
+  background: transparent;
+  height: 0;
+}

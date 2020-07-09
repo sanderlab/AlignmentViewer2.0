@@ -58,6 +58,10 @@ export const MiniMapViewport = PixiComponent<IMiniMapViewportProps, any>(
         vp = vp.wheel();
       }
 
+      vp.on("moved", () => {
+        app.render(); //no idea why this is required - didn't use to be!
+      });
+
       return vp;
     },
 
