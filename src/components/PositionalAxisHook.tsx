@@ -46,6 +46,7 @@ export function PositionalAxis(props: {
   return (
     <VirtualizedMatrixViewer
       id={id}
+      direction="x"
       columnCount={positions.length}
       columnWidth={residueWidth}
       rowCount={1}

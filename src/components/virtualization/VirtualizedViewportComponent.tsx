@@ -23,6 +23,7 @@ export interface IVirtualizedViewportProps {
   worldTopOffset: number;
   columnWidth: number;
   rowHeight: number;
+  direction: "all" | "x" | "y";
   viewportMovedVertically(newWorldTop: number): void;
   viewportMovedHorizontally(newWorldLeft: number): void;
   //mouseMoved?(event: IMouseLocation): void;
@@ -36,6 +37,7 @@ export const VirtualizedViewport = PixiComponent<
   create(props: IVirtualizedViewportProps) {
     const {
       app,
+      direction,
       parentElement,
       screenWidth,
       screenHeight,
@@ -43,7 +45,7 @@ export const VirtualizedViewport = PixiComponent<
       worldHeight,
     } = props;
 
-    return new Viewport({
+    const vp = new Viewport({
       noTicker: true,
       screenWidth: screenWidth,
       screenHeight: screenHeight,
@@ -52,8 +54,10 @@ export const VirtualizedViewport = PixiComponent<
       interaction: app.renderer.plugins.interaction,
       divWheel: parentElement,
     })
-      .drag({ clampWheel: true, direction: "all", pressDrag: false })
-      .clamp({ direction: "all" });
+      .drag({ clampWheel: true, direction: direction, pressDrag: false })
+      .clamp({ direction: direction });
+
+    return vp;
   },
 
   applyProps(
@@ -63,10 +67,9 @@ export const VirtualizedViewport = PixiComponent<
   ) {
     const {
       app,
+      direction,
       screenWidth,
       screenHeight,
-      columnWidth,
-      rowHeight,
       worldWidth,
       worldHeight,
       worldLeftOffset,
@@ -83,6 +86,13 @@ export const VirtualizedViewport = PixiComponent<
     ) {
       vp.resize(screenWidth, screenHeight, worldWidth, worldHeight);
       app.render(); //stops flicker on safari.
+    }
+
+    if (oldProps.direction !== direction) {
+      vp = vp
+        .drag({ clampWheel: true, direction: direction, pressDrag: false })
+        .clamp({ direction: direction });
+      app.render();
     }
 
     if (vp.top !== worldTopOffset) {

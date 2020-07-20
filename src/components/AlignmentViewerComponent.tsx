@@ -2,11 +2,17 @@ import "./AlignmentViewer.scss";
 import React from "react";
 import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
+//import {
+//  SequenceLogoComponent,
+//  LOGO_TYPES,
+//  ISequenceLogoProps,
+//} from "./SequenceLogoComponent";
 import {
-  SequenceLogoComponent,
+  SequenceLogo,
   LOGO_TYPES,
   ISequenceLogoProps,
-} from "./SequenceLogoComponent";
+} from "./SequenceLogoHook";
+
 import {
   SequenceBarplotComponent,
   ISequenceBarplotProps,
@@ -56,7 +62,7 @@ const defaultProps = {
 
   logoOptions: {
     logoType: LOGO_TYPES.LETTERS,
-    height: "100px",
+    height: 100,
     tooltipPlacement: undefined,
   } as Partial<
     Pick<ISequenceLogoProps, "tooltipPlacement" | "logoType" | "height">
@@ -112,6 +118,7 @@ export class AlignmentViewer extends React.Component<
     CONSENSUS: "consensus-alignment-details",
     POSITIONAL_AXIS: "positional-axis",
     FULL_MSA_METADATA_IDS: "full-alignment-metadata-ids",
+    SEQUENCE_LOGO: "sequence-logo",
   };
 
   private verticalVirtualizedScrollSync: VirtualizedScrollSync;
@@ -147,6 +154,7 @@ export class AlignmentViewer extends React.Component<
       AlignmentViewer.SCROLLER_COMPONENT_IDS.QUERY,
       AlignmentViewer.SCROLLER_COMPONENT_IDS.CONSENSUS,
       AlignmentViewer.SCROLLER_COMPONENT_IDS.POSITIONAL_AXIS,
+      AlignmentViewer.SCROLLER_COMPONENT_IDS.SEQUENCE_LOGO,
     ]);
   }
 
@@ -208,20 +216,17 @@ export class AlignmentViewer extends React.Component<
     const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
 
     return (
-      <SequenceLogoComponent
-        alignment={alignment}
-        style={style}
-        glyphWidth={residueWidth}
-        logoType={logoOpts.logoType}
-        tooltipPlacement={logoOpts.tooltipPlacement}
-        height={logoOpts.height}
-        scrollerLoaded={(scroller) => {
-          this.horizontalScrollSync.registerElementScroller(scroller);
-        }}
-        scrollerUnloaded={(scroller) => {
-          this.horizontalScrollSync.unRegisterElementScroller(scroller);
-        }}
-      />
+      <Provider store={store}>
+        <SequenceLogo
+          id={AlignmentViewer.SCROLLER_COMPONENT_IDS.SEQUENCE_LOGO}
+          alignment={alignment}
+          style={style}
+          glyphWidth={residueWidth}
+          logoType={logoOpts.logoType}
+          tooltipPlacement={logoOpts.tooltipPlacement}
+          height={logoOpts.height}
+        />
+      </Provider>
     );
   };
 
@@ -348,7 +353,13 @@ export class AlignmentViewer extends React.Component<
           : this.renderWidget(
               "av-sequence-logo-holder",
               "Logo:",
-              this.renderSequenceLogo(residueWidth)
+              this.renderSequenceLogo(residueWidth),
+              {
+                height:
+                  this.props.logoOptions && this.props.logoOptions.height
+                    ? this.props.logoOptions.height
+                    : defaultProps.logoOptions.height,
+              }
             )}
 
         {!showConsensus
@@ -453,7 +464,7 @@ export class AlignmentViewer extends React.Component<
               residueWidth={residueWidth}
             ></AlignmentDetails>
           </Provider>,
-          { height: singleSeqDivHeight }
+          {}
         )}
       </div>
     );

@@ -38,6 +38,7 @@ export function AlignmentTextualMetadata(
   return (
     <VirtualizedMatrixViewer
       id={id}
+      direction="all"
       columnCount={getMaxTextLength()}
       columnWidth={letterWidth}
       rowCount={textForEachSeq.length}

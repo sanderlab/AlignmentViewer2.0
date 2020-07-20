@@ -48,6 +48,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   return (
     <VirtualizedMatrixViewer
       id={id}
+      direction={sequences.length > 1 ? "all" : "x"}
       columnCount={sequences.length > 0 ? sequences[0].length : 0}
       columnWidth={residueWidth}
       rowCount={sequences.length}

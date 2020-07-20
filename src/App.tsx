@@ -127,7 +127,7 @@ export default class App extends React.Component<AppProps, AppState> {
           showAnnotations={showAnnotations}
           logoOptions={{
             logoType: logoPlotStyle,
-            height: "80px",
+            height: 80,
           }}
           minimapOptions={{
             startingWidth: 120,

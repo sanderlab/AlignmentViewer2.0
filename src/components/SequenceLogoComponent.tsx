@@ -18,6 +18,7 @@ import {
 } from "../common/MolecularStyles";
 import ReactTooltip from "react-tooltip";
 import { AminoAcid, Nucleotide } from "../common/Residues";
+import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
@@ -38,17 +39,18 @@ interface IGlyphStackData extends Array<IGlyphFrequency> {}
 
 export interface ISequenceLogoProps {
   //don't expose these props in the AlignmentViewer full component
+  id: string;
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
 
-  scrollerLoaded: (e: HTMLElement) => void;
-  scrollerUnloaded: (e: HTMLElement) => void;
+  //scrollerLoaded: (e: HTMLElement) => void;
+  //scrollerUnloaded: (e: HTMLElement) => void;
 
   //props that should be exposed in AlignmentViewer full component:
   logoType?: LOGO_TYPES;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
-  height?: string;
+  height?: number;
 }
 
 interface ISequenceLogoState {
@@ -59,17 +61,15 @@ export class SequenceLogoComponent extends React.Component<
   ISequenceLogoProps,
   ISequenceLogoState
 > {
+  private cache?: JSX.Element;
   private logoData?: IGlyphStackData[];
-  private ref: React.RefObject<HTMLDivElement>;
-
   static defaultProps = {
     logoType: LOGO_TYPES.LETTERS,
-    height: "100px",
+    height: 100,
   };
 
   constructor(props: ISequenceLogoProps) {
     super(props);
-    this.ref = React.createRef<HTMLDivElement>();
   }
 
   /*
@@ -133,6 +133,7 @@ export class SequenceLogoComponent extends React.Component<
   }
 
   private renderSvg() {
+    //colsToShow: number[]) {
     const { alignment, glyphWidth, height } = this.props;
     if (!alignment || !glyphWidth) {
       return null;
@@ -141,11 +142,13 @@ export class SequenceLogoComponent extends React.Component<
     //perform a bunch of data munging
     this.logoData = this.mungeLogoData();
     const totalWidth = this.logoData.length * glyphWidth;
+    //const totalWidth = colsToShow.length * glyphWidth;
 
-    return (
+    this.cache = (
       <svg
         preserveAspectRatio="none"
         viewBox={`0 0 ${this.logoData.length} 100`}
+        //viewBox={`0 0 ${colsToShow.length} 100`}
         style={{
           width: totalWidth,
           height: height ? height : SequenceLogoComponent.defaultProps.height,
@@ -156,6 +159,7 @@ export class SequenceLogoComponent extends React.Component<
           return (
             <g
               transform={`translate(${positionIdx},0)`}
+              //transform={`translate(${positionIdx - colsToShow[0]},0)`}
               className={aceResidueParentClass} //required for default coloring
               key={"p_" + positionIdx}
             >
@@ -176,6 +180,7 @@ export class SequenceLogoComponent extends React.Component<
         })}
       </svg>
     );
+    return this.cache;
   }
 
   /**
@@ -283,16 +288,8 @@ export class SequenceLogoComponent extends React.Component<
     ReactTooltip.rebuild();
   }
 
-  componentDidMount() {
-    this.props.scrollerLoaded(this.ref.current!);
-  }
-
-  componentWillUnmount() {
-    this.props.scrollerUnloaded(this.ref.current!);
-  }
-
   render() {
-    const { style } = this.props;
+    const { alignment, glyphWidth, height, id, style } = this.props;
     const classNames = [
       "sequence-logo",
       style.alignmentType.className,
@@ -301,10 +298,29 @@ export class SequenceLogoComponent extends React.Component<
     ];
 
     return (
-      <div className={classNames.join(" ")} ref={this.ref}>
-        {this.renderSvg()}
-        {this.renderTooltip()}
-      </div>
+      <VirtualizedMatrixViewer
+        id={id}
+        direction="x"
+        columnCount={alignment.getSequenceLength()}
+        columnWidth={glyphWidth}
+        rowCount={1}
+        rowHeight={height ? height : SequenceLogoComponent.defaultProps.height}
+        autoOffset={true}
+        getData={(rowIdxsToRender, colIdxsToRender) => {
+          return (
+            <div
+              className={classNames.join(" ")}
+              style={{
+                width: alignment.getSequenceLength() * glyphWidth,
+                left: colIdxsToRender[0] * -glyphWidth,
+              }}
+            >
+              {this.cache ? this.cache : this.renderSvg()}
+              {this.renderTooltip()}
+            </div>
+          );
+        }}
+      />
     );
   }
 }

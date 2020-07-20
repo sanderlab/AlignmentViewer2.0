@@ -36,12 +36,14 @@ interface IVirtualizedMatrixiewerProps {
   columnWidth: number;
   rowHeight: number;
   autoOffset: boolean;
+  direction: "all" | "x" | "y";
 }
 
 export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
   const {
     id,
     autoOffset,
+    direction,
     getData,
     columnCount,
     rowCount,
@@ -129,12 +131,14 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
   }, [dispatch, id, rowCount, columnCount]);
 
   //misc
-  const disableVerticalScrolling = !reduxState
-    ? true
-    : rowCount <= reduxState.rowIdxsToRender.length;
-  const disableHorizontalScrolling = !reduxState
-    ? true
-    : columnCount <= reduxState.columnIdxsToRender.length;
+  const disableVerticalScrolling =
+    !reduxState || !reduxState.initialized
+      ? true
+      : rowCount <= reduxState.rowIdxsToRender.length;
+  const disableHorizontalScrolling =
+    !reduxState || !reduxState.initialized
+      ? true
+      : columnCount <= reduxState.columnIdxsToRender.length;
 
   //redux state can be stale when initializing or switching datasets - these
   //eventually stabilize once useEffect functions are executed and the redux
@@ -219,6 +223,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                           worldTopOffset={reduxState.worldTopOffset}
                           columnWidth={reduxState.columnWidth}
                           rowHeight={reduxState.rowHeight}
+                          direction={direction}
                           viewportMovedVertically={viewportVerticalMove}
                           viewportMovedHorizontally={viewportHorizontalMove}
                           //mouseMoved: (e) => {
