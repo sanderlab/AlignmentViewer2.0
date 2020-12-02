@@ -375,14 +375,14 @@ export const virtualizedVerticalSlice = createSlice({
       return setCellCount(action.payload.id, action.payload.rowCount, state);
     },
 
-    setRowHeight: (
+    setRowWidth: (
       state,
       action: PayloadAction<{
         id: string;
-        rowHeight: number;
+        rowWidth: number;
       }>
     ) => {
-      return setCellSize(action.payload.id, action.payload.rowHeight, state);
+      return setCellSize(action.payload.id, action.payload.rowWidth, state);
     },
 
     setWorldTopRowOffset: (
@@ -444,7 +444,7 @@ export const {
 
 export const {
   setRowCount,
-  setRowHeight,
+  setRowWidth,
   setWorldTopRowOffset,
   setWorldTopPixelOffset,
   setScreenHeight,

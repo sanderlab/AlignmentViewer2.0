@@ -35,24 +35,31 @@ function generateTextualRuler(maxLength: number): string {
  * @param props
  */
 export function PositionalAxis(props: {
-  id: string;
+  horizontalReduxId: string;
   fontSize: number;
   positions: number[];
   residueHeight: number;
   residueWidth: number;
 }) {
-  const { id, fontSize, positions, residueHeight, residueWidth } = props;
+  const {
+    horizontalReduxId,
+    fontSize,
+    positions,
+    residueHeight,
+    residueWidth,
+  } = props;
 
   return (
     <VirtualizedMatrixViewer
-      id={id}
+      //id={id}
+      horizontalReduxId={horizontalReduxId}
       direction="x"
       columnCount={positions.length}
       columnWidth={residueWidth}
       rowCount={1}
       rowHeight={residueHeight}
       autoOffset={true}
-      getData={(rowIdxsToRender, colIdxsToRender) => {
+      getContent={(rowIdxsToRender, colIdxsToRender) => {
         const fullRuler = generateTextualRuler(Math.max(...positions));
         return (
           <div className="positional-axis" style={{ fontSize: fontSize }}>

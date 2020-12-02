@@ -4,7 +4,8 @@
  *  (but simpler)
  */
 import "./SequenceLogo.scss";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector, Provider } from "react-redux";
 import { Alignment } from "../common/Alignment";
 import { GlyphFactory } from "../common/SequenceLogoGlyphs";
 import {
@@ -18,6 +19,12 @@ import {
 import ReactTooltip from "react-tooltip";
 import { AminoAcid, Nucleotide } from "../common/Residues";
 import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { AlignmentViewer } from "./AlignmentViewerComponent";
+import {
+  IVirtualizedMatrixState,
+  RootState,
+  setWorldLeftPixelOffset,
+} from "../common/ReduxStore";
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
@@ -42,6 +49,8 @@ export interface ISequenceLogoProps {
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  //onScroll?: (location: {left: number; top: number}) => void;
+  refUpdated?: (newRef: HTMLElement | null) => void;
 
   //props that should be exposed in AlignmentViewer full component:
   logoType?: LOGO_TYPES;
@@ -58,12 +67,19 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     tooltipPlacement = undefined,
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
+    refUpdated,
   } = props;
 
-  const [positionCache, setPositionCache] = useState<null | {
-    [pos: number]: JSX.Element;
-  }>(null);
+  const ref = useRef(null);
+  //const [mouseOver, setMouseOver] = useState<boolean>(false);
+  const [svgCache, setSvgCache] = useState<null | JSX.Element>(null);
   const [logoData, setLogoData] = useState<null | IGlyphStackData[]>(null);
+  const [positionsCache, setPositionsCache] = useState<
+    | null
+    | { positionIdx: number; className: string; positionStack: JSX.Element[] }[]
+  >(null);
+
+  const dispatch = useDispatch();
 
   /**
    * Munge letter count data that was calculated during alignment creation
@@ -141,35 +157,6 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     [logoType]
   );
 
-  const generateSvg = useCallback(
-    (positionsToDisplay: number[]) => {
-      if (!alignment || !glyphWidth || !positionCache) {
-        return null;
-      }
-
-      //perform a bunch of data munging
-      const sequenceLength = alignment.getSequenceLength();
-      const totalWidth = sequenceLength * glyphWidth;
-
-      return (
-        <svg
-          preserveAspectRatio="none"
-          viewBox={`0 0 ${sequenceLength} 100`}
-          style={{
-            width: totalWidth,
-            height: height ? height : height,
-          }}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {positionsToDisplay.map((positionIdx) => {
-            return positionCache[positionIdx];
-          })}
-        </svg>
-      );
-    },
-    [alignment, glyphWidth, height, positionCache]
-  );
-
   const renderTooltip = useCallback(() => {
     return !logoData ? null : (
       <ReactTooltip
@@ -222,38 +209,79 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   //setup cache - each glyph stack as a svg g element is saved in memory for quick render
   useEffect(() => {
     const logoData = mungeLogoData();
-    const positionCache: { [pos: number]: JSX.Element } = {};
-    for (
-      let positionIdx = 0;
-      positionIdx < alignment.getSequenceLength();
-      positionIdx++
-    ) {
+    const sequenceLength = alignment.getSequenceLength();
+    const totalWidth = sequenceLength * glyphWidth;
+    const positions: React.SVGProps<SVGGElement>[] = [];
+
+    const positionsCache: {
+      positionIdx: number;
+      className: string;
+      positionStack: JSX.Element[];
+    }[] = [];
+
+    for (let positionIdx = 0; positionIdx < sequenceLength; positionIdx++) {
       const singlePositionData = logoData[positionIdx];
-      positionCache[positionIdx] = (
-        <g
-          transform={`translate(${positionIdx},0)`}
-          className={aceResidueParentClass} //required for default coloring
-          key={"p_" + positionIdx}
-        >
-          {renderSinglePositionStack(singlePositionData, logoData.length)}
-          <rect
-            className="interaction-placeholder"
-            width="1"
-            height="100"
-            data-for="getLogoTooltip"
-            data-tip={positionIdx}
-            data-class={"sequence-logo-tooltip-container"}
-          ></rect>
-        </g>
+      positionsCache.push({
+        positionIdx: positionIdx,
+        className: aceResidueParentClass,
+        positionStack: renderSinglePositionStack(
+          singlePositionData,
+          logoData.length
+        ),
+      });
+      positions.push(
+        (
+          <g
+            transform={`translate(${positionIdx},0)`}
+            className={aceResidueParentClass} //required for default coloring
+            key={"p_" + positionIdx}
+          >
+            {renderSinglePositionStack(singlePositionData, logoData.length)}
+            <rect
+              className="interaction-placeholder"
+              width="1"
+              height="100"
+              data-for="getLogoTooltip"
+              data-tip={positionIdx}
+              data-class={"sequence-logo-tooltip-container"}
+            ></rect>
+          </g>
+        ) as React.SVGProps<SVGGElement>
       );
     }
+
+    setPositionsCache(positionsCache);
     setLogoData(logoData);
-    setPositionCache(positionCache);
-  }, [alignment, mungeLogoData, renderSinglePositionStack, setPositionCache]);
+    setSvgCache(
+      <svg
+        preserveAspectRatio="none"
+        viewBox={`0 0 ${sequenceLength} 100`}
+        style={{
+          width: totalWidth,
+          height: height ? height : height,
+        }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {positions}
+      </svg>
+    );
+  }, [
+    alignment,
+    glyphWidth,
+    mungeLogoData,
+    renderSinglePositionStack,
+    setSvgCache,
+  ]);
 
   useEffect(() => {
     ReactTooltip.rebuild();
   });
+
+  useEffect(() => {
+    if (refUpdated) {
+      refUpdated(ref.current);
+    }
+  }, [ref, refUpdated]);
 
   const classNames = [
     "sequence-logo",
@@ -262,30 +290,99 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     PositionsToStyle.ALL.className,
   ];
 
+  //OPTION 1: NO VIRTUALIZATION. SPEEDY, but kind of a funny lag when scrolling.
+  /*return (
+    <div
+      ref={ref}
+      className={classNames.join(" ")}
+      style={{
+        width: alignment.getSequenceLength() * glyphWidth,
+      }}
+      //onMouseOver={() => setMouseOver(true)}
+      //onMouseOut={() => setMouseOver(false)}
+      onScroll={(e) => {
+        //console.log("LEFT SCROLL:" + e.currentTarget.scrollLeft);
+        dispatch(
+          setWorldLeftPixelOffset({
+            id: AlignmentViewer.HORIZONTAL_SCROLLER_ID,
+            worldLeftPixelOffset: e.currentTarget.scrollLeft,
+          })
+        );
+        //  if (mouseOver) {
+        //    // only if actually scrolling this target
+        //    console.log("logo scrolled:", e.currentTarget.scrollLeft);
+        //    if (props.onScroll) {
+        //      props.onScroll({left: e.currentTarget.scrollLeft, top: e.currentTarget.scrollTop});
+        //    }
+        //  }
+      }}
+    >
+      {svgCache}
+      {renderTooltip()}
+    </div>
+  );*/
+
+  //OPTION 2: VIRTUALIZATION - SEEMS SLOW
   return (
     <VirtualizedMatrixViewer
-      id={id}
+      horizontalReduxId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
       direction="x"
       columnCount={alignment.getSequenceLength()}
       columnWidth={glyphWidth}
       rowCount={1}
       rowHeight={height}
-      autoOffset={true}
-      getData={(rowIdxsToRender, colIdxsToRender) => {
+      autoOffset={false}
+      getContent={(rowIdxsToRender, colIdxsToRender) => {
+        //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET
         return (
           <div
             className={classNames.join(" ")}
             style={{
               width: alignment.getSequenceLength() * glyphWidth,
-              left: colIdxsToRender[0] * -glyphWidth,
+              left:
+                colIdxsToRender.length > 0
+                  ? colIdxsToRender[0] * glyphWidth * -1
+                  : 0,
             }}
           >
-            {generateSvg(colIdxsToRender)}
-            {renderTooltip()}
-            {/*svg*/}
-            {/*this.renderTooltip()*/}
+            {svgCache}
           </div>
         );
+
+        /* //OPTION 2B: USING VIRTUALIZATION, BUT CACHE POSITIONS
+        return (
+          <>
+            <div
+              className={classNames.join(" ")}
+            >
+              <svg
+                preserveAspectRatio="none"
+                viewBox={`0 0 ${colIdxsToRender.length} 100`}
+                style={{
+                  width: colIdxsToRender.length * glyphWidth,
+                  height: height ? height : height,
+                }}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {colIdxsToRender.map((colIdx, arrIdx) => {
+                  if (!positionsCache || !positionsCache[colIdx]) {
+                    return;
+                  }
+                  const pos = positionsCache[colIdx];
+                  return (
+                    <g
+                      transform={`translate(${arrIdx},0)`}
+                      className={aceResidueParentClass} //required for default coloring
+                      key={"p_" + pos.positionIdx}
+                    >
+                      {pos.positionStack}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          </>
+        );*/
       }}
     />
   );

@@ -30,10 +30,6 @@ import {
   NucleotideAlignmentStyle,
 } from "../common/MolecularStyles";
 import { getAlignmentFontDetails } from "../common/Utils";
-import {
-  VirtualizedScrollSync,
-  VirtualizedScrollType,
-} from "../components/virtualization/VirtualizedScrollSync";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -121,41 +117,15 @@ export class AlignmentViewer extends React.Component<
     SEQUENCE_LOGO: "sequence-logo",
   };
 
-  private verticalVirtualizedScrollSync: VirtualizedScrollSync;
-  private horizontalVirtualizedScrollSync: VirtualizedScrollSync;
-
-  private horizontalScrollSync: ScrollSync;
+  public static HORIZONTAL_SCROLLER_ID = "alignment-positions";
+  public static VERTICAL_SCROLLER_ID = "sequence-indicies";
 
   static defaultProps = defaultProps;
 
   constructor(props: IAlignmentViewerProps) {
     super(props);
 
-    this.state = {
-      //windowWidth: window.innerWidth,
-    };
-    this.horizontalScrollSync = new ScrollSync(ScrollType.horizontal);
-
     this.windowDimensionsUpdated = this.windowDimensionsUpdated.bind(this);
-
-    this.verticalVirtualizedScrollSync = new VirtualizedScrollSync(
-      VirtualizedScrollType.vertical
-    );
-    this.verticalVirtualizedScrollSync.registerScrollers([
-      AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA,
-      AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA_METADATA_IDS,
-    ]);
-
-    this.horizontalVirtualizedScrollSync = new VirtualizedScrollSync(
-      VirtualizedScrollType.horizontal
-    );
-    this.horizontalVirtualizedScrollSync.registerScrollers([
-      AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA,
-      AlignmentViewer.SCROLLER_COMPONENT_IDS.QUERY,
-      AlignmentViewer.SCROLLER_COMPONENT_IDS.CONSENSUS,
-      AlignmentViewer.SCROLLER_COMPONENT_IDS.POSITIONAL_AXIS,
-      AlignmentViewer.SCROLLER_COMPONENT_IDS.SEQUENCE_LOGO,
-    ]);
   }
 
   /**
@@ -214,7 +184,7 @@ export class AlignmentViewer extends React.Component<
   protected renderSequenceLogo = (residueWidth: number) => {
     const { alignment, logoOptions, style } = this.props;
     const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
-
+    console.log("renderSequenceLogo:" + residueWidth);
     return (
       <Provider store={store}>
         <SequenceLogo
@@ -225,6 +195,9 @@ export class AlignmentViewer extends React.Component<
           logoType={logoOpts.logoType}
           tooltipPlacement={logoOpts.tooltipPlacement}
           height={logoOpts.height}
+          refUpdated={(ref) => {
+            console.log("LOGO REF UPDATED:", ref);
+          }}
         />
       </Provider>
     );
@@ -242,10 +215,10 @@ export class AlignmentViewer extends React.Component<
         positionWidth={residueWidth}
         height={barplotProps.height}
         scrollerLoaded={(scroller) => {
-          this.horizontalScrollSync.registerElementScroller(scroller);
+          //this.horizontalScrollSync.registerElementScroller(scroller);
         }}
         scrollerUnloaded={(scroller) => {
-          this.horizontalScrollSync.unRegisterElementScroller(scroller);
+          //this.horizontalScrollSync.unRegisterElementScroller(scroller);
         }}
       ></SequenceBarplotComponent>
     );
@@ -278,7 +251,9 @@ export class AlignmentViewer extends React.Component<
                 verticalHeight={mmOptions.verticalHeight}
                 onClick={this.props.minimapClicked}
                 //sync
-                syncWithAlignmentDetailsId="full-alignment-details"
+                syncWithAlignmentDetailsId={
+                  AlignmentViewer.VERTICAL_SCROLLER_ID
+                }
               />
             </Provider>
           }
@@ -369,7 +344,7 @@ export class AlignmentViewer extends React.Component<
               "Consensus:",
               <Provider store={store}>
                 <AlignmentDetails
-                  id={AlignmentViewer.SCROLLER_COMPONENT_IDS.CONSENSUS}
+                  reduxHorizontalId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
                   sequences={[this.props.alignment.getConsensus().sequence]}
                   consensusSequence={
                     this.props.alignment.getConsensus().sequence
@@ -393,7 +368,7 @@ export class AlignmentViewer extends React.Component<
               "Query:",
               <Provider store={store}>
                 <AlignmentDetails
-                  id={AlignmentViewer.SCROLLER_COMPONENT_IDS.QUERY}
+                  reduxHorizontalId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
                   sequences={[this.props.alignment.getQuerySequence().sequence]}
                   consensusSequence={
                     this.props.alignment.getConsensus().sequence
@@ -418,7 +393,7 @@ export class AlignmentViewer extends React.Component<
               <Provider store={store}>
                 <div className="position-box">
                   <PositionalAxis
-                    id={AlignmentViewer.SCROLLER_COMPONENT_IDS.POSITIONAL_AXIS}
+                    horizontalReduxId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
                     positions={[...Array(alignment.getSequenceLength()).keys()]}
                     fontSize={fontSize}
                     residueHeight={residueHeight}
@@ -431,12 +406,11 @@ export class AlignmentViewer extends React.Component<
 
         {this.renderWidget(
           "alignment-details-holder",
+
           <Provider store={store}>
             <div className="alignment-metadata-box">
               <AlignmentTextualMetadata
-                id={
-                  AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA_METADATA_IDS
-                }
+                verticalReduxId={AlignmentViewer.VERTICAL_SCROLLER_ID}
                 textForEachSeq={this.props.alignment
                   .getSequences(
                     this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
@@ -450,7 +424,8 @@ export class AlignmentViewer extends React.Component<
           </Provider>,
           <Provider store={store}>
             <AlignmentDetails
-              id={AlignmentViewer.SCROLLER_COMPONENT_IDS.FULL_MSA}
+              reduxVerticalId={AlignmentViewer.VERTICAL_SCROLLER_ID}
+              reduxHorizontalId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
               sequences={this.props.alignment
                 .getSequences(
                   this.props.sortBy ? this.props.sortBy : defaultProps.sortBy

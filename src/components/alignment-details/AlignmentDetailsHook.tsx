@@ -13,7 +13,8 @@ import { AlignmentDetailsLetters } from "./AlignmentDetailsLettersHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 
 export interface IAlignmentDetailsProps {
-  id: string;
+  reduxVerticalId?: string;
+  reduxHorizontalId?: string;
   sequences: string[];
   consensusSequence: string;
   querySequence: string;
@@ -26,7 +27,8 @@ export interface IAlignmentDetailsProps {
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //props
   const {
-    id,
+    reduxHorizontalId,
+    reduxVerticalId,
     sequences,
     consensusSequence,
     querySequence,
@@ -47,14 +49,15 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
    */
   return (
     <VirtualizedMatrixViewer
-      id={id}
+      horizontalReduxId={reduxHorizontalId}
+      verticalReduxId={reduxVerticalId}
       direction={sequences.length > 1 ? "all" : "x"}
       columnCount={sequences.length > 0 ? sequences[0].length : 0}
       columnWidth={residueWidth}
       rowCount={sequences.length}
       rowHeight={residueHeight}
       autoOffset={false} //manually offset because of pixi funkyness (probably should recheck)
-      getData={(
+      getContent={(
         rowIdxsToRender,
         colIdxsToRender,
         additionalVerticalOffset,

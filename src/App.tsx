@@ -13,7 +13,7 @@ import {
   IColorScheme,
   ResidueStyle,
 } from "./common/MolecularStyles";
-import { LOGO_TYPES } from "./components/SequenceLogoComponent";
+import { LOGO_TYPES } from "./components/SequenceLogoHook";
 import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
 import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
 import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
@@ -25,6 +25,7 @@ interface AppState {
   sortBy: SequenceSorter;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
+  showLogo: boolean;
   showMiniMap: boolean;
   showConservationBarplot: boolean;
   showEntropyGapBarplot: boolean;
@@ -47,7 +48,8 @@ export default class App extends React.Component<AppProps, AppState> {
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
       zoomLevel: 14,
       sortBy: SequenceSorter.INPUT,
-      showMiniMap: true,
+      showLogo: true,
+      showMiniMap: false,
       showConservationBarplot: true,
       showEntropyGapBarplot: true,
       showKLDivergenceBarplot: false,
@@ -78,6 +80,7 @@ export default class App extends React.Component<AppProps, AppState> {
   render() {
     const {
       alignment,
+      showLogo,
       logoPlotStyle,
       showAnnotations,
       showConservationBarplot,
@@ -125,6 +128,7 @@ export default class App extends React.Component<AppProps, AppState> {
           sortBy={sortBy}
           showMinimap={showMiniMap}
           showAnnotations={showAnnotations}
+          showLogo={showLogo}
           logoOptions={{
             logoType: logoPlotStyle,
             height: 80,
@@ -243,6 +247,8 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderPositionStyling(style)}
               {this.renderSequenceLogo()}
               {this.renderZoomButtons()}
+
+              {this.renderToggle("annotation-toggle", "Show Logo", "showLogo")}
 
               {this.renderToggle(
                 "annotation-toggle",

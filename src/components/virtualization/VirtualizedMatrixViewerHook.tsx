@@ -11,20 +11,25 @@ import { VirtualizedViewport } from "./VirtualizedViewportComponent";
 import { ReactResizeSensor } from "../ResizeSensorHook";
 import {
   store,
-  setMatrixSize,
-  setMatrixDimensions,
-  setViewportDimensions,
+  setColumnCount,
+  setColumnWidth,
+  setScreenWidth as setReduxScreenWidth,
+  setWorldLeftPixelOffset,
+  setRowCount,
+  setRowHeight,
+  setScreenHeight as setReduxScreenHeight,
+  setWorldTopPixelOffset,
   RootState,
   IVirtualizedMatrixState,
-  setWorldTopOffset,
-  setWorldLeftOffset,
 } from "../../common/ReduxStore";
-import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
+import {
+  stopSafariFromBlockingWindowWheel,
+  generateUUIDv4,
+} from "../../common/Utils";
 import { VirtualVerticalScrollbar } from "./VirtualVerticalScrollbarHook";
 
 interface IVirtualizedMatrixiewerProps {
-  id: string;
-  getData(
+  getContent(
     rowIdxsToRender: number[],
     colIdxsToRender: number[],
     additionalVerticalOffset: number,
@@ -37,14 +42,15 @@ interface IVirtualizedMatrixiewerProps {
   rowHeight: number;
   autoOffset: boolean;
   direction: "all" | "x" | "y";
+  horizontalReduxId?: string;
+  verticalReduxId?: string;
 }
 
 export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
   const {
-    id,
     autoOffset,
     direction,
-    getData,
+    getContent,
     columnCount,
     rowCount,
     columnWidth,
@@ -56,47 +62,78 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //state
   const [mouseHovering, setMouseHovering] = useState<boolean>(false);
-
-  //redux
-  const dispatch = useDispatch();
-  const reduxState: IVirtualizedMatrixState | undefined = useSelector(
-    (rootState: RootState) => rootState.virtualizedMatrixSlice[id]
+  const [screenWidth, setScreenWidth] = useState<number>();
+  const [screenHeight, setScreenHeight] = useState<number>();
+  const [horizontalReduxId] = useState<string>(
+    props.horizontalReduxId ? props.horizontalReduxId : generateUUIDv4()
   );
-  //console.log("reduxState:", reduxState);
+  const [verticalReduxId] = useState<string>(
+    props.verticalReduxId ? props.verticalReduxId : generateUUIDv4()
+  );
+
+  //redux stores
+  const dispatch = useDispatch();
+  const fullStateHorizontal = useSelector(
+    (rootState: RootState) => rootState.virtualizedHorizontalSlice
+  );
+  const fullStateVertical = useSelector(
+    (rootState: RootState) => rootState.virtualizedVerticalSlice
+  );
+
+  const reduxStateHorizontal: IVirtualizedMatrixState | undefined =
+    direction === "all" || direction === "x"
+      ? fullStateHorizontal[horizontalReduxId]
+      : undefined;
+  const reduxStateVertical: IVirtualizedMatrixState | undefined =
+    direction === "all" || direction === "y"
+      ? fullStateVertical[verticalReduxId]
+      : undefined;
 
   //callbacks
   const viewportVerticalMove = useCallback(
     (newWorldTop: number) => {
       dispatch(
-        setWorldTopOffset({
-          id: id,
-          worldTopOffset: newWorldTop,
+        setWorldTopPixelOffset({
+          id: verticalReduxId,
+          worldTopPixelOffset: newWorldTop,
         })
       );
     },
-    [dispatch, id]
+    [dispatch, verticalReduxId]
   );
 
   const viewportHorizontalMove = useCallback(
     (newWorldLeft) => {
       dispatch(
-        setWorldLeftOffset({
-          id: id,
-          worldLeftOffset: newWorldLeft,
+        setWorldLeftPixelOffset({
+          id: horizontalReduxId,
+          worldLeftPixelOffset: newWorldLeft,
         })
       );
     },
-    [dispatch, id]
+    [dispatch, horizontalReduxId]
   );
 
   const viewportSizeChanged = useCallback((bounds) => {
-    dispatch(
-      setViewportDimensions({
-        id: id,
-        clientWidth: bounds.width,
-        clientHeight: bounds.height,
-      })
-    );
+    setScreenHeight(bounds.height);
+    setScreenWidth(bounds.width);
+
+    if (direction === "x" || direction === "all") {
+      dispatch(
+        setReduxScreenWidth({
+          id: horizontalReduxId,
+          screenWidth: bounds.width,
+        })
+      );
+    }
+    if (direction === "y" || direction === "all") {
+      dispatch(
+        setReduxScreenHeight({
+          id: verticalReduxId,
+          screenHeight: bounds.height,
+        })
+      );
+    }
   }, []);
 
   //useEffect
@@ -110,50 +147,96 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
   }, []);
 
+  //set row and column height in pixels
   useEffect(() => {
-    dispatch(
-      setMatrixDimensions({
-        id: id,
-        columnWidth: columnWidth,
-        rowHeight: rowHeight,
-      })
-    );
-  }, [dispatch, id, columnWidth, rowHeight]);
+    if (direction === "x" || direction === "all") {
+      dispatch(
+        setColumnWidth({
+          id: horizontalReduxId,
+          columnWidth: columnWidth,
+        })
+      );
+    }
+    if (direction === "y" || direction === "all") {
+      dispatch(
+        setRowHeight({
+          id: verticalReduxId,
+          rowHeight: rowHeight,
+        })
+      );
+    }
+  }, [
+    dispatch,
+    direction,
+    verticalReduxId,
+    horizontalReduxId,
+    columnWidth,
+    rowHeight,
+  ]);
 
+  //set num columns / num rows
   useEffect(() => {
-    dispatch(
-      setMatrixSize({
-        id: id,
-        rowCount: rowCount,
-        columnCount: columnCount,
-      })
-    );
-  }, [dispatch, id, rowCount, columnCount]);
+    if (direction === "x" || direction === "all") {
+      dispatch(
+        setColumnCount({
+          id: horizontalReduxId,
+          columnCount: columnCount,
+        })
+      );
+    }
+    if (direction === "y" || direction === "all") {
+      dispatch(
+        setRowCount({
+          id: verticalReduxId,
+          rowCount: rowCount,
+        })
+      );
+    }
+  }, [
+    dispatch,
+    direction,
+    verticalReduxId,
+    horizontalReduxId,
+    rowCount,
+    columnCount,
+  ]);
 
   //misc
   const disableVerticalScrolling =
-    !reduxState || !reduxState.initialized
+    !reduxStateVertical || !reduxStateVertical.initialized
       ? true
-      : rowCount <= reduxState.rowIdxsToRender.length;
+      : rowCount <= reduxStateVertical.idxsToRender.length;
   const disableHorizontalScrolling =
-    !reduxState || !reduxState.initialized
+    !reduxStateHorizontal || !reduxStateHorizontal.initialized
       ? true
-      : columnCount <= reduxState.columnIdxsToRender.length;
+      : columnCount <= reduxStateHorizontal.idxsToRender.length;
 
   //redux state can be stale when initializing or switching datasets - these
   //eventually stabilize once useEffect functions are executed and the redux
   //store emits events, but before this can happen make sure the current params
   //match the redux store and if not, render empty data.
-  let rowIdxsToRender: number[] = [];
-  let colIdxsToRender: number[] = [];
-  if (
-    reduxState &&
-    rowCount === reduxState.rowCount &&
-    columnCount === reduxState.columnCount
-  ) {
-    rowIdxsToRender = reduxState.rowIdxsToRender;
-    colIdxsToRender = reduxState.columnIdxsToRender;
-  }
+  let rowIdxsToRender: number[] =
+    reduxStateVertical && reduxStateVertical.cellCount
+      ? reduxStateVertical.idxsToRender
+      : [0];
+  let colIdxsToRender: number[] =
+    reduxStateHorizontal && reduxStateHorizontal.cellCount
+      ? reduxStateHorizontal.idxsToRender
+      : [0];
+
+  const reduxInitialized =
+    (direction === "x" &&
+      reduxStateHorizontal &&
+      reduxStateHorizontal.initialized) ||
+    (direction === "y" &&
+      reduxStateVertical &&
+      reduxStateVertical.initialized) ||
+    (direction === "all" &&
+      reduxStateVertical &&
+      reduxStateVertical.initialized &&
+      reduxStateHorizontal &&
+      reduxStateHorizontal.initialized);
+
   /*
    *
    *
@@ -173,35 +256,50 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
       >
         <ReactResizeSensor onSizeChanged={viewportSizeChanged}>
           <div className="virtualized-matrix" ref={ref}>
-            {!ref || !reduxState || !reduxState.initialized ? null : (
+            {!reduxInitialized ||
+            !ref ||
+            screenWidth === undefined ||
+            screenHeight === undefined ? null : (
               <>
                 <div
                   className="data"
                   style={{
                     top: autoOffset
-                      ? reduxState.scrollingAdditionalVerticalOffset
+                      ? reduxStateVertical
+                        ? reduxStateVertical.scrollingAdditionalOffset
+                        : undefined
                       : undefined,
                     left: autoOffset
-                      ? reduxState.scrollingAdditionalHorizontalOffset
+                      ? reduxStateHorizontal
+                        ? reduxStateHorizontal.scrollingAdditionalOffset
+                        : undefined
                       : undefined,
                   }}
                 >
-                  {getData(
+                  {getContent(
                     rowIdxsToRender,
                     colIdxsToRender,
-                    reduxState.scrollingAdditionalVerticalOffset,
-                    reduxState.scrollingAdditionalHorizontalOffset,
+                    reduxStateVertical
+                      ? reduxStateVertical.scrollingAdditionalOffset
+                      : 0,
+                    reduxStateHorizontal
+                      ? reduxStateHorizontal.scrollingAdditionalOffset
+                      : 0,
                     {
-                      width: reduxState.viewportWidth,
-                      height: reduxState.viewportHeight,
+                      width: reduxStateHorizontal
+                        ? reduxStateHorizontal.renderSize
+                        : screenWidth,
+                      height: reduxStateVertical
+                        ? reduxStateVertical.renderSize
+                        : screenHeight,
                     }
                   )}
                 </div>
 
                 <Stage
                   className="interaction-viewport stage"
-                  width={reduxState.viewportWidth}
-                  height={reduxState.viewportHeight}
+                  width={screenWidth}
+                  height={screenHeight}
                   raf={false}
                   options={{ transparent: true }}
                 >
@@ -215,14 +313,28 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                         <VirtualizedViewport
                           app={app}
                           parentElement={ref.current!}
-                          screenWidth={reduxState.clientWidth}
-                          screenHeight={reduxState.clientHeight}
-                          worldWidth={reduxState.worldWidth}
-                          worldHeight={reduxState.worldHeight}
-                          worldLeftOffset={reduxState.worldLeftOffset}
-                          worldTopOffset={reduxState.worldTopOffset}
-                          columnWidth={reduxState.columnWidth}
-                          rowHeight={reduxState.rowHeight}
+                          screenWidth={screenWidth}
+                          screenHeight={screenHeight}
+                          worldWidth={
+                            reduxStateHorizontal
+                              ? reduxStateHorizontal.worldSize
+                              : screenWidth
+                          }
+                          worldHeight={
+                            reduxStateVertical
+                              ? reduxStateVertical.worldSize
+                              : screenHeight
+                          }
+                          worldLeftOffset={
+                            reduxStateHorizontal
+                              ? reduxStateHorizontal.worldOffset
+                              : 0
+                          }
+                          worldTopOffset={
+                            reduxStateVertical
+                              ? reduxStateVertical.worldOffset
+                              : 0
+                          }
                           direction={direction}
                           viewportMovedVertically={viewportVerticalMove}
                           viewportMovedHorizontally={viewportHorizontalMove}
@@ -241,11 +353,14 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
           {disableVerticalScrolling ? null : (
             <VirtualVerticalScrollbar
               visible={mouseHovering}
-              worldHeight={reduxState.worldHeight}
-              worldTopOffset={reduxState.worldTopOffset}
+              worldHeight={reduxStateVertical!.worldSize}
+              worldTopOffset={reduxStateVertical!.worldOffset}
               scrollbarMoved={(newWorldTop) => {
                 dispatch(
-                  setWorldTopOffset({ id: id, worldTopOffset: newWorldTop })
+                  setWorldTopPixelOffset({
+                    id: verticalReduxId,
+                    worldTopPixelOffset: newWorldTop,
+                  })
                 );
               }}
             />

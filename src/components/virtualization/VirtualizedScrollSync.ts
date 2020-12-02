@@ -1,7 +1,7 @@
 import {
   store,
-  batchSetWorldTopOffset,
-  batchSetWorldLeftOffset,
+  //batchSetWorldTopOffset,
+  //batchSetWorldLeftOffset,
   IVirtualizedMatrixState,
 } from "../../common/ReduxStore";
 
@@ -95,6 +95,7 @@ export class VirtualizedScrollSync {
    */
   private stateChanged = () => {
     const oldState = this.currentState;
+    /* TMP: TESTING
     this.currentState = store.getState().virtualizedMatrixSlice;
 
     //determine whether any scrollers had their offsets changed
@@ -152,6 +153,6 @@ export class VirtualizedScrollSync {
           store.dispatch(batchSetWorldTopOffset(updatePayload));
         }
       }
-    }
+    }*/
   };
 }

@@ -17,7 +17,7 @@ import {
   NucleotideAlignmentStyle,
   ResidueStyle,
 } from "../../common/MolecularStyles";
-import { RootState, setRowTopOffset } from "../../common/ReduxStore";
+import { RootState, setWorldTopRowOffset } from "../../common/ReduxStore";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 import { ReactResizeSensor } from "../ResizeSensorHook";
 
@@ -80,7 +80,7 @@ export function MiniMap(props: IMiniMapProps) {
   const syncedAlignmentDetails = useSelector((state: RootState) =>
     !syncWithAlignmentDetailsId
       ? undefined
-      : state.virtualizedMatrixSlice[syncWithAlignmentDetailsId]
+      : state.virtualizedVerticalSlice[syncWithAlignmentDetailsId]
   );
 
   //callbacks
@@ -171,12 +171,12 @@ export function MiniMap(props: IMiniMapProps) {
                   if (syncedAlignmentDetails) {
                     const newY = Math.round(
                       mousePosition.y -
-                        syncedAlignmentDetails.rowIdxsToRender.length / 2
+                        syncedAlignmentDetails.idxsToRender.length / 2
                     );
                     dispatch(
-                      setRowTopOffset({
+                      setWorldTopRowOffset({
                         id: syncWithAlignmentDetailsId!,
-                        lineTopOffset: newY,
+                        rowOffset: newY,
                       })
                     );
                   }
@@ -199,19 +199,19 @@ export function MiniMap(props: IMiniMapProps) {
                   residueDetail={ResidueStyle.DARK}
                 />
                 {!syncedAlignmentDetails ||
-                syncedAlignmentDetails.initialized !== true ||
-                syncedAlignmentDetails.rowIdxsToRender.length < 1 ||
-                syncedAlignmentDetails.rowCount <=
-                  syncedAlignmentDetails.rowIdxsToRender.length ? (
+                !syncedAlignmentDetails.initialized ||
+                syncedAlignmentDetails.idxsToRender.length < 1 ||
+                syncedAlignmentDetails.cellCount <=
+                  syncedAlignmentDetails.idxsToRender.length ? (
                   <></>
                 ) : (
                   <MinimapPositionHighlighter
                     fillColor={0xff0000}
                     fillAlpha={dragging ? 0.75 : 0.25}
                     x={0}
-                    y={syncedAlignmentDetails.rowIdxsToRender[0]}
-                    width={syncedAlignmentDetails.columnCount}
-                    height={syncedAlignmentDetails.rowIdxsToRender.length}
+                    y={syncedAlignmentDetails.idxsToRender[0]}
+                    width={alignment.getSequenceLength()}
+                    height={syncedAlignmentDetails.idxsToRender.length}
                     dragFunctions={{
                       onDragStart: (e, parent) => {
                         const startPosition = e.data.getLocalPosition(parent);
@@ -220,16 +220,16 @@ export function MiniMap(props: IMiniMapProps) {
                           left: startPosition.x - 0,
                           top:
                             startPosition.y -
-                            syncedAlignmentDetails.rowIdxsToRender[0],
+                            syncedAlignmentDetails.idxsToRender[0],
                         });
                       },
                       onDragEnd: (e, parent) => {
                         setDragging(false);
                         const finalPosition = e.data.getLocalPosition(parent);
                         dispatch(
-                          setRowTopOffset({
+                          setWorldTopRowOffset({
                             id: syncWithAlignmentDetailsId!,
-                            lineTopOffset: Math.round(
+                            rowOffset: Math.round(
                               finalPosition.y - dragStartOffset!.top
                             ),
                           })
@@ -239,9 +239,9 @@ export function MiniMap(props: IMiniMapProps) {
                         if (dragging) {
                           const newPosition = e.data.getLocalPosition(parent);
                           dispatch(
-                            setRowTopOffset({
+                            setWorldTopRowOffset({
                               id: syncWithAlignmentDetailsId!,
-                              lineTopOffset: Math.round(
+                              rowOffset: Math.round(
                                 newPosition.y - dragStartOffset!.top
                               ),
                             })

@@ -7,7 +7,7 @@ import React, { useCallback } from "react";
 import { VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
 
 export interface IAlignmentTextualMetadataProps {
-  id: string;
+  verticalReduxId: string;
   textForEachSeq: string[];
   letterHeight: number;
   letterWidth: number;
@@ -18,7 +18,13 @@ export function AlignmentTextualMetadata(
   props: IAlignmentTextualMetadataProps
 ) {
   //props
-  const { id, textForEachSeq, letterHeight, letterWidth, fontSize } = props;
+  const {
+    verticalReduxId,
+    textForEachSeq,
+    letterHeight,
+    letterWidth,
+    fontSize,
+  } = props;
 
   const getMaxTextLength = useCallback(() => {
     return textForEachSeq.reduce((acc, txt) => {
@@ -37,14 +43,14 @@ export function AlignmentTextualMetadata(
    */
   return (
     <VirtualizedMatrixViewer
-      id={id}
+      verticalReduxId={verticalReduxId}
       direction="all"
       columnCount={getMaxTextLength()}
       columnWidth={letterWidth}
       rowCount={textForEachSeq.length}
       rowHeight={letterHeight}
       autoOffset={true}
-      getData={(rowIdxsToRender, colIdxsToRender) => {
+      getContent={(rowIdxsToRender, colIdxsToRender) => {
         return (
           <div
             className="alignment-textual-metadata"
@@ -57,6 +63,7 @@ export function AlignmentTextualMetadata(
               const fullTextLine = textForEachSeq[rowIdx];
               return (
                 <div key={fullTextLine}>
+                  {fullTextLine}
                   {colIdxsToRender
                     .map((colIdx) => {
                       return fullTextLine.length > colIdx

@@ -21,8 +21,6 @@ export interface IVirtualizedViewportProps {
   worldHeight: number;
   worldLeftOffset: number;
   worldTopOffset: number;
-  columnWidth: number;
-  rowHeight: number;
   direction: "all" | "x" | "y";
   viewportMovedVertically(newWorldTop: number): void;
   viewportMovedHorizontally(newWorldLeft: number): void;

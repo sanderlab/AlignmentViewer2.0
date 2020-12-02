@@ -18,7 +18,7 @@ import {
 } from "../common/MolecularStyles";
 import ReactTooltip from "react-tooltip";
 import { AminoAcid, Nucleotide } from "../common/Residues";
-import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { VirtualizedMatrixViewer } from "../components/virtualization/VirtualizedMatrixViewerHook";
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
@@ -306,7 +306,7 @@ export class SequenceLogoComponent extends React.Component<
         rowCount={1}
         rowHeight={height ? height : SequenceLogoComponent.defaultProps.height}
         autoOffset={true}
-        getData={(rowIdxsToRender, colIdxsToRender) => {
+        getContent={(rowIdxsToRender, colIdxsToRender) => {
           return (
             <div
               className={classNames.join(" ")}
