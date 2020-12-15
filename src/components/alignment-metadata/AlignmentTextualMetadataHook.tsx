@@ -63,7 +63,6 @@ export function AlignmentTextualMetadata(
               const fullTextLine = textForEachSeq[rowIdx];
               return (
                 <div key={fullTextLine}>
-                  {fullTextLine}
                   {colIdxsToRender
                     .map((colIdx) => {
                       return fullTextLine.length > colIdx
