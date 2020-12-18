@@ -332,8 +332,9 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       rowCount={1}
       rowHeight={height}
       autoOffset={false}
-      getContent={(rowIdxsToRender, colIdxsToRender) => {
+      getContent={(rowIdxsToRender, colIdxsToRender, additionalVerticalOffset, additionalHorizontalOffset) => {
         //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET
+        
         return (
           <div
             className={classNames.join(" ")}
@@ -341,8 +342,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
               width: alignment.getSequenceLength() * glyphWidth,
               left:
                 colIdxsToRender.length > 0
-                  ? colIdxsToRender[0] * glyphWidth * -1
-                  : 0,
+                  ? colIdxsToRender[0] * glyphWidth * -1 + additionalHorizontalOffset
+                  : additionalHorizontalOffset,
             }}
           >
             {svgCache}

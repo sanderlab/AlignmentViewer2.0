@@ -184,7 +184,7 @@ export class AlignmentViewer extends React.Component<
   protected renderSequenceLogo = (residueWidth: number) => {
     const { alignment, logoOptions, style } = this.props;
     const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
-    console.log("renderSequenceLogo:" + residueWidth);
+    //console.log("renderSequenceLogo:" + residueWidth);
     return (
       <Provider store={store}>
         <SequenceLogo
@@ -195,9 +195,9 @@ export class AlignmentViewer extends React.Component<
           logoType={logoOpts.logoType}
           tooltipPlacement={logoOpts.tooltipPlacement}
           height={logoOpts.height}
-          refUpdated={(ref) => {
-            console.log("LOGO REF UPDATED:", ref);
-          }}
+          //refUpdated={(ref) => {
+            //console.log("LOGO REF UPDATED:", ref);
+          //}}
         />
       </Provider>
     );
