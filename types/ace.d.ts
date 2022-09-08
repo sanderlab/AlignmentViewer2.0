@@ -9,6 +9,7 @@ declare module "ace-builds" {
     interface Editor extends OptionsProvider, EventEmitter {
       on(name: "mousemove", callback: (e: AceEvent) => void): Function;
       on(name: "mousedown", callback: (e: AceEvent) => void): Function;
+      on(name: "click", callback: (e: AceEvent) => void): Function;
     }
 
     interface EditSession {

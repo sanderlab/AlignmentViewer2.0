@@ -34,6 +34,8 @@ export interface IAceEditorProps {
     //mouseContainerY: number;
   }): void;
 
+  click?(event: Ace.AceEvent, editor: Ace.Editor): void;
+
   mouseEnter?(): void;
   mouseLeave?(): void;
 }
@@ -107,7 +109,7 @@ export class AceEditorComponent<
     if (!this.editor) {
       throw Error("Editor must be defined before adding listeners.");
     }
-    const { characterSizeChanged, mouseDown, mouseMove } = this.props;
+    const { characterSizeChanged, mouseDown, mouseMove, click } = this.props;
 
     function getMousePosition(editor: Ace.Editor, event: Ace.AceEvent) {
       var pos = event.getDocumentPosition();
@@ -135,6 +137,12 @@ export class AceEditorComponent<
     this.editor!.on("mousedown", (e) => {
       if (mouseDown) {
         mouseDown(getMousePosition(this.editor!, e));
+      }
+    });
+
+    this.editor!.on("click", (event: Ace.AceEvent) => {
+      if (click) {
+        click(event, this.editor!);
       }
     });
 

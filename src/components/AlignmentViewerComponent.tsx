@@ -48,6 +48,11 @@ const defaultProps = {
   showQuery: true as boolean,
   showRuler: true as boolean,
 
+  annotationOptions: {
+    editorLoaded: (editor: Ace.Editor) => {},
+    click: (event: Ace.AceEvent, editor: Ace.Editor) => {}
+  },
+
   logoOptions: {
     logoType: LOGO_TYPES.LETTERS,
     height: "100px",
@@ -448,15 +453,15 @@ export class AlignmentViewer extends React.Component<
     </div>
   );
 
-  protected renderAlignmentAnnotationBox = () => (
-    <div className="alignment-metadata-box">
+  protected renderAlignmentAnnotationBox = () => {
+    const sequences = this.props.alignment
+    .getSequences(
+      this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
+    );
+    return <div className="alignment-metadata-box">
       <AceEditorComponent
         classNames="ace-alignment-metadata"
-        text={this.props.alignment
-          .getSequences(
-            this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
-          )
-          .map((x) => x.id)
+        text={sequences.map(x => x.id)
           .join("\n")}
         fontSize={
           this.props.zoomLevel ? this.props.zoomLevel : defaultProps.zoomLevel
@@ -468,10 +473,12 @@ export class AlignmentViewer extends React.Component<
             parentElem,
             ScrollType.vertical
           );
+          this.props.annotationOptions?.editorLoaded(editor);
         }}
+        click={this.props.annotationOptions?.click}
       ></AceEditorComponent>
     </div>
-  );
+  }
 
   protected renderMiniMap() {
     const { alignment, showMinimap, sortBy, style } = this.props;
