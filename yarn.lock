@@ -2167,14 +2167,7 @@
   "resolved" "https://registry.npmjs.org/@types/earcut/-/earcut-2.1.1.tgz"
   "version" "2.1.1"
 
-"@types/enzyme-adapter-react-16@^1.0.6":
-  "integrity" "sha512-VonDkZ15jzqDWL8mPFIQnnLtjwebuL9YnDkqeCDYnB4IVgwUm0mwKkqhrxLL6mb05xm7qqa3IE95m8CZE9imCg=="
-  "resolved" "https://registry.npmjs.org/@types/enzyme-adapter-react-16/-/enzyme-adapter-react-16-1.0.6.tgz"
-  "version" "1.0.6"
-  dependencies:
-    "@types/enzyme" "*"
-
-"@types/enzyme@*", "@types/enzyme@^3.10.5":
+"@types/enzyme@^3.10.5":
   "integrity" "sha512-R+phe509UuUYy9Tk0YlSbipRpfVtIzb/9BHn5pTEtjJTF5LXvUjrIQcZvNyANNEyFrd2YGs196PniNT1fgvOQA=="
   "resolved" "https://registry.npmjs.org/@types/enzyme/-/enzyme-3.10.5.tgz"
   "version" "3.10.5"
@@ -2359,8 +2352,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16.14.x":
-  "version" "16.14.31"
+"@types/react@*", "@types/react@^17.0.1":
+  "integrity" "sha512-CCBPMZaPhcKkYUTqFs/hOWqKjPxhTEmnZWjlHHgIMop67DsXywf9B5Os9Hz8KSacjNOgIdnZVJamwl232uxoPg=="
+  "resolved" "https://registry.npmjs.org/@types/react/-/react-17.0.49.tgz"
+  "version" "17.0.49"
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -2723,7 +2718,7 @@
     "mime-types" "~2.1.34"
     "negotiator" "0.6.3"
 
-"ace-builds@1.4.x":
+"ace-builds@^1.4.14":
   "version" "1.4.14"
 
 "acorn-globals@^4.3.2":
