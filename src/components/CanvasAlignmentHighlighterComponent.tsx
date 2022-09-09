@@ -11,15 +11,15 @@ interface IAlignmentHighlighterProps {
   fillAlpha: number;
   dragFunctions?: {
     onDragStart(
-      event: PIXI.InteractionEvent,
+      event: PIXI.interaction.InteractionEvent,
       parent: PIXI.DisplayObject
     ): void;
     onDragEnd(
-      event: PIXI.InteractionEvent,
+      event: PIXI.interaction.InteractionEvent,
       parent: PIXI.DisplayObject
     ): void;
     onDragMove(
-      event: PIXI.InteractionEvent,
+      event: PIXI.interaction.InteractionEvent,
       parent: PIXI.DisplayObject
     ): void;
   };
@@ -49,13 +49,13 @@ export const CanvasAlignmentHighlighter = PixiComponent(
             e.stopPropagation(); //keep entire viewport from moving
           });
 
-          const dragStart = (e: PIXI.InteractionEvent) => {
+          const dragStart = (e: PIXI.interaction.InteractionEvent) => {
             newProps.dragFunctions?.onDragStart(e, instance.parent);
           };
-          const dragEnd = (e: PIXI.InteractionEvent) => {
+          const dragEnd = (e: PIXI.interaction.InteractionEvent) => {
             newProps.dragFunctions?.onDragEnd(e, instance.parent);
           };
-          const dragMove = (e: PIXI.InteractionEvent) => {
+          const dragMove = (e: PIXI.interaction.InteractionEvent) => {
             newProps.dragFunctions?.onDragMove(e, instance.parent);
           };
 
