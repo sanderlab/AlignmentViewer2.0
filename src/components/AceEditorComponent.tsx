@@ -97,7 +97,7 @@ export class AceEditorComponent<
     this.editor.setReadOnly(true);
     this.editor.setHighlightActiveLine(false);
     this.editor.setHighlightGutterLine(false);
-    this.editor.setFontSize(this.props.fontSize + "px");
+    this.editor.setFontSize(this.props.fontSize!);
     this.editor.renderer.setShowGutter(false);
     this.editor.renderer.setPadding(0);
     this.editor.renderer.$cursorLayer.element.style.display = "none";
@@ -174,7 +174,7 @@ export class AceEditorComponent<
     }
     //only update if needed
     if (this.props.fontSize + "px" !== this.editor.getFontSize()) {
-      this.editor.setFontSize(this.props.fontSize + "px");
+      this.editor.setFontSize(this.props.fontSize!);
     }
     if (this.lastMode !== this.getEditorMode()) {
       const newMode = this.getEditorMode();
