@@ -49,7 +49,7 @@ const defaultProps = {
   showRuler: true as boolean,
 
   annotationOptions: {
-    editorLoaded: (editor: Ace.Editor) => {},
+    textChanged: (newText: string, editor: Ace.Editor) => {},
     click: (event: Ace.AceEvent, editor: Ace.Editor) => {}
   },
 
@@ -473,8 +473,8 @@ export class AlignmentViewer extends React.Component<
             parentElem,
             ScrollType.vertical
           );
-          this.props.annotationOptions?.editorLoaded(editor);
         }}
+        textChanged={this.props.annotationOptions?.textChanged}
         click={this.props.annotationOptions?.click}
       ></AceEditorComponent>
     </div>
