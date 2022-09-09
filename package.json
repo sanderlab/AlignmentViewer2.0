@@ -1,14 +1,15 @@
 {
-  "name": "alignment-viewer-2",
+  "name": "@stackwave/alignment-viewer-2",
   "homepage": "https://fast.alignmentviewer.org",
-  "version": "1.0.0-beta-15",
+  "version": "1.0.0",
   "private": false,
   "author": "Nicholas Gauthier",
   "module": "dist/js/index.js",
   "types": "dist/js/index.d.ts",
   "contributors": [
     "Andrew Diamantoukos",
-    "Chris Sander"
+    "Chris Sander",
+    "Ryan Meyer"
   ],
   "repository": {
     "type": "git",
