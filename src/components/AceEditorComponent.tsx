@@ -35,6 +35,7 @@ export interface IAceEditorProps {
   }): void;
 
   click?(event: Ace.AceEvent, editor: Ace.Editor): void;
+  textChanged?(newText: string, editor: Ace.Editor): void;
 
   mouseEnter?(): void;
   mouseLeave?(): void;
@@ -186,6 +187,9 @@ export class AceEditorComponent<
       const newText = this.getText();
       this.editor.insert(newText);
       this.lastText = newText;
+      if (this.props.textChanged) {
+        this.props.textChanged(newText, this.editor);
+      }
     }
   }
 
