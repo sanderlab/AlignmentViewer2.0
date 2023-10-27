@@ -17,13 +17,13 @@ export interface IVirtualizedViewportProps {
   parentElement: HTMLElement;
   screenWidth: number;
   screenHeight: number;
-  worldWidth: number;
-  worldHeight: number;
-  worldLeftOffset: number;
-  worldTopOffset: number;
+  worldWidth?: number;
+  worldHeight?: number;
+  worldLeftOffset?: number;
+  worldTopOffset?: number;
   direction: "all" | "x" | "y";
-  viewportMovedVertically(newWorldTop: number): void;
-  viewportMovedHorizontally(newWorldLeft: number): void;
+  viewportMovedVertically?(newWorldTop: number): void;
+  viewportMovedHorizontally?(newWorldLeft: number): void;
   //mouseMoved?(event: IMouseLocation): void;
   //clicked?(event: IMouseLocation): void;
 }
@@ -42,7 +42,6 @@ export const VirtualizedViewport = PixiComponent<
       worldWidth,
       worldHeight,
     } = props;
-
     const vp = new Viewport({
       noTicker: true,
       screenWidth: screenWidth,
@@ -93,12 +92,12 @@ export const VirtualizedViewport = PixiComponent<
       app.render();
     }
 
-    if (vp.top !== worldTopOffset) {
-      vp.top = worldTopOffset;
+    if (worldTopOffset !== undefined && vp.top !== worldTopOffset) {
+      vp.top = worldTopOffset ? worldTopOffset : 0;
       app.render(); //stops flicker on safari.
     }
 
-    if (vp.left !== worldLeftOffset) {
+    if (worldLeftOffset !== undefined && vp.left !== worldLeftOffset) {
       vp.left = worldLeftOffset;
       app.render(); //stops flicker on safari.
     }
@@ -114,11 +113,11 @@ export const VirtualizedViewport = PixiComponent<
       const newWorldTop = data.viewport.top;
       const newWorldLeft = data.viewport.left;
 
-      if (data.type === "wheel" && newWorldTop !== worldTopOffset) {
+      if (data.type === "wheel" && newWorldTop !== worldTopOffset && viewportMovedVertically) {
         viewportMovedVertically(newWorldTop);
         app.render(); //stops flicker on safari.
       }
-      if (data.type === "wheel" && newWorldLeft !== worldLeftOffset) {
+      if (data.type === "wheel" && newWorldLeft !== worldLeftOffset && viewportMovedHorizontally) {
         viewportMovedHorizontally(newWorldLeft);
         app.render(); //stops flicker on safari.
       }

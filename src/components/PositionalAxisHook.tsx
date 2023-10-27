@@ -59,6 +59,8 @@ export function PositionalAxis(props: {
       rowCount={1}
       rowHeight={residueHeight}
       autoOffset={true}
+      suppressVerticalScrollbar={true}
+      suppressHorizontalScrollbar={true}
       getContent={(rowIdxsToRender, colIdxsToRender) => {
         const fullRuler = generateTextualRuler(Math.max(...positions));
         return (

@@ -356,6 +356,8 @@ export class AlignmentViewer extends React.Component<
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
+                  suppressVerticalScrollbar={true}
+                  suppressHorizontalScrollbar={true}
                 />
               </Provider>,
               { height: singleSeqDivHeight }
@@ -380,6 +382,8 @@ export class AlignmentViewer extends React.Component<
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
+                  suppressVerticalScrollbar={true}
+                  suppressHorizontalScrollbar={true}
                 />
               </Provider>,
               { height: singleSeqDivHeight }

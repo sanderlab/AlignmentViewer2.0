@@ -22,6 +22,8 @@ export interface IAlignmentDetailsProps {
   residueHeight: number;
   residueWidth: number;
   fontSize: number;
+  suppressVerticalScrollbar?: boolean;
+  suppressHorizontalScrollbar?: boolean;
 }
 
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
@@ -36,8 +38,10 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     residueHeight,
     residueWidth,
     fontSize,
+    suppressVerticalScrollbar,
+    suppressHorizontalScrollbar,
   } = props;
-
+  
   /**
    *
    *
@@ -57,6 +61,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       rowCount={sequences.length}
       rowHeight={residueHeight}
       autoOffset={false} //manually offset because of pixi funkyness (probably should recheck)
+      suppressVerticalScrollbar={suppressVerticalScrollbar}
+      suppressHorizontalScrollbar={suppressHorizontalScrollbar}
       getContent={(
         rowIdxsToRender,
         colIdxsToRender,
@@ -68,7 +74,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           const seq = sequences[seqIdx];
           return colIdxsToRender.map((colIdx) => seq[colIdx]).join("");
         });
-        //console.log(id + " :: ", seqsSliced);
+        const querySliced = colIdxsToRender.map((colIdx) => querySequence[colIdx]).join("")
+        const consensusSliced = colIdxsToRender.map((colIdx) => consensusSequence[colIdx]).join("")
 
         return (
           <div className="av-viewport">
@@ -84,8 +91,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   return (
                     <CanvasAlignmentTiled
                       sequences={seqsSliced}
-                      consensusSequence={consensusSequence}
-                      querySequence={querySequence}
+                      consensusSequence={consensusSliced}
+                      querySequence={querySliced}
                       alignmentType={alignmentStyle.alignmentType}
                       residueDetail={alignmentStyle.residueDetail}
                       colorScheme={alignmentStyle.colorScheme}
@@ -104,8 +111,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
 
             <AlignmentDetailsLetters
               sequencesToRender={seqsSliced}
-              consensusSequence={consensusSequence}
-              querySequence={querySequence}
+              consensusSequence={consensusSliced}
+              querySequence={querySliced}
               alignmentStyle={alignmentStyle}
               fontSize={fontSize}
               lineHeight={residueHeight}

@@ -27,6 +27,7 @@ import {
   generateUUIDv4,
 } from "../../common/Utils";
 import { VirtualVerticalScrollbar } from "./VirtualVerticalScrollbarHook";
+import { VirtualHorizontalScrollbar } from "./VirtualHorizontalScrollbarHook";
 
 interface IVirtualizedMatrixiewerProps {
   getContent(
@@ -36,6 +37,7 @@ interface IVirtualizedMatrixiewerProps {
     additionalHorizontalOffset: number,
     stageDimensions: { width: number; height: number }
   ): JSX.Element;
+  app?: PIXI.Application;
   columnCount: number;
   rowCount: number;
   columnWidth: number;
@@ -44,10 +46,13 @@ interface IVirtualizedMatrixiewerProps {
   direction: "all" | "x" | "y";
   horizontalReduxId?: string;
   verticalReduxId?: string;
+  suppressHorizontalScrollbar?: boolean;
+  suppressVerticalScrollbar?: boolean;
 }
 
 export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
   const {
+    app,
     autoOffset,
     direction,
     getContent,
@@ -55,6 +60,8 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     rowCount,
     columnWidth,
     rowHeight,
+    suppressHorizontalScrollbar,
+    suppressVerticalScrollbar
   } = props;
 
   //ref
@@ -203,11 +210,11 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //misc
   const disableVerticalScrolling =
-    !reduxStateVertical || !reduxStateVertical.initialized
+    !reduxStateVertical || !reduxStateVertical.initialized || suppressVerticalScrollbar
       ? true
       : rowCount <= reduxStateVertical.idxsToRender.length;
   const disableHorizontalScrolling =
-    !reduxStateHorizontal || !reduxStateHorizontal.initialized
+    !reduxStateHorizontal || !reduxStateHorizontal.initialized || suppressHorizontalScrollbar
       ? true
       : columnCount <= reduxStateHorizontal.idxsToRender.length;
 
@@ -237,6 +244,13 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
       reduxStateHorizontal &&
       reduxStateHorizontal.initialized);
 
+  //console.log(
+  //  'reduxStateHorizontal [size: '+ 
+  //  (reduxStateHorizontal ? reduxStateHorizontal.worldSize : reduxStateHorizontal) + 
+  //  '] : ' + (reduxStateHorizontal ? reduxStateHorizontal.worldOffset : reduxStateHorizontal)
+  //);
+  //console.log('reduxStateVertical', reduxStateVertical)
+
   /*
    *
    *
@@ -261,6 +275,58 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
             screenWidth === undefined ||
             screenHeight === undefined ? null : (
               <>
+                {/* virtualized scrolling with the mouse */}
+                <Stage
+                    style={{position: 'absolute', top:0, bottom:0, left:0, right:0}}
+                    className="virtualized-viewport-scroller"
+                    width={reduxStateHorizontal
+                      ? reduxStateHorizontal.renderSize
+                      : screenWidth!}
+                    height={
+                      reduxStateVertical
+                        ? reduxStateVertical.renderSize
+                        : screenHeight!}
+                    raf={false}
+                    options={{ antialias: false, transparent: true }}
+                  >
+                  <AppContext.Consumer>
+                    {(app) => {
+                      return ( reduxStateHorizontal !== undefined || reduxStateVertical !== undefined ?
+                        <VirtualizedViewport
+                          app={app}
+                          parentElement={ref.current!}
+                          screenWidth={reduxStateHorizontal
+                            ? reduxStateHorizontal.renderSize
+                            : screenWidth!}
+                          screenHeight={reduxStateVertical
+                            ? reduxStateVertical.renderSize
+                            : screenHeight!}
+                          worldWidth={reduxStateHorizontal ? reduxStateHorizontal.worldSize : undefined}
+                          worldLeftOffset={reduxStateHorizontal ? reduxStateHorizontal.worldOffset : undefined}
+                          worldHeight={reduxStateVertical ? reduxStateVertical.worldSize : undefined}
+                          worldTopOffset={reduxStateVertical ? reduxStateVertical.worldOffset : undefined }
+                          direction={direction}
+                          viewportMovedVertically={(newWorldTop: number)=>{
+                            dispatch(
+                              setWorldTopPixelOffset({
+                                id: verticalReduxId,
+                                worldTopPixelOffset: newWorldTop,
+                              })
+                            );
+                          }}
+                          viewportMovedHorizontally={(newWorldLeft: number)=>{
+                            dispatch(
+                              setWorldLeftPixelOffset({
+                                id: horizontalReduxId,
+                                worldLeftPixelOffset: newWorldLeft,
+                              })
+                            );
+                          }}
+                        ></VirtualizedViewport> : <></>
+                      )
+                    }}
+                  </AppContext.Consumer>
+                </Stage>
                 <div
                   className="data"
                   style={{
@@ -288,64 +354,13 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                     {
                       width: reduxStateHorizontal
                         ? reduxStateHorizontal.renderSize
-                        : screenWidth,
+                        : screenWidth!,
                       height: reduxStateVertical
                         ? reduxStateVertical.renderSize
-                        : screenHeight,
+                        : screenHeight!,
                     }
                   )}
                 </div>
-
-                <Stage
-                  className="interaction-viewport stage"
-                  width={screenWidth}
-                  height={screenHeight}
-                  raf={false}
-                  options={{ transparent: true }}
-                >
-                  <AppContext.Consumer>
-                    {(app) => (
-                      //entrypoint to the interaction viewport for registering scroll
-                      //and zoom and other events. This is not rendering anything, but
-                      //is used to calculate interaction changes and report them
-                      //back to this component.
-                      <Provider store={store}>
-                        <VirtualizedViewport
-                          app={app}
-                          parentElement={ref.current!}
-                          screenWidth={screenWidth}
-                          screenHeight={screenHeight}
-                          worldWidth={
-                            reduxStateHorizontal
-                              ? reduxStateHorizontal.worldSize
-                              : screenWidth
-                          }
-                          worldHeight={
-                            reduxStateVertical
-                              ? reduxStateVertical.worldSize
-                              : screenHeight
-                          }
-                          worldLeftOffset={
-                            reduxStateHorizontal
-                              ? reduxStateHorizontal.worldOffset
-                              : 0
-                          }
-                          worldTopOffset={
-                            reduxStateVertical
-                              ? reduxStateVertical.worldOffset
-                              : 0
-                          }
-                          direction={direction}
-                          viewportMovedVertically={viewportVerticalMove}
-                          viewportMovedHorizontally={viewportHorizontalMove}
-                          //mouseMoved: (e) => {
-                          //  console.log("mose moved:", e);
-                          //},
-                        />
-                      </Provider>
-                    )}
-                  </AppContext.Consumer>
-                </Stage>
               </>
             )}
           </div>
@@ -360,6 +375,22 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                   setWorldTopPixelOffset({
                     id: verticalReduxId,
                     worldTopPixelOffset: newWorldTop,
+                  })
+                );
+              }}
+            />
+          )}
+
+          {disableHorizontalScrolling ? null : (
+            <VirtualHorizontalScrollbar
+              visible={mouseHovering}
+              worldWidth={reduxStateHorizontal!.worldSize}
+              worldLeftOffset={reduxStateHorizontal!.worldOffset}
+              scrollbarMoved={(newWorldLeft) => {
+                dispatch(
+                  setWorldLeftPixelOffset({
+                    id: horizontalReduxId,
+                    worldLeftPixelOffset: newWorldLeft,
                   })
                 );
               }}

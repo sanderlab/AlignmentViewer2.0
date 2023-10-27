@@ -25,6 +25,7 @@ export function AlignmentTextualMetadata(
     letterWidth,
     fontSize,
   } = props;
+  const horizontalReduxId = 'METADATA_HORIZONTAL_SCROLLER';
 
   const getMaxTextLength = useCallback(() => {
     return textForEachSeq.reduce((acc, txt) => {
@@ -44,6 +45,7 @@ export function AlignmentTextualMetadata(
   return (
     <VirtualizedMatrixViewer
       verticalReduxId={verticalReduxId}
+      horizontalReduxId={horizontalReduxId}
       direction="all"
       columnCount={getMaxTextLength()}
       columnWidth={letterWidth}

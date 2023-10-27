@@ -174,7 +174,7 @@ export class StockholmAlignment extends Alignment {
         removeDuplicateSequences
       );
     } catch (e) {
-      throw getParseError("Stockholm", e.message);
+      throw getParseError("Stockholm", (e as Error).message);
     }
   }
 

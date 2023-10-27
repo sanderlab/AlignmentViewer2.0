@@ -36,7 +36,7 @@ export class FastaAlignment extends Alignment {
     try {
       return new FastaAlignment(fileName, sequences, removeDuplicateSequences);
     } catch (e) {
-      throw getParseError("Fasta", e.message);
+      throw getParseError("Fasta", (e as Error).message);
     }
   }
 }

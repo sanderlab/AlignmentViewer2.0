@@ -332,6 +332,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       rowCount={1}
       rowHeight={height}
       autoOffset={false}
+      suppressVerticalScrollbar={true}
+      suppressHorizontalScrollbar={true}
       getContent={(rowIdxsToRender, colIdxsToRender, additionalVerticalOffset, additionalHorizontalOffset) => {
         //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET
         

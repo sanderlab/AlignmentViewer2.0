@@ -109,7 +109,8 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
   }
 
   state.initialized = true;
-  state.worldSize = cellCount * cellPixelSize;
+  state.worldSize = (cellCount * cellPixelSize)
+                    + Math.floor(0.5*cellPixelSize); //add extra padding to avoid jitter
 
   //easiest case -- everything fits into the visible screen
   let allCellsFitIntoScreen = false;

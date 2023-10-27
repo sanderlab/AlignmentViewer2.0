@@ -100,7 +100,7 @@ export function getURLParameters() {
 /**
  * Get an Error that represents a parser problem
  */
-export function getParseError(parserName: string, errorMessage: string) {
+export function getParseError(parserName: string, errorMessage: string): Error {
   const toReturn = new Error(errorMessage);
   toReturn.name = parserName + " Parse Error";
   return toReturn;

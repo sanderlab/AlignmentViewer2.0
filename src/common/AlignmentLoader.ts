@@ -52,7 +52,7 @@ export class AlignmentLoader {
       console.error("Unable to load alignment by URL '" + url + "'", e);
       const err = new AlignmentLoadError(
         "Unable to fetch alignment in URL",
-        [{ name: "Browser-reported error message", message: e.message }],
+        [{ name: "Browser-reported error message", message: (e as Error).message }],
         "Possible causes: (1) The alignment is not sent using SSL or (2) the server that hosts " +
           "the alignment has not enabled CORS. To be assessible to Alignment Viewer 2, the " +
           "alignment must be served by HTTPS and the server must enable CORS."
@@ -69,7 +69,7 @@ export class AlignmentLoader {
         errorCallback
       );
     } catch (e) {
-      errorCallback(e);
+      errorCallback(e as AlignmentLoadError);
     }
   }
 
@@ -97,7 +97,7 @@ export class AlignmentLoader {
           )
         );
       } catch (e) {
-        errorCallback(e);
+        errorCallback(e as AlignmentLoadError);
       }
     };
     reader.readAsText(file);
@@ -124,7 +124,7 @@ export class AlignmentLoader {
         );
         return toreturn;
       } catch (e) {
-        err.errors.push(e);
+        err.errors.push(e as { name: string; message: string });
       }
     }
     throw err;
