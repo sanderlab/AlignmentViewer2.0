@@ -108,6 +108,7 @@ export const VirtualizedViewport = PixiComponent<
     //the event otherwise I'd only add the listener in the
     //viewport creation phase above (pixelsFromWorldTop is
     //stale if put there or in useEffect)
+    //console.log('(1): worldTopOffset=' + worldTopOffset);
     vp.off("moved");
     vp.on("moved", (data: MovedEventData) => {
       const newWorldTop = data.viewport.top;
@@ -116,11 +117,7 @@ export const VirtualizedViewport = PixiComponent<
       if (
         data.type === "wheel" && 
         newWorldTop !== worldTopOffset && 
-        viewportMovedVertically && 
-        (
-          (worldHeight! - (renderHeight+newWorldTop)) > 1 || //if not at the very top, go ahead regardless
-          Math.abs(newWorldTop - worldTopOffset!) > 1        //if at very top, only move in increments over 1 - stops some jitter
-        )
+        viewportMovedVertically
       ) { 
         viewportMovedVertically(newWorldTop);
         app.render(); //stops flicker on safari.
@@ -129,13 +126,9 @@ export const VirtualizedViewport = PixiComponent<
       if (
         data.type === "wheel" && 
         newWorldLeft !== worldLeftOffset && 
-        viewportMovedHorizontally &&
-        (
-          (worldWidth! - (renderWidth+newWorldLeft)) > 1 || //if not at the very right, go ahead regardless
-          Math.abs(newWorldLeft - worldLeftOffset!) > 1     //if at very left, only move in increments over 1 - stops some jitter
-        )
+        viewportMovedHorizontally
       ) {
-        console.log('worldWidth:'+worldWidth+'renderWidth+newWorldLeft:'+(renderWidth+newWorldLeft)+', newWorldLeft:'+newWorldLeft + ', newWorldLeft - worldLeftOffset='+(newWorldLeft - worldLeftOffset!));
+        //console.log('worldWidth:'+worldWidth+'renderWidth+newWorldLeft:'+(renderWidth+newWorldLeft)+', newWorldLeft:'+newWorldLeft + ', newWorldLeft - worldLeftOffset='+(newWorldLeft - worldLeftOffset!));
         viewportMovedHorizontally(newWorldLeft);
         app.render(); //stops flicker on safari.
       }

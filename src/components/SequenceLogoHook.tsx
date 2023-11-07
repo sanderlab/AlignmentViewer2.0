@@ -20,11 +20,6 @@ import ReactTooltip from "react-tooltip";
 import { AminoAcid, Nucleotide } from "../common/Residues";
 import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 import { AlignmentViewer } from "./AlignmentViewerComponent";
-import {
-  IVirtualizedMatrixState,
-  RootState,
-  setWorldLeftPixelOffset,
-} from "../common/ReduxStore";
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",

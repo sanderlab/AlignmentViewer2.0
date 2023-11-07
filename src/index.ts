@@ -11,11 +11,6 @@ export * from "./common/SequenceLogoGlyphs.js";
 export * from "./common/StockholmAlignment.js";
 export * from "./common/Utils.js";
 
-export * from "./components/ace/AceConsensusSequenceComponent.js";
-export * from "./components/ace/AceEditorComponent.js";
-export * from "./components/ace/AceMultipleSequenceAlignmentComponent.js";
-export * from "./components/ace/AceQuerySequenceComponent.js";
-export * from "./components/ace/AceTextualRulerComponent.js";
 export * from "./components/AlignmentFileLoaderComponent.js";
 export * from "./components/AlignmentViewerComponent.js";
 export * from "./components/SequenceBarplotComponent.js";

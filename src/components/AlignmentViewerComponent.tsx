@@ -328,7 +328,7 @@ export class AlignmentViewer extends React.Component<
               )
             )}
 
-        {!showLogo || !logoOptions
+        {!showLogo || !logoOptions 
           ? null
           : this.renderWidget(
               "av-sequence-logo-holder",
@@ -342,7 +342,7 @@ export class AlignmentViewer extends React.Component<
               }
             )}
 
-        {!showConsensus 
+        {!showConsensus
           ? null
           : this.renderWidget(
               "consensus-seq-holder",
@@ -368,7 +368,7 @@ export class AlignmentViewer extends React.Component<
               { height: singleSeqDivHeight }
             )}
 
-        {!showQuery 
+        {!showQuery
           ? null
           : this.renderWidget(
               "query-seq-holder",
@@ -417,7 +417,7 @@ export class AlignmentViewer extends React.Component<
           "alignment-details-holder",
           <Provider store={store}>
             <div className="alignment-metadata-box">
-              <AlignmentTextualMetadata
+              { <AlignmentTextualMetadata
                 horizontalReduxId={metadataReduxId}
                 verticalReduxId={sharedVerticalReduxId}
                 textForEachSeq={alignment
@@ -428,7 +428,7 @@ export class AlignmentViewer extends React.Component<
                 fontSize={fontSize}
                 letterHeight={residueHeight}
                 letterWidth={residueWidth}
-              />
+              /> }
             </div>
           </Provider>,
           <Provider store={store}>

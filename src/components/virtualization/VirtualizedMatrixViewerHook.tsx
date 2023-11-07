@@ -290,10 +290,10 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                           app={app}
                           parentElement={ref.current!}
                           renderWidth={reduxStateHorizontal
-                            ? reduxStateHorizontal.renderSize
+                            ? reduxStateHorizontal.screenSize//renderSize
                             : screenWidth!}
                           renderHeight={reduxStateVertical
-                            ? reduxStateVertical.renderSize
+                            ? reduxStateVertical.screenSize//renderSize
                             : screenHeight!}
                           worldWidth={reduxStateHorizontal ? reduxStateHorizontal.worldSize : undefined}
                           worldLeftOffset={reduxStateHorizontal ? reduxStateHorizontal.worldOffset : undefined}

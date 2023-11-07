@@ -23,6 +23,5 @@
     "src/common",
     "src/index.ts",
     "types",
-    "src/components/ace/AceAlignmentMode.ts"
-  ]
+ ]
 }
