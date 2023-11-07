@@ -45,7 +45,6 @@ interface IGlyphStackData extends Array<IGlyphFrequency> {}
 
 export interface ISequenceLogoProps {
   //don't expose these props in the AlignmentViewer full component
-  id: string;
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
@@ -60,7 +59,6 @@ export interface ISequenceLogoProps {
 
 export function SequenceLogo(props: ISequenceLogoProps) {
   const {
-    id,
     alignment,
     glyphWidth,
     style,
@@ -304,7 +302,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         //console.log("LEFT SCROLL:" + e.currentTarget.scrollLeft);
         dispatch(
           setWorldLeftPixelOffset({
-            id: AlignmentViewer.HORIZONTAL_SCROLLER_ID,
+            id: AlignmentViewer.getScrollerReduxId(alignment.getUUID(), 'x'),
             worldLeftPixelOffset: e.currentTarget.scrollLeft,
           })
         );
@@ -323,9 +321,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   );*/
 
   //OPTION 2: VIRTUALIZATION - SEEMS SLOW
+  const horizontalReduxId = AlignmentViewer.getScrollerReduxId(alignment.getUUID(), 'x');
   return (
     <VirtualizedMatrixViewer
-      horizontalReduxId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
+      horizontalReduxId={horizontalReduxId}
       direction="x"
       columnCount={alignment.getSequenceLength()}
       columnWidth={glyphWidth}
@@ -334,9 +333,14 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       autoOffset={false}
       suppressVerticalScrollbar={true}
       suppressHorizontalScrollbar={true}
-      getContent={(rowIdxsToRender, colIdxsToRender, additionalVerticalOffset, additionalHorizontalOffset) => {
+      getContent={(
+        rowIdxsToRender,
+        colIdxsToRender,
+        additionalVerticalOffset,
+        additionalHorizontalOffset,
+        stageDimensions
+      ) => {
         //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET
-        
         return (
           <div
             className={classNames.join(" ")}

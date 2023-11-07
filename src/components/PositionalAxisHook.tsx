@@ -61,7 +61,13 @@ export function PositionalAxis(props: {
       autoOffset={true}
       suppressVerticalScrollbar={true}
       suppressHorizontalScrollbar={true}
-      getContent={(rowIdxsToRender, colIdxsToRender) => {
+      getContent={(
+        rowIdxsToRender,
+        colIdxsToRender,
+        additionalVerticalOffset,
+        additionalHorizontalOffset,
+        stageDimensions
+      ) => {
         const fullRuler = generateTextualRuler(Math.max(...positions));
         return (
           <div className="positional-axis" style={{ fontSize: fontSize }}>

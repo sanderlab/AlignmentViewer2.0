@@ -536,6 +536,13 @@ export default class App extends React.Component<AppProps, AppState> {
           fileSelectorLabelText={"Upload Alignment File:"}
           exampleFiles={[
             {
+              labelText: "Test",
+              fileURL:
+                process.env.PUBLIC_URL +
+                "/TESTING.a2m",
+              fileName: "TESTING.a2m",
+            },
+            {
               labelText: "β-lactamase",
               fileURL:
                 process.env.PUBLIC_URL +

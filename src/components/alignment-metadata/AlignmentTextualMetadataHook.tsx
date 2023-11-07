@@ -7,6 +7,7 @@ import React, { useCallback } from "react";
 import { VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
 
 export interface IAlignmentTextualMetadataProps {
+  horizontalReduxId: string;
   verticalReduxId: string;
   textForEachSeq: string[];
   letterHeight: number;
@@ -19,19 +20,21 @@ export function AlignmentTextualMetadata(
 ) {
   //props
   const {
+    horizontalReduxId,
     verticalReduxId,
     textForEachSeq,
     letterHeight,
     letterWidth,
     fontSize,
   } = props;
-  const horizontalReduxId = 'METADATA_HORIZONTAL_SCROLLER';
 
   const getMaxTextLength = useCallback(() => {
     return textForEachSeq.reduce((acc, txt) => {
       return txt.length > acc ? txt.length : acc;
     }, 0);
   }, [textForEachSeq]);
+  //console.log('verticalReduxId = ' + verticalReduxId + ', getMaxTextLength:' + getMaxTextLength());
+  
 
   /**
    *
@@ -52,7 +55,16 @@ export function AlignmentTextualMetadata(
       rowCount={textForEachSeq.length}
       rowHeight={letterHeight}
       autoOffset={true}
-      getContent={(rowIdxsToRender, colIdxsToRender) => {
+      getContent={(
+        rowIdxsToRender,
+        colIdxsToRender,
+        additionalVerticalOffset,
+        additionalHorizontalOffset,
+        stageDimensions
+      ) => {
+        //console.log('verticalReduxId = ' + verticalReduxId+', rowIdxsToRender length = ' + 
+        //            rowIdxsToRender.length+', textForEachSeq:', textForEachSeq);
+        //console.log('rowIdxsToRender:',rowIdxsToRender);
         return (
           <div
             className="alignment-textual-metadata"

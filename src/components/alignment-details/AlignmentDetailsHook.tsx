@@ -70,10 +70,13 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         additionalHorizontalOffset,
         stageDimensions
       ) => {
+        //issue with loading new alignment (a second alignment): virutalizedmatrix can end up not loading 
+        //the redux store after calling getContent 
         const seqsSliced = rowIdxsToRender.map((seqIdx) => {
           const seq = sequences[seqIdx];
           return colIdxsToRender.map((colIdx) => seq[colIdx]).join("");
         });
+
         const querySliced = colIdxsToRender.map((colIdx) => querySequence[colIdx]).join("")
         const consensusSliced = colIdxsToRender.map((colIdx) => consensusSequence[colIdx]).join("")
 

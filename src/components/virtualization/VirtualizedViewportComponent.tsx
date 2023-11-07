@@ -15,8 +15,8 @@ export interface IVirtualizedViewportProps {
   //e.g., the minimap on positioned above the viewport, the wheel events
   //propogate through to the viewport
   parentElement: HTMLElement;
-  screenWidth: number;
-  screenHeight: number;
+  renderWidth: number;
+  renderHeight: number;
   worldWidth?: number;
   worldHeight?: number;
   worldLeftOffset?: number;
@@ -37,15 +37,15 @@ export const VirtualizedViewport = PixiComponent<
       app,
       direction,
       parentElement,
-      screenWidth,
-      screenHeight,
+      renderWidth,
+      renderHeight,
       worldWidth,
       worldHeight,
     } = props;
     const vp = new Viewport({
       noTicker: true,
-      screenWidth: screenWidth,
-      screenHeight: screenHeight,
+      screenWidth: renderWidth,
+      screenHeight: renderHeight,
       worldWidth: worldWidth,
       worldHeight: worldHeight,
       interaction: app.renderer.plugins.interaction,
@@ -65,8 +65,8 @@ export const VirtualizedViewport = PixiComponent<
     const {
       app,
       direction,
-      screenWidth,
-      screenHeight,
+      renderWidth,
+      renderHeight,
       worldWidth,
       worldHeight,
       worldLeftOffset,
@@ -76,12 +76,12 @@ export const VirtualizedViewport = PixiComponent<
     } = newProps;
 
     if (
-      oldProps.screenWidth !== screenWidth ||
-      oldProps.screenHeight !== screenHeight ||
+      oldProps.renderWidth !== renderWidth ||
+      oldProps.renderHeight !== renderHeight ||
       oldProps.worldWidth !== worldWidth ||
       oldProps.worldHeight !== worldHeight
     ) {
-      vp.resize(screenWidth, screenHeight, worldWidth, worldHeight);
+      vp.resize(renderWidth, renderHeight, worldWidth, worldHeight);
       app.render(); //stops flicker on safari.
     }
 
@@ -113,11 +113,29 @@ export const VirtualizedViewport = PixiComponent<
       const newWorldTop = data.viewport.top;
       const newWorldLeft = data.viewport.left;
 
-      if (data.type === "wheel" && newWorldTop !== worldTopOffset && viewportMovedVertically) {
+      if (
+        data.type === "wheel" && 
+        newWorldTop !== worldTopOffset && 
+        viewportMovedVertically && 
+        (
+          (worldHeight! - (renderHeight+newWorldTop)) > 1 || //if not at the very top, go ahead regardless
+          Math.abs(newWorldTop - worldTopOffset!) > 1        //if at very top, only move in increments over 1 - stops some jitter
+        )
+      ) { 
         viewportMovedVertically(newWorldTop);
         app.render(); //stops flicker on safari.
       }
-      if (data.type === "wheel" && newWorldLeft !== worldLeftOffset && viewportMovedHorizontally) {
+
+      if (
+        data.type === "wheel" && 
+        newWorldLeft !== worldLeftOffset && 
+        viewportMovedHorizontally &&
+        (
+          (worldWidth! - (renderWidth+newWorldLeft)) > 1 || //if not at the very right, go ahead regardless
+          Math.abs(newWorldLeft - worldLeftOffset!) > 1     //if at very left, only move in increments over 1 - stops some jitter
+        )
+      ) {
+        console.log('worldWidth:'+worldWidth+'renderWidth+newWorldLeft:'+(renderWidth+newWorldLeft)+', newWorldLeft:'+newWorldLeft + ', newWorldLeft - worldLeftOffset='+(newWorldLeft - worldLeftOffset!));
         viewportMovedHorizontally(newWorldLeft);
         app.render(); //stops flicker on safari.
       }

@@ -3,10 +3,17 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: rgba(256, 256, 256, 0.8);
+  //background-color: rgba(0, 0, 150, 0.5);
 
   .vertical-scrollbar {
     position: absolute;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .vertical-scrollbar:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  .vertical-scrollbar:active {
     background-color: rgba(0, 0, 0, 0.8);
   }
 }
@@ -23,11 +30,18 @@
   position: absolute;
   right: 0;
   left: 0;
-  bottom: -5px;
-  background-color: rgba(256, 256, 256, 0.8);
+  bottom: 0;
+  //background-color: rgba(150, 0, 0, 0.5);
 
   .horizontal-scrollbar {
     position: absolute;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .horizontal-scrollbar:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  .horizontal-scrollbar:active {
     background-color: rgba(0, 0, 0, 0.8);
   }
 }

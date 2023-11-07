@@ -2,12 +2,12 @@
  * Base react hook for a virtual vertical scrollbar.
  */
 import "./VirtualScrollbars.scss";
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { ReactResizeSensor } from "../ResizeSensorHook";
 
 interface IVirtualScrollbarProps {
   visible: boolean;
-  horizontalScrollbarHeight: number;
+  horizontalScrollbarWidth: number;
   worldHeight: number;
   worldTopOffset: number;
   width?: number;
@@ -19,7 +19,7 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
   const {
     width = 10,
     minHeight = 20,
-    horizontalScrollbarHeight,
+    horizontalScrollbarWidth,
     scrollbarMoved,
     worldHeight,
     worldTopOffset,
@@ -36,51 +36,48 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
   const [dragStartScrollbarTop, setDragStartScrollbarTop] = useState<number>(
     -1
   );
-  const [scrollbarAreaProportions, setScrollbarAreaProportions] = useState({
-    scrollareaBoundsHeight: 100,
-    draggerHolderHeight: 100,
-    clientTop: 0,
+  const [scrollbarHolderProportions, setScrollbarHolderProportions] = useState({
+    height: 100,
+    top: 0,
   });
-  
+
   //useCallback
   const scrollbarHolderSizeChanged = useCallback((bounds) => {
     //sizing - could be passed as a prop, but doing this calculation here in case
     //         the parent does something odd with css and messes up the actual
     //         spacing that the scrollbar consumes.
     if (
-      !scrollbarAreaProportions ||
-      scrollbarAreaProportions.clientTop !== bounds.top ||
-      scrollbarAreaProportions.scrollareaBoundsHeight !== bounds.scrollareaBoundsHeight ||
-      scrollbarAreaProportions.draggerHolderHeight !== bounds.draggerHolderHeight
+      !scrollbarHolderProportions ||
+      scrollbarHolderProportions.top !== bounds.top ||
+      scrollbarHolderProportions.height !== bounds.height
     ) {
-      setScrollbarAreaProportions({
+      setScrollbarHolderProportions({
         //if there is also a horizontal scrollbar, stop scrollbar right above horizontal scrollbar
-        draggerHolderHeight: bounds.height - horizontalScrollbarHeight, 
-        scrollareaBoundsHeight: bounds.height,
-        clientTop: bounds.top,
+        height: bounds.height - horizontalScrollbarWidth, 
+        top: bounds.top,
       });
     }
-  }, [scrollbarAreaProportions, horizontalScrollbarHeight]);
+  }, [scrollbarHolderProportions, horizontalScrollbarWidth]);
 
   //calculate all sizing into one variable
   const scrollbarSizing = (() => {
     const heightInClient = Math.max(
       minHeight, //min height of scrollbar is 20
-      scrollbarAreaProportions.draggerHolderHeight *
-        (scrollbarAreaProportions.draggerHolderHeight / worldHeight)
+      scrollbarHolderProportions.height *
+        (scrollbarHolderProportions.height / worldHeight)
     );
-    const numScrollablePixels = scrollbarAreaProportions.draggerHolderHeight - heightInClient; //num client pixels avail to scroll
-    const hiddenWorldHeight = worldHeight - (scrollbarAreaProportions.scrollareaBoundsHeight);
-    const worldToScrollablePixelsRatio = hiddenWorldHeight / numScrollablePixels; //e.g., 1 world pixel = 10 client pixel
+    const clientToWorldRatio =
+      (scrollbarHolderProportions.height - heightInClient) /
+      (worldHeight - scrollbarHolderProportions.height);
 
     return {
       heightInClient: heightInClient,
-      currentClientTop: worldTopOffset / worldToScrollablePixelsRatio,
-      worldToScrollablePixelsRatio: worldToScrollablePixelsRatio,
-      numScrollablePixels: numScrollablePixels //the top of the scrollbar can go from zero to here.
+      currentClientTop: clientToWorldRatio * worldTopOffset,
+      clientToWorldRatio: clientToWorldRatio,
     };
   })();
-  
+  //console.log('worldHeight:'+worldHeight+'  ::  '+'worldTopOffset: '+worldTopOffset);
+  //console.log('worldHeight:'+worldHeight+'  ::  '+'worldTopOffset: '+worldTopOffset);
   /*
    *
    *
@@ -89,8 +86,14 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
    *
    */
 
-  const getNewOffsetFromWorldTop = (clientScrollbarTop: number) => {
-    return clientScrollbarTop * scrollbarSizing.worldToScrollablePixelsRatio;
+  /**
+   * Calculate where a
+   * @param suggestedScrollbarClientTop
+   */
+  const getNewOffsetFromWorldTop = (suggestedScrollbarClientTop: number) => {
+    let newWorldTop =
+      (1 / scrollbarSizing.clientToWorldRatio) * suggestedScrollbarClientTop;
+    return newWorldTop;
   };
 
   /*
@@ -105,13 +108,13 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
       e.stopPropagation();
       e.preventDefault();
       const delta = e.pageY - dragStartTop;
-      const approxScrollbarTop = delta + dragStartScrollbarTop;
-      scrollbarMoved(
-        approxScrollbarTop <= 0 ? 0 : 
-        approxScrollbarTop >= scrollbarSizing.numScrollablePixels ? 
-          getNewOffsetFromWorldTop(scrollbarSizing.numScrollablePixels) : 
-          getNewOffsetFromWorldTop(approxScrollbarTop)
+      const newPixelsFromWorldTop = getNewOffsetFromWorldTop(
+        delta + dragStartScrollbarTop
       );
+      //console.log('Scrollbar: DRAG MOVE offset: ' + newPixelsFromWorldTop+', scrollbarHolderProportions.height'+scrollbarHolderProportions.height);
+      //console.log('worldHeight:'+worldHeight+'  ::  '+'worldTopOffset: '+worldTopOffset);
+      //console.log(scrollbarSizing);
+      scrollbarMoved(newPixelsFromWorldTop);
     }
   };
 
@@ -122,7 +125,7 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
     setDragStartTop(e.pageY);
     setDragStartScrollbarTop(
       (e.currentTarget as HTMLDivElement).getBoundingClientRect().top -
-      scrollbarAreaProportions.clientTop
+        scrollbarHolderProportions.top
     );
   };
 

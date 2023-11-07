@@ -7,22 +7,24 @@ import { ReactResizeSensor } from "../ResizeSensorHook";
 
 interface IVirtualScrollbarProps {
   visible: boolean;
+  verticalScrollbarWidth: number;
   worldWidth: number;
   worldLeftOffset: number;
   height?: number;
   minWidth?: number;
-  scrollbarMoved(newWorldTop: number): void;
+  scrollbarMoved(newWorldLeft: number): void;
 }
 
 export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
   const {
     height = 10,
     minWidth = 20,
+    verticalScrollbarWidth,
     scrollbarMoved,
     worldWidth,
     worldLeftOffset,
   } = props;
-  const SCROLLBAR_HOLDER_HEIGHT = height + 6;
+  const SCROLLBAR_HOLDER_HEIGHT = height;// + 4;
   const SCROLLBAR_OFFSET = (SCROLLBAR_HOLDER_HEIGHT - height) / 2;
 
   //props
@@ -38,7 +40,7 @@ export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
     width: 100,
     left: 0,
   });
-
+  
   //useCallback
   const scrollbarHolderSizeChanged = useCallback((bounds) => {
     //sizing - could be passed as a prop, but doing this calculation here in case
@@ -50,11 +52,11 @@ export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
       scrollbarHolderProportions.width !== bounds.width
     ) {
       setScrollbarHolderProportions({
-        width: bounds.width,
+        width: bounds.width - verticalScrollbarWidth,
         left: bounds.left,
       });
     }
-  }, []);
+  }, [scrollbarHolderProportions, verticalScrollbarWidth]);
 
   //calculate all sizing into one variable
   const scrollbarSizing = (() => {
@@ -63,14 +65,16 @@ export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
       scrollbarHolderProportions.width *
         (scrollbarHolderProportions.width / worldWidth)
     );
-    const clientToWorldRatio =
-      (scrollbarHolderProportions.width - widthInClient) /
-      (worldWidth - scrollbarHolderProportions.width);
+    const numScrollablePixels = scrollbarHolderProportions.width - widthInClient; //num client pixels avail to scroll
+    const hiddenWorldWidth = worldWidth - (scrollbarHolderProportions.width + 
+                                           verticalScrollbarWidth);
+    const worldToScrollablePixelsRatio = hiddenWorldWidth / numScrollablePixels; //e.g., 1 world pixel = 10 client pixel
 
     return {
       widthInClient: widthInClient,
-      currentClientLeft: clientToWorldRatio * worldLeftOffset,
-      clientToWorldRatio: clientToWorldRatio,
+      currentClientLeft: worldLeftOffset / worldToScrollablePixelsRatio,
+      worldToScrollablePixelsRatio: worldToScrollablePixelsRatio,
+      numScrollablePixels: numScrollablePixels //the left of the scrollbar can go from zero to here.
     };
   })();
 
@@ -86,10 +90,8 @@ export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
    * Calculate where a
    * @param suggestedScrollbarClientTop
    */
-  const getNewOffsetFromWorldLeft = (suggestedScrollbarClientLeft: number) => {
-    let newWorldLeft =
-      (1 / scrollbarSizing.clientToWorldRatio) * suggestedScrollbarClientLeft;
-    return newWorldLeft;
+  const getNewOffsetFromWorldLeft = (clientScrollbarLeft: number) => {
+    return clientScrollbarLeft * scrollbarSizing.worldToScrollablePixelsRatio;
   };
 
   /*
@@ -104,10 +106,13 @@ export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
       e.stopPropagation();
       e.preventDefault();
       const delta = e.pageX - dragStartLeft;
-      const newPixelsFromWorldLeft = getNewOffsetFromWorldLeft(
-        delta + dragStartScrollbarLeft
+      const approxScrollbarLeft = delta + dragStartScrollbarLeft;
+      scrollbarMoved(
+        approxScrollbarLeft <= 0 ? 0 : 
+        approxScrollbarLeft >= scrollbarSizing.numScrollablePixels ? 
+          getNewOffsetFromWorldLeft(scrollbarSizing.numScrollablePixels) : 
+          getNewOffsetFromWorldLeft(approxScrollbarLeft)
       );
-      scrollbarMoved(newPixelsFromWorldLeft);
     }
   };
 

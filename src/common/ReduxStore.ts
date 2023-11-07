@@ -11,6 +11,9 @@ export interface IVirtualizedMatrixState {
   // ONLY SET BY CALLER
   //
 
+  //the id of the matrix state
+  id: string;
+
   //the surrounding div width/height
   screenSize: number;
 
@@ -41,7 +44,7 @@ export interface IVirtualizedMatrixState {
   //It will always be negative or zero
   scrollingAdditionalOffset: number;
 
-  // the actual number of lines and columns that should be rendered taking into
+  // the actual rows or columns that should be rendered taking into
   // account the rendered location in the data (top, bottom, in the middle) and
   // line offsets
   idxsToRender: number[];
@@ -54,6 +57,9 @@ export interface IVirtualizedMatrixState {
 
   //world width/height
   worldSize: number;
+
+  //world width/height
+  worldSizePadded: number;
 }
 
 /**
@@ -70,6 +76,7 @@ const initializeNewIdAsNeeded = (
 ) => {
   if (id in state === false) {
     state[id] = {
+      id: id,
       initialized: false,
 
       worldOffset: 0,
@@ -78,6 +85,7 @@ const initializeNewIdAsNeeded = (
       screenSize: -1,
       renderSize: -1,
       worldSize: -1,
+      worldSizePadded: -1,
 
       cellCount: -1,
 
@@ -109,20 +117,24 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
   }
 
   state.initialized = true;
-  state.worldSize = (cellCount * cellPixelSize)
-                    + Math.floor(0.5*cellPixelSize); //add extra padding to avoid jitter
+  
+  //ISSUE1: jitter when scrolling to the end without introducing padding
+  //ISSUE2: with padding, bottom doesn't seat properly for scrollbar and sometimes bottom even crashes
+  //ISSUE3: without padding, drag / wheel scrollng deosn't seat properly.
+  //const worldSizeWithoutPadding = (cellCount * cellPixelSize);//works for scrollbar scrolling
+  //const worldSizeWithoutPadding = (cellCount * cellPixelSize)+ Math.floor(0.5*cellPixelSize);//works for vertical drag scrolling
+  
+  state.worldSize = (cellCount * cellPixelSize);//works for vertical scrollbar scrolling
+  state.worldSizePadded = state.worldSize + (state.worldSize/100); //add extra padding to avoid jitter
+                    //+ Math.floor(0.5*cellPixelSize); //add extra padding to avoid jitter
 
   //easiest case -- everything fits into the visible screen
-  let allCellsFitIntoScreen = false;
   if (Math.floor(screenSize / cellPixelSize) >= cellCount) {
     //all lines / columns will fit into the screen - no offset positioning needed
     state.worldOffset = 0;
     state.scrollingAdditionalOffset = 0;
     state.idxsToRender = [...Array(cellCount).keys()];
     state.renderSize = state.idxsToRender.length * cellPixelSize;
-    allCellsFitIntoScreen = true;
-  }
-  if (allCellsFitIntoScreen) {
     return state;
   }
 
@@ -164,8 +176,16 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
   state.idxsToRender = [...Array(numCellsToRender).keys()].map(
     (zeroIdx) => zeroIdx + firstRenderedCell
   );
-  state.renderSize = state.idxsToRender.length * cellPixelSize;
+  
+  //another out of bounds check
+  //if (state.idxsToRender[state.idxsToRender.length-1] >= cellCount-5){
+  //  console.log('OVER OR CLOSE! '+state.idxsToRender[state.idxsToRender.length-1] + '>=' + cellCount);
+  //  state.idxsToRender = [...Array(numCellsToRender).keys()].map(
+  //    (zeroIdx) => zeroIdx + firstRenderedCell - 1
+  //  );
+  //}
 
+  state.renderSize = state.idxsToRender.length * cellPixelSize;
   return state;
 };
 
@@ -287,6 +307,7 @@ const batchSetPixelOffsets = (
   });
   return state;
 };
+
 
 /**
  *

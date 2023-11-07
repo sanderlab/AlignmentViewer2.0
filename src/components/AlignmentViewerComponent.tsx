@@ -108,18 +108,10 @@ export class AlignmentViewer extends React.Component<
   IAlignmentViewerProps,
   IAlignmentViewerState
 > {
-  private static SCROLLER_COMPONENT_IDS = {
-    FULL_MSA: "full-alignment-details",
-    QUERY: "query-alignment-details",
-    CONSENSUS: "consensus-alignment-details",
-    POSITIONAL_AXIS: "positional-axis",
-    FULL_MSA_METADATA_IDS: "full-alignment-metadata-ids",
-    SEQUENCE_LOGO: "sequence-logo",
-  };
-
-  public static HORIZONTAL_SCROLLER_ID = "alignment-positions";
-  public static VERTICAL_SCROLLER_ID = "sequence-indicies";
-
+  public static getScrollerReduxId(alignmentUUID: string, direction: 'x' | 'y'){
+    return direction+'_scroller_'+alignmentUUID;
+  }
+  
   static defaultProps = defaultProps;
 
   constructor(props: IAlignmentViewerProps) {
@@ -184,11 +176,9 @@ export class AlignmentViewer extends React.Component<
   protected renderSequenceLogo = (residueWidth: number) => {
     const { alignment, logoOptions, style } = this.props;
     const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
-    //console.log("renderSequenceLogo:" + residueWidth);
     return (
       <Provider store={store}>
         <SequenceLogo
-          id={AlignmentViewer.SCROLLER_COMPONENT_IDS.SEQUENCE_LOGO}
           alignment={alignment}
           style={style}
           glyphWidth={residueWidth}
@@ -224,12 +214,17 @@ export class AlignmentViewer extends React.Component<
     );
   };
 
-  protected renderMiniMap() {
-    const { alignment, showMinimap, sortBy, style } = this.props;
+  /*componentDidUpdate(prevProps: IAlignmentViewerProps) {
+    if (prevProps.alignment !== this.props.alignment ||
+        prevProps.alignment.getSequenceLength() !== this.props.alignment.getSequenceLength() ||
+        prevProps.alignment.getSequences().length !== this.props.alignment.getSequences().length) {
+      console.log('alignment changed:', prevProps.alignment); 
+    }
+  }*/
 
-    let mmOptions = this.props.minimapOptions
-      ? this.props.minimapOptions
-      : defaultProps.minimapOptions;
+  protected renderMiniMap(alignmentDetailsReduxId: string) {
+    const { alignment, showMinimap, sortBy, style, minimapOptions, minimapClicked } = this.props;
+    let mmOptions = minimapOptions ? minimapOptions : defaultProps.minimapOptions;
     //const mmClassName = showMinimap ? "minimap" : "minimap hidden";
     return (
       alignment &&
@@ -249,11 +244,9 @@ export class AlignmentViewer extends React.Component<
                 resizable={mmOptions.resizable}
                 startingWidth={mmOptions.startingWidth}
                 verticalHeight={mmOptions.verticalHeight}
-                onClick={this.props.minimapClicked}
+                onClick={minimapClicked}
                 //sync
-                syncWithAlignmentDetailsId={
-                  AlignmentViewer.VERTICAL_SCROLLER_ID
-                }
+                syncWithAlignmentDetailsId={alignmentDetailsReduxId}
               />
             </Provider>
           }
@@ -281,15 +274,19 @@ export class AlignmentViewer extends React.Component<
     const {
       alignment,
       barplots,
+      logoOptions,
       showAnnotations,
       showConsensus,
+      showLogo,
       showQuery,
       showRuler,
+      sortBy,
+      style
     } = this.props;
     if (!alignment) {
       return null;
     }
-
+    
     const classes = ["alignment-viewer"];
     if (!showAnnotations) {
       classes.push("annotation-closed");
@@ -302,13 +299,21 @@ export class AlignmentViewer extends React.Component<
     );
     const singleSeqDivHeight = residueHeight;
 
+    const sharedHorizontalReduxId = AlignmentViewer.getScrollerReduxId(
+      alignment.getUUID(), 'x'
+    );
+    const sharedVerticalReduxId = AlignmentViewer.getScrollerReduxId(
+      alignment.getUUID(), 'y'
+    );
+    const metadataReduxId = 'scroller_x_metadata_'+alignment.getUUID();
+
     return (
-      <div className={classes.join(" ")}>
-        {this.renderMiniMap()}
+      <div className={classes.join(" ")} key={alignment.getUUID()}>
+        {this.renderMiniMap(sharedVerticalReduxId)}
 
         {/*<div id="column_mouseover"></div>*/}
 
-        {!barplots || barplots.length < 1
+        {!barplots || barplots.length < 1 
           ? null
           : barplots.map((barplot, idx) =>
               this.renderWidget(
@@ -323,7 +328,7 @@ export class AlignmentViewer extends React.Component<
               )
             )}
 
-        {!this.props.showLogo || !this.props.logoOptions
+        {!showLogo || !logoOptions
           ? null
           : this.renderWidget(
               "av-sequence-logo-holder",
@@ -331,28 +336,28 @@ export class AlignmentViewer extends React.Component<
               this.renderSequenceLogo(residueWidth),
               {
                 height:
-                  this.props.logoOptions && this.props.logoOptions.height
-                    ? this.props.logoOptions.height
+                  logoOptions && logoOptions.height
+                    ? logoOptions.height
                     : defaultProps.logoOptions.height,
               }
             )}
 
-        {!showConsensus
+        {!showConsensus 
           ? null
           : this.renderWidget(
               "consensus-seq-holder",
               "Consensus:",
               <Provider store={store}>
                 <AlignmentDetails
-                  reduxHorizontalId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
-                  sequences={[this.props.alignment.getConsensus().sequence]}
+                  reduxHorizontalId={sharedHorizontalReduxId}
+                  sequences={[alignment.getConsensus().sequence]}
                   consensusSequence={
-                    this.props.alignment.getConsensus().sequence
+                    alignment.getConsensus().sequence
                   }
                   querySequence={
-                    this.props.alignment.getQuerySequence().sequence
+                    alignment.getQuerySequence().sequence
                   }
-                  alignmentStyle={this.props.style}
+                  alignmentStyle={style}
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
@@ -363,22 +368,22 @@ export class AlignmentViewer extends React.Component<
               { height: singleSeqDivHeight }
             )}
 
-        {!showQuery
+        {!showQuery 
           ? null
           : this.renderWidget(
               "query-seq-holder",
               "Query:",
               <Provider store={store}>
                 <AlignmentDetails
-                  reduxHorizontalId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
-                  sequences={[this.props.alignment.getQuerySequence().sequence]}
+                  reduxHorizontalId={sharedHorizontalReduxId}
+                  sequences={[alignment.getQuerySequence().sequence]}
                   consensusSequence={
-                    this.props.alignment.getConsensus().sequence
+                    alignment.getConsensus().sequence
                   }
                   querySequence={
-                    this.props.alignment.getQuerySequence().sequence
+                    alignment.getQuerySequence().sequence
                   }
-                  alignmentStyle={this.props.style}
+                  alignmentStyle={style}
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
@@ -389,7 +394,7 @@ export class AlignmentViewer extends React.Component<
               { height: singleSeqDivHeight }
             )}
 
-        {!showRuler
+        {!showRuler 
           ? null
           : this.renderWidget(
               "position-indicator-holder",
@@ -397,7 +402,7 @@ export class AlignmentViewer extends React.Component<
               <Provider store={store}>
                 <div className="position-box">
                   <PositionalAxis
-                    horizontalReduxId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
+                    horizontalReduxId={sharedHorizontalReduxId}
                     positions={[...Array(alignment.getSequenceLength()).keys()]}
                     fontSize={fontSize}
                     residueHeight={residueHeight}
@@ -410,14 +415,14 @@ export class AlignmentViewer extends React.Component<
 
         {this.renderWidget(
           "alignment-details-holder",
-
           <Provider store={store}>
             <div className="alignment-metadata-box">
               <AlignmentTextualMetadata
-                verticalReduxId={AlignmentViewer.VERTICAL_SCROLLER_ID}
-                textForEachSeq={this.props.alignment
+                horizontalReduxId={metadataReduxId}
+                verticalReduxId={sharedVerticalReduxId}
+                textForEachSeq={alignment
                   .getSequences(
-                    this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
+                    sortBy ? sortBy : defaultProps.sortBy
                   )
                   .map((iseq) => iseq.id)}
                 fontSize={fontSize}
@@ -428,16 +433,16 @@ export class AlignmentViewer extends React.Component<
           </Provider>,
           <Provider store={store}>
             <AlignmentDetails
-              reduxVerticalId={AlignmentViewer.VERTICAL_SCROLLER_ID}
-              reduxHorizontalId={AlignmentViewer.HORIZONTAL_SCROLLER_ID}
-              sequences={this.props.alignment
+              reduxVerticalId={sharedVerticalReduxId}
+              reduxHorizontalId={sharedHorizontalReduxId}
+              sequences={alignment
                 .getSequences(
-                  this.props.sortBy ? this.props.sortBy : defaultProps.sortBy
+                  sortBy ? sortBy : defaultProps.sortBy
                 )
                 .map((iseq) => iseq.sequence)}
-              consensusSequence={this.props.alignment.getConsensus().sequence}
-              querySequence={this.props.alignment.getQuerySequence().sequence}
-              alignmentStyle={this.props.style}
+              consensusSequence={alignment.getConsensus().sequence}
+              querySequence={alignment.getQuerySequence().sequence}
+              alignmentStyle={style}
               fontSize={fontSize}
               residueHeight={residueHeight}
               residueWidth={residueWidth}
