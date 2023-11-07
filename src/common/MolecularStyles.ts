@@ -71,13 +71,13 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
  */
 export class AlignmentTypes {
   static readonly AMINOACID = new AlignmentTypes(
-    "aminoacid-alignment",
+    "aa",
     "Amino Acid Sequences",
     styles.aaAlignTypeClass,
     ALL_AMINOACID_COLORSCHEMES
   );
   static readonly NUCLEOTIDE = new AlignmentTypes(
-    "nucleotide-alignment",
+    "nt",
     "Nucleotide Sequences",
     styles.ntAlignTypeClass,
     ALL_NUCLEOTIDE_COLORSCHEMES
@@ -154,27 +154,27 @@ export class PositionsToStyle {
   ) {}
 }
 
-export class ResidueStyle {
-  static readonly LIGHT = new ResidueStyle(
+export class ResidueColoring {
+  static readonly LIGHT = new ResidueColoring(
     "light",
     "Light",
     styles.lightHueClass
   );
-  static readonly DARK = new ResidueStyle("dark", "Dark", styles.darkHueClass);
-  static readonly NO_BACKGROUND = new ResidueStyle(
+  static readonly DARK = new ResidueColoring("dark", "Dark", styles.darkHueClass);
+  static readonly NO_BACKGROUND = new ResidueColoring(
     "lettersonly",
     "Letters Only",
     styles.lettersOnlyHueClass
   );
 
   static list = [
-    ResidueStyle.DARK,
-    ResidueStyle.LIGHT,
-    ResidueStyle.NO_BACKGROUND,
+    ResidueColoring.DARK,
+    ResidueColoring.LIGHT,
+    ResidueColoring.NO_BACKGROUND,
   ];
 
   static fromKey(key: string) {
-    return ResidueStyle.list.find((at) => {
+    return ResidueColoring.list.find((at) => {
       return at.key === key;
     });
   }
@@ -200,8 +200,6 @@ export class ResidueStyle {
 export abstract class AlignmentStyle {
   abstract readonly alignmentType: AlignmentTypes;
   abstract colorScheme: IColorScheme;
-  abstract positionsToStyle: PositionsToStyle;
-  abstract residueDetail: ResidueStyle;
 
   static fromAlignmentType(alignmentType: AlignmentTypes) {
     if (alignmentType === AlignmentTypes.AMINOACID)
@@ -221,8 +219,6 @@ export class AminoAcidAlignmentStyle implements AlignmentStyle {
 
   constructor(
     public colorScheme: IColorScheme = ALL_AMINOACID_COLORSCHEMES[0],
-    public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
-    public residueDetail: ResidueStyle = ResidueStyle.LIGHT
   ) {}
 }
 
@@ -239,8 +235,6 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
 
   constructor(
     public colorScheme: IColorScheme = ALL_NUCLEOTIDE_COLORSCHEMES[0],
-    public positionsToStyle: PositionsToStyle = PositionsToStyle.ALL,
-    public residueDetail: ResidueStyle = ResidueStyle.LIGHT
   ) {}
 }
 

@@ -91,20 +91,20 @@ describe("MolecularStyles", () => {
   });
 
   it("Should handle getting a style for the 'amino acid' alignment.", () => {
-    expect(AlignmentTypes.fromKey("aminoacid-alignment")).toEqual({
+    expect(AlignmentTypes.fromKey("aa")).toEqual({
       allColorSchemes: [],
       className: "aaAlignTypeClass",
       description: "Amino Acid Sequences",
-      key: "aminoacid-alignment",
+      key: "aa",
     });
   });
 
   it("Should handle getting a style for the 'nucleotide' alignment.", () => {
-    expect(AlignmentTypes.fromKey("nucleotide-alignment")).toEqual({
+    expect(AlignmentTypes.fromKey("nt")).toEqual({
       allColorSchemes: [],
       className: "ntAlignTypeClass",
       description: "Nucleotide Sequences",
-      key: "nucleotide-alignment",
+      key: "nt",
     });
   });
 

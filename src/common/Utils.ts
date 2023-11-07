@@ -88,6 +88,20 @@ export type ArrayOneOrMore<T> = {
 } & Array<T>;
 
 /**
+ * Convert a string to a boolean or number if possible, otherwise
+ * return the string.
+ * @param val 
+ * @returns 
+ */
+function strToNumberBooleanString(val: string){
+  if (['TRUE', 'FALSE'].includes(val.toUpperCase())){
+    return val.toUpperCase() === 'TRUE';
+  }
+  if(+val){ return +val; }
+  return val;
+}
+
+/**
  * Get all the parameters in the URL. Taken from:
  * https://stackoverflow.com/questions/979975
  */
@@ -97,8 +111,10 @@ export function getURLParameters() {
     .split("&")
     .map((v) => v.split("="))
     .reduce(
-      (map, [key, value]) => map.set(key, decodeURIComponent(value)),
-      new Map<string, string>()
+      (map, [key, value]) => map.set(
+        key, decodeURIComponent(value))//strToNumberBooleanString( decodeURIComponent(value)) )
+      ,
+      new Map<string, string>()// | boolean | number>()
     );
 }
 

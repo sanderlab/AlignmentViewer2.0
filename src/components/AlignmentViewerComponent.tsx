@@ -17,6 +17,7 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   PositionsToStyle,
+  ResidueColoring
 } from "../common/MolecularStyles";
 import { MiniMapComponent } from "./MiniMapComponent";
 import { AceMultipleSequenceAlignmentComponent } from "./AceMultipleSequenceAlignmentComponent";
@@ -29,10 +30,12 @@ import { IMiniMapProps } from "./MiniMapComponent";
 export type IAlignmentViewerProps = {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle;
+  residueColoring: ResidueColoring;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
-type IBarplotExposedProps = Pick<
+export type IBarplotExposedProps = Pick<
   ISequenceBarplotProps,
   "dataSeriesSet" | "tooltipPlacement" | "height"
 >;
@@ -354,9 +357,9 @@ export class AlignmentViewer extends React.Component<
         }
         classNames={[
           "ace-consensusseq",
-          this.props.style.residueDetail.className,
+          this.props.residueColoring.className,
           this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
+          this.props.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor, parentElem) => {
@@ -381,9 +384,9 @@ export class AlignmentViewer extends React.Component<
         sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
         classNames={[
           "ace-queryseq",
-          this.props.style.residueDetail.className,
+          this.props.residueColoring.className,
           this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
+          this.props.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
         editorLoaded={(editor, parentElem) => {
@@ -430,9 +433,9 @@ export class AlignmentViewer extends React.Component<
         sortBy={this.props.sortBy ? this.props.sortBy : defaultProps.sortBy}
         classNames={[
           "ace-alignment",
-          this.props.style.residueDetail.className,
+          this.props.residueColoring.className,
           this.props.style.alignmentType.className,
-          this.props.style.positionsToStyle.className,
+          this.props.positionsToStyle.className,
           this.props.style.colorScheme.className,
         ].join(" ")}
         characterSizeChanged={this.handleCharacterSizeChanged}
@@ -474,7 +477,7 @@ export class AlignmentViewer extends React.Component<
   );
 
   protected renderMiniMap() {
-    const { alignment, showMinimap, sortBy, style } = this.props;
+    const { alignment, showMinimap, positionsToStyle, sortBy, style } = this.props;
     const { msaEditorVewport } = this.state;
 
     let mmOptions = this.props.minimapOptions
@@ -492,6 +495,7 @@ export class AlignmentViewer extends React.Component<
             //not exposed to instantiator
             alignment={alignment}
             alignmentStyle={style}
+            positionsToStyle={positionsToStyle}
             sortBy={sortBy ? sortBy : defaultProps.sortBy}
             highlightRows={
               !msaEditorVewport

@@ -83,6 +83,7 @@ $styPosConsensusDiff: $styPosClassPrefix + consensus-diff;
  *
  * COLOR SCHEMES
  * most colors taken from / inspired by https://github.com/wilzbach/msa-colorschemes
+ * and https://www.jalview.org/help/html/colourSchemes/
  *
  */
 
@@ -183,6 +184,7 @@ $aaProps: (
         Z: grey,
       ),
     ),
+    /* // WEIRD white background on N and Q
     Clustal: (
       description: "Clustal",
       topLevelClass: $aaStyleClassPrefix + clustal,
@@ -216,10 +218,10 @@ $aaProps: (
         Y: blue,
         Z: #fff,
       ),
-    ),
-    Clustal2: (
-      description: "Clustal2",
-      topLevelClass: $aaStyleClassPrefix + clustal2,
+    ),*/
+    Clustal: (
+      description: "Clustal",
+      topLevelClass: $aaStyleClassPrefix + clustal,
       backgroundAlpha: $defaultBackgroundAlpha,
       defaultLetterColor: $defaultLetterColor,
       colors: (

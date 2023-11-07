@@ -62,28 +62,30 @@ const alignmentObj = FastaAlignment.fromFileContents(
 <AlignmentViewer alignment={ alignmentObj } style={ alignmentObj.getDefaultStyle() } />
 ```
 
-## Building Alignment Viewer 2.0
+## Download code and gather dependencies
 
 ```sh
 git clone https://github.com/sanderlab/AlignmentViewer2.0.git
 cd AlignmentViewer2.0
+export NODE_OPTIONS=--openssl-legacy-provider
 yarn
+yarn run
 ```
 
-For some reason node-sass needs to be installed separately even though it is in devDependencies (?!?)
-
-```sh
-yarn add node-sass
-```
-
-To startup the local demo site:
-
+## Run the Alignment Viewer 2.0 demo site locally
 ```sh
 yarn run
 ```
 
-## Running Unit Tests
+## Building and running Alignment Viewer 2.0 locally
+```sh
+yarn build
+cd build
+python3 -m http.server
+```
 
+
+## Running Unit Tests
 ```sh
 yarn test
 ```
