@@ -23,6 +23,15 @@ export interface IVirtualizedMatrixState {
   //info about the matrix: the row or column count
   cellCount: number;
 
+  //mouseover
+  mouseMove: {
+    hoverWorldOffset: number;     //the world offset hovering over
+    hoverIdx: number;             //the row or column hovering over
+    hoverIdxScreenMin: number;    //the left or top of the hover in screen pixels
+    hoverIdxScreenMax: number;    //the right or bottom of the hover in screen pixels
+  } | undefined;
+
+
   //
   // SET BY CALLER, BUT WILL BE ADJUSTED IF OUT OF BOUNDS
   //
@@ -57,9 +66,6 @@ export interface IVirtualizedMatrixState {
 
   //world width/height
   worldSize: number;
-
-  //world width/height
-  worldSizePadded: number;
 }
 
 /**
@@ -85,7 +91,8 @@ const initializeNewIdAsNeeded = (
       screenSize: -1,
       renderSize: -1,
       worldSize: -1,
-      worldSizePadded: -1,
+
+      mouseMove: undefined,
 
       cellCount: -1,
 
@@ -117,16 +124,7 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
   }
 
   state.initialized = true;
-  
-  //ISSUE1: jitter when scrolling to the end without introducing padding
-  //ISSUE2: with padding, bottom doesn't seat properly for scrollbar and sometimes bottom even crashes
-  //ISSUE3: without padding, drag / wheel scrollng deosn't seat properly.
-  //const worldSizeWithoutPadding = (cellCount * cellPixelSize);//works for scrollbar scrolling
-  //const worldSizeWithoutPadding = (cellCount * cellPixelSize)+ Math.floor(0.5*cellPixelSize);//works for vertical drag scrolling
-  
   state.worldSize = (cellCount * cellPixelSize);//works for vertical scrollbar scrolling
-  state.worldSizePadded = state.worldSize + (state.worldSize/100); //add extra padding to avoid jitter
-                    //+ Math.floor(0.5*cellPixelSize); //add extra padding to avoid jitter
 
   //easiest case -- everything fits into the visible screen
   if (Math.floor(screenSize / cellPixelSize) >= cellCount) {
@@ -176,14 +174,6 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
   state.idxsToRender = [...Array(numCellsToRender).keys()].map(
     (zeroIdx) => zeroIdx + firstRenderedCell
   );
-  
-  //another out of bounds check
-  //if (state.idxsToRender[state.idxsToRender.length-1] >= cellCount-5){
-  //  console.log('OVER OR CLOSE! '+state.idxsToRender[state.idxsToRender.length-1] + '>=' + cellCount);
-  //  state.idxsToRender = [...Array(numCellsToRender).keys()].map(
-  //    (zeroIdx) => zeroIdx + firstRenderedCell - 1
-  //  );
-  //}
 
   state.renderSize = state.idxsToRender.length * cellPixelSize;
   return state;
@@ -310,6 +300,35 @@ const batchSetPixelOffsets = (
 
 
 /**
+ * Set the size of the screen bounding element
+ * @param id
+ * @param mouseOffset
+ * @param state
+ */
+const setMouseOver = (
+  id: string,
+  mouseViewportOffset: number | undefined,
+  state: { [id: string]: IVirtualizedMatrixState }
+) => {
+  state = initializeNewIdAsNeeded(id, state);
+  if (mouseViewportOffset === undefined || state[id].initialized === false){
+    state[id].mouseMove = undefined;
+  }
+  else{
+    const mouseWorldOffset = mouseViewportOffset + state[id].worldOffset;
+    const hoverIdx = Math.floor(mouseWorldOffset / state[id].cellPixelSize);
+    state[id].mouseMove = {
+      hoverWorldOffset: mouseWorldOffset,
+      hoverIdx: hoverIdx,
+      hoverIdxScreenMin: (hoverIdx * state[id].cellPixelSize) - state[id].worldOffset,
+      hoverIdxScreenMax: ((hoverIdx * state[id].cellPixelSize) + state[id].cellPixelSize) - state[id].worldOffset,
+    };
+  }
+  state[id] = attachRenderDetails(state[id]);
+  return state;
+};
+
+/**
  *
  *
  * SLICES
@@ -321,6 +340,18 @@ export const virtualizedHorizontalSlice = createSlice({
   initialState: {} as { [id: string]: IVirtualizedMatrixState },
 
   reducers: {
+    setMouseOverX: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        mouseViewportOffsetX: number | undefined;
+      }>
+    ) => {
+      return setMouseOver(
+        action.payload.id, action.payload.mouseViewportOffsetX, state
+      );
+    },
+
     setColumnCount: (
       state,
       action: PayloadAction<{
@@ -387,6 +418,18 @@ export const virtualizedVerticalSlice = createSlice({
   initialState: {} as { [id: string]: IVirtualizedMatrixState },
 
   reducers: {
+    setMouseOverY: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        mouseViewportOffsetY: number | undefined;
+      }>
+    ) => {
+      return setMouseOver(
+        action.payload.id, action.payload.mouseViewportOffsetY, state
+      );
+    },
+
     setRowCount: (
       state,
       action: PayloadAction<{
@@ -456,6 +499,7 @@ export const virtualizedVerticalSlice = createSlice({
  *
  */
 export const {
+  setMouseOverX,
   setColumnCount,
   setColumnWidth,
   setWorldLeftColumnOffset,
@@ -465,6 +509,7 @@ export const {
 } = virtualizedHorizontalSlice.actions;
 
 export const {
+  setMouseOverY,
   setRowCount,
   setRowHeight,
   setWorldTopRowOffset,
@@ -472,6 +517,15 @@ export const {
   setScreenHeight,
   batchSetWorldTopPixelOffset,
 } = virtualizedVerticalSlice.actions;
+
+/*
+ *
+ *
+ * export some helper functions
+ *
+ *
+ */
+
 
 /*
  *

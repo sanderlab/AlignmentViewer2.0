@@ -1,4 +1,4 @@
-import { Viewport, MovedEventData } from "pixi-viewport";
+import { Viewport, MovedEventData, ClickEventData } from "pixi-viewport";
 import * as PIXI from "pixi.js";
 import { PixiComponent } from "@inlet/react-pixi";
 
@@ -53,7 +53,6 @@ export const VirtualizedViewport = PixiComponent<
     })
       .drag({ clampWheel: true, direction: direction, pressDrag: false })
       .clamp({ direction: direction });
-
     return vp;
   },
 
@@ -108,7 +107,6 @@ export const VirtualizedViewport = PixiComponent<
     //the event otherwise I'd only add the listener in the
     //viewport creation phase above (pixelsFromWorldTop is
     //stale if put there or in useEffect)
-    //console.log('(1): worldTopOffset=' + worldTopOffset);
     vp.off("moved");
     vp.on("moved", (data: MovedEventData) => {
       const newWorldTop = data.viewport.top;
@@ -128,11 +126,17 @@ export const VirtualizedViewport = PixiComponent<
         newWorldLeft !== worldLeftOffset && 
         viewportMovedHorizontally
       ) {
-        //console.log('worldWidth:'+worldWidth+'renderWidth+newWorldLeft:'+(renderWidth+newWorldLeft)+', newWorldLeft:'+newWorldLeft + ', newWorldLeft - worldLeftOffset='+(newWorldLeft - worldLeftOffset!));
         viewportMovedHorizontally(newWorldLeft);
         app.render(); //stops flicker on safari.
       }
     });
+
+    //vp.off("clicked");
+    //vp.on("clicked", (data: ClickEventData) => {
+      //console.log('clicked:', data);
+    //});
+
+    
 
     /*
     if (mouseMoved !== oldProps.mouseMoved) {

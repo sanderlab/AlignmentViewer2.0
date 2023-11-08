@@ -11,6 +11,8 @@ import { VirtualizedViewport } from "./VirtualizedViewportComponent";
 import { ReactResizeSensor } from "../ResizeSensorHook";
 import {
   store as reduxStore,
+  setMouseOverX as setReduxMouseOverX,
+  setMouseOverY as setReduxMouseOverY,
   setColumnCount as setReduxColumnCount,
   setColumnWidth as setReduxColumnWidth,
   setScreenWidth as setReduxScreenWidth,
@@ -94,31 +96,6 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
       ? fullStateVertical[stateVerticalReduxId]
       : undefined;
 
-  //callbacks
-  /*
-  const viewportVerticalMove = useCallback(
-    (newWorldTop: number) => {
-      dispatch(
-        setWorldTopPixelOffset({
-          id: verticalReduxId,
-          worldTopPixelOffset: newWorldTop,
-        })
-      );
-    },
-    [dispatch, verticalReduxId]
-  );
-
-  const viewportHorizontalMove = useCallback(
-    (newWorldLeft) => {
-      dispatch(
-        setWorldLeftPixelOffset({
-          id: horizontalReduxId,
-          worldLeftPixelOffset: newWorldLeft,
-        })
-      );
-    },
-    [dispatch, horizontalReduxId]
-  );*/
 
   const viewportSizeChanged = useCallback((bounds) => {
     setScreenHeight(bounds.height);
@@ -206,7 +183,6 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     rowCount,
     columnCount,
   ]);
-  //console.log('reduxStore:', reduxStore.getState())
 
   //misc
   const disableVerticalScrolling =
@@ -270,6 +246,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
              screenHeight === undefined ? null : (
               <>
                 {/* virtualized scrolling with the mouse */}
+                {/*
                 <Stage
                   style={{position: 'absolute', top:0, bottom:0, left:0, right:0}}
                   className="virtualized-viewport-scroller"
@@ -321,6 +298,111 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                     }}
                   </AppContext.Consumer>
                 </Stage>
+                */}
+
+                {/* super simple way of enabling wheel scrolling and monitoring of
+                    mouse over events */}
+                <div className={'wheel-scroller'} 
+                    onMouseOut={() =>{
+                      dispatch(
+                        setReduxMouseOverY({
+                          id: stateVerticalReduxId,
+                          mouseViewportOffsetY: undefined,
+                        })
+                      );
+                      dispatch(
+                        setReduxMouseOverX({
+                          id: stateHorizontalReduxId,
+                          mouseViewportOffsetX: undefined,
+                        })
+                      );
+                    }}
+                    onMouseMove={(event) => {
+                      const bounds = event.currentTarget.getBoundingClientRect();
+                      const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
+                      const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
+
+                      dispatch(
+                        setReduxMouseOverY({
+                          id: stateVerticalReduxId,
+                          mouseViewportOffsetY: viewportY,
+                        })
+                      );
+                      dispatch(
+                        setReduxMouseOverX({
+                          id: stateHorizontalReduxId,
+                          mouseViewportOffsetX: viewportX,
+                        })
+                      );
+                    }}
+                    onWheel={(event) => {
+                      if (event.deltaX !== 0 && reduxStateHorizontal){
+                        dispatch(
+                          setReduxWorldLeftPixelOffset({
+                            id: stateHorizontalReduxId,
+                            worldLeftPixelOffset: reduxStateHorizontal.worldOffset + event.deltaX,
+                          })
+                        );
+                      }
+                      if (event.deltaY !== 0 && reduxStateVertical){
+                        dispatch(
+                          setReduxWorldTopPixelOffset({
+                            id: stateVerticalReduxId,
+                            worldTopPixelOffset: reduxStateVertical.worldOffset + event.deltaY,
+                          })
+                        );
+                      }
+                    }}
+                >
+                  <div className="hover-tracker-y" style={!reduxStateVertical || !reduxStateVertical.mouseMove ? 
+                    {display: "none"} : {
+                      position: "absolute",
+                      zIndex: 1000,
+
+                      left: -4, //1/2 the width
+                      top: reduxStateVertical.mouseMove.hoverIdxScreenMin
+                           + .5*reduxStateVertical.cellPixelSize
+                           - 4, // 1/2 the height
+                      width:8, height:8, 
+                      borderRadius: "50%",
+                      backgroundColor:"red"
+
+                      /*border: "solid red 1px",
+                      top: reduxStateVertical.mouseMove.hoverIdxScreenMin-1, 
+                      bottom: 0,
+                      left:0, 
+                      right:0,
+                      height: reduxStateVertical.cellPixelSize, */
+                    }}
+                  ></div>
+
+                  <div className="hover-tracker-x" style={!reduxStateHorizontal || !reduxStateHorizontal.mouseMove ? 
+                    {display: "none"} : {
+                      position: "absolute",
+                      zIndex: 1000,
+ 
+                      top: -4, //1/2 the height
+                      left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin
+                           + .5*reduxStateHorizontal.cellPixelSize
+                           - 4, // 1/2 the width
+                      width:8, height:8, 
+                      borderRadius: "50%",
+                      backgroundColor:"red"
+
+                      /*
+                      border: "solid red 1px",
+                      top: 0,
+                      bottom: 0,
+                      left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin-1, 
+                      //right: reduxStateHorizontal.mouseMove.hoverIdxScreenMax,
+                      width: reduxStateHorizontal.cellPixelSize, 
+                      //borderRadius: "50%",
+                      //backgroundColor:"red"*/
+                    }}
+                  ></div>
+
+                </div>
+
                 <div
                   className="data"
                   style={{
@@ -369,7 +451,6 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
               worldHeight={reduxStateVertical!.worldSize}
               worldTopOffset={reduxStateVertical!.worldOffset}
               scrollbarMoved={(newWorldTop) => {
-                console.log('VirtualVerticalScrollbar top: '+ newWorldTop);
                 dispatch(
                   setReduxWorldTopPixelOffset({
                     id: stateVerticalReduxId,
