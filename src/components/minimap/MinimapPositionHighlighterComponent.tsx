@@ -1,98 +1,114 @@
 import * as PIXI from "pixi.js";
-import { PixiComponent } from "@pixi/react";
-import { Graphics } from "pixi.js";
+import { PixiRef, Sprite } from "@pixi/react";
+import { useRef, useState } from "react";
+import React from "react";
 
 interface IMinimapPositionHighlighterProps {
-  minimapHolder: React.RefObject<HTMLDivElement>; 
   x: number;
   y: number;
   width: number;
   height: number;
   fillColor: number;
-  fillAlpha: number;
-  onDragStart(
-    event: PIXI.FederatedPointerEvent,
-    parent: PIXI.DisplayObject
-  ): void;
-  onDragEnd(
-    event: PIXI.FederatedPointerEvent,
-    parent: PIXI.DisplayObject
-  ): void;
-  onDragMove(
-    event: PIXI.FederatedPointerEvent,
-    parent: PIXI.DisplayObject
+
+  maxHeight: number;
+  maxWidth: number;
+
+  highlighterMoved(
+    newStartRowIdx: number
   ): void;
 }
 
-export const MinimapPositionHighlighter = PixiComponent(
-  "MinimapPositionHighlighter",
-  {
-    create: (props: IMinimapPositionHighlighterProps) => {
-      const toReturn = new Graphics();
-      toReturn.eventMode = "static";
-      return toReturn;
-    },
-    applyProps: (instance, oldProps, newProps) => {
-      const { x, y, width, height, fillColor, fillAlpha } = newProps;
-      instance.clear();
-      instance.beginFill(fillColor, fillAlpha);
-      instance.drawRect(x, y, width, height);
-      instance.endFill();
-      //console.log('oldProps:', oldProps.dragFunctions ? oldProps.dragFunctions.onDragStart : undefined)
-      //console.log('newProps:', newProps.dragFunctions ? newProps.dragFunctions.onDragStart : undefined)
-      //console.log('eq:' + ( (oldProps.dragFunctions && newProps.dragFunctions) ? oldProps.dragFunctions.onDragStart === newProps.dragFunctions.onDragStart : '?'))
-      //console.log('<>');
+export function MinimapPositionHighlighter(props: IMinimapPositionHighlighterProps){
+  const {
+    x, y, width, height, maxWidth, maxHeight, fillColor, highlighterMoved
+  } = props;
+  const spriteRef = useRef<PixiRef<typeof Sprite>>(null);
 
-      //inspired by
-      //http://scottmcdonnell.github.io/pixi-examples/index.html?s=demos&f=dragging.js
-      if (oldProps.onDragStart !== newProps.onDragStart ||
-          oldProps.onDragEnd !== newProps.onDragEnd ||
-          oldProps.onDragMove !== newProps.onDragMove) {
-        
-        //console.log('SETTING UP NEW DRAG LISTENERS onDragStart: ' + (oldProps.onDragStart != newProps.onDragStart));
-        //console.log('SETTING UP NEW DRAG LISTENERS onDragEnd: ' + (oldProps.onDragEnd != newProps.onDragEnd));
-        //console.log('SETTING UP NEW DRAG LISTENERS onDragMove: ' + (oldProps.onDragMove != newProps.onDragMove));
+  const [dragging, setDragging] = useState<boolean>(false);
+  const [dragMouseStartY, setDragMouseStartY] = useState<number>(-1);
+  const [dragViewportStartY, setDragViewportStartY] = useState<number>(-1);
 
-        instance.removeAllListeners();
+  //const app = useApp()
+  //console.log(app.stage.getLocalBounds());
+  /*
+   *
+   *
+   * EVENT FUNCTIONS
+   *
+   *
+   */
+  const dragMove = (e: PIXI.FederatedPointerEvent) => {
+    if (dragging && dragMouseStartY !== -1 && spriteRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
 
-        instance.addListener("pointerdown", (e) => {
-          e.stopPropagation(); //keep entire viewport from moving
-        });
-
-        const dragStart = (e: PIXI.FederatedPointerEvent) => {
-          newProps.onDragStart(e, instance.parent);
-        };
-        const dragEnd = (e: PIXI.FederatedPointerEvent) => {
-          newProps.onDragEnd(e, instance.parent);
-        };
-        const dragMove = (e: PIXI.FederatedPointerEvent) => {
-          newProps.onDragMove(e, instance.parent);
-        };
-
-        //events for drag start
-        instance.addListener("mousedown", dragStart);
-        instance.addListener("touchstart", dragStart);
-
-        // events for drag end
-        instance.addListener("mouseup", dragEnd);
-        instance.addListener("mouseupoutside", dragEnd);
-        instance.addListener("touchend", dragEnd);
-        instance.addListener("touchendoutside", dragEnd);
-
-        // events for drag move
-        instance.addListener("mousemove", dragMove);
-        instance.addListener("touchmove", dragMove)
-
-          //console.log(
-          //  'instance:', instance
-          //);
-          //console.log(
-          //  'newProps.minimapHolder.current:', 
-          //  newProps.minimapHolder.current);
-      }
-    },
-    willUnmount: (instance) => {
-      instance.removeAllListeners();
+      const currentY = e.getLocalPosition(spriteRef.current.parent).y;
+      const mouseDeltaY = currentY - dragMouseStartY;
+      highlighterMoved(mouseDeltaY+dragViewportStartY);
     }
   }
-);
+
+  const dragStart = (e: PIXI.FederatedPointerEvent) => {
+    if (spriteRef.current){
+      e.stopPropagation();
+      e.preventDefault();
+      setDragging(true);
+      setDragViewportStartY(y);
+      setDragMouseStartY(
+        e.getLocalPosition(spriteRef.current.parent).y
+      );
+    }
+  };
+
+  const dragEnd = (e: PIXI.FederatedPointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setDragging(false);
+    setDragMouseStartY(-1);
+  };
+
+  return (
+    <>
+      <Sprite 
+        ref={spriteRef}
+        texture={PIXI.Texture.WHITE}
+        eventMode={"static"}
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        alpha={dragging ? 0.75 : 0.25}
+        tint={fillColor}
+        onmousedown={dragStart}
+        ontouchstart={dragStart}
+        onpointerdown={(e)=>{e.stopPropagation();}} //keep entire viewport from moving
+      />
+      {!dragging ? undefined : 
+        //secondary sprite object takes over the entire canvas during draggin
+        <Sprite 
+          texture={PIXI.Texture.WHITE}
+          eventMode={"static"}
+          x={0}
+          y={0}
+          width={maxWidth}
+          height={maxHeight}
+          alpha={0}
+
+          onmousemove={dragMove}
+          ontouchmove={dragMove}
+
+          onmouseup={dragEnd}
+          onmouseupoutside={dragEnd}
+          onmouseleave={dragEnd}
+          onmouseout={dragEnd}
+          onpointerout={dragEnd}
+          onpointerleave={dragEnd}
+          onpointerupoutside={dragEnd}
+          //onpointerupoutside={(e)=>{console.log('onpointerupoutside')}}
+          ontouchend={dragEnd}
+          touchendoutside={dragEnd}
+        />
+      }
+    </>
+  );
+};

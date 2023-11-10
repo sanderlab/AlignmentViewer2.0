@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./MiniMap.scss";
 import * as PIXI from "pixi.js";
-import { useRef, useEffect, useCallback, useMemo } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import { Stage, AppContext } from "@pixi/react";
 
 import { MiniMapViewport } from "./MiniMapViewportComponent";
@@ -67,11 +67,7 @@ export function MiniMap(props: IMiniMapProps) {
   const minimapRef = useRef<HTMLDivElement>(null);
 
   //state
-  const [dragging, setDragging] = React.useState(false);
-  const [dragStartOffset, setDragStartOffset] = React.useState<
-    undefined | { left: number; top: number }
-  >(undefined);
-  const [resizedDimensions, setResizedDimensions] = React.useState<
+  const [resizedDimensions, setResizedDimensions] = useState<
     undefined | { width: number; height: number }
   >(undefined);
 
@@ -82,8 +78,6 @@ export function MiniMap(props: IMiniMapProps) {
       ? undefined
       : state.virtualizedVerticalSlice[syncWithAlignmentDetailsId]
   );
-
-  
 
   //callbacks
   const viewportResized = useCallback((bounds) => {
@@ -128,61 +122,6 @@ export function MiniMap(props: IMiniMapProps) {
         : startingWidth,
     };
   })();
-
-  const onDragStart = useMemo( () => (
-    e: PIXI.FederatedPointerEvent, parent: PIXI.DisplayObject
-  )=>{
-    if(syncedAlignmentDetails){
-      const startPosition = e.getLocalPosition(parent);
-      setDragging(true);
-      setDragStartOffset({
-        left: startPosition.x - 0,
-        top:
-          startPosition.y -
-          syncedAlignmentDetails!.idxsToRender[0],
-      });
-    }
-  }, [syncedAlignmentDetails]);
-
-  const onDragEnd = useMemo( () => (
-    e: PIXI.FederatedPointerEvent, parent: PIXI.DisplayObject
-  )=>{
-    setDragging(false);
-    const finalPosition = e.getLocalPosition(parent);
-    dispatch(
-      setWorldTopRowOffset({
-        id: syncWithAlignmentDetailsId!,
-        rowOffset: Math.round(
-          finalPosition.y - dragStartOffset!.top
-        ),
-      })
-    );
-  }, [
-    dispatch, 
-    syncWithAlignmentDetailsId, 
-    dragStartOffset
-  ]);
-
-  const onDragMove = useMemo( () => (
-    e: PIXI.FederatedPointerEvent, parent: PIXI.DisplayObject
-  )=>{
-    if (dragging) {
-      const newPosition = e.getLocalPosition(parent);
-      dispatch(
-        setWorldTopRowOffset({
-          id: syncWithAlignmentDetailsId!,
-          rowOffset: Math.round(
-            newPosition.y - dragStartOffset!.top
-          ),
-        })
-      );
-    }
-  }, [
-    dispatch, 
-    dragStartOffset, 
-    dragging,
-    syncWithAlignmentDetailsId
-  ]);
 
   const renderAlignment = (frameWidth: number, frameHeight: number) => {
     return (
@@ -264,54 +203,21 @@ export function MiniMap(props: IMiniMapProps) {
                   <></>
                 ) : (
                   <MinimapPositionHighlighter
-                    minimapHolder={minimapRef}
                     fillColor={0xff0000}
-                    fillAlpha={dragging ? 0.75 : 0.25}
                     x={0}
                     y={syncedAlignmentDetails.idxsToRender[0]}
                     width={alignment.getSequenceLength()}
                     height={syncedAlignmentDetails.idxsToRender.length}
-                    onDragStart={onDragStart}
-                    onDragEnd={onDragEnd}
-                    onDragMove={onDragMove}
-                    
-                    /*dragFunctions={{
-                      onDragStart: (e, parent) => {
-                        const startPosition = e.getLocalPosition(parent);
-                        setDragging(true);
-                        setDragStartOffset({
-                          left: startPosition.x - 0,
-                          top:
-                            startPosition.y -
-                            syncedAlignmentDetails.idxsToRender[0],
-                        });
-                      },
-                      onDragEnd: (e, parent) => {
-                        setDragging(false);
-                        const finalPosition = e.getLocalPosition(parent);
-                        dispatch(
-                          setWorldTopRowOffset({
-                            id: syncWithAlignmentDetailsId!,
-                            rowOffset: Math.round(
-                              finalPosition.y - dragStartOffset!.top
-                            ),
-                          })
-                        );
-                      },
-                      onDragMove: (e, parent) => {
-                        if (dragging) {
-                          const newPosition = e.getLocalPosition(parent);
-                          dispatch(
-                            setWorldTopRowOffset({
-                              id: syncWithAlignmentDetailsId!,
-                              rowOffset: Math.round(
-                                newPosition.y - dragStartOffset!.top
-                              ),
-                            })
-                          );
-                        }
-                      },
-                    }}*/
+                    maxWidth={alignment.getSequenceLength()}
+                    maxHeight={alignment.getSequenceCount()}
+                    highlighterMoved={(newStartRowIdx)=>{
+                      dispatch(
+                        setWorldTopRowOffset({
+                          id: syncWithAlignmentDetailsId!,
+                          rowOffset: newStartRowIdx,
+                        })
+                      );
+                    }}
                   />
                 )}
               </MiniMapViewport>
