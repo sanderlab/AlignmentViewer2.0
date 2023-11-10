@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Viewport } from "pixi-viewport";
-import { PixiComponent } from "@inlet/react-pixi";
+import { PixiComponent } from "@pixi/react";
 
 export interface IMiniMapViewportProps {
   numColumns: number;
@@ -9,10 +9,10 @@ export interface IMiniMapViewportProps {
   onMouseClick?: (mousePosition: IPosition) => void;
   stageWidth: number;
   stageHeight: number;
-  ensureVisible?: {
-    y: number;
-    height: number;
-  };
+  //ensureVisible?: {
+  //  y: number;
+  //  height: number;
+  //};
 }
 
 const OVERFLOW_ZOOM_ALLOWED = 0.05; //allow 5% zoom out (both sides = 10% total) past max width / height
@@ -22,7 +22,7 @@ export const MiniMapViewport = PixiComponent<IMiniMapViewportProps, any>(
   {
     create(props: IMiniMapViewportProps) {
       const { app, numColumns, numRows, stageWidth } = props;
-      app.renderer.backgroundColor = 0xffffff;
+      app.renderer.background.color = 0xffffff;
 
       const useDrag = true; // Allows the user to drag the viewport around.
       const usePinch = true; // Allows the user to pinch to zoom; e.g. on a trackpad.
@@ -30,10 +30,9 @@ export const MiniMapViewport = PixiComponent<IMiniMapViewportProps, any>(
 
       let vp = new Viewport({
         screenWidth: stageWidth,
-        //screenHeight: stageHeight,
         worldWidth: numColumns,
         worldHeight: numRows,
-        interaction: app.renderer.plugins.interaction,
+        events: app.renderer.events,
       })
         .decelerate()
         .clamp({
@@ -104,9 +103,10 @@ export const MiniMapViewport = PixiComponent<IMiniMapViewportProps, any>(
 
         //set the clamp based on the current stage height/width
         let clampWidthMax, clampHeightMax;
-        let clampMinWidth = newProps.ensureVisible
-          ? newProps.ensureVisible.height
-          : undefined;
+        let clampMinWidth = undefined;
+        //let clampMinWidth = newProps.ensureVisible
+        //  ? newProps.ensureVisible.height
+        //  : undefined;
 
         if (numColumns / stageWidth > numRows / stageHeight) {
           //width is more important
@@ -165,15 +165,14 @@ export const MiniMapViewport = PixiComponent<IMiniMapViewportProps, any>(
       }
 
       //once all the zoom etc
-      if (newProps.ensureVisible) {
-        //@ts-ignore
-        vp.ensureVisible(
-          undefined,
-          newProps.ensureVisible.y,
-          undefined,
-          newProps.ensureVisible.height
-        );
-      }
+      //if (newProps.ensureVisible) {
+      //  vp.ensureVisible(
+      //    undefined,
+      //    newProps.ensureVisible.y,
+      //    undefined,
+      //    newProps.ensureVisible.height
+      //  );
+      //}
 
       return vp;
     },

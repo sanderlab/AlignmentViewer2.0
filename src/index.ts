@@ -6,7 +6,6 @@ export * from "./common/FastaAlignment.js";
 export * from "./common/MolecularStyles.js";
 export * from "./common/ReduxStore.js";
 export * from "./common/Residues.js";
-export * from "./common/ScrollSync.js";
 export * from "./common/SequenceLogoGlyphs.js";
 export * from "./common/StockholmAlignment.js";
 export * from "./common/Utils.js";

@@ -52,6 +52,8 @@
  *   </div>
  */
 
+@use 'sass:math';
+
 //ace specific props
 $acePrefix: ace_;
 $preAceQueryClass: q;
@@ -608,8 +610,9 @@ $ntProps: (
 
 //see https://stackoverflow.com/questions/11867545
 @function brightness($color) {
-  @return ((red($color) * 299) + (green($color) * 587) + (blue($color) * 114)) /
-    1000;
+  @return math.div((red($color) * 299) + (green($color) * 587) + (blue($color) * 114), 1000);
+  //@return ((red($color) * 299) + (green($color) * 587) + (blue($color) * 114)) /
+  //  1000;
 }
 
 //get the letter color for the dark color scheme depending on the lightness

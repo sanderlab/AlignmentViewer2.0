@@ -4,6 +4,7 @@ import _ from "lodash";
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
 import ReactTooltip from "react-tooltip";
+import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 export interface ISequenceBarplotDataSeries {
   id: string; //must be unique for each series
@@ -29,6 +30,7 @@ export interface ISequenceBarplotProps {
   dataSeriesSet: ArrayOneOrMore<ISequenceBarplotDataSeries>;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
   height?: string;
+  horizontalReduxId?: string;
 
   //expose these, but requires smarter forwarding within the AlignmentViewer full component
   onPositionSelectionChanged?(
@@ -669,15 +671,48 @@ export class SequenceBarplotComponent extends React.Component<
   }
 
   render() {
+    const {alignment, positionWidth, horizontalReduxId, } = this.props;
     const classNames = ["barplot"];
     if (this.state.svgHovered) {
       classNames.push("hovered");
     }
-
     return !this.props.alignment ? null : (
-      <div className={classNames.join(" ")} ref={this.ref}>
+      <div className={"barplot"} ref={this.ref}>
+        <VirtualizedMatrixViewer
+          horizontalReduxId={horizontalReduxId}
+          direction="x"
+          columnCount={alignment.getSequenceLength()}
+          columnWidth={positionWidth}
+          rowCount={1}
+          rowHeight={75} //TODO unhardcode
+          autoOffset={false}
+          suppressVerticalScrollbar={true}
+          suppressHorizontalScrollbar={true}
+          getContent={(
+            rowIdxsToRender,
+            colIdxsToRender,
+            additionalVerticalOffset,
+            additionalHorizontalOffset,
+            stageDimensions
+          ) => {
+            //console.log('render barplot');
+            return (
+              <div
+                style={{
+                  position:"absolute",
+                  width: alignment.getSequenceLength() * positionWidth,
+                  left:
+                    colIdxsToRender.length > 0
+                      ? colIdxsToRender[0] * positionWidth * -1 + additionalHorizontalOffset
+                      : additionalHorizontalOffset,
+                }}
+              >
+                {this.renderBarPlot()}
+              </div>
+            );
+          }}
+        />
         {this.renderTooltip()}
-        {this.renderBarPlot()}
       </div>
     );
   }

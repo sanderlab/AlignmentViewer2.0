@@ -7,10 +7,11 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
 } from "../../common/MolecularStyles";
-import { Stage, AppContext } from "@inlet/react-pixi";
+
 import { VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
 import { AlignmentDetailsLetters } from "./AlignmentDetailsLettersHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
+import { AppContext, Stage } from "@pixi/react";
 
 export interface IAlignmentDetailsProps {
   reduxVerticalId?: string;
@@ -87,7 +88,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
               width={stageDimensions.width}
               height={stageDimensions.height}
               raf={false}
-              options={{ antialias: false, transparent: true }}
+              options={{ antialias: false, backgroundAlpha: 0 }}
             >
               <AppContext.Consumer>
                 {(app) => {

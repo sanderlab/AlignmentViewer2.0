@@ -1,9 +1,8 @@
 import * as React from "react";
 import "./MiniMap.scss";
 import * as PIXI from "pixi.js";
-import { useRef, useEffect, useCallback } from "react";
-import { Stage, AppContext } from "@inlet/react-pixi";
-import { useDispatch, useSelector } from "react-redux";
+import { useRef, useEffect, useCallback, useMemo } from "react";
+import { Stage, AppContext } from "@pixi/react";
 
 import { MiniMapViewport } from "./MiniMapViewportComponent";
 import { MinimapPositionHighlighter } from "./MinimapPositionHighlighterComponent";
@@ -20,6 +19,7 @@ import {
 import { RootState, setWorldTopRowOffset } from "../../common/ReduxStore";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 import { ReactResizeSensor } from "../ResizeSensorHook";
+import { useAppDispatch, useAppSelector } from "../../common/Hooks";
 
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
@@ -76,12 +76,14 @@ export function MiniMap(props: IMiniMapProps) {
   >(undefined);
 
   //redux
-  const dispatch = useDispatch();
-  const syncedAlignmentDetails = useSelector((state: RootState) =>
+  const dispatch = useAppDispatch();
+  const syncedAlignmentDetails = useAppSelector((state: RootState) =>
     !syncWithAlignmentDetailsId
       ? undefined
       : state.virtualizedVerticalSlice[syncWithAlignmentDetailsId]
   );
+
+  
 
   //callbacks
   const viewportResized = useCallback((bounds) => {
@@ -100,12 +102,12 @@ export function MiniMap(props: IMiniMapProps) {
       });
       //});
     }
-  }, []);
+  }, [resizedDimensions]);
 
   //effects
   useEffect(() => {
-    PIXI.utils.skipHello();
-    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+    PIXI.settings.RENDER_OPTIONS!.hello = false;
+    PIXI.BaseTexture.defaultOptions.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
     //fix safari-specific bug - this function will tell the window to stop
     //blocking scroll events on the "minimap-canvas" class
@@ -126,6 +128,61 @@ export function MiniMap(props: IMiniMapProps) {
         : startingWidth,
     };
   })();
+
+  const onDragStart = useMemo( () => (
+    e: PIXI.FederatedPointerEvent, parent: PIXI.DisplayObject
+  )=>{
+    if(syncedAlignmentDetails){
+      const startPosition = e.getLocalPosition(parent);
+      setDragging(true);
+      setDragStartOffset({
+        left: startPosition.x - 0,
+        top:
+          startPosition.y -
+          syncedAlignmentDetails!.idxsToRender[0],
+      });
+    }
+  }, [syncedAlignmentDetails]);
+
+  const onDragEnd = useMemo( () => (
+    e: PIXI.FederatedPointerEvent, parent: PIXI.DisplayObject
+  )=>{
+    setDragging(false);
+    const finalPosition = e.getLocalPosition(parent);
+    dispatch(
+      setWorldTopRowOffset({
+        id: syncWithAlignmentDetailsId!,
+        rowOffset: Math.round(
+          finalPosition.y - dragStartOffset!.top
+        ),
+      })
+    );
+  }, [
+    dispatch, 
+    syncWithAlignmentDetailsId, 
+    dragStartOffset
+  ]);
+
+  const onDragMove = useMemo( () => (
+    e: PIXI.FederatedPointerEvent, parent: PIXI.DisplayObject
+  )=>{
+    if (dragging) {
+      const newPosition = e.getLocalPosition(parent);
+      dispatch(
+        setWorldTopRowOffset({
+          id: syncWithAlignmentDetailsId!,
+          rowOffset: Math.round(
+            newPosition.y - dragStartOffset!.top
+          ),
+        })
+      );
+    }
+  }, [
+    dispatch, 
+    dragStartOffset, 
+    dragging,
+    syncWithAlignmentDetailsId
+  ]);
 
   const renderAlignment = (frameWidth: number, frameHeight: number) => {
     return (
@@ -149,7 +206,7 @@ export function MiniMap(props: IMiniMapProps) {
           width={frameWidth - 14} //add space for the dragger on safari
           height={frameHeight}
           raf={false}
-          options={{ transparent: false }}
+          options={{ backgroundAlpha: 0 }}
           className="minimap-canvas"
         >
           <AppContext.Consumer>
@@ -188,9 +245,9 @@ export function MiniMap(props: IMiniMapProps) {
                 stageHeight={frameHeight}
               >
                 <CanvasAlignmentTiled
-                  sequences={alignment
-                    .getSequences(sortBy)
-                    .map((seq) => seq.sequence)}
+                  sequences={
+                    alignment.getSequences(sortBy).map((seq) => seq.sequence)
+                  }
                   consensusSequence={alignment.getConsensus().sequence}
                   querySequence={alignment.getQuerySequence().sequence}
                   alignmentType={alignmentStyle.alignmentType}
@@ -198,23 +255,29 @@ export function MiniMap(props: IMiniMapProps) {
                   colorScheme={alignmentStyle.colorScheme}
                   residueDetail={ResidueStyle.DARK}
                 />
-                {!syncedAlignmentDetails ||
-                !syncedAlignmentDetails.initialized ||
-                syncedAlignmentDetails.idxsToRender.length < 1 ||
-                syncedAlignmentDetails.cellCount <=
+                {
+                  !syncedAlignmentDetails ||
+                  !syncedAlignmentDetails.initialized ||
+                  syncedAlignmentDetails.idxsToRender.length < 1 ||
+                  syncedAlignmentDetails.cellCount <=
                   syncedAlignmentDetails.idxsToRender.length ? (
                   <></>
                 ) : (
                   <MinimapPositionHighlighter
+                    minimapHolder={minimapRef}
                     fillColor={0xff0000}
                     fillAlpha={dragging ? 0.75 : 0.25}
                     x={0}
                     y={syncedAlignmentDetails.idxsToRender[0]}
                     width={alignment.getSequenceLength()}
                     height={syncedAlignmentDetails.idxsToRender.length}
-                    dragFunctions={{
+                    onDragStart={onDragStart}
+                    onDragEnd={onDragEnd}
+                    onDragMove={onDragMove}
+                    
+                    /*dragFunctions={{
                       onDragStart: (e, parent) => {
-                        const startPosition = e.data.getLocalPosition(parent);
+                        const startPosition = e.getLocalPosition(parent);
                         setDragging(true);
                         setDragStartOffset({
                           left: startPosition.x - 0,
@@ -225,7 +288,7 @@ export function MiniMap(props: IMiniMapProps) {
                       },
                       onDragEnd: (e, parent) => {
                         setDragging(false);
-                        const finalPosition = e.data.getLocalPosition(parent);
+                        const finalPosition = e.getLocalPosition(parent);
                         dispatch(
                           setWorldTopRowOffset({
                             id: syncWithAlignmentDetailsId!,
@@ -237,7 +300,7 @@ export function MiniMap(props: IMiniMapProps) {
                       },
                       onDragMove: (e, parent) => {
                         if (dragging) {
-                          const newPosition = e.data.getLocalPosition(parent);
+                          const newPosition = e.getLocalPosition(parent);
                           dispatch(
                             setWorldTopRowOffset({
                               id: syncWithAlignmentDetailsId!,
@@ -248,7 +311,7 @@ export function MiniMap(props: IMiniMapProps) {
                           );
                         }
                       },
-                    }}
+                    }}*/
                   />
                 )}
               </MiniMapViewport>

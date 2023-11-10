@@ -1,6 +1,6 @@
 import React from "react";
+import { Sprite } from "@pixi/react";
 import { Nucleotide, AminoAcid } from "../common/Residues";
-import { Sprite } from "@inlet/react-pixi";
 
 import {
   PositionsToStyle,

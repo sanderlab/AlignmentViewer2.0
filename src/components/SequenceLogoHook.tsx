@@ -5,7 +5,6 @@
  */
 import "./SequenceLogo.scss";
 import React, { useCallback, useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector, Provider } from "react-redux";
 import { Alignment } from "../common/Alignment";
 import { GlyphFactory } from "../common/SequenceLogoGlyphs";
 import {
@@ -19,7 +18,6 @@ import {
 import ReactTooltip from "react-tooltip";
 import { AminoAcid, Nucleotide } from "../common/Residues";
 import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
-import { AlignmentViewer } from "./AlignmentViewerComponent";
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
@@ -43,13 +41,13 @@ export interface ISequenceLogoProps {
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  //onScroll?: (location: {left: number; top: number}) => void;
   refUpdated?: (newRef: HTMLElement | null) => void;
 
   //props that should be exposed in AlignmentViewer full component:
   logoType?: LOGO_TYPES;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
   height?: number;
+  horizontalReduxId?: string;
 }
 
 export function SequenceLogo(props: ISequenceLogoProps) {
@@ -61,18 +59,17 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
     refUpdated,
+    horizontalReduxId,
   } = props;
 
   const ref = useRef(null);
   //const [mouseOver, setMouseOver] = useState<boolean>(false);
   const [svgCache, setSvgCache] = useState<null | JSX.Element>(null);
   const [logoData, setLogoData] = useState<null | IGlyphStackData[]>(null);
-  const [positionsCache, setPositionsCache] = useState<
-    | null
-    | { positionIdx: number; className: string; positionStack: JSX.Element[] }[]
-  >(null);
-
-  const dispatch = useDispatch();
+  //const [positionsCache, setPositionsCache] = useState<
+  //  | null
+  //  | { positionIdx: number; className: string; positionStack: JSX.Element[] }[]
+  //>(null);
 
   /**
    * Munge letter count data that was calculated during alignment creation
@@ -243,7 +240,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       );
     }
 
-    setPositionsCache(positionsCache);
+    //setPositionsCache(positionsCache);
     setLogoData(logoData);
     setSvgCache(
       <svg
@@ -264,6 +261,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     mungeLogoData,
     renderSinglePositionStack,
     setSvgCache,
+    height
   ]);
 
   useEffect(() => {
@@ -315,8 +313,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     </div>
   );*/
 
-  //OPTION 2: VIRTUALIZATION - SEEMS SLOW
-  const horizontalReduxId = AlignmentViewer.getScrollerReduxId(alignment.getUUID(), 'x');
+  //OPTION 2: VIRTUALIZATION
+  //const horizontalReduxId = AlignmentViewer.getScrollerReduxId(alignment.getUUID(), 'x');
   return (
     <VirtualizedMatrixViewer
       horizontalReduxId={horizontalReduxId}
@@ -351,7 +349,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           </div>
         );
 
-        /* //OPTION 2B: USING VIRTUALIZATION, BUT CACHE POSITIONS
+        /* //OPTION 2B: USING VIRTUALIZATION, BUT CACHE POSITIONS - this is slow
         return (
           <>
             <div

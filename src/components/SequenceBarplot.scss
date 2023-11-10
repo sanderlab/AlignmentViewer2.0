@@ -6,9 +6,10 @@
 }
 
 .barplot {
-  overflow-x: auto;
-  overflow-y: hidden;
-  position: relative;
+  //overflow-x: auto;
+  //overflow-y: hidden;
+  //position: relative;
+  height: 75px;
 
   svg {
     .position-container rect.interaction-placeholder {

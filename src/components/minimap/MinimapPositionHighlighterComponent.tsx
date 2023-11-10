@@ -1,28 +1,27 @@
 import * as PIXI from "pixi.js";
-import { PixiComponent } from "@inlet/react-pixi";
+import { PixiComponent } from "@pixi/react";
 import { Graphics } from "pixi.js";
 
 interface IMinimapPositionHighlighterProps {
+  minimapHolder: React.RefObject<HTMLDivElement>; 
   x: number;
   y: number;
   width: number;
   height: number;
   fillColor: number;
   fillAlpha: number;
-  dragFunctions?: {
-    onDragStart(
-      event: PIXI.interaction.InteractionEvent,
-      parent: PIXI.DisplayObject
-    ): void;
-    onDragEnd(
-      event: PIXI.interaction.InteractionEvent,
-      parent: PIXI.DisplayObject
-    ): void;
-    onDragMove(
-      event: PIXI.interaction.InteractionEvent,
-      parent: PIXI.DisplayObject
-    ): void;
-  };
+  onDragStart(
+    event: PIXI.FederatedPointerEvent,
+    parent: PIXI.DisplayObject
+  ): void;
+  onDragEnd(
+    event: PIXI.FederatedPointerEvent,
+    parent: PIXI.DisplayObject
+  ): void;
+  onDragMove(
+    event: PIXI.FederatedPointerEvent,
+    parent: PIXI.DisplayObject
+  ): void;
 }
 
 export const MinimapPositionHighlighter = PixiComponent(
@@ -30,7 +29,7 @@ export const MinimapPositionHighlighter = PixiComponent(
   {
     create: (props: IMinimapPositionHighlighterProps) => {
       const toReturn = new Graphics();
-      toReturn.interactive = true;
+      toReturn.eventMode = "static";
       return toReturn;
     },
     applyProps: (instance, oldProps, newProps) => {
@@ -39,41 +38,61 @@ export const MinimapPositionHighlighter = PixiComponent(
       instance.beginFill(fillColor, fillAlpha);
       instance.drawRect(x, y, width, height);
       instance.endFill();
+      //console.log('oldProps:', oldProps.dragFunctions ? oldProps.dragFunctions.onDragStart : undefined)
+      //console.log('newProps:', newProps.dragFunctions ? newProps.dragFunctions.onDragStart : undefined)
+      //console.log('eq:' + ( (oldProps.dragFunctions && newProps.dragFunctions) ? oldProps.dragFunctions.onDragStart === newProps.dragFunctions.onDragStart : '?'))
+      //console.log('<>');
 
       //inspired by
       //http://scottmcdonnell.github.io/pixi-examples/index.html?s=demos&f=dragging.js
-      if (oldProps.dragFunctions !== newProps.dragFunctions) {
+      if (oldProps.onDragStart !== newProps.onDragStart ||
+          oldProps.onDragEnd !== newProps.onDragEnd ||
+          oldProps.onDragMove !== newProps.onDragMove) {
+        
+        //console.log('SETTING UP NEW DRAG LISTENERS onDragStart: ' + (oldProps.onDragStart != newProps.onDragStart));
+        //console.log('SETTING UP NEW DRAG LISTENERS onDragEnd: ' + (oldProps.onDragEnd != newProps.onDragEnd));
+        //console.log('SETTING UP NEW DRAG LISTENERS onDragMove: ' + (oldProps.onDragMove != newProps.onDragMove));
+
         instance.removeAllListeners();
-        if (newProps.dragFunctions) {
-          instance.addListener("pointerdown", (e) => {
-            e.stopPropagation(); //keep entire viewport from moving
-          });
 
-          const dragStart = (e: PIXI.interaction.InteractionEvent) => {
-            newProps.dragFunctions?.onDragStart(e, instance.parent);
-          };
-          const dragEnd = (e: PIXI.interaction.InteractionEvent) => {
-            newProps.dragFunctions?.onDragEnd(e, instance.parent);
-          };
-          const dragMove = (e: PIXI.interaction.InteractionEvent) => {
-            newProps.dragFunctions?.onDragMove(e, instance.parent);
-          };
+        instance.addListener("pointerdown", (e) => {
+          e.stopPropagation(); //keep entire viewport from moving
+        });
 
-          //events for drag start
-          instance.addListener("mousedown", dragStart);
-          instance.addListener("touchstart", dragStart);
+        const dragStart = (e: PIXI.FederatedPointerEvent) => {
+          newProps.onDragStart(e, instance.parent);
+        };
+        const dragEnd = (e: PIXI.FederatedPointerEvent) => {
+          newProps.onDragEnd(e, instance.parent);
+        };
+        const dragMove = (e: PIXI.FederatedPointerEvent) => {
+          newProps.onDragMove(e, instance.parent);
+        };
 
-          // events for drag end
-          instance.addListener("mouseup", dragEnd);
-          instance.addListener("mouseupoutside", dragEnd);
-          instance.addListener("touchend", dragEnd);
-          instance.addListener("touchendoutside", dragEnd);
+        //events for drag start
+        instance.addListener("mousedown", dragStart);
+        instance.addListener("touchstart", dragStart);
 
-          // events for drag move
-          instance.addListener("mousemove", dragMove);
-          instance.addListener("touchmove", dragMove);
-        }
+        // events for drag end
+        instance.addListener("mouseup", dragEnd);
+        instance.addListener("mouseupoutside", dragEnd);
+        instance.addListener("touchend", dragEnd);
+        instance.addListener("touchendoutside", dragEnd);
+
+        // events for drag move
+        instance.addListener("mousemove", dragMove);
+        instance.addListener("touchmove", dragMove)
+
+          //console.log(
+          //  'instance:', instance
+          //);
+          //console.log(
+          //  'newProps.minimapHolder.current:', 
+          //  newProps.minimapHolder.current);
       }
     },
+    willUnmount: (instance) => {
+      instance.removeAllListeners();
+    }
   }
 );

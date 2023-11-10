@@ -2,11 +2,6 @@ import "./AlignmentViewer.scss";
 import React from "react";
 import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
-//import {
-//  SequenceLogoComponent,
-//  LOGO_TYPES,
-//  ISequenceLogoProps,
-//} from "./SequenceLogoComponent";
 import {
   SequenceLogo,
   LOGO_TYPES,
@@ -23,7 +18,6 @@ import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
-import { ScrollSync, ScrollType } from "../common/ScrollSync";
 import { store } from "../common/ReduxStore";
 import {
   AminoAcidAlignmentStyle,
@@ -173,29 +167,31 @@ export class AlignmentViewer extends React.Component<
     );
   }
 
-  protected renderSequenceLogo = (residueWidth: number) => {
+  protected renderSequenceLogo = (
+    residueWidth: number, sharedHorizontalReduxId: string
+  ) => {
     const { alignment, logoOptions, style } = this.props;
     const logoOpts = logoOptions ? logoOptions : defaultProps.logoOptions;
     return (
-      <Provider store={store}>
-        <SequenceLogo
-          alignment={alignment}
-          style={style}
-          glyphWidth={residueWidth}
-          logoType={logoOpts.logoType}
-          tooltipPlacement={logoOpts.tooltipPlacement}
-          height={logoOpts.height}
-          //refUpdated={(ref) => {
-            //console.log("LOGO REF UPDATED:", ref);
-          //}}
-        />
-      </Provider>
+      <SequenceLogo
+        alignment={alignment}
+        style={style}
+        glyphWidth={residueWidth}
+        logoType={logoOpts.logoType}
+        tooltipPlacement={logoOpts.tooltipPlacement}
+        height={logoOpts.height}
+        horizontalReduxId={sharedHorizontalReduxId}
+        //refUpdated={(ref) => {
+          //console.log("LOGO REF UPDATED:", ref);
+        //}}
+      />
     );
   };
 
   protected renderBarplot = (
     barplotProps: IBarplotExposedProps,
-    residueWidth: number
+    residueWidth: number,
+    sharedHorizontalReduxId: string
   ) => {
     return (
       <SequenceBarplotComponent
@@ -204,6 +200,7 @@ export class AlignmentViewer extends React.Component<
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={residueWidth}
         height={barplotProps.height}
+        horizontalReduxId={sharedHorizontalReduxId}
         scrollerLoaded={(scroller) => {
           //this.horizontalScrollSync.registerElementScroller(scroller);
         }}
@@ -234,21 +231,19 @@ export class AlignmentViewer extends React.Component<
           style={{ display: showMinimap ? "flex" : "none" }}
         >
           {
-            <Provider store={store}>
-              <MiniMap
-                alignment={alignment}
-                alignmentStyle={style}
-                sortBy={sortBy ? sortBy : defaultProps.sortBy}
-                //exposed by prop to instantiator
-                alignHorizontal={mmOptions.alignHorizontal}
-                resizable={mmOptions.resizable}
-                startingWidth={mmOptions.startingWidth}
-                verticalHeight={mmOptions.verticalHeight}
-                onClick={minimapClicked}
-                //sync
-                syncWithAlignmentDetailsId={alignmentDetailsReduxId}
-              />
-            </Provider>
+            <MiniMap
+              alignment={alignment}
+              alignmentStyle={style}
+              sortBy={sortBy ? sortBy : defaultProps.sortBy}
+              //exposed by prop to instantiator
+              alignHorizontal={mmOptions.alignHorizontal}
+              resizable={mmOptions.resizable}
+              startingWidth={mmOptions.startingWidth}
+              verticalHeight={mmOptions.verticalHeight}
+              onClick={minimapClicked}
+              //sync
+              syncWithAlignmentDetailsId={alignmentDetailsReduxId}
+            />
           }
         </div>
       )
@@ -305,49 +300,50 @@ export class AlignmentViewer extends React.Component<
     const sharedVerticalReduxId = AlignmentViewer.getScrollerReduxId(
       alignment.getUUID(), 'y'
     );
-    const metadataReduxId = 'scroller_x_metadata_'+alignment.getUUID();
+    const metadataReduxId = 'metadata_scroller_x'+alignment.getUUID();
 
     return (
       <div className={classes.join(" ")} key={alignment.getUUID()}>
-        {this.renderMiniMap(sharedVerticalReduxId)}
+        <Provider store={store}>
+           
+          {this.renderMiniMap(sharedVerticalReduxId)}
 
-        {/*<div id="column_mouseover"></div>*/}
+          {/*<div id="column_mouseover"></div>*/}
 
-        {!barplots || barplots.length < 1 
-          ? null
-          : barplots.map((barplot, idx) =>
-              this.renderWidget(
-                "av-barplot-holder",
-                barplot.dataSeriesSet.map((series) => series.name).join(" / ") +
-                  ":",
-                this.renderBarplot(barplot, residueWidth),
-                undefined,
-                `${idx}-${barplot.dataSeriesSet
-                  .map((dataseries) => dataseries.id)
-                  .join("|")}`
-              )
-            )}
+          {!barplots || barplots.length < 1 
+            ? null
+            : barplots.map((barplot, idx) =>
+                this.renderWidget(
+                  "av-barplot-holder",
+                  barplot.dataSeriesSet.map((series) => series.name).join(" / ") +
+                    ":",
+                  this.renderBarplot(barplot, residueWidth, sharedHorizontalReduxId),
+                  undefined,
+                  `${idx}-${barplot.dataSeriesSet
+                    .map((dataseries) => dataseries.id)
+                    .join("|")}`
+                )
+              )}
 
-        {!showLogo || !logoOptions 
-          ? null
-          : this.renderWidget(
-              "av-sequence-logo-holder",
-              "Logo:",
-              this.renderSequenceLogo(residueWidth),
-              {
-                height:
-                  logoOptions && logoOptions.height
-                    ? logoOptions.height
-                    : defaultProps.logoOptions.height,
-              }
-            )}
+          {!showLogo || !logoOptions 
+            ? null
+            : this.renderWidget(
+                "av-sequence-logo-holder",
+                "Logo:",
+                this.renderSequenceLogo(residueWidth, sharedHorizontalReduxId),
+                {
+                  height:
+                    logoOptions && logoOptions.height
+                      ? logoOptions.height
+                      : defaultProps.logoOptions.height,
+                }
+              )}
 
-        {!showConsensus
-          ? null
-          : this.renderWidget(
-              "consensus-seq-holder",
-              "Consensus:",
-              <Provider store={store}>
+          {!showConsensus
+            ? null
+            : this.renderWidget(
+                "consensus-seq-holder",
+                "Consensus:",
                 <AlignmentDetails
                   reduxHorizontalId={sharedHorizontalReduxId}
                   sequences={[alignment.getConsensus().sequence]}
@@ -363,17 +359,15 @@ export class AlignmentViewer extends React.Component<
                   residueWidth={residueWidth}
                   suppressVerticalScrollbar={true}
                   suppressHorizontalScrollbar={true}
-                />
-              </Provider>,
-              { height: singleSeqDivHeight }
-            )}
+                />,
+                { height: singleSeqDivHeight }
+              )}
 
-        {!showQuery
-          ? null
-          : this.renderWidget(
-              "query-seq-holder",
-              "Query:",
-              <Provider store={store}>
+          {!showQuery
+            ? null
+            : this.renderWidget(
+                "query-seq-holder",
+                "Query:",
                 <AlignmentDetails
                   reduxHorizontalId={sharedHorizontalReduxId}
                   sequences={[alignment.getQuerySequence().sequence]}
@@ -389,17 +383,15 @@ export class AlignmentViewer extends React.Component<
                   residueWidth={residueWidth}
                   suppressVerticalScrollbar={true}
                   suppressHorizontalScrollbar={true}
-                />
-              </Provider>,
-              { height: singleSeqDivHeight }
-            )}
+                />,
+                { height: singleSeqDivHeight }
+              )}
 
-        {!showRuler 
-          ? null
-          : this.renderWidget(
-              "position-indicator-holder",
-              "Position:",
-              <Provider store={store}>
+          {!showRuler 
+            ? null
+            : this.renderWidget(
+                "position-indicator-holder",
+                "Position:",
                 <div className="position-box">
                   <PositionalAxis
                     horizontalReduxId={sharedHorizontalReduxId}
@@ -408,14 +400,12 @@ export class AlignmentViewer extends React.Component<
                     residueHeight={residueHeight}
                     residueWidth={residueWidth}
                   />
-                </div>
-              </Provider>,
-              { height: singleSeqDivHeight }
-            )}
+                </div>,
+                { height: singleSeqDivHeight }
+              )}
 
-        {this.renderWidget(
-          "alignment-details-holder",
-          <Provider store={store}>
+          {this.renderWidget(
+            "alignment-details-holder",
             <div className="alignment-metadata-box">
               { <AlignmentTextualMetadata
                 horizontalReduxId={metadataReduxId}
@@ -429,9 +419,7 @@ export class AlignmentViewer extends React.Component<
                 letterHeight={residueHeight}
                 letterWidth={residueWidth}
               /> }
-            </div>
-          </Provider>,
-          <Provider store={store}>
+            </div>,
             <AlignmentDetails
               reduxVerticalId={sharedVerticalReduxId}
               reduxHorizontalId={sharedHorizontalReduxId}
@@ -446,10 +434,10 @@ export class AlignmentViewer extends React.Component<
               fontSize={fontSize}
               residueHeight={residueHeight}
               residueWidth={residueWidth}
-            ></AlignmentDetails>
-          </Provider>,
-          {}
-        )}
+            ></AlignmentDetails>,
+            {}
+          )}
+        </Provider>
       </div>
     );
   }

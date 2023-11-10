@@ -42,7 +42,7 @@ describe("MiniMap", () => {
     const wrapper = shallow(
       <Provider store={store}>
         <MiniMap
-          alignment={new Alignment("", [])}
+          alignment={new Alignment("", [], true)}
           alignmentStyle={AlignmentStyle.fromAlignmentType(
             AlignmentTypes.AMINOACID
           )}
