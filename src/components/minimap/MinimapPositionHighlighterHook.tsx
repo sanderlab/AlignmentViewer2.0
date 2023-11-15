@@ -84,7 +84,9 @@ export function MinimapPositionHighlighter(props: IMinimapPositionHighlighterPro
         onpointerdown={(e)=>{e.stopPropagation();}} //keep entire viewport from moving
       />
       {!dragging ? undefined : 
-        //secondary sprite object takes over the entire canvas during draggin
+        //secondary sprite object takes over the entire canvas during dragging. this
+        //enables the mouse to move out of the dragger as long is it is pressed. dragging
+        //stops when the mouse button is lived up.
         <Sprite 
           texture={PIXI.Texture.WHITE}
           eventMode={"static"}

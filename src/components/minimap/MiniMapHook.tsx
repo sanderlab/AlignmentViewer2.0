@@ -5,7 +5,7 @@ import { useRef, useEffect, useCallback, useState } from "react";
 import { Stage, AppContext } from "@pixi/react";
 
 import { MiniMapViewport } from "./MiniMapViewportComponent";
-import { MinimapPositionHighlighter } from "./MinimapPositionHighlighterComponent";
+import { MinimapPositionHighlighter } from "./MinimapPositionHighlighterHook";
 
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
 

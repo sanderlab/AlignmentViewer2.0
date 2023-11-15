@@ -25,6 +25,9 @@ export interface IAlignmentDetailsProps {
   fontSize: number;
   suppressVerticalScrollbar?: boolean;
   suppressHorizontalScrollbar?: boolean;
+
+  highlightedSequenceIdxs?: number[];
+  highlightedPositionIdxs?: number[];
 }
 
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
