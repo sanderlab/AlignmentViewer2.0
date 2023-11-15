@@ -3,7 +3,7 @@ import "./App.scss";
 import { Alignment } from "./common/Alignment";
 import { SequenceSorter } from "./common/AlignmentSorter";
 import { getURLParameters } from "./common/Utils";
-import { AlignmentViewer } from "./components/AlignmentViewerComponent";
+import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerComponent";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -15,7 +15,7 @@ import {
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoHook";
 import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
-import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
+import { ISequenceBarplotDataSeries, SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
 import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
 
 interface AppProps {}
@@ -69,7 +69,7 @@ export default class App extends React.Component<AppProps, AppState> {
       });
 
       AlignmentLoader.loadAlignmentFromURL(
-        params.get(URL_PARAM_NAMES.ALIGNMENT_URL),
+        params.get(URL_PARAM_NAMES.ALIGNMENT_URL)!,
         true, // remove duplicates by default
         this.onAlignmentReceived,
         this.onAlignmentLoadError
@@ -92,7 +92,7 @@ export default class App extends React.Component<AppProps, AppState> {
       zoomLevel,
     } = this.state;
 
-    const barplots = [];
+    const barplots: IBarplotExposedProps[] = [];
     if (showConservationBarplot) {
       barplots.push({
         dataSeriesSet: [SequenceBarplotComponent.CONSERVATION_BARPLOT],

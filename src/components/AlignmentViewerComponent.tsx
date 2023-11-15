@@ -34,7 +34,7 @@ export type IAlignmentViewerProps = {
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
-type IBarplotExposedProps = Pick<
+export type IBarplotExposedProps = Pick<
   ISequenceBarplotProps,
   "dataSeriesSet" | "tooltipPlacement" | "height"
 >;
