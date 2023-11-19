@@ -18,5 +18,3 @@ export * from "./components/SequenceLogoHook.js";
 export * from "./components/alignment-details/AlignmentDetailsHook.js";
 
 export * from "./components/minimap/MiniMapHook";
-export * from "./components/minimap/MiniMapViewportComponent.js";
-export * from "./components/minimap/MinimapPositionHighlighterHook.js";

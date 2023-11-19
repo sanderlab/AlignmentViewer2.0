@@ -13,3 +13,5 @@ interface IRectangle {
   width: number;
   height: number;
 }
+
+type NonNullable<T> = T extends null | undefined ? never : T;

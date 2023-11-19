@@ -104,10 +104,9 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                       residueDetail={alignmentStyle.residueDetail}
                       colorScheme={alignmentStyle.colorScheme}
                       positionsToStyle={alignmentStyle.positionsToStyle}
-                      scale={{
-                        x: residueWidth,
-                        y: residueHeight,
-                      }}
+                      //TODO further optimization by removing this and scaling with pixi 
+                      //(see minimap)
+                      scale={{x: residueWidth, y: residueHeight}}
                       translateY={additionalVerticalOffset}
                       translateX={additionalHorizontalOffset}
                     />

@@ -12,8 +12,7 @@ import {
   SequenceBarplotComponent,
   ISequenceBarplotProps,
 } from "./SequenceBarplotComponent";
-import { MiniMap } from "./minimap/MiniMapHook";
-import { IMiniMapProps } from "./minimap/MiniMapHook";
+import { IMiniMapProps, MiniMap } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
@@ -30,7 +29,7 @@ export type IAlignmentViewerProps = {
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
 
   //event reporting
-  minimapClicked?(mousePosition: IPosition): void;
+  //minimapClicked?(mousePosition: IPosition): void;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
@@ -61,12 +60,13 @@ const defaultProps = {
   minimapOptions: {
     alignHorizontal: "right",
     startingWidth: 100,
+    minWidth: 100,
     resizable: "horizontal",
     verticalHeight: "div",
   } as Partial<
     Pick<
       IMiniMapProps,
-      "alignHorizontal" | "startingWidth" | "resizable" | "verticalHeight"
+      "alignHorizontal" | "startingWidth" | "minWidth" | "resizable" | "verticalHeight"
     >
   >,
 
@@ -220,7 +220,7 @@ export class AlignmentViewer extends React.Component<
   }*/
 
   protected renderMiniMap(alignmentDetailsReduxId: string) {
-    const { alignment, showMinimap, sortBy, style, minimapOptions, minimapClicked } = this.props;
+    const { alignment, showMinimap, sortBy, style, minimapOptions } = this.props;
     let mmOptions = minimapOptions ? minimapOptions : defaultProps.minimapOptions;
     //const mmClassName = showMinimap ? "minimap" : "minimap hidden";
     return (
@@ -239,10 +239,10 @@ export class AlignmentViewer extends React.Component<
               alignHorizontal={mmOptions.alignHorizontal}
               resizable={mmOptions.resizable}
               startingWidth={mmOptions.startingWidth}
+              minWidth={mmOptions.minWidth}
               verticalHeight={mmOptions.verticalHeight}
-              onClick={minimapClicked}
               //sync
-              syncWithAlignmentDetailsId={alignmentDetailsReduxId}
+              verticalReduxId={alignmentDetailsReduxId}
             />
           }
         </div>

@@ -1,4 +1,11 @@
 /** App.scss */
+html, body {
+  //prevent safari from bouncing - updated 11/2023
+  height  : 100%;
+  overflow: hidden;
+  position: relative;
+  overscroll-behavior-x: none; //prevent safari from going back as well
+}
 
 body {
   //stop the bouncy at the bottom of a scroll - since the webgl component
@@ -11,6 +18,10 @@ body {
   //the alignment
   overscroll-behavior-x: none;
 }
+
+//*{ //stop the back button swipe on safari spcifically. It must be working on some specific
+//  overscroll-behavior-x: none;
+//}
 
 #root {
   height: 100vh;

@@ -67,7 +67,9 @@ export class CanvasAlignmentTiled extends React.Component<
       nextProps.querySequence !== this.props.querySequence ||
       nextProps.colorScheme !== this.props.colorScheme ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
-      nextProps.scale !== this.props.scale
+      nextProps.scale !== this.props.scale ||
+      nextProps.translateX !== this.props.translateX ||
+      nextProps.translateY !== this.props.translateY
     );
   }
 
@@ -135,6 +137,9 @@ export class CanvasAlignmentTiled extends React.Component<
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
                   ${residueDetail.key}_
+                  ${this.props.scale}_
+                  ${this.props.translateY}_
+                  ${this.props.translateX}_
                   ${
                     //outputting all sequences leads to huge memory usage!
                     //outputting ids may cause duplicates if changes sequences

@@ -5,6 +5,7 @@ import {
   createSlice,
   PayloadAction,
 } from "@reduxjs/toolkit";
+import _ from "lodash";
 
 export interface IVirtualizedMatrixState {
   //
@@ -30,7 +31,6 @@ export interface IVirtualizedMatrixState {
     hoverIdxScreenMin: number;    //the left or top of the hover in screen pixels
     hoverIdxScreenMax: number;    //the right or bottom of the hover in screen pixels
   } | undefined;
-
 
   //
   // SET BY CALLER, BUT WILL BE ADJUSTED IF OUT OF BOUNDS
@@ -171,9 +171,15 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
     numCellsToRender < 1 && cellCount > 0 ? 1 : numCellsToRender;
 
   state.scrollingAdditionalOffset = -1 * (state.worldOffset % cellPixelSize);
-  state.idxsToRender = [...Array(numCellsToRender).keys()].map(
+
+  //only update currentIds if they changed. TODO: does this break any redux rules?
+  const currentIdxsToRender = [...Array(numCellsToRender).keys()].map(
     (zeroIdx) => zeroIdx + firstRenderedCell
   );
+  if(state.idxsToRender.length !== currentIdxsToRender.length ||
+     !_.isEqual(state.idxsToRender, currentIdxsToRender) ){
+    state.idxsToRender = currentIdxsToRender;
+  }
 
   state.renderSize = state.idxsToRender.length * cellPixelSize;
   return state;

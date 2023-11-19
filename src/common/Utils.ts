@@ -168,7 +168,7 @@ if (!isChrome) {
     if (e.deltaY || e.deltaX) {
       if (
         validCSSScrollClasses.find((item) => {
-          return (e.srcElement as HTMLElement).classList.contains(item);
+          return (e.target as HTMLElement).classList.contains(item);
         })
       ) {
         return false;

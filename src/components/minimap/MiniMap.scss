@@ -9,13 +9,5 @@
   border-style: solid;
 
   overflow: hidden; //needed for resize handle (set as style in react)
-  min-width: 100px;
-
-  .alignment-canvas {
-    text-align: center;
-  }
-}
-
-.minimap-holder canvas {
-  transform: translate3d(0, 0, 0);
+  //min-width: 100px; //now set in javascript code
 }

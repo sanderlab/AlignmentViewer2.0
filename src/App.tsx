@@ -15,7 +15,7 @@ import {
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoHook";
 import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
-import { ISequenceBarplotDataSeries, SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
+import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
 import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
 
 interface AppProps {}
@@ -49,7 +49,7 @@ export default class App extends React.Component<AppProps, AppState> {
       zoomLevel: 14,
       sortBy: SequenceSorter.INPUT,
       showLogo: true,
-      showMiniMap: false,
+      showMiniMap: true,
       showConservationBarplot: true,
       showEntropyGapBarplot: true,
       showKLDivergenceBarplot: false,
@@ -134,7 +134,8 @@ export default class App extends React.Component<AppProps, AppState> {
             height: 80,
           }}
           minimapOptions={{
-            startingWidth: 120,
+            startingWidth: 100,
+            minWidth: 100,
             verticalHeight: "div",
             alignHorizontal: "right",
             resizable: "horizontal",
