@@ -82,6 +82,9 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     const consensusSliced = sliceSequences(
       [consensusSequence], [0], colIdxsToRender
     )[0];
+    const sequencesInViewport = rowIdxsToRender.map((seqIdx) => {
+      return sequences[seqIdx];
+    }, []);
 
     return (
       <div className="av-viewport">
@@ -115,7 +118,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         </Stage>
 
         <AlignmentDetailsLetters
-          sequencesToRender={seqsSliced}
+          sequencesInViewport={sequencesInViewport}
+          slicedSequences={seqsSliced}
           consensusSequence={consensusSliced}
           querySequence={querySliced}
           alignmentStyle={alignmentStyle}
@@ -174,7 +178,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
  * @param props
  */
 export function AlignmentDetailsLetters(props: {
-  sequencesToRender: string[];
+  sequencesInViewport: string[];
+  slicedSequences: string[];
   consensusSequence: string;
   querySequence: string;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
@@ -184,7 +189,8 @@ export function AlignmentDetailsLetters(props: {
   horizontalOffset?: number;
 }) {
   const {
-    sequencesToRender,
+    sequencesInViewport,
+    slicedSequences,
     consensusSequence,
     querySequence,
     alignmentStyle,
@@ -251,7 +257,7 @@ export function AlignmentDetailsLetters(props: {
   //with each letter color as key and each value is an array of
   //with each entry 
   const letterColorToLocations = useMemo(()=>{
-    return sequencesToRender.reduce((colorsAcc, seqStr, seqIdx)=>{
+    return slicedSequences.reduce((colorsAcc, seqStr, seqIdx)=>{
       for (let positionIdx=0, n = seqStr.length; positionIdx < n; ++positionIdx){
         const letter = seqStr[positionIdx];
         const color = getLetterColor(
@@ -272,7 +278,7 @@ export function AlignmentDetailsLetters(props: {
       return colorsAcc;
     }, {} as {[letterColor: string]: { [seqId: number]: number[] }})
   }, [
-    sequencesToRender, //changes too frequently. what is that about?
+    slicedSequences, //changes too frequently. what is that about?
     alignmentStyle, 
     consensusSequence, 
     getLetterColor, 
@@ -284,7 +290,7 @@ export function AlignmentDetailsLetters(props: {
   //position will be blank for all except one of the elemnets)
   const individualColors = Object.entries(letterColorToLocations).map(
     ([color, locations]) => {
-      const colorStrings = sequencesToRender.map((seqStr, seqIdx) => {
+      const colorStrings = slicedSequences.map((seqStr, seqIdx) => {
         return seqStr
           .split("")
           .map((letter, colIdx) => {
@@ -325,7 +331,10 @@ export function AlignmentDetailsLetters(props: {
     >
       <div
         className="letters-viewport"
-        style={{ fontSize: fontSize, lineHeight: lineHeight + "px" }}
+        style={{ 
+          fontSize: fontSize, 
+          lineHeight: lineHeight + "px" 
+        }}
       >
         {
           //output each color separately
@@ -336,8 +345,8 @@ export function AlignmentDetailsLetters(props: {
           // add a hidden interaction element that contains all the displayed sequences
           // so users can copy paste
         }
-        <div className={`hidden-residues-for-copy-paste`}>
-          {sequencesToRender.map((seqStr, idx) => {
+        <div className={"hidden-residues-for-copy-paste"}>
+          {sequencesInViewport.map((seqStr, idx) => {
             return (
               <React.Fragment key={idx + seqStr}>
                 {seqStr} <br />

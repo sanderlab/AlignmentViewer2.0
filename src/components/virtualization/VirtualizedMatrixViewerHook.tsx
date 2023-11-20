@@ -342,6 +342,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                     }
                   }}
               >
+                
                 <div className="hover-tracker-y" style={!reduxStateVertical || !reduxStateVertical.mouseMove ? 
                   {display: "none"} : {
                     position: "absolute",
@@ -355,12 +356,12 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                     borderRadius: "50%",
                     backgroundColor:"red"
 
-                    /*border: "solid red 1px",
-                    top: reduxStateVertical.mouseMove.hoverIdxScreenMin-1, 
-                    bottom: 0,
-                    left:0, 
-                    right:0,
-                    height: reduxStateVertical.cellPixelSize, */
+                    //border: "solid red 1px",
+                    //top: reduxStateVertical.mouseMove.hoverIdxScreenMin-1, 
+                    //bottom: 0,
+                    //left:0, 
+                    //right:0,
+                    //height: reduxStateVertical.cellPixelSize,
                   }}
                 ></div>
 
@@ -377,39 +378,34 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                     borderRadius: "50%",
                     backgroundColor:"red"
 
-                    /*
-                    border: "solid red 1px",
-                    top: 0,
-                    bottom: 0,
-                    left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin-1, 
-                    //right: reduxStateHorizontal.mouseMove.hoverIdxScreenMax,
-                    width: reduxStateHorizontal.cellPixelSize, 
-                    //borderRadius: "50%",
-                    //backgroundColor:"red"*/
+                    //border: "solid red 1px",
+                    //top: 0,
+                    //bottom: 0,
+                    //left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin-1, 
+                    //width: reduxStateHorizontal.cellPixelSize, 
                   }}
                 ></div>
 
-              </div>
-
-              <div
-                className="data"
-                style={{
-                  top: autoOffset
-                    ? reduxStateVertical
-                      ? reduxStateVertical.scrollingAdditionalOffset
-                      : undefined
-                    : undefined,
-                  left: autoOffset
-                    ? reduxStateHorizontal
-                      ? reduxStateHorizontal.scrollingAdditionalOffset
-                      : undefined
-                    : undefined,
-                }}
-              >
-                {
-                  //request matrix - cached above
-                  contentFromParent
-                } 
+                <div
+                  className="data"
+                  style={{
+                    top: autoOffset
+                      ? reduxStateVertical
+                        ? reduxStateVertical.scrollingAdditionalOffset
+                        : undefined
+                      : undefined,
+                    left: autoOffset
+                      ? reduxStateHorizontal
+                        ? reduxStateHorizontal.scrollingAdditionalOffset
+                        : undefined
+                      : undefined,
+                  }}
+                >
+                  {
+                    //request matrix - cached above
+                    contentFromParent
+                  } 
+                </div>
               </div>
             </>
           )}

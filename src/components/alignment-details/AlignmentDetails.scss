@@ -47,6 +47,7 @@
       -webkit-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      pointer-events: none;
     }
     .hidden-residues-for-copy-paste {
       position: absolute;
@@ -55,7 +56,7 @@
       top: 0;
       left: 0;
       color: rgba(0, 0, 0, 0);
-      //pointer-events: all;
+      pointer-events: all;
     }
   }
 }
