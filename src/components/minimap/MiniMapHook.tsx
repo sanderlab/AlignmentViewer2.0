@@ -44,21 +44,13 @@ export function MiniMap(props: IMiniMapProps) {
   } = props;
 
   //default props
-  const alignHorizontal: IMiniMapProps["alignHorizontal"] = props.alignHorizontal
-    ? props.alignHorizontal
-    : "left";
-  const resizable: IMiniMapProps["resizable"] = props.resizable
-    ? props.resizable
-    : "none";
-  const startingWidth: IMiniMapProps["startingWidth"] = props.startingWidth
-    ? props.startingWidth
-    : 200;
-  const minWidth: IMiniMapProps["minWidth"] = props.minWidth
-    ? props.minWidth
-    : 100;
-  const verticalHeight: IMiniMapProps["verticalHeight"] = props.verticalHeight
-    ? props.verticalHeight
-    : "div";
+  const {
+    alignHorizontal = "20px",
+    resizable = "none",
+    startingWidth = 200,
+    minWidth = 100,
+    verticalHeight = "div"
+  } = props;
 
   //
   //state

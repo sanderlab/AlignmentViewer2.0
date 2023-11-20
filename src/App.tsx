@@ -14,7 +14,7 @@ import {
   ResidueStyle,
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoHook";
-import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
+import { AlignmentFileDrop, AlignmentFileLoader } from "./components/AlignmentFileLoaderHook";
 import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
 import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
 
@@ -178,6 +178,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
     return (
       <div className="app-header">
+        {this.renderFileDropZone()}
         <div className="settings-box">
           <form>
             <div className="settings-header">
@@ -530,41 +531,59 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
 
+  protected renderFileDropZone = () => {
+    return (
+      <AlignmentFileDrop
+        removeDuplicateSeqs={true} //todo - prop this, it is presently in the 
+        alignmentLoaded={this.onAlignmentReceived}
+        onAlignmenLoadError={(e)=>{
+          this.onAlignmentLoadError(e);
+          this.setState({
+            showSettings: true,
+          });
+        }}
+        onFileLoadStart={() => {
+          this.setState({
+            loading: true,
+          });
+        }}
+      />
+    )
+  }
+
   protected renderFileUpload = () => {
     return (
-      <div>
-        <AlignmentFileLoaderComponent
-          fileSelectorLabelText={"Upload Alignment File:"}
-          exampleFiles={[
-            {
-              labelText: "Test",
-              fileURL:
-                process.env.PUBLIC_URL +
-                "/TESTING.a2m",
-              fileName: "TESTING.a2m",
-            },
-            {
-              labelText: "β-lactamase",
-              fileURL:
-                process.env.PUBLIC_URL +
-                "/7fa1c5691376beab198788a726917d48_b0.4.a2m",
-              fileName: "7fa1c5691376beab198788a726917d48_b0.4.a2m",
-            },
-            {
-              labelText: "SARS-CoV-2 Spike",
-              fileURL: process.env.PUBLIC_URL + "/Spike_Full_f05_m05_t08.a2m",
-              fileName: "Spike_Full_f05_m05_t08.a2m",
-            },
-          ]}
-          onFileLoadStart={() => {
-            this.setState({
-              loading: true,
-            });
-          }}
-          onAlignmentLoaded={this.onAlignmentReceived}
-          onAlignmenLoadError={this.onAlignmentLoadError}
-        />
-      </div>
+      <AlignmentFileLoader
+        fileSelectorLabelText={"Upload Alignment File:"}
+        exampleFiles={[
+          {
+            labelText: "Testasdf",
+            fileURL:
+              process.env.PUBLIC_URL +
+              "/TESTING.a2m",
+            fileName: "TESTING.a2m",
+          },
+          {
+            labelText: "β-lactamase",
+            fileURL:
+              process.env.PUBLIC_URL +
+              "/7fa1c5691376beab198788a726917d48_b0.4.a2m",
+            fileName: "7fa1c5691376beab198788a726917d48_b0.4.a2m",
+          },
+          {
+            labelText: "SARS-CoV-2 Spike",
+            fileURL: process.env.PUBLIC_URL + "/Spike_Full_f05_m05_t08.a2m",
+            fileName: "Spike_Full_f05_m05_t08.a2m",
+          },
+        ]}
+        onFileLoadStart={() => {
+          this.setState({
+            loading: true,
+          });
+        }}
+        onAlignmentLoaded={this.onAlignmentReceived}
+        onAlignmenLoadError={this.onAlignmentLoadError}
+      />
     );
   };
 

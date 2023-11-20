@@ -10,7 +10,7 @@ export * from "./common/SequenceLogoGlyphs.js";
 export * from "./common/StockholmAlignment.js";
 export * from "./common/Utils.js";
 
-export * from "./components/AlignmentFileLoaderComponent.js";
+export * from "./components/AlignmentFileLoaderHook.js";
 export * from "./components/AlignmentViewerComponent.js";
 export * from "./components/SequenceBarplotComponent.js";
 export * from "./components/SequenceLogoHook.js";
