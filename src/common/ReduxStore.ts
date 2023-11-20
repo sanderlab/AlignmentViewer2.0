@@ -26,11 +26,18 @@ export interface IVirtualizedMatrixState {
 
   //mouseover
   mouseMove: {
-    hoverWorldOffset: number;     //the world offset hovering over
-    hoverIdx: number;             //the row or column hovering over
-    hoverIdxScreenMin: number;    //the left or top of the hover in screen pixels
-    hoverIdxScreenMax: number;    //the right or bottom of the hover in screen pixels
+    hoverWorldOffset: number;   //the world offset hovering over
+    hoverIdx: number;           //the row or column hovering over
+    hoverIdxScreenMin: number;  //the left or top of the hover in screen pixels
+    hoverIdxScreenMax: number;  //the right or bottom of the hover in screen pixels
   } | undefined;
+
+  //toggled by clicking
+  selected: {
+    idx: number;                //the index of the selected row or column
+    idxScreenMin: number;       //the left or top of the selected row or column in screen pixels
+    idxScreenMax: number;       //the right or bottom of the selected row or column in screen pixels
+  }[];
 
   //
   // SET BY CALLER, BUT WILL BE ADJUSTED IF OUT OF BOUNDS
@@ -93,6 +100,7 @@ const initializeNewIdAsNeeded = (
       worldSize: -1,
 
       mouseMove: undefined,
+      selected: [],
 
       cellCount: -1,
 
@@ -172,13 +180,33 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
 
   state.scrollingAdditionalOffset = -1 * (state.worldOffset % cellPixelSize);
 
-  //only update currentIds if they changed. TODO: does this break any redux rules?
+  //only update currentIds if they changed (for performance reasons). TODO: does this break any redux rules?
   const currentIdxsToRender = [...Array(numCellsToRender).keys()].map(
     (zeroIdx) => zeroIdx + firstRenderedCell
   );
   if(state.idxsToRender.length !== currentIdxsToRender.length ||
      !_.isEqual(state.idxsToRender, currentIdxsToRender) ){
     state.idxsToRender = currentIdxsToRender;
+  }
+
+  //update the selected element positioning
+  var anyUpdated = false;
+  const newSelected = state.selected.map((elem, idx) => {
+    const minOffset = (elem.idx * state.cellPixelSize) - state.worldOffset;
+    const newElem = {
+      idx: elem.idx,
+      idxScreenMin: minOffset,
+      idxScreenMax: minOffset + state.cellPixelSize
+    };
+    anyUpdated = anyUpdated 
+      ? true 
+      : elem.idxScreenMax !== newElem.idxScreenMax || 
+        elem.idxScreenMin !== newElem.idxScreenMin;
+    return newElem
+  }, []);
+
+  if (anyUpdated){
+    state.selected = newSelected;
   }
 
   state.renderSize = state.idxsToRender.length * cellPixelSize;
@@ -334,6 +362,48 @@ const setMouseOver = (
   return state;
 };
 
+
+/**
+ * toggle a selected row or column on or off
+ * @param id
+ * @param mouseOffset
+ * @param state
+ */
+const toggleSelected = (
+  id: string,
+  mouseViewportOffset: number,
+  state: { [id: string]: IVirtualizedMatrixState }
+) => {
+  state = initializeNewIdAsNeeded(id, state);
+  const mouseWorldOffset = mouseViewportOffset + state[id].worldOffset;
+  const clickedIdx = Math.floor(mouseWorldOffset / state[id].cellPixelSize);
+  console.log(
+    'mouseViewportOffset:'+mouseViewportOffset+', worldOffset:'+state[id].worldOffset + ', state[id].cellPixelSize:'+state[id].cellPixelSize+
+    ', mouseWorldOffset='+mouseWorldOffset+', clickedIdx:'+clickedIdx + ',state[id].initialized:'+state[id].initialized
+  );
+  
+  const newSelected = state[id].selected.reduce((acc, element) => {
+    if (element.idx !== clickedIdx){
+      acc.push(element);
+    }
+    return acc;
+  }, [] as IVirtualizedMatrixState["selected"]);
+
+  if (newSelected.length === state[id].selected.length){
+    //nothing was removed, so it is a toggle on. otherwise it 
+    //was a toggle off and it was removed
+    newSelected.push({
+      idx: clickedIdx,
+      idxScreenMin: -1, //set by attachRenderDetails
+      idxScreenMax: -1, //set by attachRenderDetails
+    })
+  }
+  state[id].selected = newSelected;
+  console.log('state[id].selected:', state[id].selected);
+  state[id] = attachRenderDetails(state[id]);
+  return state;
+};
+
 /**
  *
  *
@@ -346,6 +416,18 @@ export const virtualizedHorizontalSlice = createSlice({
   initialState: {} as { [id: string]: IVirtualizedMatrixState },
 
   reducers: {
+    toggleSelectedPosition: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        mouseViewportOffsetX: number;
+      }>
+    ) => {
+      return toggleSelected(
+        action.payload.id, action.payload.mouseViewportOffsetX, state
+      );
+    },
+
     setMouseOverX: (
       state,
       action: PayloadAction<{
@@ -424,6 +506,18 @@ export const virtualizedVerticalSlice = createSlice({
   initialState: {} as { [id: string]: IVirtualizedMatrixState },
 
   reducers: {
+    toggleSelectedSequence: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        mouseViewportOffsetY: number;
+      }>
+    ) => {
+      return toggleSelected(
+        action.payload.id, action.payload.mouseViewportOffsetY, state
+      );
+    },
+
     setMouseOverY: (
       state,
       action: PayloadAction<{
@@ -505,6 +599,7 @@ export const virtualizedVerticalSlice = createSlice({
  *
  */
 export const {
+  toggleSelectedPosition,
   setMouseOverX,
   setColumnCount,
   setColumnWidth,
@@ -515,6 +610,7 @@ export const {
 } = virtualizedHorizontalSlice.actions;
 
 export const {
+  toggleSelectedSequence,
   setMouseOverY,
   setRowCount,
   setRowHeight,

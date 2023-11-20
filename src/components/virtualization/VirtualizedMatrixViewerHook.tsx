@@ -7,6 +7,8 @@ import * as PIXI from "pixi.js";
 
 import { ReactResizeSensor } from "../ResizeSensorHook";
 import {
+  toggleSelectedPosition as toggleReduxSelectedPosition,
+  toggleSelectedSequence as toggleReduxSelectedSequence,
   setMouseOverX as setReduxMouseOverX,
   setMouseOverY as setReduxMouseOverY,
   setColumnCount as setReduxColumnCount,
@@ -121,7 +123,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
     //fix safari-specific bug - this function will tell the window to stop
     //blocking scroll events on the "single-sequence-text" class
-    stopSafariFromBlockingWindowWheel("virtualized-matrix");
+    stopSafariFromBlockingWindowWheel("av2-virtualized-matrix");
     stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
   }, []);
 
@@ -263,6 +265,12 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     reduxStateHorizontal?.idxsToRender,
   ]);
 
+  const blah = useMemo(()=>{
+    if (reduxStateHorizontal?.selected.length > 0){
+      console.log(reduxStateHorizontal?.selected);
+    }
+  }, [reduxStateHorizontal?.selected]);
+
   /*
    *
    *
@@ -279,8 +287,39 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
         setMouseHovering(false);
       }}
     >
+      { 
+        reduxStateHorizontal?.selected.map((elem)=>{
+          return <div style={{
+            position: "absolute",
+            top: 0,
+            left: elem.idxScreenMin-2, 
+            width: elem.idxScreenMax-elem.idxScreenMin+2,
+            bottom: "2px",
+            border: "dashed red 2px",
+            zIndex: 5000,
+            pointerEvents: "none"
+          }}></div>
+        })
+      }
+
+      { 
+        reduxStateVertical?.selected.map((elem)=>{
+          return <div style={{
+            position: "absolute",
+            top: elem.idxScreenMin-1,
+            height: elem.idxScreenMax-elem.idxScreenMin+2,
+            left: 0, 
+            right: "2px",
+            border: "dashed red 2px",
+            zIndex: 5000,
+            pointerEvents: "none"
+          }}></div>
+        })
+      }
+
+
       <ReactResizeSensor onSizeChanged={viewportSizeChanged}>
-        <div className="virtualized-matrix" ref={ref}>
+        <div className="av2-virtualized-matrix" ref={ref}>
           {!reduxInitialized ||
             !ref ||
             screenWidth === undefined ||
@@ -290,59 +329,79 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                 // super simple way of enabling wheel scrolling and monitoring of
                 // mouse over events 
               }
-              <div className={'wheel-scroller'} 
-                  onMouseOut={() =>{
-                    dispatch(
-                      setReduxMouseOverY({
-                        id: verticalReduxId,
-                        mouseViewportOffsetY: undefined,
-                      })
-                    );
-                    dispatch(
-                      setReduxMouseOverX({
-                        id: horizontalReduxId,
-                        mouseViewportOffsetX: undefined,
-                      })
-                    );
-                  }}
-                  onMouseMove={(event) => {
-                    const bounds = event.currentTarget.getBoundingClientRect();
-                    const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
-                    const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
+              <div 
+                className={'av2-wheel-scroller'} 
+                onClick={(event)=>{
+                  const bounds = event.currentTarget.getBoundingClientRect();
+                  const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
+                  const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
 
+                  console.log('toggling: ['+viewportX+','+viewportY+']');
+                  dispatch(
+                    toggleReduxSelectedPosition({
+                      id: horizontalReduxId,
+                      mouseViewportOffsetX: viewportX,
+                    })
+                  );
+                  dispatch(
+                    toggleReduxSelectedSequence({
+                      id: verticalReduxId,
+                      mouseViewportOffsetY: viewportY,
+                    })
+                  );
+                }}
+                onMouseOut={() =>{
+                  dispatch(
+                    setReduxMouseOverY({
+                      id: verticalReduxId,
+                      mouseViewportOffsetY: undefined,
+                    })
+                  );
+                  dispatch(
+                    setReduxMouseOverX({
+                      id: horizontalReduxId,
+                      mouseViewportOffsetX: undefined,
+                    })
+                  );
+                }}
+                onMouseMove={(event) => {
+                  const bounds = event.currentTarget.getBoundingClientRect();
+                  const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
+                  const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
+                  
+                  dispatch(
+                    setReduxMouseOverY({
+                      id: verticalReduxId,
+                      mouseViewportOffsetY: viewportY,
+                    })
+                  );
+                  dispatch(
+                    setReduxMouseOverX({
+                      id: horizontalReduxId,
+                      mouseViewportOffsetX: viewportX,
+                    })
+                  );
+                }}
+                onWheel={(event) => {
+                  if (event.deltaX !== 0 && reduxStateHorizontal){
                     dispatch(
-                      setReduxMouseOverY({
-                        id: verticalReduxId,
-                        mouseViewportOffsetY: viewportY,
-                      })
-                    );
-                    dispatch(
-                      setReduxMouseOverX({
+                      setReduxWorldLeftPixelOffset({
                         id: horizontalReduxId,
-                        mouseViewportOffsetX: viewportX,
+                        worldLeftPixelOffset: reduxStateHorizontal.worldOffset + event.deltaX,
                       })
                     );
-                  }}
-                  onWheel={(event) => {
-                    if (event.deltaX !== 0 && reduxStateHorizontal){
-                      dispatch(
-                        setReduxWorldLeftPixelOffset({
-                          id: horizontalReduxId,
-                          worldLeftPixelOffset: reduxStateHorizontal.worldOffset + event.deltaX,
-                        })
-                      );
-                    }
-                    if (event.deltaY !== 0 && reduxStateVertical){
-                      dispatch(
-                        setReduxWorldTopPixelOffset({
-                          id: verticalReduxId,
-                          worldTopPixelOffset: reduxStateVertical.worldOffset + event.deltaY,
-                        })
-                      );
-                    }
-                  }}
+                  }
+                  if (event.deltaY !== 0 && reduxStateVertical){
+                    dispatch(
+                      setReduxWorldTopPixelOffset({
+                        id: verticalReduxId,
+                        worldTopPixelOffset: reduxStateVertical.worldOffset + event.deltaY,
+                      })
+                    );
+                  }
+                }}
               >
-                
+
                 <div className="hover-tracker-y" style={!reduxStateVertical || !reduxStateVertical.mouseMove ? 
                   {display: "none"} : {
                     position: "absolute",
@@ -387,7 +446,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                 ></div>
 
                 <div
-                  className="data"
+                  className="av2-data"
                   style={{
                     top: autoOffset
                       ? reduxStateVertical
