@@ -264,13 +264,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     reduxStateHorizontal?.cellCount,
     reduxStateHorizontal?.idxsToRender,
   ]);
-
-  const blah = useMemo(()=>{
-    if (reduxStateHorizontal?.selected.length > 0){
-      console.log(reduxStateHorizontal?.selected);
-    }
-  }, [reduxStateHorizontal?.selected]);
-
+  
   /*
    *
    *
@@ -336,7 +330,6 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                   const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
                   const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
 
-                  console.log('toggling: ['+viewportX+','+viewportY+']');
                   dispatch(
                     toggleReduxSelectedPosition({
                       id: horizontalReduxId,

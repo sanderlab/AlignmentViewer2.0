@@ -5,7 +5,7 @@ import {
   createSlice,
   PayloadAction,
 } from "@reduxjs/toolkit";
-import _ from "lodash";
+import { shallowEqual } from "react-redux";
 
 export interface IVirtualizedMatrixState {
   //
@@ -185,7 +185,7 @@ const attachRenderDetails = (state: IVirtualizedMatrixState) => {
     (zeroIdx) => zeroIdx + firstRenderedCell
   );
   if(state.idxsToRender.length !== currentIdxsToRender.length ||
-     !_.isEqual(state.idxsToRender, currentIdxsToRender) ){
+     !shallowEqual(state.idxsToRender, currentIdxsToRender) ){
     state.idxsToRender = currentIdxsToRender;
   }
 
@@ -251,11 +251,11 @@ const setCellSize = (
   state: { [id: string]: IVirtualizedMatrixState }
 ) => {
   state = initializeNewIdAsNeeded(id, state);
-  const startLineLeft = state[id].worldOffset / state[id].cellPixelSize;
+  const startCell = state[id].worldOffset / state[id].cellPixelSize;
   state[id].cellPixelSize = size;
 
-  //try to maintain the same left offset
-  state[id].worldOffset = startLineLeft * size;
+  //try to maintain the same offset
+  state[id].worldOffset = startCell * size;
 
   state[id] = attachRenderDetails(state[id]);
   return state;

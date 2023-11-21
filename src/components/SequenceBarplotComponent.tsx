@@ -1,6 +1,5 @@
 import React from "react";
 import "./SequenceBarplot.scss";
-import _ from "lodash";
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
 import ReactTooltip from "react-tooltip";
@@ -412,10 +411,14 @@ export class SequenceBarplotComponent extends React.Component<
       });
 
       //normalize bars group by group
-      this.cache.bars = Object.entries(
-        _.groupBy(allBars, (bar) => bar.dataSeriesSet.id)
+      this.cache.bars = Object.values(
+        allBars.reduce((acc, bar)=>{
+          acc[bar.dataSeriesSet.id] = acc[bar.dataSeriesSet.id] 
+            ? [...acc[bar.dataSeriesSet.id], bar] : [bar];
+          return acc;
+        }, {} as {[seriesId: string]: ISingleBarDetailsFull[]})    
       )
-        .map(([categoryId, categoryBars]) => {
+        .map((categoryBars) => {
           return this.normalizeBarHeights(categoryBars);
         })
         .flat();

@@ -17,6 +17,7 @@ import { RootState, setWorldTopRowOffset } from "../../common/ReduxStore";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 import { ReactResizeSensor } from "../ResizeSensorHook";
 import { useAppDispatch, useAppSelector } from "../../common/Hooks";
+import { shallowEqual } from "react-redux";
 
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
@@ -65,11 +66,23 @@ export function MiniMap(props: IMiniMapProps) {
   //redux
   //
   const dispatch = useAppDispatch();
-  const reduxStateVertical = useAppSelector((state: RootState) =>
-    !verticalReduxId
-      ? undefined
-      : state.virtualizedVerticalSlice[verticalReduxId]
-  );
+
+  const idxsToRender = useAppSelector((state: RootState) => {
+    return !verticalReduxId ||
+           !state.virtualizedVerticalSlice[verticalReduxId] ||
+           !state.virtualizedVerticalSlice[verticalReduxId].initialized
+      ? [] 
+      : state.virtualizedVerticalSlice[verticalReduxId].idxsToRender
+  }, shallowEqual);
+
+  const viewportFullyRendersAlignment = useAppSelector((state: RootState) => {
+    return !verticalReduxId || 
+           !state.virtualizedVerticalSlice[verticalReduxId] || 
+           !state.virtualizedVerticalSlice[verticalReduxId].initialized 
+      ? false
+      : state.virtualizedVerticalSlice[verticalReduxId].cellCount <= 
+        state.virtualizedVerticalSlice[verticalReduxId].idxsToRender.length
+  });
 
   //
   //cache
@@ -90,21 +103,23 @@ export function MiniMap(props: IMiniMapProps) {
 
   const mmOffsets = useMemo(()=>{
     //calculate offset of the minimap and minmap dragger 
-    if (!reduxStateVertical?.initialized ||
-        reduxStateVertical.idxsToRender.length < 1 ||
+    if (idxsToRender.length < 1 ||
         !frameSizing?.frameHeight ||
         !frameSizing?.frameWidth){
       return undefined;
     }
+    
     //the y offset of the minimap takes into account its scrollable height as well
     //as the fraction of sequences hidden in the viewport.
     const scale = frameSizing.frameWidth / alignment.getSequenceLength();
     const totalSeqCount = alignment.getSequenceCount();
 
-    const vpVisibleSeqCount = reduxStateVertical.idxsToRender.length;
-    const vpNumSeqsHiddenAbove = reduxStateVertical.idxsToRender[0];
+    const vpVisibleSeqCount = idxsToRender.length;
+    const vpNumSeqsHiddenAbove = idxsToRender[0];
     
-    const mmVisibleSeqCount = frameSizing.frameHeight / scale;
+    const mmVisibleSeqCount = (frameSizing.frameHeight / scale) > totalSeqCount 
+      ? totalSeqCount 
+      : (frameSizing.frameHeight / scale);
     const mmVisibleProportionalToHidden = (
       //scrollable height: total minimap height - dragger (=viewport height)
       mmVisibleSeqCount-vpVisibleSeqCount 
@@ -129,8 +144,7 @@ export function MiniMap(props: IMiniMapProps) {
       minimapDraggerSequenceOffset: vpNumSeqsHiddenAbove
     };
   }, [
-    reduxStateVertical?.initialized,
-    reduxStateVertical?.idxsToRender,
+    idxsToRender,
     frameSizing?.frameHeight, 
     frameSizing?.frameWidth,
     alignment
@@ -148,7 +162,7 @@ export function MiniMap(props: IMiniMapProps) {
     stopSafariFromBlockingWindowWheel("minimap-canvas");
   }, []);
 
-  /*useEffect(() => {
+  /*useEffect(() => { //some performance issues with this? I'm tired but kept the other..
     if (app && mmOffsets){
       app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
       app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
@@ -196,21 +210,25 @@ export function MiniMap(props: IMiniMapProps) {
 
   const mmWheeled = useCallback((e: React.WheelEvent) => {
     if (
-      mmOffsets 
-      && reduxStateVertical 
-      && reduxStateVertical.idxsToRender.length>0 
-      && e.deltaY !== 0
+      mmOffsets &&
+      idxsToRender.length>0 &&
+      e.deltaY !== 0
     ){
       dispatch(
         setWorldTopRowOffset({
           id: verticalReduxId,
           rowOffset: 
-            reduxStateVertical.idxsToRender[0]
+            idxsToRender[0]
             + (e.deltaY / mmOffsets.scale)
         })
       );
     }
-  }, [dispatch, verticalReduxId, mmOffsets, reduxStateVertical]);
+  }, [
+    dispatch,
+    idxsToRender, 
+    verticalReduxId, 
+    mmOffsets
+  ]);
 
   //
   //rendering
@@ -265,31 +283,46 @@ export function MiniMap(props: IMiniMapProps) {
               residueDetail={ResidueStyle.DARK}
             />
           </Stage>
-          <MinimapDragger
-            fillColor={'#000000'}
-            baselineOpacity={0.4}
-            mouseoverOpacity={0.3}
-            draggingOpacity={0.2}
-            onWheel={mmWheeled}
-            highlighterHeightPx={ 
-              //since we render the minimap as single pixels the mapping is the same
-              offsets.minimapDraggerHeight * offsets.scale
-            }
-            highlighterYPx={
-              offsets.minimapDraggerY * offsets.scale
-            }
-            highlighterMoved={(deltaPx)=>{
-              dispatch(
-                setWorldTopRowOffset({
-                  id: verticalReduxId!,
-                  rowOffset: (
+
+          { //only render dragger if there is something to drag
+            viewportFullyRendersAlignment ? undefined :
+              <MinimapDragger
+                fillColor={'#000000'}
+                baselineOpacity={0.4}
+                mouseoverOpacity={0.3}
+                draggingOpacity={0.2}
+                onWheel={mmWheeled}
+                highlighterHeightPx={ 
+                  //since we render the minimap as single pixels the mapping is the same
+                  offsets.minimapDraggerHeight * offsets.scale
+                }
+                highlighterYPx={
+                  offsets.minimapDraggerY * offsets.scale
+                }
+                highlighterMoved={(deltaPx)=>{
+                  //TODO clamp
+                  const calculatedRowOffset = 
                     (deltaPx * offsets.minimapPixelToWorldOffset / offsets.scale) +
-                    (offsets.minimapDraggerSequenceOffset)
-                  ),
-                })
-              );
-            }}
-          />
+                    (offsets.minimapDraggerSequenceOffset);
+                  const suggestedRowOffset = 
+                    calculatedRowOffset < 0 
+                      ? 0 
+                      : calculatedRowOffset > alignment.getSequenceCount() - idxsToRender.length
+                        ? alignment.getSequenceCount() - idxsToRender.length 
+                        : calculatedRowOffset
+
+                  //console.log('deltaPx:'+deltaPx+', suggestedRowOffset:'+suggestedRowOffset + 
+                  //', vp showing='+idxsToRender.length+', previous:'+offsets.minimapDraggerY);
+                  //console.log(offsets.minimapPixelToWorldOffset);
+                  dispatch(
+                    setWorldTopRowOffset({
+                      id: verticalReduxId!,
+                      rowOffset: suggestedRowOffset,
+                    })
+                  );
+                }}
+              />
+          }
       </div>
     )
   }
@@ -309,11 +342,7 @@ export function MiniMap(props: IMiniMapProps) {
       }}
     >
       <ReactResizeSensor onSizeChanged={minimapHolderResized}>
-        { !frameSizing || !mmOffsets ||
-          !reduxStateVertical ||
-          !reduxStateVertical.initialized ||
-          reduxStateVertical.idxsToRender.length < 1 ||
-          reduxStateVertical.cellCount <= reduxStateVertical.idxsToRender.length
+        { !frameSizing || !mmOffsets
             ? null 
             : renderAlignment(
                 frameSizing.frameWidth, 
@@ -372,12 +401,6 @@ export function MinimapDragger(props: IMinimapDraggerProps){
    *
    *
    */
-  /*const onWheel = useCallback((
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    console.log('onWheel:');
-  }, []);*/
-
   const dragMove = useCallback((
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
