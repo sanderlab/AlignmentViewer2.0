@@ -363,13 +363,17 @@ export class SequenceBarplotComponent extends React.Component<
         bar.dataSeriesSet.plotOptions && bar.dataSeriesSet.plotOptions.fixYMax
           ? bar.dataSeriesSet.plotOptions.fixYMax(alignment)
           : overallMaxHeight;
+      
+      const normalizedHeight = bar.height === undefined
+        ? NaN
+        : ((bar.height - minHeight) / (maxHeight - minHeight)) *
+          SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT;
+      
       return {
         ...bar,
-        normalizedHeight:
-          bar.height === undefined
-            ? undefined
-            : ((bar.height - minHeight) / (maxHeight - minHeight)) *
-              SequenceBarplotComponent.POSITION_VIEWBOX_HEIGHT,
+        normalizedHeight: isNaN(normalizedHeight) 
+          ? undefined 
+          : normalizedHeight
       };
     });
   }
@@ -532,7 +536,6 @@ export class SequenceBarplotComponent extends React.Component<
     const totalWidth = positionWidth * maxSeqLength;
 
     const barsObj = this.getBars();
-
     return (
       <svg
         preserveAspectRatio="none"
@@ -623,7 +626,7 @@ export class SequenceBarplotComponent extends React.Component<
                   //something off here with typescript and this accumulator.
                   //can't specify type as rect
                 }, new Array<JSX.Element>())}
-
+  
                 <rect
                   className="interaction-placeholder"
                   transform={`translate(0,${
@@ -698,7 +701,6 @@ export class SequenceBarplotComponent extends React.Component<
             additionalHorizontalOffset,
             stageDimensions
           ) => {
-            //console.log('render barplot');
             return (
               <div
                 style={{
