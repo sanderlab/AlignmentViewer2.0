@@ -2,7 +2,8 @@
  * Hooks for pure webgl alignment details.
  */
 import "./AlignmentDetails.scss";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import * as PIXI from "pixi.js";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -49,10 +50,15 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     suppressHorizontalScrollbar,
   } = props;
   
+
+  //
+  //state
+  //
+  const [app, setApp] = useState<PIXI.Application<PIXI.ICanvas>>();
+
   //
   // useCallbacks
   //
-
   const sliceSequences = useCallback((
     sequencesToSlice: string[],
     rowIdxsToRender: number[], 
@@ -86,6 +92,15 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       return sequences[seqIdx];
     }, []);
 
+    if(app){
+      app.stage.position.set(
+        -colIdxsToRender[0]*residueWidth + additionalHorizontalOffset, 
+        -rowIdxsToRender[0]*residueHeight + additionalVerticalOffset
+      );
+      app.stage.scale.set(residueWidth, residueHeight);
+      //app.render();  
+    }
+
     return (
       <div className="av-viewport">
         <Stage
@@ -93,28 +108,22 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           width={stageDimensions.width}
           height={stageDimensions.height}
           raf={false}
+          renderOnComponentChange={true}
+          onMount={setApp}
           options={{ antialias: false, backgroundAlpha: 0 }}
+          style={{ //might not be needed
+            imageRendering: "pixelated",
+          }}
         >
-          <AppContext.Consumer>
-            {(app) => {
-              return (
-                <CanvasAlignmentTiled
-                  sequences={seqsSliced}
-                  consensusSequence={consensusSliced}
-                  querySequence={querySliced}
-                  alignmentType={alignmentStyle.alignmentType}
-                  residueDetail={alignmentStyle.residueDetail}
-                  colorScheme={alignmentStyle.colorScheme}
-                  positionsToStyle={alignmentStyle.positionsToStyle}
-                  //TODO further optimization by removing this and scaling with pixi 
-                  //(see minimap)
-                  scale={{x: residueWidth, y: residueHeight}}
-                  translateY={additionalVerticalOffset}
-                  translateX={additionalHorizontalOffset}
-                />
-              );
-            }}
-          </AppContext.Consumer>
+          <CanvasAlignmentTiled
+            sequences={sequences}
+            consensusSequence={consensusSequence}
+            querySequence={querySequence}
+            alignmentType={alignmentStyle.alignmentType}
+            residueDetail={alignmentStyle.residueDetail}
+            colorScheme={alignmentStyle.colorScheme}
+            positionsToStyle={alignmentStyle.positionsToStyle}
+          />
         </Stage>
 
         <AlignmentDetailsLetters
@@ -138,7 +147,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     residueHeight,
     residueWidth,
     sequences,
-    sliceSequences
+    sliceSequences,
+    app
   ]);
 
 

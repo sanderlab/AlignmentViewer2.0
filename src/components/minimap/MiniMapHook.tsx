@@ -233,7 +233,7 @@ export function MiniMap(props: IMiniMapProps) {
   //
   //rendering
   //
-  const renderAlignment = (
+  const renderAlignment = useCallback((
     frameWidth: number, 
     frameHeight: number,
     offsets: NonNullable<typeof mmOffsets>
@@ -244,6 +244,7 @@ export function MiniMap(props: IMiniMapProps) {
       // out of sync for some reason (testing not very rigerous, could test again TODO)
       app.stage.position.set(0, -offsets.minimapY * offsets.scale);
       app.stage.scale.set(offsets.scale, offsets.scale);
+      //app.render();
     }
 
     return (
@@ -325,7 +326,21 @@ export function MiniMap(props: IMiniMapProps) {
           }
       </div>
     )
-  }
+  }, [
+    alignment,
+    alignmentStyle.alignmentType,
+    alignmentStyle.colorScheme,
+    alignmentStyle.positionsToStyle,
+    app,
+    dispatch,
+    idxsToRender.length,
+    mmClicked,
+    mmWheeled,
+    sortBy,
+    verticalReduxId,
+    viewportFullyRendersAlignment
+  ]);
+
   return (
     <div
       ref={setRefElement}

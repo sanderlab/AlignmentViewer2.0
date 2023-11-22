@@ -141,7 +141,8 @@ export class AlignmentViewer extends React.Component<
   }
 
   /**
-   * Generate a single widget that contains an annotation and content
+   * Generate a single widget (logo, barplot, alignment details, positional axis,
+   * metadat) that contains an annotation and content
    * @param className
    * @param annotation
    * @param content
