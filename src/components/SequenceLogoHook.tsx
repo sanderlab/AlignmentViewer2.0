@@ -3,8 +3,9 @@
  * Inspired / derived from https://github.com/weng-lab/logojs-package
  *  (but simpler)
  */
-import "./SequenceLogo.scss";
 import React, { useCallback, useState, useEffect, useRef } from "react";
+import "./SequenceLogo.scss";
+import { Tooltip } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { GlyphFactory } from "../common/SequenceLogoGlyphs";
 import {
@@ -15,7 +16,6 @@ import {
   NucleotideAlignmentStyle,
   PositionsToStyle,
 } from "../common/MolecularStyles";
-import ReactTooltip from "react-tooltip";
 import { AminoAcid, Nucleotide } from "../common/Residues";
 import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
@@ -148,54 +148,57 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   );
 
   const renderTooltip = useCallback(() => {
+    const getTooltipForPosition = (pos: string) => {
+      if (!pos || !logoData || !logoData[parseInt(pos)]) {
+        return;
+      }
+
+      const position = parseInt(pos) + 1;
+      const glyphData = logoData[parseInt(pos)];
+      return glyphData.length === 0 ? null : (
+        <div className="logo-tooltip">
+          <h1>Position: {position}</h1>
+          <div className="row">
+            <div className="col legend-square"></div>
+            <div className="col header name">Residue</div>
+            <div className="col header frequency">Frequency</div>
+            <div className="col header count">Count</div>
+          </div>
+          {glyphData
+            .slice()
+            .reverse()
+            .map((letterFreq, myidx) => {
+              return (
+                <div key={myidx} className="row">
+                  <div
+                    className={`col legend-square ${letterFreq.letter.classNames}`}
+                  ></div>
+                  <div className="col name">
+                    {`${letterFreq.residue.fullName} [${letterFreq.letter.letter}]`}
+                  </div>
+                  <div className="col frequency">
+                    {+(letterFreq.frequency * 100).toFixed(2)}%
+                  </div>
+                  <div className="col count">{letterFreq.count}</div>
+                </div>
+              );
+            })}
+        </div>
+      );
+    }
+
     return !logoData ? null : (
-      <ReactTooltip
+      <Tooltip
         id="getLogoTooltip"
-        effect="solid"
-        type="light"
-        place={tooltipPlacement} //isn't always respected?
-        border={true}
-        getContent={(pos: string) => {
-          if (!pos || !logoData || !logoData[parseInt(pos)]) {
-            return;
-          }
-          const position = parseInt(pos) + 1;
-          const glyphData = logoData[parseInt(pos)];
-          return glyphData.length === 0 ? null : (
-            <div className="logo-tooltip">
-              <h1>Position: {position}</h1>
-              <div className="row">
-                <div className="col legend-square"></div>
-                <div className="col header name">Residue</div>
-                <div className="col header frequency">Frequency</div>
-                <div className="col header count">Count</div>
-              </div>
-              {glyphData
-                .slice()
-                .reverse()
-                .map((letterFreq, myidx) => {
-                  return (
-                    <div key={myidx} className="row">
-                      <div
-                        className={`col legend-square ${letterFreq.letter.classNames}`}
-                      ></div>
-                      <div className="col name">
-                        {`${letterFreq.residue.fullName} [${letterFreq.letter.letter}]`}
-                      </div>
-                      <div className="col frequency">
-                        {+(letterFreq.frequency * 100).toFixed(2)}%
-                      </div>
-                      <div className="col count">{letterFreq.count}</div>
-                    </div>
-                  );
-                })}
-            </div>
-          );
+        className="sequence-logo-tooltip-container"
+        place={tooltipPlacement}
+        render={({ content, activeAnchor }) => {
+          return getTooltipForPosition(content!);
         }}
-      />
+      ></Tooltip>
     );
   }, [tooltipPlacement, logoData]);
-
+  
   //setup cache - each glyph stack as a svg g element is saved in memory for quick render
   useEffect(() => {
     const logoData = mungeLogoData();
@@ -231,9 +234,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
               className="interaction-placeholder"
               width="1"
               height="100"
-              data-for="getLogoTooltip"
-              data-tip={positionIdx}
-              data-class={"sequence-logo-tooltip-container"}
+              data-tooltip-id="getLogoTooltip"
+              data-tooltip-content={positionIdx}
+              data-tooltip-position-strategy="fixed"
+              data-tooltip-variant="light"
             ></rect>
           </g>
         ) as React.SVGProps<SVGGElement>
@@ -243,17 +247,20 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     //setPositionsCache(positionsCache);
     setLogoData(logoData);
     setSvgCache(
-      <svg
-        preserveAspectRatio="none"
-        viewBox={`0 0 ${sequenceLength} 100`}
-        style={{
-          width: totalWidth,
-          height: height ? height : height,
-        }}
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {positions}
-      </svg>
+      <>
+        <svg
+          preserveAspectRatio="none"
+          className="blahblahblah"
+          viewBox={`0 0 ${sequenceLength} 100`}
+          style={{
+            width: totalWidth,
+            height: height ? height : height,
+          }}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {positions}
+        </svg>
+      </>
     );
   }, [
     alignment,
@@ -261,12 +268,12 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     mungeLogoData,
     renderSinglePositionStack,
     setSvgCache,
-    height
+    height,
   ]);
 
-  useEffect(() => {
-    ReactTooltip.rebuild();
-  });
+  //useEffect(() => {
+    //ReactTooltip.rebuild();
+  //});
 
   useEffect(() => {
     if (refUpdated) {
@@ -333,7 +340,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         additionalHorizontalOffset,
         stageDimensions
       ) => {
-        //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET
+        //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET. Quick on
+        //sequences of reasonable length - need to check for longer sequences. It adds
+        //~20 x length of sequences dom elements, which could add up, but is probably
+        //fine
         return (
           <div
             className={classNames.join(" ")}
@@ -346,6 +356,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
             }}
           >
             {svgCache}
+            {renderTooltip()}
           </div>
         );
 

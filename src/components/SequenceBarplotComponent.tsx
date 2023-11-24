@@ -1,8 +1,8 @@
 import React from "react";
 import "./SequenceBarplot.scss";
+import { Tooltip } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
-import ReactTooltip from "react-tooltip";
 import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 export interface ISequenceBarplotDataSeries {
@@ -451,65 +451,59 @@ export class SequenceBarplotComponent extends React.Component<
    *
    *
    */
+  private renderTooltip(hoverKey: string){
 
-  /**
-   * Render the tooltip for a particular position.
-   */
-  private renderTooltip() {
-    const barsObj = this.getBars();
-    const { tooltipPlacement } = this.props;
-    const { hoverKey } = this.state;
+    const getTooltipForBar = (posInt: number) => {
+      const barsObj = this.getBars();
 
+      const posPlusOne = posInt + 1; // positions should be 1 based, not zero based
+      const barsAtPostion = barsObj.barsGroupedByPosition.get(posInt)!;
+      const numValidBars = !barsAtPostion
+        ? 0
+        : barsAtPostion.reduce((acc, bar) => {
+            return acc + (bar.height !== undefined ? 1 : 0);
+          }, 0 as number);
+
+      return numValidBars < 1 ? undefined : (
+        <div className="bar-position-textblock" style={{zIndex:10000}}>
+          <h1>Position: {posPlusOne}</h1>
+          {barsAtPostion.map((bar) => {
+            return (
+              <div
+                className={`dataseries-line ${bar.dataSeriesSet.cssClass}`}
+                key={bar.dataSeriesSet.id}
+              >
+                <span
+                  className="legend-square"
+                  style={{
+                    backgroundColor: bar.dataSeriesSet.color
+                      ? bar.dataSeriesSet.color
+                      : undefined,
+                  }}
+                ></span>
+                <span className="legend-text">
+                  {bar.dataSeriesSet.name}:{" "}
+                  {bar.tooltipValueText
+                    ? bar.tooltipValueText
+                    : bar.height !== undefined
+                    ? +bar.height.toFixed(1)
+                    : "undefined"}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
     return (
-      <ReactTooltip
+      <Tooltip
         id={`getBarTooltip-${hoverKey}`}
-        effect="solid"
-        type="light"
-        border={true}
-        place={tooltipPlacement}
-        getContent={(pos: string) => {
-          const posInt = parseInt(pos);
-          const posPlusOne = posInt + 1; // positions should be 1 based, not zero based
-          const barsAtPostion = barsObj.barsGroupedByPosition.get(posInt)!;
-          const numValidBars = !barsAtPostion
-            ? 0
-            : barsAtPostion.reduce((acc, bar) => {
-                return acc + (bar.height !== undefined ? 1 : 0);
-              }, 0 as number);
-
-          return numValidBars < 1 ? undefined : (
-            <div className="bar-position-textblock">
-              <h1>Position: {posPlusOne}</h1>
-              {barsAtPostion.map((bar) => {
-                return (
-                  <div
-                    className={`dataseries-line ${bar.dataSeriesSet.cssClass}`}
-                    key={bar.dataSeriesSet.id}
-                  >
-                    <span
-                      className="legend-square"
-                      style={{
-                        backgroundColor: bar.dataSeriesSet.color
-                          ? bar.dataSeriesSet.color
-                          : undefined,
-                      }}
-                    ></span>
-                    <span className="legend-text">
-                      {bar.dataSeriesSet.name}:{" "}
-                      {bar.tooltipValueText
-                        ? bar.tooltipValueText
-                        : bar.height !== undefined
-                        ? +bar.height.toFixed(1)
-                        : "undefined"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          );
+        className="barplot-tooltip-holder"
+        render={({ content, activeAnchor }) => {
+          return getTooltipForBar(parseInt(content!));
         }}
-      />
-    );
+      ></Tooltip>
+    )
   }
 
   /**
@@ -590,9 +584,10 @@ export class SequenceBarplotComponent extends React.Component<
                 onMouseLeave={(event) => {
                   this.handlePositionHover(event, pos, false);
                 }}
-                data-for={`getBarTooltip-${hoverKey}`}
-                data-tip={pos}
-                data-class={"barplot-tooltip-container"}
+                data-tooltip-id={`getBarTooltip-${hoverKey}`}
+                data-tooltip-content={pos}
+                data-tooltip-position-strategy="fixed"
+                data-tooltip-variant="light"
                 key={`pos_${pos}`}
               >
                 {bars.reduce((acc, bar, dataseriesIdx) => {
@@ -665,7 +660,7 @@ export class SequenceBarplotComponent extends React.Component<
   }
 
   componentDidUpdate() {
-    ReactTooltip.rebuild();
+   // ReactTooltip.rebuild();
   }
 
   componentDidMount() {
@@ -678,6 +673,8 @@ export class SequenceBarplotComponent extends React.Component<
 
   render() {
     const {alignment, positionWidth, horizontalReduxId, } = this.props;
+    const {hoverKey} = this.state;
+
     const classNames = ["barplot"];
     if (this.state.svgHovered) {
       classNames.push("hovered");
@@ -717,7 +714,7 @@ export class SequenceBarplotComponent extends React.Component<
             );
           }}
         />
-        {this.renderTooltip()}
+        {this.renderTooltip(hoverKey)}
       </div>
     );
   }

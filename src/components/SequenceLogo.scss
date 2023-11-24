@@ -16,6 +16,8 @@
 
   .sequence-logo-tooltip-container {
     margin: 0;
+    z-index: 5001;
+    border:solid gray 1px;
 
     .logo-tooltip {
       display: table;
