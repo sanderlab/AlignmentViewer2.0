@@ -499,7 +499,8 @@ export class SequenceBarplotComponent extends React.Component<
       <Tooltip
         id={`getBarTooltip-${hoverKey}`}
         className="barplot-tooltip-holder"
-        render={({ content, activeAnchor }) => {
+        border="solid black 1px"
+        render={({ content }) => {
           return getTooltipForBar(parseInt(content!));
         }}
       ></Tooltip>

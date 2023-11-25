@@ -191,8 +191,9 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       <Tooltip
         id="getLogoTooltip"
         className="sequence-logo-tooltip-container"
+        border="solid black 1px"
         place={tooltipPlacement}
-        render={({ content, activeAnchor }) => {
+        render={({ content }) => {
           return getTooltipForPosition(content!);
         }}
       ></Tooltip>
