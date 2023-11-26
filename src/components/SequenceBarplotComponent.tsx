@@ -451,7 +451,8 @@ export class SequenceBarplotComponent extends React.Component<
    *
    *
    */
-  private renderTooltip(hoverKey: string){
+  private renderTooltip(){
+    const { hoverKey } = this.state;
 
     const getTooltipForBar = (posInt: number) => {
       const barsObj = this.getBars();
@@ -500,6 +501,8 @@ export class SequenceBarplotComponent extends React.Component<
         id={`getBarTooltip-${hoverKey}`}
         className="barplot-tooltip-holder"
         border="solid black 1px"
+        //openEvents={{'click': true, 'mouseenter': false, 'focus': false}}
+        //closeEvents={{'click': true, 'mouseleave': false, 'blur': false}}
         render={({ content }) => {
           return getTooltipForBar(parseInt(content!));
         }}
@@ -589,7 +592,7 @@ export class SequenceBarplotComponent extends React.Component<
                 data-tooltip-content={pos}
                 data-tooltip-position-strategy="fixed"
                 data-tooltip-variant="light"
-                key={`pos_${pos}`}
+                key={pos}
               >
                 {bars.reduce((acc, bar, dataseriesIdx) => {
                   if (bar.normalizedHeight !== undefined) {
@@ -674,7 +677,6 @@ export class SequenceBarplotComponent extends React.Component<
 
   render() {
     const {alignment, positionWidth, horizontalReduxId, } = this.props;
-    const {hoverKey} = this.state;
 
     const classNames = ["barplot"];
     if (this.state.svgHovered) {
@@ -715,7 +717,7 @@ export class SequenceBarplotComponent extends React.Component<
             );
           }}
         />
-        {this.renderTooltip(hoverKey)}
+        {this.renderTooltip()}
       </div>
     );
   }

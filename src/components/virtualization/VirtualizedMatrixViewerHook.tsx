@@ -282,32 +282,40 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
       }}
     >
       { 
-        reduxStateHorizontal?.selected.map((elem)=>{
-          return <div style={{
-            position: "absolute",
-            top: 0,
-            left: elem.idxScreenMin-2, 
-            width: elem.idxScreenMax-elem.idxScreenMin+2,
-            bottom: "2px",
-            border: "dashed red 2px",
-            zIndex: 5000,
-            pointerEvents: "none"
-          }}></div>
+        reduxStateHorizontal?.selected.map((elem, idx)=>{
+          return (
+            <div 
+              style={{
+                position: "absolute",
+                top: 0,
+                left: elem.idxScreenMin-2, 
+                width: elem.idxScreenMax-elem.idxScreenMin+2,
+                bottom: "2px",
+                border: "dashed red 2px",
+                zIndex: 5000,
+                pointerEvents: "none"
+              }}
+              key={idx}/>
+          );
         })
       }
 
       { 
-        reduxStateVertical?.selected.map((elem)=>{
-          return <div style={{
-            position: "absolute",
-            top: elem.idxScreenMin-1,
-            height: elem.idxScreenMax-elem.idxScreenMin+2,
-            left: 0, 
-            right: "2px",
-            border: "dashed red 2px",
-            zIndex: 5000,
-            pointerEvents: "none"
-          }}></div>
+        reduxStateVertical?.selected.map((elem, idx)=>{
+          return (
+            <div 
+              style={{
+                position: "absolute",
+                top: elem.idxScreenMin-1,
+                height: elem.idxScreenMax-elem.idxScreenMin+2,
+                left: 0, 
+                right: "2px",
+                border: "dashed red 2px",
+                zIndex: 5000,
+                pointerEvents: "none"
+              }}
+              key={idx}/>
+          );
         })
       }
 
