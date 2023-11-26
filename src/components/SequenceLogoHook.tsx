@@ -192,6 +192,14 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         id="getLogoTooltip"
         className="sequence-logo-tooltip-container"
         border="solid black 1px"
+        openEvents={{"mouseenter": true, "focus": false}}
+        closeEvents={{"mouseleave": true, "blur": false}}
+        globalCloseEvents={{
+          "clickOutsideAnchor": true,
+          "escape": true, 
+          "scroll": true, 
+          "resize": true
+        }}
         place={tooltipPlacement}
         render={({ content }) => {
           return getTooltipForPosition(content!);

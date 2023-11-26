@@ -466,7 +466,7 @@ export class SequenceBarplotComponent extends React.Component<
           }, 0 as number);
 
       return numValidBars < 1 ? undefined : (
-        <div className="bar-position-textblock" style={{zIndex:10000}}>
+        <div className="bar-position-textblock">
           <h1>Position: {posPlusOne}</h1>
           {barsAtPostion.map((bar) => {
             return (
@@ -501,8 +501,14 @@ export class SequenceBarplotComponent extends React.Component<
         id={`getBarTooltip-${hoverKey}`}
         className="barplot-tooltip-holder"
         border="solid black 1px"
-        //openEvents={{'click': true, 'mouseenter': false, 'focus': false}}
-        //closeEvents={{'click': true, 'mouseleave': false, 'blur': false}}
+        openEvents={{"mouseenter": true, "focus": false}}
+        closeEvents={{"mouseleave": true, "blur": false}}
+        globalCloseEvents={{
+          "clickOutsideAnchor": true,
+          "escape": true, 
+          "scroll": true, 
+          "resize": true
+        }}
         render={({ content }) => {
           return getTooltipForBar(parseInt(content!));
         }}
