@@ -176,6 +176,7 @@ export default class App extends React.Component<AppProps, AppState> {
       showEntropyGapBarplot: this.urlInputs.ENTROPY_BARPLOT.initialValue,
       showKLDivergenceBarplot: this.urlInputs.KLDIVERGENCE_BARPLOT.initialValue,
       showAnnotations: this.urlInputs.ANNOTATIONS.initialValue,
+      showLogo: this.urlInputs.SHOW_LOGO.initialValue,
       zoomLevel: this.urlInputs.ZOOM_LEVEL.initialValue,
 
       removeDuplicateSeqs: this.urlInputs.REMOVE_DUPLICATE_SEQS.initialValue,
