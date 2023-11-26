@@ -11,7 +11,8 @@ import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-  ResidueStyle,
+  PositionsToStyle,
+  ResidueColoring
 } from "../../common/MolecularStyles";
 import { RootState, setWorldTopRowOffset } from "../../common/ReduxStore";
 import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
@@ -23,6 +24,7 @@ export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
   sortBy: SequenceSorter;
+  positionsToStyle: PositionsToStyle;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
 
   //props that should be exposed in AlignmentViewer full component:
@@ -41,6 +43,7 @@ export function MiniMap(props: IMiniMapProps) {
     alignment,
     sortBy,
     alignmentStyle,
+    positionsToStyle,
     verticalReduxId,
   } = props;
 
@@ -279,9 +282,9 @@ export function MiniMap(props: IMiniMapProps) {
               consensusSequence={alignment.getConsensus().sequence}
               querySequence={alignment.getQuerySequence().sequence}
               alignmentType={alignmentStyle.alignmentType}
-              positionsToStyle={alignmentStyle.positionsToStyle}
               colorScheme={alignmentStyle.colorScheme}
-              residueDetail={ResidueStyle.DARK}
+              positionsToStyle={positionsToStyle}
+              residueColoring={ResidueColoring.DARK}
             />
           </Stage>
 
@@ -330,7 +333,7 @@ export function MiniMap(props: IMiniMapProps) {
     alignment,
     alignmentStyle.alignmentType,
     alignmentStyle.colorScheme,
-    alignmentStyle.positionsToStyle,
+    positionsToStyle,
     app,
     dispatch,
     idxsToRender.length,

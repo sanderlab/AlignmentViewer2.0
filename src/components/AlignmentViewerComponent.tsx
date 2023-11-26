@@ -21,12 +21,16 @@ import { store } from "../common/ReduxStore";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
+  PositionsToStyle,
+  ResidueColoring
 } from "../common/MolecularStyles";
 import { getAlignmentFontDetails } from "../common/Utils";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle;
+  residueColoring: ResidueColoring;
 
   //event reporting
   //minimapClicked?(mousePosition: IPosition): void;
@@ -221,7 +225,7 @@ export class AlignmentViewer extends React.Component<
   }*/
 
   protected renderMiniMap(alignmentDetailsReduxId: string) {
-    const { alignment, showMinimap, sortBy, style, minimapOptions } = this.props;
+    const { alignment, positionsToStyle, showMinimap, sortBy, style, minimapOptions } = this.props;
     let mmOptions = minimapOptions ? minimapOptions : defaultProps.minimapOptions;
     //const mmClassName = showMinimap ? "minimap" : "minimap hidden";
     return (
@@ -235,6 +239,7 @@ export class AlignmentViewer extends React.Component<
             <MiniMap
               alignment={alignment}
               alignmentStyle={style}
+              positionsToStyle={positionsToStyle}
               sortBy={sortBy ? sortBy : defaultProps.sortBy}
               //exposed by prop to instantiator
               alignHorizontal={mmOptions.alignHorizontal}
@@ -277,7 +282,9 @@ export class AlignmentViewer extends React.Component<
       showQuery,
       showRuler,
       sortBy,
-      style
+      style,
+      positionsToStyle,
+      residueColoring
     } = this.props;
     if (!alignment) {
       return null;
@@ -355,6 +362,8 @@ export class AlignmentViewer extends React.Component<
                     alignment.getQuerySequence().sequence
                   }
                   alignmentStyle={style}
+                  positionsToStyle={positionsToStyle}
+                  residueColoring={residueColoring}
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
@@ -379,6 +388,8 @@ export class AlignmentViewer extends React.Component<
                     alignment.getQuerySequence().sequence
                   }
                   alignmentStyle={style}
+                  positionsToStyle={positionsToStyle}
+                  residueColoring={residueColoring}
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
@@ -432,6 +443,8 @@ export class AlignmentViewer extends React.Component<
               consensusSequence={alignment.getConsensus().sequence}
               querySequence={alignment.getQuerySequence().sequence}
               alignmentStyle={style}
+              positionsToStyle={positionsToStyle}
+              residueColoring={residueColoring}
               fontSize={fontSize}
               residueHeight={residueHeight}
               residueWidth={residueWidth}

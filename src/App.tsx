@@ -2,7 +2,7 @@ import React from "react";
 import "./App.scss";
 import { Alignment } from "./common/Alignment";
 import { SequenceSorter } from "./common/AlignmentSorter";
-import { getURLParameters } from "./common/Utils";
+import { UrlLocalstorageBooleanInputManager, UrlLocalstorageInputManager, UrlLocalstorageNumberInputManager, getURLParameters } from "./common/Utils";
 import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerComponent";
 import {
   AminoAcidAlignmentStyle,
@@ -11,7 +11,9 @@ import {
   AlignmentTypes,
   PositionsToStyle,
   IColorScheme,
-  ResidueStyle,
+  ResidueColoring,
+  ALL_NUCLEOTIDE_COLORSCHEMES,
+  ALL_AMINOACID_COLORSCHEMES,
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoHook";
 import { AlignmentFileDrop, AlignmentFileLoader } from "./components/AlignmentFileLoaderHook";
@@ -22,6 +24,8 @@ interface AppProps {}
 interface AppState {
   alignment?: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle;
+  residueColoring: ResidueColoring;
   sortBy: SequenceSorter;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
@@ -34,19 +38,20 @@ interface AppState {
   showSettings: boolean;
   loading?: boolean;
   loadError?: AlignmentLoadError;
+  removeDuplicateSeqs: boolean;
 }
 
-const URL_PARAM_NAMES = {
-  ALIGNMENT_URL: "alignment-url",
-};
-
 export default class App extends React.Component<AppProps, AppState> {
+  private urlInputs;
+
   constructor(props: AppProps) {
     super(props);
     this.state = {
       style: new AminoAcidAlignmentStyle(),
+      residueColoring: ResidueColoring.LIGHT,
+      positionsToStyle: PositionsToStyle.ALL,
       logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
-      zoomLevel: 14,
+      zoomLevel: 12,
       sortBy: SequenceSorter.INPUT,
       showLogo: true,
       showMiniMap: true,
@@ -55,26 +60,128 @@ export default class App extends React.Component<AppProps, AppState> {
       showKLDivergenceBarplot: false,
       showAnnotations: true,
       showSettings: true,
+      removeDuplicateSeqs: true
     };
+
+    //write defaults for all UI parameters
+    UrlLocalstorageInputManager.initializeAllInputs()
+    this.urlInputs = {
+      ALIGNMENT_STYLE: new UrlLocalstorageInputManager<AlignmentStyle>(
+        new AminoAcidAlignmentStyle(), 'alignment-style',
+        (as: AlignmentStyle) => {return as.alignmentType.key + '.' + as.colorScheme.commonName},
+        (str: string) => {
+          const split = str.split('.');
+          const at = AlignmentTypes.fromKey(split[0]) ? 
+                     AlignmentTypes.fromKey(split[0]) :
+                     AlignmentTypes.AMINOACID;
+
+          var colorScheme = AlignmentTypes.AMINOACID ? 
+                            ALL_AMINOACID_COLORSCHEMES[0] : 
+                            ALL_NUCLEOTIDE_COLORSCHEMES[0];
+          if (split.length > 1){
+            const commonName = split[1];
+            colorScheme = at === AlignmentTypes.AMINOACID ? 
+              ALL_AMINOACID_COLORSCHEMES.reduce( (acc: IColorScheme | undefined, colorscheme) => {
+                if (colorscheme.commonName === commonName){  return colorscheme; }
+                return acc;
+              }, ALL_AMINOACID_COLORSCHEMES[0] )! :
+              ALL_NUCLEOTIDE_COLORSCHEMES.reduce( (acc: IColorScheme | undefined, colorscheme) => {
+                if (colorscheme.commonName === commonName){  return colorscheme; }
+                return acc;
+              }, ALL_NUCLEOTIDE_COLORSCHEMES[0] )!
+          }
+          return at === AlignmentTypes.AMINOACID ? 
+            new AminoAcidAlignmentStyle(colorScheme) : 
+            new NucleotideAlignmentStyle(colorScheme)
+        },
+      ),
+
+      POSITIONS_TO_STYLE: new UrlLocalstorageInputManager<PositionsToStyle>(
+        PositionsToStyle.ALL, 'positions-to-style', 
+        (pts: PositionsToStyle) => {return pts.key},
+        (key: string) => {
+          return PositionsToStyle.fromKey(key) ? PositionsToStyle.fromKey(key)! : PositionsToStyle.ALL;
+        },
+      ),
+
+      RESIDUE_COLORING: new UrlLocalstorageInputManager<ResidueColoring>(
+        ResidueColoring.LIGHT, 'residue-coloring', 
+        (rs: ResidueColoring) => {return rs.key},
+        (key: string) => {
+          return ResidueColoring.fromKey(key) ? ResidueColoring.fromKey(key)! : ResidueColoring.LIGHT;
+        },
+      ),
+
+      SORT_BY: new UrlLocalstorageInputManager<SequenceSorter>(
+        SequenceSorter.INPUT, 'sort-by',
+        (s: SequenceSorter) => {return s.key},
+        (key: string) => {
+          return SequenceSorter.fromKey(key) ? SequenceSorter.fromKey(key)! : SequenceSorter.INPUT;
+        },
+      ),
+
+      LOGO_STYLE: new UrlLocalstorageInputManager<LOGO_TYPES>(
+        LOGO_TYPES.LETTERS, 'logo-style',
+        (s: LOGO_TYPES) => {return s === LOGO_TYPES.LETTERS ? 'letters' : 'bars'},
+        (key: string) => {
+          return key === 'letters' ? LOGO_TYPES.LETTERS : LOGO_TYPES.BARS;
+        },
+      ),
+
+      MINIMAP: new UrlLocalstorageBooleanInputManager(true, 'minimap'),
+      CONSERVATION_BARPLOT: new UrlLocalstorageBooleanInputManager(true, 'conservation-barplot'),
+      ENTROPY_BARPLOT: new UrlLocalstorageBooleanInputManager(true, 'entropy-barplot'),
+      KLDIVERGENCE_BARPLOT: new UrlLocalstorageBooleanInputManager(false, 'kl-divergence-barplot'),
+      ANNOTATIONS: new UrlLocalstorageBooleanInputManager(true, 'annotations'),
+      SHOW_LOGO: new UrlLocalstorageBooleanInputManager(true, 'show-logo'),
+
+      REMOVE_DUPLICATE_SEQS: new UrlLocalstorageBooleanInputManager(true, 'remove-duplicates'),
+
+      ZOOM_LEVEL: new UrlLocalstorageNumberInputManager(12, 'zoom-level'),
+    };
+
     this.onAlignmentReceived = this.onAlignmentReceived.bind(this);
     this.onAlignmentLoadError = this.onAlignmentLoadError.bind(this);
   }
 
   componentDidMount() {
-    //is there an alignment in the URL?
     const params = getURLParameters();
-    if (params.has(URL_PARAM_NAMES.ALIGNMENT_URL)) {
+
+    //is there an alignment in the URL?
+    const alignmentUrlName = 'alignment-url'
+    if (params.has(alignmentUrlName) && 
+        typeof params.get(alignmentUrlName) === 'string') {
       this.setState({
         loading: true,
       });
 
       AlignmentLoader.loadAlignmentFromURL(
-        params.get(URL_PARAM_NAMES.ALIGNMENT_URL)!,
-        true, // remove duplicates by default
+        params.get(alignmentUrlName) as string,
+        this.state.removeDuplicateSeqs,
         this.onAlignmentReceived,
         this.onAlignmentLoadError
       );
     }
+
+    this.setState({
+      alignment: undefined,
+      style: this.urlInputs.ALIGNMENT_STYLE.initialValue,
+      positionsToStyle: this.urlInputs.POSITIONS_TO_STYLE.initialValue,
+      residueColoring: this.urlInputs.RESIDUE_COLORING.initialValue,
+      logoPlotStyle: this.urlInputs.LOGO_STYLE.initialValue,
+      sortBy: this.urlInputs.SORT_BY.initialValue,
+      
+      showMiniMap: this.urlInputs.MINIMAP.initialValue,
+      showConservationBarplot: this.urlInputs.CONSERVATION_BARPLOT.initialValue,
+      showEntropyGapBarplot: this.urlInputs.ENTROPY_BARPLOT.initialValue,
+      showKLDivergenceBarplot: this.urlInputs.KLDIVERGENCE_BARPLOT.initialValue,
+      showAnnotations: this.urlInputs.ANNOTATIONS.initialValue,
+      zoomLevel: this.urlInputs.ZOOM_LEVEL.initialValue,
+
+      removeDuplicateSeqs: this.urlInputs.REMOVE_DUPLICATE_SEQS.initialValue,
+
+      showSettings: true,
+    });
   }
 
   render() {
@@ -82,6 +189,8 @@ export default class App extends React.Component<AppProps, AppState> {
       alignment,
       showLogo,
       logoPlotStyle,
+      positionsToStyle,
+      residueColoring,
       showAnnotations,
       showConservationBarplot,
       showEntropyGapBarplot,
@@ -124,6 +233,8 @@ export default class App extends React.Component<AppProps, AppState> {
         <AlignmentViewer
           alignment={alignment}
           style={style}
+          residueColoring={residueColoring}
+          positionsToStyle={positionsToStyle}
           zoomLevel={zoomLevel}
           sortBy={sortBy}
           showMinimap={showMiniMap}
@@ -156,7 +267,7 @@ export default class App extends React.Component<AppProps, AppState> {
   protected renderSettingsBox = (
     style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
   ) => {
-    const { alignment, loading, loadError, showSettings } = this.state;
+    const { alignment, loading, loadError, showSettings, residueColoring, positionsToStyle } = this.state;
     const alignmentDescription = alignment ? (
       <div>
         <h3>{alignment.getName()}</h3>
@@ -245,37 +356,47 @@ export default class App extends React.Component<AppProps, AppState> {
               {this.renderAlignmentTypeLabel(style)}
               {this.renderSortControl()}
               {this.renderColorScheme(style)}
-              {this.renderResidueDetail(style)}
-              {this.renderPositionStyling(style)}
+              {this.renderResidueColoring(residueColoring)}
+              {this.renderPositionStyling(positionsToStyle)}
               {this.renderSequenceLogo()}
               {this.renderZoomButtons()}
 
-              {this.renderToggle("annotation-toggle", "Show Logo", "showLogo")}
+              {this.renderToggle(
+                "annotation-toggle",
+                "Show Logo", 
+                "showLogo",
+                "SHOW_LOGO"
+              )}
 
               {this.renderToggle(
                 "annotation-toggle",
                 "Show Annotations",
-                "showAnnotations"
+                "showAnnotations",
+                "ANNOTATIONS"
               )}
               {this.renderToggle(
                 "minimap-toggle",
                 "Show MiniMap",
-                "showMiniMap"
+                "showMiniMap",
+                "MINIMAP"
               )}
               {this.renderToggle(
                 "barplot-conservation-toggle",
                 "Show Conservation Barplot",
-                "showConservationBarplot"
+                "showConservationBarplot",
+                "CONSERVATION_BARPLOT"
               )}
               {this.renderToggle(
                 "barplot-entropy-gaps-toggle",
                 "Show Entropy / Gaps Barplot",
-                "showEntropyGapBarplot"
+                "showEntropyGapBarplot",
+                "ENTROPY_BARPLOT"
               )}
               {this.renderToggle(
                 "barplot-kldivergence-toggle",
                 "Show KL Divergence Barplot",
-                "showKLDivergenceBarplot"
+                "showKLDivergenceBarplot",
+                "KLDIVERGENCE_BARPLOT"
               )}
 
               <br></br>
@@ -317,14 +438,16 @@ export default class App extends React.Component<AppProps, AppState> {
     return (
       <div>
         <label>
-          <strong>Sort order:</strong>
+          <strong>Sort Order:</strong>
           <select
             value={sortBy.key}
-            onChange={(e) =>
+            onChange={(e) =>{
+              const sb = SequenceSorter.fromKey(e.target.value)!;
               this.setState({
-                sortBy: SequenceSorter.fromKey(e.target.value)!,
+                sortBy: sb,
               })
-            }
+              this.urlInputs.SORT_BY.onChange(sb);
+            }}
           >
             {sorters.map((sso) => {
               return (
@@ -347,13 +470,15 @@ export default class App extends React.Component<AppProps, AppState> {
           <strong>Alignment Type:</strong>
           <select
             value={style.alignmentType.key}
-            onChange={(e) =>
+            onChange={(e) => {
+              const newAlignmentStyle = AlignmentStyle.fromAlignmentType(
+                AlignmentTypes.fromKey(e.target.value)!
+              );
               this.setState({
-                style: AlignmentStyle.fromAlignmentType(
-                  AlignmentTypes.fromKey(e.target.value)!
-                ),
-              })
-            }
+                style: newAlignmentStyle,
+              });
+              this.urlInputs.ALIGNMENT_STYLE.onChange(newAlignmentStyle);
+            }}
           >
             {AlignmentTypes.list.map((alignmentType) => {
               return (
@@ -379,15 +504,16 @@ export default class App extends React.Component<AppProps, AppState> {
               style.colorScheme
             )}
             onChange={(e) => {
+              const newStyle = {
+                ...style!, 
+                colorScheme: style.alignmentType.allColorSchemes[
+                  parseInt(e.target.value)
+                ],
+              }
               this.setState({
-                style: {
-                  ...style!,
-                  colorScheme:
-                    style.alignmentType.allColorSchemes[
-                      parseInt(e.target.value)
-                    ],
-                },
+                style: newStyle,
               });
+              this.urlInputs.ALIGNMENT_STYLE.onChange(newStyle);
             }}
           >
             {style.alignmentType.allColorSchemes.map(
@@ -404,25 +530,24 @@ export default class App extends React.Component<AppProps, AppState> {
       </div>
     );
   };
-  protected renderResidueDetail = (
-    style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
+  protected renderResidueColoring = (
+    residueColoring: ResidueColoring
   ) => {
     return (
       <div>
         <label>
-          <strong>Residue Style:</strong>
+          <strong>Residue Coloring:</strong>
           <select
-            value={style.residueDetail.key}
+            value={residueColoring.key}
             onChange={(e) => {
+              const rc = ResidueColoring.fromKey(e.target.value)!
               this.setState({
-                style: {
-                  ...style,
-                  residueDetail: ResidueStyle.fromKey(e.target.value)!,
-                },
+                residueColoring: rc,
               });
+              this.urlInputs.RESIDUE_COLORING.onChange(rc);
             }}
           >
-            {ResidueStyle.list.map((rd) => {
+            {ResidueColoring.list.map((rd) => {
               return (
                 <option key={rd.key} value={rd.key}>
                   {rd.description}
@@ -435,22 +560,20 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   };
   protected renderPositionStyling = (
-    style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
+    positionsToStyle: PositionsToStyle
   ) => {
     return (
       <div>
         <label>
           <strong>Positions to Style:</strong>
           <select
-            value={PositionsToStyle.list.indexOf(style.positionsToStyle)}
+            value={PositionsToStyle.list.indexOf(positionsToStyle)}
             onChange={(e) => {
+              const pts = PositionsToStyle.list[parseInt(e.target.value)];
               this.setState({
-                style: {
-                  ...style,
-                  positionsToStyle:
-                    PositionsToStyle.list[parseInt(e.target.value)],
-                },
+                positionsToStyle: pts
               });
+              this.urlInputs.POSITIONS_TO_STYLE.onChange(pts);
             }}
           >
             {PositionsToStyle.list.map(
@@ -477,9 +600,11 @@ export default class App extends React.Component<AppProps, AppState> {
           <select
             value={logoPlotStyle}
             onChange={(e) => {
+              const ls = e.target.value as LOGO_TYPES
               this.setState({
-                logoPlotStyle: e.target.value as LOGO_TYPES,
+                logoPlotStyle: ls,
               });
+              this.urlInputs.LOGO_STYLE.onChange(ls);
             }}
           >
             {Object.values(LOGO_TYPES).map((logoType) => {
@@ -506,9 +631,11 @@ export default class App extends React.Component<AppProps, AppState> {
               type="button"
               disabled={zoomLevel < 7}
               onClick={(e) => {
+                const zl = zoomLevel - 1;
                 this.setState({
-                  zoomLevel: zoomLevel - 1,
+                  zoomLevel: zl,
                 });
+                this.urlInputs.ZOOM_LEVEL.onChange(zl);
               }}
             >
               -
@@ -518,9 +645,11 @@ export default class App extends React.Component<AppProps, AppState> {
               type="button"
               disabled={zoomLevel > 19}
               onClick={(e) => {
+                const zl = zoomLevel + 1;
                 this.setState({
-                  zoomLevel: zoomLevel + 1,
+                  zoomLevel: zl,
                 });
+                this.urlInputs.ZOOM_LEVEL.onChange(zl);
               }}
             >
               +
@@ -581,6 +710,13 @@ export default class App extends React.Component<AppProps, AppState> {
             loading: true,
           });
         }}
+        removeDuplicateSeqs={this.state.removeDuplicateSeqs}
+        setRemoveDuplicateSeqs={(newValue)=>{
+          this.setState({
+            removeDuplicateSeqs: newValue
+          })
+          this.urlInputs.REMOVE_DUPLICATE_SEQS.onChange(newValue);
+        }}
         onAlignmentLoaded={this.onAlignmentReceived}
         onAlignmenLoadError={this.onAlignmentLoadError}
       />
@@ -590,7 +726,8 @@ export default class App extends React.Component<AppProps, AppState> {
   protected renderToggle = (
     classInputName: string,
     label: string,
-    stateVar: string
+    stateVar: string,
+    urlInputLabel: string,
   ) => {
     return (
       <div className={classInputName}>
@@ -605,6 +742,7 @@ export default class App extends React.Component<AppProps, AppState> {
               const newState = {};
               newState[stateVar] = e.target.checked;
               this.setState(newState);
+              this.urlInputs[urlInputLabel].onChange(e.target.checked);
             }}
           />
         </label>

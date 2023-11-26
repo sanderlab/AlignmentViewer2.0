@@ -6,7 +6,7 @@ import {
   PositionsToStyle,
   AlignmentTypes,
   IColorScheme,
-  ResidueStyle,
+  ResidueColoring,
 } from "../common/MolecularStyles";
 import { generateUUIDv4 } from "../common/Utils";
 
@@ -35,7 +35,7 @@ export interface ICanvasAlignmentTiledProps {
   alignmentType: AlignmentTypes;
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
-  residueDetail: ResidueStyle;
+  residueColoring: ResidueColoring;
   scale?: { x: number; y: number };
   translateY?: number;
   translateX?: number;
@@ -66,6 +66,7 @@ export class CanvasAlignmentTiled extends React.Component<
       nextProps.consensusSequence !== this.props.consensusSequence ||
       nextProps.querySequence !== this.props.querySequence ||
       nextProps.colorScheme !== this.props.colorScheme ||
+      nextProps.residueColoring !== this.props.residueColoring ||
       nextProps.positionsToStyle !== this.props.positionsToStyle ||
       nextProps.scale !== this.props.scale ||
       nextProps.translateX !== this.props.translateX ||
@@ -79,7 +80,7 @@ export class CanvasAlignmentTiled extends React.Component<
       alignmentType,
       colorScheme,
       positionsToStyle,
-      residueDetail,
+      residueColoring,
       scale,
     } = this.props;
 
@@ -136,7 +137,7 @@ export class CanvasAlignmentTiled extends React.Component<
                   ${colorScheme.commonName}_
                   ${positionsToStyle.key}_
                   ${alignmentType.key}_
-                  ${residueDetail.key}_
+                  ${residueColoring.key}_
                   ${this.props.scale}_
                   ${this.props.translateY}_
                   ${this.props.translateX}_
@@ -252,7 +253,7 @@ export class CanvasAlignmentTiled extends React.Component<
       alignmentType,
       colorScheme,
       positionsToStyle,
-      residueDetail,
+      residueColoring,
     } = this.props;
     const moleculeClass =
       alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
@@ -276,9 +277,9 @@ export class CanvasAlignmentTiled extends React.Component<
     }
 
     //TODO: ripe for speed increases / caching etc
-    return residueDetail === ResidueStyle.DARK
+    return residueColoring === ResidueColoring.DARK
       ? molecule.colors[colorScheme.commonName].darkTheme.backgroundColor.rgb
-      : residueDetail === ResidueStyle.LIGHT
+      : residueColoring === ResidueColoring.LIGHT
       ? molecule.colors[colorScheme.commonName].lightTheme.backgroundColor.rgb
       : CanvasAlignmentTiled.WHITE_RGB;
   }

@@ -13,6 +13,9 @@ export interface IExampleFileProps {
 export interface IAlignmentLoaderProps {
   fileSelectorLabelText: string;
 
+  removeDuplicateSeqs: boolean;
+  setRemoveDuplicateSeqs: (newValue: boolean) => void;
+
   onAlignmentLoaded: (alignment: Alignment) => void; //loading ended
   onAlignmenLoadError: (e: AlignmentLoadError) => void; //loading error
 
@@ -28,6 +31,8 @@ export function AlignmentFileLoader(props: IAlignmentLoaderProps) {
     onAlignmentLoaded,
     onFileLoadStart,
     onAlignmenLoadError,
+    removeDuplicateSeqs,
+    setRemoveDuplicateSeqs
   } = props;
 
   const {
@@ -36,12 +41,6 @@ export function AlignmentFileLoader(props: IAlignmentLoaderProps) {
 
   const fileInput  = useRef<HTMLInputElement>(null)
 
-  //
-  //state
-  //
-  const [
-    removeDuplicateSeqs, setRemoveDuplicateSeqs
-  ] = useState<boolean>(true);
 
   //
   //useCallback methods
@@ -160,7 +159,7 @@ export function AlignmentFileLoader(props: IAlignmentLoaderProps) {
         />
       </label>
     );
-  }, [removeDuplicateSeqs]);
+  }, [removeDuplicateSeqs, setRemoveDuplicateSeqs]);
 
   return (
     <div className="av2-input-file-loader">

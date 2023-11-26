@@ -183,3 +183,92 @@ export function stopSafariFromBlockingWindowWheel(cssClass: string) {
     validCSSScrollClasses.push(cssClass);
   }
 }
+
+/**
+ * URL Parsing and Local Storage management  
+ */
+//inspired by https://pierrehedkvist.com/posts/react-state-url
+export class UrlLocalstorageInputManager<T>{
+  protected initialValue: T;
+  protected onChange: (newValue: T) => void;
+
+  static LOCAL_STORAGE_KEY = "UI_OPTIONS_CACHE";
+  static initializeAllInputs = () => {
+    const urlSearchParams = new URLSearchParams( window.location.search )
+    const finalParams = new URLSearchParams( 
+      localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY) ? 
+      localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY)! : 
+      undefined
+    )
+
+    //overwrite or add url parameters to local storage parameters 
+    for (const [key, value] of urlSearchParams) {
+      finalParams.set(key, value);
+    }
+    UrlLocalstorageInputManager.writeParamsToUrlAndLocalstorage(finalParams);
+  }
+
+  static writeParamsToUrlAndLocalstorage = (params: URLSearchParams) => {
+    //write the complete parameter list to both the url and local storage
+    window.history.replaceState(null, "", "?"+params.toString());
+    params.delete("alignment-url")
+    localStorage.setItem(
+      UrlLocalstorageInputManager.LOCAL_STORAGE_KEY, 
+      params.toString()
+    );
+  }
+
+  constructor(
+    defaultValue: T,
+    paramName: string,
+    serialize: (state: T) => string,
+    deserialize: (state: string) => T
+  ) {
+    function loadValue(searchStr: string | null, db: "URL" | "Local Storage"){
+      const val = new URLSearchParams( searchStr ? searchStr : undefined ).get(paramName);
+      if (val){ return deserialize(val); }
+    }
+
+    const localstorageStr = localStorage.getItem(
+      UrlLocalstorageInputManager.LOCAL_STORAGE_KEY
+    );
+
+    //default initial value priority: url -> local storage -> default
+    this.initialValue = loadValue(window.location.search, "URL") !== undefined ? 
+                        loadValue(window.location.search, "URL")! :
+                        loadValue(localstorageStr, "Local Storage") !== undefined ?
+                        loadValue(localstorageStr, "Local Storage")! :
+                        defaultValue;
+
+    this.onChange = (newValue: T) => {
+      const searchParams = new URLSearchParams( window.location.search )
+      if (serialize(newValue) === serialize(defaultValue)){ 
+        searchParams.delete(paramName) 
+      }
+      else {
+        searchParams.set(paramName, serialize(newValue));
+      }
+      UrlLocalstorageInputManager.writeParamsToUrlAndLocalstorage(searchParams);
+    };
+  }
+}
+
+export class UrlLocalstorageBooleanInputManager extends UrlLocalstorageInputManager<boolean>{
+  constructor(defaultValue: boolean, paramName: string){
+    super(
+      defaultValue, paramName, 
+      (b) => {return b ? 'true': 'false'},
+      (s) => {return s.toUpperCase() === 'TRUE' ? true: false}
+    );
+  }
+}
+
+export class UrlLocalstorageNumberInputManager extends UrlLocalstorageInputManager<number>{
+  constructor(defaultValue: number, paramName: string){
+    super(
+      defaultValue, paramName, 
+      (n) => {return n.toString();},
+      (s) => {return !isNaN(+s) ? +s : defaultValue}
+    );
+  }
+}

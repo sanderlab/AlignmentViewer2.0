@@ -4,17 +4,17 @@
 import "./AlignmentDetails.scss";
 import React, { useCallback, useMemo, useState } from "react";
 import * as PIXI from "pixi.js";
+import {  Stage } from "@pixi/react";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
-  ResidueStyle,
+  ResidueColoring,
   AlignmentTypes,
   PositionsToStyle,
 } from "../../common/MolecularStyles";
 import { AminoAcid, Nucleotide } from "../../common/Residues";
 import { VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
-import { AppContext, Stage } from "@pixi/react";
 
 
 export interface IAlignmentDetailsProps {
@@ -24,6 +24,8 @@ export interface IAlignmentDetailsProps {
   consensusSequence: string;
   querySequence: string;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle;
+  residueColoring: ResidueColoring;
   residueHeight: number;
   residueWidth: number;
   fontSize: number;
@@ -43,6 +45,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     consensusSequence,
     querySequence,
     alignmentStyle,
+    positionsToStyle,
+    residueColoring,
     residueHeight,
     residueWidth,
     fontSize,
@@ -115,16 +119,21 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
             imageRendering: "pixelated",
           }}
         >
-          <CanvasAlignmentTiled
-            sequences={sequences}
-            consensusSequence={consensusSequence}
-            querySequence={querySequence}
-            alignmentType={alignmentStyle.alignmentType}
-            residueDetail={alignmentStyle.residueDetail}
-            colorScheme={alignmentStyle.colorScheme}
-            positionsToStyle={alignmentStyle.positionsToStyle}
-          />
+          {
+            residueColoring === ResidueColoring.NO_BACKGROUND 
+              ? undefined 
+              : <CanvasAlignmentTiled
+                  sequences={sequences}
+                  consensusSequence={consensusSequence}
+                  querySequence={querySequence}
+                  alignmentType={alignmentStyle.alignmentType}
+                  colorScheme={alignmentStyle.colorScheme}
+                  positionsToStyle={positionsToStyle}
+                  residueColoring={residueColoring}
+                />
+          }
         </Stage>
+        
 
         <AlignmentDetailsLetters
           sequencesInViewport={sequencesInViewport}
@@ -132,6 +141,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           consensusSequence={consensusSliced}
           querySequence={querySliced}
           alignmentStyle={alignmentStyle}
+          positionsToStyle={positionsToStyle}
+          residueColoring={residueColoring}
           fontSize={fontSize}
           lineHeight={residueHeight}
           verticalOffset={additionalVerticalOffset}
@@ -141,6 +152,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     );
   }, [
     alignmentStyle,
+    positionsToStyle,
+    residueColoring,
     consensusSequence,
     fontSize,
     querySequence,
@@ -193,6 +206,8 @@ export function AlignmentDetailsLetters(props: {
   consensusSequence: string;
   querySequence: string;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle,
+  residueColoring: ResidueColoring,
   fontSize: number;
   lineHeight: number;
   verticalOffset: number;
@@ -204,6 +219,8 @@ export function AlignmentDetailsLetters(props: {
     consensusSequence,
     querySequence,
     alignmentStyle,
+    positionsToStyle,
+    residueColoring,
     fontSize,
     lineHeight,
     verticalOffset,
@@ -218,7 +235,9 @@ export function AlignmentDetailsLetters(props: {
     positionIdx: number,
     consensusSequence: string,
     querySequence: string,
-    alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
+    alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle,
+    positionsToStyle: PositionsToStyle,
+    residueColoring: ResidueColoring
   ) => {
     const moleculeClass =
       alignmentStyle.alignmentType === AlignmentTypes.AMINOACID
@@ -226,31 +245,26 @@ export function AlignmentDetailsLetters(props: {
         : Nucleotide;
     let molecule = moleculeClass.UNKNOWN;
 
-    if (alignmentStyle.positionsToStyle === PositionsToStyle.ALL) {
+    if (positionsToStyle === PositionsToStyle.ALL) {
       molecule = moleculeClass.fromSingleLetterCode(letter);
     } else {
       const isConsensus = consensusSequence[positionIdx] === letter;
       const isQuery = querySequence[positionIdx] === letter;
       if (
-        (alignmentStyle.positionsToStyle === PositionsToStyle.CONSENSUS &&
-          isConsensus) ||
-        (alignmentStyle.positionsToStyle === PositionsToStyle.CONSENSUS_DIFF &&
-          !isConsensus) ||
-        (alignmentStyle.positionsToStyle === PositionsToStyle.QUERY && isQuery) ||
-        (alignmentStyle.positionsToStyle === PositionsToStyle.QUERY_DIFF &&
+        (positionsToStyle === PositionsToStyle.CONSENSUS && isConsensus) ||
+        (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && !isConsensus) ||
+        (positionsToStyle === PositionsToStyle.QUERY && isQuery) ||
+        (positionsToStyle === PositionsToStyle.QUERY_DIFF &&
           !isQuery)
       ) {
         molecule = moleculeClass.fromSingleLetterCode(letter);
       }
     }
-    return alignmentStyle.residueDetail === ResidueStyle.DARK
-      ? molecule.colors[alignmentStyle.colorScheme.commonName].darkTheme
-          .letterColor
-      : alignmentStyle.residueDetail === ResidueStyle.LIGHT
-      ? molecule.colors[alignmentStyle.colorScheme.commonName].lightTheme
-          .letterColor
-      : molecule.colors[alignmentStyle.colorScheme.commonName].lettersOnlyTheme
-          .letterColor;
+    return residueColoring === ResidueColoring.DARK
+      ? molecule.colors[alignmentStyle.colorScheme.commonName].darkTheme.letterColor
+      : residueColoring === ResidueColoring.LIGHT
+      ? molecule.colors[alignmentStyle.colorScheme.commonName].lightTheme.letterColor
+      : molecule.colors[alignmentStyle.colorScheme.commonName].lettersOnlyTheme.letterColor;
   }, []);
 
 
@@ -275,7 +289,9 @@ export function AlignmentDetailsLetters(props: {
           positionIdx,
           consensusSequence,
           querySequence,
-          alignmentStyle
+          alignmentStyle,
+          positionsToStyle,
+          residueColoring
         );
         if (!colorsAcc[color.hexString]) {
           colorsAcc[color.hexString] = {};
@@ -290,6 +306,8 @@ export function AlignmentDetailsLetters(props: {
   }, [
     slicedSequences, //changes too frequently. what is that about?
     alignmentStyle, 
+    positionsToStyle,
+    residueColoring,
     consensusSequence, 
     getLetterColor, 
     querySequence

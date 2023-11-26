@@ -377,10 +377,10 @@ const toggleSelected = (
   state = initializeNewIdAsNeeded(id, state);
   const mouseWorldOffset = mouseViewportOffset + state[id].worldOffset;
   const clickedIdx = Math.floor(mouseWorldOffset / state[id].cellPixelSize);
-  console.log(
-    'mouseViewportOffset:'+mouseViewportOffset+', worldOffset:'+state[id].worldOffset + ', state[id].cellPixelSize:'+state[id].cellPixelSize+
-    ', mouseWorldOffset='+mouseWorldOffset+', clickedIdx:'+clickedIdx + ',state[id].initialized:'+state[id].initialized
-  );
+  //console.log(
+  //  'mouseViewportOffset:'+mouseViewportOffset+', worldOffset:'+state[id].worldOffset + ', state[id].cellPixelSize:'+state[id].cellPixelSize+
+  //  ', mouseWorldOffset='+mouseWorldOffset+', clickedIdx:'+clickedIdx + ',state[id].initialized:'+state[id].initialized
+  //);
   
   const newSelected = state[id].selected.reduce((acc, element) => {
     if (element.idx !== clickedIdx){
@@ -399,7 +399,7 @@ const toggleSelected = (
     })
   }
   state[id].selected = newSelected;
-  console.log('state[id].selected:', state[id].selected);
+  //console.log('state[id].selected:', state[id].selected);
   state[id] = attachRenderDetails(state[id]);
   return state;
 };
