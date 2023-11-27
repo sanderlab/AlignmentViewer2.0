@@ -17,8 +17,8 @@ import {
 } from "./common/MolecularStyles";
 import { LOGO_TYPES } from "./components/SequenceLogoHook";
 import { AlignmentFileDrop, AlignmentFileLoader } from "./components/AlignmentFileLoaderHook";
-import { SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
 import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
+import { PreconfiguredPositionalBarplots } from "./components/PositionalBarplotHook";
 
 interface AppProps {}
 interface AppState {
@@ -205,15 +205,15 @@ export default class App extends React.Component<AppProps, AppState> {
     const barplots: IBarplotExposedProps[] = [];
     if (showConservationBarplot) {
       barplots.push({
-        dataSeriesSet: [SequenceBarplotComponent.CONSERVATION_BARPLOT],
+        dataSeriesSet: [PreconfiguredPositionalBarplots.Conservation],
         height: "75px",
       });
     }
     if (showEntropyGapBarplot) {
       barplots.push({
         dataSeriesSet: [
-          SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
-          SequenceBarplotComponent.GAPS_BARPLOT,
+          PreconfiguredPositionalBarplots.ShannonEntropy,
+          PreconfiguredPositionalBarplots.Gaps,
         ],
         height: "75px",
       });
@@ -221,7 +221,7 @@ export default class App extends React.Component<AppProps, AppState> {
     if (showKLDivergenceBarplot) {
       barplots.push({
         dataSeriesSet: [
-          SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
+          PreconfiguredPositionalBarplots.KullbacLeiblerDivergence,
         ],
         height: "75px",
       });

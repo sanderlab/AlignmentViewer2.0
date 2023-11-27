@@ -12,7 +12,7 @@ export * from "./common/Utils.js";
 
 export * from "./components/AlignmentFileLoaderHook.js";
 export * from "./components/AlignmentViewerComponent.js";
-export * from "./components/SequenceBarplotComponent.js";
+export * from "./components/PositionalBarplotHook.js"
 export * from "./components/SequenceLogoHook.js";
 
 export * from "./components/alignment-details/AlignmentDetailsHook.js";

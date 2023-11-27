@@ -3,7 +3,7 @@
  * Inspired / derived from https://github.com/weng-lab/logojs-package
  *  (but simpler)
  */
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useMemo } from "react";
 import "./SequenceLogo.scss";
 import { Tooltip } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
@@ -58,24 +58,14 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     tooltipPlacement = undefined,
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
-    refUpdated,
     horizontalReduxId,
   } = props;
-
-  const ref = useRef(null);
-  //const [mouseOver, setMouseOver] = useState<boolean>(false);
-  const [svgCache, setSvgCache] = useState<null | JSX.Element>(null);
-  const [logoData, setLogoData] = useState<null | IGlyphStackData[]>(null);
-  //const [positionsCache, setPositionsCache] = useState<
-  //  | null
-  //  | { positionIdx: number; className: string; positionStack: JSX.Element[] }[]
-  //>(null);
 
   /**
    * Munge letter count data that was calculated during alignment creation
    * into a form appropriate for the glyph generation
    */
-  const mungeLogoData = useCallback((): IGlyphStackData[] => {
+  const logoData = useMemo((): IGlyphStackData[] => {
     const numberSequences = alignment.getSequenceCount();
     const lettersSorted = alignment.getAllUpperAlphaLettersInAlignmentSorted();
 
@@ -113,41 +103,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     );
   }, [alignment, style.alignmentType]);
 
-  /**
-   * Generate the svg elements for a single position, i.e., column
-   */
-  const renderSinglePositionStack = useCallback(
-    (positionalFrequencies: IGlyphStackData, numGlyphStacks: number) => {
-      let dy = 100;
-
-      return positionalFrequencies.map((freq, idx) => {
-        dy = dy - freq.frequency * 100;
-        const xscale = 0.009; // invariant scaling, not exact, but works.
-
-        if (logoType === LOGO_TYPES.BARS) {
-          return (
-            <rect
-              width="100"
-              height="100"
-              transform={`translate(0, ${dy}) scale(${xscale},${freq.frequency})`}
-              className={freq.letter.classNames}
-              key={`idxrect_${idx}`}
-            ></rect>
-          );
-        }
-
-        const selectedGlyph = GlyphFactory.glyphFromChar(freq.letter.letter)({
-          className: freq.letter.classNames,
-          transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
-          key: `idxglyph_${idx}`,
-        });
-        return selectedGlyph;
-      });
-    },
-    [logoType]
-  );
-
-  const renderTooltip = useCallback(() => {
+  //render teh tooltip 
+  const renderedTooltip = useMemo(() => {
     const getTooltipForPosition = (pos: string) => {
       if (!pos || !logoData || !logoData[parseInt(pos)]) {
         return;
@@ -208,29 +165,47 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     );
   }, [tooltipPlacement, logoData]);
   
-  //setup cache - each glyph stack as a svg g element is saved in memory for quick render
-  useEffect(() => {
-    const logoData = mungeLogoData();
-    const sequenceLength = alignment.getSequenceLength();
-    const totalWidth = sequenceLength * glyphWidth;
-    const positions: React.SVGProps<SVGGElement>[] = [];
 
-    const positionsCache: {
-      positionIdx: number;
-      className: string;
-      positionStack: JSX.Element[];
-    }[] = [];
+  /**
+   * Generate the svg elements for a single position, i.e., column
+   */
+  const renderSinglePositionStack = useCallback((
+    positionalFrequencies: IGlyphStackData, 
+    numGlyphStacks: number
+  ) => {
+      let dy = 100;
+
+      return positionalFrequencies.map((freq, idx) => {
+        dy = dy - freq.frequency * 100;
+        const xscale = 0.009; // invariant scaling, not exact, but works.
+
+        if (logoType === LOGO_TYPES.BARS) {
+          return (
+            <rect
+              width="100"
+              height="100"
+              transform={`translate(0, ${dy}) scale(${xscale},${freq.frequency})`}
+              className={freq.letter.classNames}
+              key={`idxrect_${idx}`}
+            ></rect>
+          );
+        }
+
+        const selectedGlyph = GlyphFactory.glyphFromChar(freq.letter.letter)({
+          className: freq.letter.classNames,
+          transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
+          key: `idxglyph_${idx}`,
+        });
+        return selectedGlyph;
+      });
+  }, [logoType]);
+
+  const positionsCache = useMemo(()=>{
+    const sequenceLength = alignment.getSequenceLength();
+    const positions: React.SVGProps<SVGGElement>[] = [];
 
     for (let positionIdx = 0; positionIdx < sequenceLength; positionIdx++) {
       const singlePositionData = logoData[positionIdx];
-      positionsCache.push({
-        positionIdx: positionIdx,
-        className: aceResidueParentClass,
-        positionStack: renderSinglePositionStack(
-          singlePositionData,
-          logoData.length
-        ),
-      });
       positions.push(
         (
           <g
@@ -252,85 +227,70 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         ) as React.SVGProps<SVGGElement>
       );
     }
+    return positions;
+  }, [alignment, logoData, renderSinglePositionStack]);
 
-    //setPositionsCache(positionsCache);
-    setLogoData(logoData);
-    setSvgCache(
-      <>
-        <svg
-          preserveAspectRatio="none"
-          className="blahblahblah"
-          viewBox={`0 0 ${sequenceLength} 100`}
-          style={{
-            width: totalWidth,
-            height: height ? height : height,
-          }}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {positions}
-        </svg>
-      </>
+  //setup cache - each glyph stack as a svg g element is saved in memory for quick render
+  const renderedSvg = useMemo(() => {
+    const sequenceLength = alignment.getSequenceLength();
+    const totalWidth = sequenceLength * glyphWidth;
+
+    return (
+      <svg
+        preserveAspectRatio="none"
+        viewBox={`0 0 ${sequenceLength} 100`}
+        style={{
+          width: totalWidth,
+          height: height ? height : height,
+        }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {positionsCache}
+      </svg>
     );
   }, [
     alignment,
     glyphWidth,
-    mungeLogoData,
-    renderSinglePositionStack,
-    setSvgCache,
     height,
+    positionsCache,
   ]);
 
-  //useEffect(() => {
-    //ReactTooltip.rebuild();
-  //});
+  const renderFullLogoAndOffset = useCallback((
+    colIdxsToRender: number[],
+    additionalHorizontalOffset: number
+  )=>{
+    const classNames = [
+      "sequence-logo",
+      style.alignmentType.className,
+      style.colorScheme.className,
+      PositionsToStyle.ALL.className,
+    ];
 
-  useEffect(() => {
-    if (refUpdated) {
-      refUpdated(ref.current);
-    }
-  }, [ref, refUpdated]);
-
-  const classNames = [
-    "sequence-logo",
-    style.alignmentType.className,
-    style.colorScheme.className,
-    PositionsToStyle.ALL.className,
-  ];
-
-  //OPTION 1: NO VIRTUALIZATION. SPEEDY, but kind of a funny lag when scrolling.
-  /*return (
-    <div
-      ref={ref}
-      className={classNames.join(" ")}
-      style={{
-        width: alignment.getSequenceLength() * glyphWidth,
-      }}
-      //onMouseOver={() => setMouseOver(true)}
-      //onMouseOut={() => setMouseOver(false)}
-      onScroll={(e) => {
-        //console.log("LEFT SCROLL:" + e.currentTarget.scrollLeft);
-        dispatch(
-          setWorldLeftPixelOffset({
-            id: AlignmentViewer.getScrollerReduxId(alignment.getUUID(), 'x'),
-            worldLeftPixelOffset: e.currentTarget.scrollLeft,
-          })
-        );
-        //  if (mouseOver) {
-        //    // only if actually scrolling this target
-        //    console.log("logo scrolled:", e.currentTarget.scrollLeft);
-        //    if (props.onScroll) {
-        //      props.onScroll({left: e.currentTarget.scrollLeft, top: e.currentTarget.scrollTop});
-        //    }
-        //  }
-      }}
-    >
-      {svgCache}
-      {renderTooltip()}
-    </div>
-  );*/
+    return (
+      <div
+        className={classNames.join(" ")}
+        style={{
+          width: alignment.getSequenceLength() * glyphWidth,
+          left:
+            colIdxsToRender.length > 0
+              ? colIdxsToRender[0] * glyphWidth * -1 + additionalHorizontalOffset
+              : additionalHorizontalOffset,
+        }}
+      >
+        {renderedSvg}
+        {renderedTooltip}
+      </div>
+    )
+  }, [
+    alignment, 
+    glyphWidth, 
+    renderedSvg, 
+    renderedTooltip, 
+    style.alignmentType.className, 
+    style.colorScheme.className
+  ]);
 
   //OPTION 2: VIRTUALIZATION
-  //const horizontalReduxId = AlignmentViewer.getScrollerReduxId(alignment.getUUID(), 'x');
   return (
     <VirtualizedMatrixViewer
       horizontalReduxId={horizontalReduxId}
@@ -339,7 +299,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       columnWidth={glyphWidth}
       rowCount={1}
       rowHeight={height}
-      autoOffset={false}
+      autoOffset={false} //manage the offset manually
       suppressVerticalScrollbar={true}
       suppressHorizontalScrollbar={true}
       getContent={(
@@ -353,20 +313,9 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         //sequences of reasonable length - need to check for longer sequences. It adds
         //~20 x length of sequences dom elements, which could add up, but is probably
         //fine
-        return (
-          <div
-            className={classNames.join(" ")}
-            style={{
-              width: alignment.getSequenceLength() * glyphWidth,
-              left:
-                colIdxsToRender.length > 0
-                  ? colIdxsToRender[0] * glyphWidth * -1 + additionalHorizontalOffset
-                  : additionalHorizontalOffset,
-            }}
-          >
-            {svgCache}
-            {renderTooltip()}
-          </div>
+        return renderFullLogoAndOffset(
+          colIdxsToRender, 
+          additionalHorizontalOffset
         );
 
         /* //OPTION 2B: USING VIRTUALIZATION, BUT CACHE POSITIONS - this is slow

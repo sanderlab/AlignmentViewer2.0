@@ -1,6 +1,6 @@
 /** PositionalAxis.scss */
 
-.positional-axis {
+.av2-positional-axis {
   font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
     monospace;
   white-space: nowrap;
@@ -13,7 +13,8 @@
   left: 0;
   right: 0;
 }
-.positional-axis::-webkit-scrollbar {
+.av2-positional-axis::-webkit-scrollbar {
   background: transparent;
   height: 0;
-}
+}  
+

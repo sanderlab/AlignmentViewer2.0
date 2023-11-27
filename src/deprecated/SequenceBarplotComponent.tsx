@@ -3,7 +3,7 @@ import "./SequenceBarplot.scss";
 import { Tooltip } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
-import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { VirtualizedMatrixViewer } from "../components/virtualization/VirtualizedMatrixViewerHook";
 
 export interface ISequenceBarplotDataSeries {
   id: string; //must be unique for each series
@@ -21,9 +21,6 @@ export interface ISequenceBarplotProps {
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
   positionWidth: number;
-
-  scrollerLoaded: (e: HTMLElement) => void;
-  scrollerUnloaded: (e: HTMLElement) => void;
 
   //props that should be exposed in AlignmentViewer full component:
   dataSeriesSet: ArrayOneOrMore<ISequenceBarplotDataSeries>;
@@ -671,14 +668,6 @@ export class SequenceBarplotComponent extends React.Component<
 
   componentDidUpdate() {
    // ReactTooltip.rebuild();
-  }
-
-  componentDidMount() {
-    this.props.scrollerLoaded(this.ref.current!);
-  }
-
-  componentWillUnmount() {
-    this.props.scrollerUnloaded(this.ref.current!);
   }
 
   render() {

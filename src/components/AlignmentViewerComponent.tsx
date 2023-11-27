@@ -8,10 +8,6 @@ import {
   ISequenceLogoProps,
 } from "./SequenceLogoHook";
 
-import {
-  SequenceBarplotComponent,
-  ISequenceBarplotProps,
-} from "./SequenceBarplotComponent";
 import { IMiniMapProps, MiniMap } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
@@ -25,6 +21,11 @@ import {
   ResidueColoring
 } from "../common/MolecularStyles";
 import { getAlignmentFontDetails } from "../common/Utils";
+import { 
+  IPositionalBarplotProps,
+  PositionalBarplot, 
+  PreconfiguredPositionalBarplots 
+} from "./PositionalBarplotHook";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
@@ -38,7 +39,7 @@ export type IAlignmentViewerProps = {
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
 export type IBarplotExposedProps = Pick<
-  ISequenceBarplotProps,
+  IPositionalBarplotProps,
   "dataSeriesSet" | "tooltipPlacement" | "height"
 >;
 
@@ -80,13 +81,12 @@ const defaultProps = {
   barplots: [
     {
       dataSeriesSet: [
-        SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
-        SequenceBarplotComponent.GAPS_BARPLOT,
+        PreconfiguredPositionalBarplots.ShannonEntropy,
+        PreconfiguredPositionalBarplots.Gaps,
       ],
       tooltipPlacement: undefined,
       height: "100px",
     },
-    //[SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT],
   ] as undefined | IBarplotExposedProps[],
 };
 
@@ -199,20 +199,14 @@ export class AlignmentViewer extends React.Component<
     sharedHorizontalReduxId: string
   ) => {
     return (
-      <SequenceBarplotComponent
+      <PositionalBarplot
         alignment={this.props.alignment}
         tooltipPlacement={barplotProps.tooltipPlacement}
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={residueWidth}
         height={barplotProps.height}
         horizontalReduxId={sharedHorizontalReduxId}
-        scrollerLoaded={(scroller) => {
-          //this.horizontalScrollSync.registerElementScroller(scroller);
-        }}
-        scrollerUnloaded={(scroller) => {
-          //this.horizontalScrollSync.unRegisterElementScroller(scroller);
-        }}
-      ></SequenceBarplotComponent>
+      ></PositionalBarplot>
     );
   };
 
