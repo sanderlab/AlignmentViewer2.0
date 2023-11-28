@@ -302,13 +302,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       autoOffset={false} //manage the offset manually
       suppressVerticalScrollbar={true}
       suppressHorizontalScrollbar={true}
-      getContent={(
-        rowIdxsToRender,
+      getContent={({
         colIdxsToRender,
-        additionalVerticalOffset,
         additionalHorizontalOffset,
-        stageDimensions
-      ) => {
+      }) => {
         //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET. Quick on
         //sequences of reasonable length - need to check for longer sequences. It adds
         //~20 x length of sequences dom elements, which could add up, but is probably

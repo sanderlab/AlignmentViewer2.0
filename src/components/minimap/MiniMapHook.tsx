@@ -4,7 +4,7 @@ import * as PIXI from "pixi.js";
 import { useEffect, useCallback, useState, useMemo } from "react";
 import { Stage } from "@pixi/react";
 
-import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
+import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
 
 import { Alignment } from "../../common/Alignment";
 import { SequenceSorter } from "../../common/AlignmentSorter";
@@ -15,7 +15,7 @@ import {
   ResidueColoring
 } from "../../common/MolecularStyles";
 import { RootState, setWorldTopRowOffset } from "../../common/ReduxStore";
-import { stopSafariFromBlockingWindowWheel } from "../../common/Utils";
+import { stopSafariFromBlockingWindowWheel, useStateCallback } from "../../common/Utils";
 import { ReactResizeSensor } from "../ResizeSensorHook";
 import { useAppDispatch, useAppSelector } from "../../common/Hooks";
 import { shallowEqual } from "react-redux";
@@ -165,13 +165,6 @@ export function MiniMap(props: IMiniMapProps) {
     stopSafariFromBlockingWindowWheel("minimap-canvas");
   }, []);
 
-  /*useEffect(() => { //some performance issues with this? I'm tired but kept the other..
-    if (app && mmOffsets){
-      app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
-      app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
-    }
-  }, [app, mmOffsets]);*/
-
   //
   //callbacks
   //
@@ -211,6 +204,10 @@ export function MiniMap(props: IMiniMapProps) {
     }
   }, [dispatch, verticalReduxId, mmOffsets]);
 
+  const sequences = useMemo(()=>{
+    return alignment.getSequences(sortBy).map((seq) => seq.sequence)
+  }, [alignment, sortBy]);
+
   const mmWheeled = useCallback((e: React.WheelEvent) => {
     if (
       mmOffsets &&
@@ -233,35 +230,84 @@ export function MiniMap(props: IMiniMapProps) {
     mmOffsets
   ]);
 
+  /*useEffect(()=>{ //out of sync when used in an effect. unclear why.
+    if (app && mmOffsets?.minimapY !== undefined){ 
+      app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
+      app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
+    }
+  }, [
+    app,
+    mmOffsets?.minimapY,
+    mmOffsets?.scale
+  ]);*/
+
+  const handleHighlighterMoved = useCallback((deltaPx)=>{
+    //TODO clamp
+    if (mmOffsets?.scale){
+      const calculatedRowOffset = 
+        (deltaPx * mmOffsets.minimapPixelToWorldOffset / mmOffsets.scale) +
+        (mmOffsets.minimapDraggerSequenceOffset);
+      const suggestedRowOffset = 
+        calculatedRowOffset < 0 
+          ? 0 
+          : calculatedRowOffset > alignment.getSequenceCount() - idxsToRender.length
+            ? alignment.getSequenceCount() - idxsToRender.length 
+            : calculatedRowOffset
+      dispatch(
+        setWorldTopRowOffset({
+          id: verticalReduxId,
+          rowOffset: suggestedRowOffset,
+        })
+      );
+    }
+  }, [
+    alignment, 
+    dispatch, 
+    idxsToRender.length, 
+    verticalReduxId, 
+    mmOffsets?.minimapDraggerSequenceOffset,
+    mmOffsets?.minimapPixelToWorldOffset,
+    mmOffsets?.scale,
+  ]);
+
   //
   //rendering
   //
-  const renderAlignment = useCallback((
-    frameWidth: number, 
-    frameHeight: number,
-    offsets: NonNullable<typeof mmOffsets>
-  ) => {
-
-    if (app){ 
-      // I'd prefer this in a useEffect, but unforutnatly the dragging gets
-      // out of sync for some reason (testing not very rigerous, could test again TODO)
-      app.stage.position.set(0, -offsets.minimapY * offsets.scale);
-      app.stage.scale.set(offsets.scale, offsets.scale);
-      //app.render();
-    }
-
+  const renderedCanvas = useMemo(()=>{
     return (
-      <div 
-        className="alignment-canvas" 
-        style={{
-          position: "absolute",
-          top: 0, bottom: 0, left: 0, right: 0
-        }}
+      <CanvasAlignmentTiled
+        sequences={sequences}
+        consensusSequence={alignment.getConsensus().sequence}
+        querySequence={alignment.getQuerySequence().sequence}
+        alignmentType={alignmentStyle.alignmentType}
+        colorScheme={alignmentStyle.colorScheme}
+        positionsToStyle={positionsToStyle}
+        residueColoring={ResidueColoring.DARK}
+      />
+    )
+  }, [
+    alignment,
+    alignmentStyle.alignmentType,
+    alignmentStyle.colorScheme,
+    positionsToStyle,
+    sequences
+  ]);
+
+  const renderedAlignment = useMemo(() => {
+    return frameSizing === undefined || !mmOffsets
+      ? undefined
+      : (
+        <div 
+          className="alignment-canvas" 
+          style={{
+            position: "absolute",
+            top: 0, bottom: 0, left: 0, right: 0
+          }}
         >
           <Stage
             className="minimap-canvas"
-            width={frameWidth}
-            height={frameHeight}
+            width={frameSizing.frameWidth}
+            height={frameSizing.frameHeight}
             raf={false}
             renderOnComponentChange={true}
             onMount={setApp}
@@ -275,74 +321,44 @@ export function MiniMap(props: IMiniMapProps) {
               imageRendering: "pixelated",
             }}
           > 
-            <CanvasAlignmentTiled
-              sequences={
-                alignment.getSequences(sortBy).map((seq) => seq.sequence)
-              }
-              consensusSequence={alignment.getConsensus().sequence}
-              querySequence={alignment.getQuerySequence().sequence}
-              alignmentType={alignmentStyle.alignmentType}
-              colorScheme={alignmentStyle.colorScheme}
-              positionsToStyle={positionsToStyle}
-              residueColoring={ResidueColoring.DARK}
-            />
+            {renderedCanvas}
           </Stage>
 
-          { //only render dragger if there is something to drag
-            viewportFullyRendersAlignment ? undefined :
-              <MinimapDragger
-                fillColor={'#000000'}
-                baselineOpacity={0.4}
-                mouseoverOpacity={0.3}
-                draggingOpacity={0.2}
-                onWheel={mmWheeled}
-                highlighterHeightPx={ 
-                  //since we render the minimap as single pixels the mapping is the same
-                  offsets.minimapDraggerHeight * offsets.scale
-                }
-                highlighterYPx={
-                  offsets.minimapDraggerY * offsets.scale
-                }
-                highlighterMoved={(deltaPx)=>{
-                  //TODO clamp
-                  const calculatedRowOffset = 
-                    (deltaPx * offsets.minimapPixelToWorldOffset / offsets.scale) +
-                    (offsets.minimapDraggerSequenceOffset);
-                  const suggestedRowOffset = 
-                    calculatedRowOffset < 0 
-                      ? 0 
-                      : calculatedRowOffset > alignment.getSequenceCount() - idxsToRender.length
-                        ? alignment.getSequenceCount() - idxsToRender.length 
-                        : calculatedRowOffset
-
-                  //console.log('deltaPx:'+deltaPx+', suggestedRowOffset:'+suggestedRowOffset + 
-                  //', vp showing='+idxsToRender.length+', previous:'+offsets.minimapDraggerY);
-                  //console.log(offsets.minimapPixelToWorldOffset);
-                  dispatch(
-                    setWorldTopRowOffset({
-                      id: verticalReduxId!,
-                      rowOffset: suggestedRowOffset,
-                    })
-                  );
-                }}
-              />
-          }
-      </div>
+          {viewportFullyRendersAlignment || !mmOffsets
+          ? undefined 
+          : <MinimapDragger
+              fillColor={'#000000'}
+              baselineOpacity={0.4}
+              mouseoverOpacity={0.3}
+              draggingOpacity={0.2}
+              onWheel={mmWheeled}
+              highlighterHeightPx={ 
+                //since we render the minimap as single pixels the mapping is the same
+                mmOffsets.minimapDraggerHeight * mmOffsets.scale
+              }
+              highlighterYPx={
+                mmOffsets.minimapDraggerY * mmOffsets.scale
+              }
+              highlighterMoved={handleHighlighterMoved}
+            />}
+          </div>
     )
   }, [
-    alignment,
-    alignmentStyle.alignmentType,
-    alignmentStyle.colorScheme,
-    positionsToStyle,
-    app,
-    dispatch,
-    idxsToRender.length,
+    frameSizing, 
+    handleHighlighterMoved,
     mmClicked,
+    mmOffsets,
     mmWheeled,
-    sortBy,
-    verticalReduxId,
+    renderedCanvas,
     viewportFullyRendersAlignment
   ]);
+
+  if (app && mmOffsets?.minimapY !== undefined){  
+    //feels like this should be in an effect, but doesn't seem to work - it
+    //is out of sync for some reason. 
+    app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
+    app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
+  }
 
   return (
     <div
@@ -360,18 +376,12 @@ export function MiniMap(props: IMiniMapProps) {
       }}
     >
       <ReactResizeSensor onSizeChanged={minimapHolderResized}>
-        { !frameSizing || !mmOffsets
-            ? null 
-            : renderAlignment(
-                frameSizing.frameWidth, 
-                frameSizing.frameHeight, 
-                mmOffsets
-            )
-        }
+        { renderedAlignment }
       </ReactResizeSensor>
     </div>
   );
 }
+
 
 /***********************************
  * 
@@ -411,6 +421,11 @@ export function MinimapDragger(props: IMinimapDraggerProps){
 
   const [dragging, setDragging] = useState<boolean>(false);
   const [mouseover, setMouseover] = useState<boolean>(false);
+  //custom callback that enables us to call function (highlighterMoved) only
+  //after the state has been set.
+  const [mouseLastYPx, setMouseLastYPx] = useStateCallback< 
+    number | undefined
+  >(undefined);
 
   /*
    *
@@ -424,27 +439,37 @@ export function MinimapDragger(props: IMinimapDraggerProps){
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    if (dragging) {
-      highlighterMoved(
-        e.movementY, 
+    if (dragging && mouseLastYPx !== undefined) {
+      setMouseLastYPx(
+        e.screenY, 
+        () => highlighterMoved(e.screenY-mouseLastYPx)
       );
     }
-  }, [dragging, highlighterMoved]);
+  }, [
+    dragging,
+    highlighterMoved,
+    setMouseLastYPx, 
+    mouseLastYPx
+  ]);
 
   const dragStart = useCallback((
-    e: React.MouseEvent<HTMLDivElement, MouseEvent> | 
-       React.TouchEvent<HTMLDivElement>
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>// | 
+       //React.TouchEvent<HTMLDivElement>
   ) => {
     e.stopPropagation();
     e.preventDefault();
     setDragging(true);
-  }, [setDragging]);
+    setMouseLastYPx(e.screenY)
+  }, [setDragging, setMouseLastYPx]);
 
-  const dragEnd = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const dragEnd = useCallback((
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
     e.stopPropagation();
     e.preventDefault();
     setDragging(false);
-  }, [setDragging]);
+    setMouseLastYPx(undefined)
+  }, [setDragging, setMouseLastYPx]);
   
   return (
     <>
@@ -462,7 +487,7 @@ export function MinimapDragger(props: IMinimapDraggerProps){
         onMouseEnter={()=>{setMouseover(true);}}
         onMouseLeave={()=>{setMouseover(false);}}
         onMouseDown={dragStart}
-        onTouchStart={(dragStart)}
+        //onTouchStart={(dragStart)}
       />
       {!dragging ? undefined : 
         //secondary sprite object takes over the entire canvas during dragging. this

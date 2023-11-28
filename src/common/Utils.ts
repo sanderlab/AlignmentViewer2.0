@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
 /**
  * Convert any valid color string into a hex code and RGB
  * value using the built in browser converter.
@@ -46,6 +48,39 @@ export function generateUUIDv4() {
         (15 >> (parseInt(c) / 4)))
     ).toString(16);
   });
+}
+
+/**
+ * Custom state function that enables a function call only
+ * after the state has been updated. Necessary when attempting
+ * to track the mouse movement in e.g., the minimap - otherwise 
+ * redux store is updated and new props are generated / passed 
+ * before the state registers.
+ * taken directly from https://stackoverflow.com/questions/54954091
+ * @param initialState 
+ * @returns 
+ */
+export function useStateCallback<T>(
+  initialState: T
+): [T, (state: T, cb?: (state: T) => void) => void] {
+  const [state, setState] = useState(initialState);
+  const cbRef = useRef<((state: T) => void) | undefined>(undefined); // init mutable ref container for callbacks
+
+  const setStateCallback = useCallback((state: T, cb?: (state: T) => void) => {
+    cbRef.current = cb; // store current, passed callback in ref
+    setState(state);
+  }, []); // keep object reference stable, exactly like `useState`
+
+  useEffect(() => {
+    // cb.current is `undefined` on initial render,
+    // so we only invoke callback on state *updates*
+    if (cbRef.current) {
+      cbRef.current(state);
+      cbRef.current = undefined; // reset callback after execution
+    }
+  }, [state]);
+
+  return [state, setStateCallback];
 }
 
 /**

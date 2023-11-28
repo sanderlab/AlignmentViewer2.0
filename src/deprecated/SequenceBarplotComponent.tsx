@@ -689,13 +689,10 @@ export class SequenceBarplotComponent extends React.Component<
           autoOffset={false}
           suppressVerticalScrollbar={true}
           suppressHorizontalScrollbar={true}
-          getContent={(
-            rowIdxsToRender,
+          getContent={({
             colIdxsToRender,
-            additionalVerticalOffset,
             additionalHorizontalOffset,
-            stageDimensions
-          ) => {
+          }) => {
             return (
               <div
                 style={{

@@ -514,13 +514,10 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         autoOffset={false}
         suppressVerticalScrollbar={true}
         suppressHorizontalScrollbar={true}
-        getContent={(
-          rowIdxsToRender,
+        getContent={({
           colIdxsToRender,
-          additionalVerticalOffset,
           additionalHorizontalOffset,
-          stageDimensions
-        ) => {
+        }) => {
           return (
             <div
               style={{

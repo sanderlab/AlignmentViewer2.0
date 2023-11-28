@@ -23,20 +23,21 @@ import {
 } from "../../common/ReduxStore";
 import {
   stopSafariFromBlockingWindowWheel,
-  generateUUIDv4,
 } from "../../common/Utils";
 import { VirtualVerticalScrollbar } from "./VirtualVerticalScrollbarHook";
 import { VirtualHorizontalScrollbar } from "./VirtualHorizontalScrollbarHook";
 import { useAppDispatch, useAppSelector } from "../../common/Hooks";
 
-interface IVirtualizedMatrixiewerProps {
-  getContent(
-    rowIdxsToRender: number[],
-    colIdxsToRender: number[],
-    additionalVerticalOffset: number,
-    additionalHorizontalOffset: number,
-    stageDimensions: { width: number; height: number }
-  ): JSX.Element;
+export interface IVirtualizedContentParameters {
+  rowIdxsToRender: number[],
+  colIdxsToRender: number[],
+  additionalVerticalOffset: number,
+  additionalHorizontalOffset: number,
+  stageDimensions: { width: number; height: number }
+}
+
+export interface IVirtualizedMatrixiewerProps {
+  getContent(params: IVirtualizedContentParameters): JSX.Element;
   columnCount: number;
   rowCount: number;
   columnWidth: number;
@@ -61,10 +62,10 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     suppressHorizontalScrollbar,
     suppressVerticalScrollbar
   } = props;
-
+  
   const {
-    horizontalReduxId = generateUUIDv4(),
-    verticalReduxId = generateUUIDv4(),
+    horizontalReduxId,//generateUUIDv4(),
+    verticalReduxId,//generateUUIDv4(),
   } = props;
 
   //ref
@@ -77,12 +78,17 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //redux stores
   const dispatch = useAppDispatch();
-  const reduxStateVertical = useAppSelector((state: RootState) =>
-    state.virtualizedVerticalSlice[verticalReduxId]
-  );
-  const reduxStateHorizontal = useAppSelector((state: RootState) =>
-    state.virtualizedHorizontalSlice[horizontalReduxId]
-  );
+  const reduxStateVertical = useAppSelector((state: RootState) => {
+    return !verticalReduxId 
+      ? undefined 
+      : state.virtualizedVerticalSlice[verticalReduxId]
+  });
+  const reduxStateHorizontal = useAppSelector((state: RootState) =>{
+    return !horizontalReduxId 
+      ? undefined 
+      : state.virtualizedHorizontalSlice[horizontalReduxId]
+  });
+  
 
   //
   //useCallbacks
@@ -91,7 +97,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     setScreenHeight(bounds.height);
     setScreenWidth(bounds.width);
 
-    if (direction === "x" || direction === "all") {
+    if (horizontalReduxId && (direction === "x" || direction === "all")) {
       dispatch(
         setReduxScreenWidth({
           id: horizontalReduxId,
@@ -99,7 +105,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
         })
       );
     }
-    if (direction === "y" || direction === "all") {
+    if (verticalReduxId && (direction === "y" || direction === "all")) {
       dispatch(
         setReduxScreenHeight({
           id: verticalReduxId,
@@ -129,7 +135,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //set row and column height in pixels
   useEffect(() => {
-    if (direction === "x" || direction === "all") {
+    if (horizontalReduxId && (direction === "x" || direction === "all")) {
       dispatch(
         setReduxColumnWidth({
           id: horizontalReduxId,
@@ -137,7 +143,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
         })
       );
     }
-    if (direction === "y" || direction === "all") {
+    if (verticalReduxId && (direction === "y" || direction === "all")) {
       dispatch(
         setReduxRowHeight({
           id: verticalReduxId,
@@ -156,7 +162,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //set num columns / num rows
   useEffect(() => {
-    if ((direction === "x" || direction === "all")) {
+    if (horizontalReduxId && (direction === "x" || direction === "all")) {
       dispatch(
         setReduxColumnCount({
           id: horizontalReduxId,
@@ -164,7 +170,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
         })
       );
     }
-    if ((direction === "y" || direction === "all")) {
+    if (verticalReduxId && (direction === "y" || direction === "all")) {
       dispatch(
         setReduxRowCount({
           id: verticalReduxId,
@@ -245,17 +251,17 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
       reduxStateHorizontal?.cellCount
         ? reduxStateHorizontal.idxsToRender
         : [0]; //this really shouldn't ever happen - not a good default abstractly (TODO)
-        
-    return getContent(
-      rowIdxsToRender,
-      colIdxsToRender,
-      reduxOffsets.verticalAdditionalOffset,
-      reduxOffsets.horizontalAdditionalOffset,
-      {
+
+    return getContent({
+      rowIdxsToRender: rowIdxsToRender,
+      colIdxsToRender: colIdxsToRender,
+      additionalVerticalOffset: reduxOffsets.verticalAdditionalOffset,
+      additionalHorizontalOffset: reduxOffsets.horizontalAdditionalOffset,
+      stageDimensions: {
         width: reduxOffsets.stageWidth,
         height: reduxOffsets.stageHeight
       }
-    );
+    });
   }, [
     getContent,
     reduxOffsets,
@@ -264,14 +270,14 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     reduxStateHorizontal?.cellCount,
     reduxStateHorizontal?.idxsToRender,
   ]);
-  
-  /*
-   *
-   *
-   * RENDER
-   *
-   *
-   */
+
+  //
+  //
+  //
+  // RENDER
+  //
+  //
+  //
   return (
     <div
       onMouseEnter={() => {
@@ -319,8 +325,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
         })
       }
 
-
-      <ReactResizeSensor onSizeChanged={viewportSizeChanged}>
+      <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
         <div className="av2-virtualized-matrix" ref={ref}>
           {!reduxInitialized ||
             !ref ||
@@ -337,54 +342,65 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                   const bounds = event.currentTarget.getBoundingClientRect();
                   const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
                   const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
-
-                  dispatch(
-                    toggleReduxSelectedPosition({
-                      id: horizontalReduxId,
-                      mouseViewportOffsetX: viewportX,
-                    })
-                  );
-                  dispatch(
-                    toggleReduxSelectedSequence({
-                      id: verticalReduxId,
-                      mouseViewportOffsetY: viewportY,
-                    })
-                  );
+                  if (horizontalReduxId){
+                    dispatch(
+                      toggleReduxSelectedPosition({
+                        id: horizontalReduxId,
+                        mouseViewportOffsetX: viewportX,
+                      })
+                    );
+                  }
+                  if (verticalReduxId){
+                    dispatch(
+                      toggleReduxSelectedSequence({
+                        id: verticalReduxId,
+                        mouseViewportOffsetY: viewportY,
+                      })
+                    );
+                  }
                 }}
                 onMouseOut={() =>{
-                  dispatch(
-                    setReduxMouseOverY({
-                      id: verticalReduxId,
-                      mouseViewportOffsetY: undefined,
-                    })
-                  );
-                  dispatch(
-                    setReduxMouseOverX({
-                      id: horizontalReduxId,
-                      mouseViewportOffsetX: undefined,
-                    })
-                  );
+                  if (verticalReduxId){
+                    dispatch(
+                      setReduxMouseOverY({
+                        id: verticalReduxId,
+                        mouseViewportOffsetY: undefined,
+                      })
+                    );
+                  }
+                  if (horizontalReduxId){
+                    dispatch(
+                      setReduxMouseOverX({
+                        id: horizontalReduxId,
+                        mouseViewportOffsetX: undefined,
+                      })
+                    );
+                  }
                 }}
                 onMouseMove={(event) => {
                   const bounds = event.currentTarget.getBoundingClientRect();
                   const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
                   const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
                   
-                  dispatch(
-                    setReduxMouseOverY({
-                      id: verticalReduxId,
-                      mouseViewportOffsetY: viewportY,
-                    })
-                  );
-                  dispatch(
-                    setReduxMouseOverX({
-                      id: horizontalReduxId,
-                      mouseViewportOffsetX: viewportX,
-                    })
-                  );
+                  if (verticalReduxId){
+                    dispatch(
+                      setReduxMouseOverY({
+                        id: verticalReduxId,
+                        mouseViewportOffsetY: viewportY,
+                      })
+                    );
+                  }
+                  if (horizontalReduxId){
+                    dispatch(
+                      setReduxMouseOverX({
+                        id: horizontalReduxId,
+                        mouseViewportOffsetX: viewportX,
+                      })
+                    );
+                  }
                 }}
                 onWheel={(event) => {
-                  if (event.deltaX !== 0 && reduxStateHorizontal){
+                  if (event.deltaX !== 0 && reduxStateHorizontal && horizontalReduxId){
                     dispatch(
                       setReduxWorldLeftPixelOffset({
                         id: horizontalReduxId,
@@ -392,7 +408,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                       })
                     );
                   }
-                  if (event.deltaY !== 0 && reduxStateVertical){
+                  if (event.deltaY !== 0 && reduxStateVertical && verticalReduxId){
                     dispatch(
                       setReduxWorldTopPixelOffset({
                         id: verticalReduxId,
@@ -481,12 +497,14 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
             worldHeight={reduxStateVertical!.worldSize}
             worldTopOffset={reduxStateVertical!.worldOffset}
             scrollbarMoved={(newWorldTop) => {
-              dispatch(
-                setReduxWorldTopPixelOffset({
-                  id: verticalReduxId,
-                  worldTopPixelOffset: newWorldTop,
-                })
-              );
+              if (verticalReduxId){
+                dispatch(
+                  setReduxWorldTopPixelOffset({
+                    id: verticalReduxId,
+                    worldTopPixelOffset: newWorldTop,
+                  })
+                );
+              }
             }}
           />
         )}
@@ -501,12 +519,14 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
             worldWidth={reduxStateHorizontal!.worldSize}
             worldLeftOffset={reduxStateHorizontal!.worldOffset}
             scrollbarMoved={(newWorldLeft) => {
-              dispatch(
-                setReduxWorldLeftPixelOffset({
-                  id: horizontalReduxId,
-                  worldLeftPixelOffset: newWorldLeft,
-                })
-              );
+              if (horizontalReduxId){
+                dispatch(
+                  setReduxWorldLeftPixelOffset({
+                    id: horizontalReduxId,
+                    worldLeftPixelOffset: newWorldLeft,
+                  })
+                );
+              }
             }}
           />
         )}

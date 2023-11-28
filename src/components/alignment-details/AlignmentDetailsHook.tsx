@@ -13,8 +13,8 @@ import {
   PositionsToStyle,
 } from "../../common/MolecularStyles";
 import { AminoAcid, Nucleotide } from "../../common/Residues";
-import { VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
-import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledComponent";
+import { IVirtualizedContentParameters, VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
+import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
 
 
 export interface IAlignmentDetailsProps {
@@ -74,13 +74,13 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     });
   }, []);
 
-  const renderMatrixContent = useCallback((
-    rowIdxsToRender: number[],
-    colIdxsToRender: number[],
-    additionalVerticalOffset: number,
-    additionalHorizontalOffset: number,
-    stageDimensions: {width: number, height: number}
-  ) => {
+  const renderMatrixContent = useCallback(({
+    rowIdxsToRender,
+    colIdxsToRender,
+    additionalVerticalOffset,
+    additionalHorizontalOffset,
+    stageDimensions
+  }: IVirtualizedContentParameters) => {
     //issue with loading new alignment (a second alignment): virutalizedmatrix can end up not loading 
     //the redux store after calling getContent 
     const seqsSliced = sliceSequences(
@@ -97,6 +97,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     }, []);
 
     if(app){
+      //move and scale the background "squares" of the alignment around based on
+      //the scroll amount and residue sizing
       app.stage.position.set(
         -colIdxsToRender[0]*residueWidth + additionalHorizontalOffset, 
         -rowIdxsToRender[0]*residueHeight + additionalVerticalOffset
@@ -133,7 +135,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                 />
           }
         </Stage>
-        
 
         <AlignmentDetailsLetters
           sequencesInViewport={sequencesInViewport}

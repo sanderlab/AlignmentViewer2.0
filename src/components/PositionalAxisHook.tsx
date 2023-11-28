@@ -2,7 +2,7 @@
  * Hook for rendering the position axis
  */
 import "./PositionalAxis.scss";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 /**
@@ -24,6 +24,7 @@ export function PositionalAxis(props: {
   } = props;
 
   const maxLength = Math.max(...positions);
+  const renderCache = useRef({} as {[colIdsStr: string]: JSX.Element});
 
   /**
    * Generate a string axis (positional information) with one character per position
@@ -52,15 +53,18 @@ export function PositionalAxis(props: {
     return s; // this.hruler = s.replace(/ /g, '.');
   }, [maxLength]);
 
-  const renderAxis = useCallback((colIdxsToRender: number[])=>{
-    return (
-      <div className="av2-positional-axis" style={{ fontSize: fontSize }}>
-        {colIdxsToRender.map((colIdx) => {
-            return fullRuler[colIdx];
-          })
-          .join("")}
-      </div>
-    )
+  const renderAxis = useCallback((colIdxsToRender: number[])=>{ // example of caching. unnecessary here though
+    if (!renderCache.current[colIdxsToRender.toString()]){
+      renderCache.current[colIdxsToRender.toString()] = (
+        <div className="av2-positional-axis" style={{ fontSize: fontSize }}>
+          {colIdxsToRender.map((colIdx) => {
+              return fullRuler[colIdx];
+            })
+            .join("")}
+        </div>
+      );
+    }
+    return renderCache.current[colIdxsToRender.toString()];
   }, [fullRuler, fontSize]);
 
   return (
@@ -75,13 +79,7 @@ export function PositionalAxis(props: {
       autoOffset={true}
       suppressVerticalScrollbar={true}
       suppressHorizontalScrollbar={true}
-      getContent={(
-        rowIdxsToRender,
-        colIdxsToRender,
-        additionalVerticalOffset,
-        additionalHorizontalOffset,
-        stageDimensions
-      ) => {
+      getContent={({colIdxsToRender}) => {
         return renderAxis(colIdxsToRender);
       }}
     />

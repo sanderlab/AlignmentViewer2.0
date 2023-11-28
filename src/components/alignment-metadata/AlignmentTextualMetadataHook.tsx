@@ -55,16 +55,11 @@ export function AlignmentTextualMetadata(
       rowCount={textForEachSeq.length}
       rowHeight={letterHeight}
       autoOffset={true}
-      getContent={(
+      getContent={({
         rowIdxsToRender,
-        colIdxsToRender,
-        additionalVerticalOffset,
-        additionalHorizontalOffset,
-        stageDimensions
-      ) => {
-        //console.log('verticalReduxId = ' + verticalReduxId+', rowIdxsToRender length = ' + 
-        //            rowIdxsToRender.length+', textForEachSeq:', textForEachSeq);
-        //console.log('rowIdxsToRender:',rowIdxsToRender);
+        colIdxsToRender
+      }) => {
+
         return (
           <div
             className="alignment-textual-metadata"
