@@ -1,5 +1,5 @@
 /**
- * Sequence logo component.
+ * Sequence logo hook.
  * Inspired / derived from https://github.com/weng-lab/logojs-package
  *  (but simpler)
  */
@@ -37,13 +37,13 @@ interface IGlyphFrequency {
 interface IGlyphStackData extends Array<IGlyphFrequency> {}
 
 export interface ISequenceLogoProps {
-  //don't expose these props in the AlignmentViewer full component
+  //don't expose these props in AlignmentViewer
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   refUpdated?: (newRef: HTMLElement | null) => void;
 
-  //props that should be exposed in AlignmentViewer full component:
+  //props that should be exposed in AlignmentViewer:
   logoType?: LOGO_TYPES;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
   height?: number;

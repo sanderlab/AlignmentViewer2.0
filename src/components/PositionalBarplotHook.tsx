@@ -18,11 +18,11 @@ export interface IPositionalBarplotDataSeries {
 }
 
 export interface IPositionalBarplotProps {
-  //don't expose these props in the AlignmentViewer full component
+  //don't expose these props in AlignmentViewer
   alignment: Alignment;
   positionWidth: number;
 
-  //props that should be exposed in AlignmentViewer full component:
+  //props that should be exposed in AlignmentViewer:
   dataSeriesSet: ArrayOneOrMore<IPositionalBarplotDataSeries>;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
   height?: string;
