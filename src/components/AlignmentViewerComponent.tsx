@@ -316,7 +316,7 @@ export class AlignmentViewer extends React.Component<
             ? null
             : barplots.map((barplot, idx) =>
                 this.renderWidget(
-                  "av-barplot-holder",
+                  "av2-barplot-render",
                   barplot.dataSeriesSet.map((series) => series.name).join(" / ") +
                     ":",
                   this.renderBarplot(barplot, residueWidth, sharedHorizontalReduxId),
@@ -330,7 +330,7 @@ export class AlignmentViewer extends React.Component<
           {!showLogo || !logoOptions 
             ? null
             : this.renderWidget(
-                "av-sequence-logo-holder",
+                "av2-sequence-logo-render",
                 "Logo:",
                 this.renderSequenceLogo(residueWidth, sharedHorizontalReduxId),
                 {
@@ -344,7 +344,7 @@ export class AlignmentViewer extends React.Component<
           {!showConsensus
             ? null
             : this.renderWidget(
-                "consensus-seq-holder",
+                "av2-consensus-seq-render",
                 "Consensus:",
                 <AlignmentDetails
                   reduxHorizontalId={sharedHorizontalReduxId}
@@ -370,7 +370,7 @@ export class AlignmentViewer extends React.Component<
           {!showQuery
             ? null
             : this.renderWidget(
-                "query-seq-holder",
+                "av2-query-seq-render",
                 "Query:",
                 <AlignmentDetails
                   reduxHorizontalId={sharedHorizontalReduxId}
@@ -396,7 +396,7 @@ export class AlignmentViewer extends React.Component<
           {!showRuler 
             ? null
             : this.renderWidget(
-                "position-indicator-holder",
+                "av2-position-indicator-render",
                 "Position:",
                 <div className="position-box">
                   <PositionalAxis
@@ -411,7 +411,7 @@ export class AlignmentViewer extends React.Component<
               )}
 
           {this.renderWidget(
-            "alignment-details-holder",
+            "av2-alignment-details-render",
             <div className="alignment-metadata-box">
               { <AlignmentTextualMetadata
                 horizontalReduxId={metadataReduxId}

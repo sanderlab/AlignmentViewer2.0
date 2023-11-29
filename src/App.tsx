@@ -2,6 +2,7 @@ import React from "react";
 import "./App.scss";
 import { Alignment } from "./common/Alignment";
 import { SequenceSorter } from "./common/AlignmentSorter";
+import { downloadLogoSvg } from "./common/FileExporter"
 import { UrlLocalstorageBooleanInputManager, UrlLocalstorageInputManager, UrlLocalstorageNumberInputManager, getURLParameters } from "./common/Utils";
 import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerComponent";
 import {
@@ -306,8 +307,22 @@ export default class App extends React.Component<AppProps, AppState> {
                   width="16"
                   height="16"
                   src={`${process.env.PUBLIC_URL}/GitHub-Mark-32px.png`}
-                />
+                /> 
               </a>
+
+              <button
+                className={`download button-link${!alignment ? " hide" : ""}`}
+                type="button"
+                style={{ margin: 0, border: "none" }}
+                onClick={()=>{downloadLogoSvg(this.state.style)}}
+              >
+                <img
+                  alt="Download Alignment" 
+                  width="16"
+                  height="16"
+                  src={`${process.env.PUBLIC_URL}/download_32px.png`}
+                />
+              </button>
 
               <button
                 className={`button-link${showSettings ? " hide" : ""}`}
@@ -759,6 +774,9 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   protected onAlignmentReceived(alignment: Alignment) {
+    this.urlInputs.ALIGNMENT_STYLE.onChange(
+      alignment.getDefaultStyle()
+    );
     this.setState({
       alignment: alignment,
       showSettings: false,

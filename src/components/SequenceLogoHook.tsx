@@ -7,9 +7,9 @@ import React, { useCallback, useMemo } from "react";
 import "./SequenceLogo.scss";
 import { Tooltip } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
-import { GlyphFactory } from "../common/SequenceLogoGlyphs";
+import { GlyphFactory, LogoFonts } from "../common/SequenceLogoGlyphs";
 import {
-  aceResidueParentClass,
+  residueParentClass,
   getLetterClassNames,
   AlignmentTypes,
   AminoAcidAlignmentStyle,
@@ -23,9 +23,8 @@ export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
   BARS = "Bar Plot",
 }
-
 interface ILetterWithClasses {
-  letter: string;
+  letter: AvailableGlyphs;
   classNames: string;
 }
 interface IGlyphFrequency {
@@ -76,7 +75,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const letterObjects = lettersSorted.reduce((arr, letter) => {
       arr[letter] = {
         letter: letter,
-        classNames: getLetterClassNames(letter, false, false, false),
+        classNames: getLetterClassNames(letter, false, false),
       };
       return arr;
     }, {} as { [letter: string]: ILetterWithClasses });
@@ -190,8 +189,9 @@ export function SequenceLogo(props: ISequenceLogoProps) {
             ></rect>
           );
         }
-
-        const selectedGlyph = GlyphFactory.glyphFromChar(freq.letter.letter)({
+        const selectedGlyph = GlyphFactory.glyphFromChar(
+          freq.letter.letter, LogoFonts.ROBOTO_MONO_MEDIUM
+        )({
           className: freq.letter.classNames,
           transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
           key: `idxglyph_${idx}`,
@@ -210,7 +210,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         (
           <g
             transform={`translate(${positionIdx},0)`}
-            className={aceResidueParentClass} //required for default coloring
+            className={residueParentClass} //required for default coloring
             key={"p_" + positionIdx}
           >
             {renderSinglePositionStack(singlePositionData, logoData.length)}
@@ -237,11 +237,14 @@ export function SequenceLogo(props: ISequenceLogoProps) {
 
     return (
       <svg
+        className="av2-sequence-logo"
         preserveAspectRatio="none"
         viewBox={`0 0 ${sequenceLength} 100`}
+        width={`${totalWidth}px`}
+        height={`${height}px`}
         style={{
-          width: totalWidth,
-          height: height ? height : height,
+          width: totalWidth, //not respected in illustrator when exported
+          height: height,    //hence also adding the attributes above
         }}
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -260,7 +263,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     additionalHorizontalOffset: number
   )=>{
     const classNames = [
-      "sequence-logo",
+      "sequence-logo-holder",
       style.alignmentType.className,
       style.colorScheme.className,
       PositionsToStyle.ALL.className,
@@ -338,7 +341,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
                   return (
                     <g
                       transform={`translate(${arrIdx},0)`}
-                      className={aceResidueParentClass} //required for default coloring
+                      className={residueParentClass} //required for default coloring
                       key={"p_" + pos.positionIdx}
                     >
                       {pos.positionStack}

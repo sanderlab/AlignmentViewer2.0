@@ -1,11 +1,11 @@
 /** SequenceLogo.scss */
 
-.sequence-logo::-webkit-scrollbar {
+.sequence-logo-holder::-webkit-scrollbar {
   background: transparent; // make scrollbar transparent
   height: 0;
 }
 
-.sequence-logo {
+.sequence-logo-holder {
   overflow-x: auto;
   overflow-y: hidden;
   position: relative;

@@ -13,14 +13,14 @@
   bottom: 0;
 
   //single row editors
-  .av-widget.consensus-seq-holder,
-  .av-widget.query-seq-holder,
-  .av-widget.position-indicator-holder {
+  .av-widget.av2-consensus-seq-render,
+  .av-widget.av2-query-seq-render,
+  .av-widget.av2-position-indicator-render {
     height: 24px; //default, but this is set as a style
   }
 
   //the main editor
-  .av-widget.alignment-details-holder {
+  .av-widget.av2-alignment-details-render {
     flex-grow: 4;
   }
 

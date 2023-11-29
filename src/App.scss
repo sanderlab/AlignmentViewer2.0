@@ -43,7 +43,7 @@ body {
       border: 2px solid black;
       padding: 15px;
       position: absolute;
-      z-index: 500;
+      //z-index: 500;
       background-color: white;
 
       h3,
@@ -79,8 +79,13 @@ body {
           font-size: 0;
           padding-right: 10px;
         }
-        button {
+        button.download {
           order: 3;
+          font-size: 0;
+          padding-right: 10px;
+        }
+        button {
+          order: 4;
           font-size: 0;
           padding: 0;
         }

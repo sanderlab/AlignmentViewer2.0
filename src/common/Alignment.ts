@@ -34,7 +34,7 @@ export class Alignment {
   private querySequence: ISequence;
   private positionalLetterCounts: Map<number, { [letter: string]: number }>;
   private globalAlphaLetterCounts: { [letter: string]: number };
-  private allUpperAlphaLettersInAlignmentSorted: string[];
+  private allUpperAlphaLettersInAlignmentSorted: UpperCaseLetters[];
   private consensus: ISequence;
 
   /**
@@ -259,10 +259,12 @@ export class Alignment {
     ).reduce((acc, charCodeStr) => {
       const charCode = parseInt(charCodeStr);
       if (charCode > 64 && charCode < 91) {
-        acc.push(String.fromCharCode(charCode));
+        acc.push(
+          String.fromCharCode(charCode) as UpperCaseLetters
+        );
       }
       return acc;
-    }, [] as string[]);
+    }, [] as UpperCaseLetters[]);
 
     //extract consensus
     this.consensus = {
@@ -498,7 +500,7 @@ export class Alignment {
    * Get a sorted list of all of the upper case letters in the alignment.
    * @returns a list of all letters in the alignment sorted alphabetically.
    */
-  getAllUpperAlphaLettersInAlignmentSorted(): string[] {
+  getAllUpperAlphaLettersInAlignmentSorted(): UpperCaseLetters[] {
     return this.allUpperAlphaLettersInAlignmentSorted;
   }
 

@@ -1,4 +1,3 @@
-import { GlyphFactory } from "./SequenceLogoGlyphs";
 import { stringToColor } from "./Utils";
 import {
   ALL_AMINOACID_COLORSCHEMES,
@@ -35,19 +34,16 @@ interface IAminoAcid {
   singleLetterCode: string;
   threeLetterCode: string;
   fullName: string;
-  glyph: (props: { [key: string]: string }) => JSX.Element;
   colors: IResidueColor;
 }
 
 interface INucleotide {
   singleLetterCode: string;
   fullName: string;
-  glyph: (props: { [key: string]: string }) => JSX.Element;
   colors: IResidueColor;
 }
 
 export class AminoAcid implements IAminoAcid {
-  glyph: (props: { [key: string]: string }) => JSX.Element;
   colors: IResidueColor;
 
   public static readonly canonicalAminoAcids: AminoAcid[] = [
@@ -115,7 +111,6 @@ export class AminoAcid implements IAminoAcid {
     this.singleLetterCode = singleLetterCode;
     this.threeLetterCode = threeLetterCode;
     this.fullName = fullName;
-    this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
     this.colors = ALL_AMINOACID_COLORSCHEMES.reduce((acc, cs) => {
       acc[cs.commonName] = {
         lightTheme: {
@@ -157,7 +152,6 @@ export class AminoAcid implements IAminoAcid {
 }
 
 export class Nucleotide implements INucleotide {
-  glyph: (props: { [key: string]: string }) => JSX.Element;
   colors: IResidueColor;
 
   static allNucleotides: Nucleotide[] = [
@@ -194,7 +188,6 @@ export class Nucleotide implements INucleotide {
   constructor(public singleLetterCode: string, public fullName: string) {
     this.singleLetterCode = singleLetterCode;
     this.fullName = fullName;
-    this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
     this.colors = ALL_NUCLEOTIDE_COLORSCHEMES.reduce((acc, cs) => {
       acc[cs.commonName] = {
         lightTheme: {

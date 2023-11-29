@@ -281,23 +281,21 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
  */
 const darkHueClass = styles.darkHueClass;
 const lightHueClass = styles.lightHueClass;
-const aceResidueParentClass = styles.aceResidueParentClass;
+const residueParentClass = styles.residueParentClass;
 export {
   lightHueClass,
   darkHueClass,
-  aceResidueParentClass, // place above any residue (e.g., ace_A) to get default coloring
+  residueParentClass, // place above any residue (e.g., resi_A) to get default coloring
 };
 
 /**
- * Export ace helper parameters and functions.
+ * Export helper parameters and functions.
  */
 
 /**
  * fast lookup of the query, consensus classes
- * @param isForAceItself If it is for ace, do not include the ace_ prefix
- *                       as this is added automatically by ace itself.
  */
-function generateFastClassLookup(isForAceItself?: boolean) {
+function generateFastClassLookup() {
   let ALL_POSSIBLE_CHARS = "";
   for (var i = 32; i <= 126; i++) {
     ALL_POSSIBLE_CHARS += String.fromCharCode(i);
@@ -306,9 +304,7 @@ function generateFastClassLookup(isForAceItself?: boolean) {
   return ALL_POSSIBLE_CHARS.split("") //".-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     .reduce((acc, letter) => {
       const letterInClass = letter === "." ? "dot" : letter;
-      const prefix = isForAceItself
-        ? letterInClass
-        : styles.acePrefix + letterInClass;
+      const prefix = styles.resiPrefix + letterInClass;
       acc.set(
         letter,
         new Map([
@@ -319,17 +315,17 @@ function generateFastClassLookup(isForAceItself?: boolean) {
                 true,
                 prefix +
                   " " +
-                  styles.preAceConsensusClass +
+                  styles.preConsensusClass +
                   " " +
-                  styles.preAceQueryClass,
+                  styles.preQueryClass,
               ], //is consensus and query
-              [false, prefix + " " + styles.preAceConsensusClass], //is consensus, not query
+              [false, prefix + " " + styles.preConsensusClass], //is consensus, not query
             ]),
           ],
           [
             false,
             new Map([
-              [true, prefix + " " + styles.preAceQueryClass], //is query, not consensus
+              [true, prefix + " " + styles.preQueryClass], //is query, not consensus
               [false, prefix], //not query and not consensus
             ]),
           ],
@@ -339,20 +335,15 @@ function generateFastClassLookup(isForAceItself?: boolean) {
     }, new Map<string, Map<boolean, Map<boolean, string>>>());
 }
 
-const LETTER_CLASS_NAMES = generateFastClassLookup(false);
-const LETTER_CLASS_NAMES_FOR_ACE = generateFastClassLookup(true);
-
+const LETTER_CLASS_NAMES = generateFastClassLookup();
 /**
- * Export a class name array that is used by the ace editor
- * mode to fill class names for each letter. The structure
- * of this string is just the list of class names, separated
- * by a period. Ace subsequently prepends ace_ to each value
- * when adding the classes to the editor.
+ * Export a class name array that is used by the different parts
+ * of alignment viewer to fill class names for each letter. The
+ * structure of this string is just the list of class names, 
+ * separated by a period.
  *
  * Update: I only use a single class name separated by a space.
- *         I think this helps with performance:(1) ace no
- *         longer needs to split the returned value by periods
- *         and apply any multi-class logic, and (2) the dom has
+ *         I think this helps with performance: the dom has
  *         shorter classnames. I did rough tests and this seems
  *         to help with performance, but admittedly they were not
  *         rigerous or scientific and it doesn't seem to make a
@@ -361,17 +352,11 @@ const LETTER_CLASS_NAMES_FOR_ACE = generateFastClassLookup(true);
  * @param letter
  * @param isConsensus
  * @param isQuery
- * @param forAceItself if set to true, the first returned class will
- *                     not have ace_ prepended as the ace editor will
- *                     do the prepending on its own.
  */
 export function getLetterClassNames(
   letter: string,
   isConsensus: boolean,
-  isQuery: boolean,
-  forAceItself?: boolean
+  isQuery: boolean
 ) {
-  return forAceItself
-    ? LETTER_CLASS_NAMES_FOR_ACE.get(letter)!.get(isConsensus)!.get(isQuery)!
-    : LETTER_CLASS_NAMES.get(letter)!.get(isConsensus)!.get(isQuery)!;
+  return LETTER_CLASS_NAMES.get(letter)!.get(isConsensus)!.get(isQuery)!;
 }

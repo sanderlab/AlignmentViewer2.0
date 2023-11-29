@@ -194,10 +194,13 @@ export const AlignmentFileDrop = (props: {
   const [mouseoverTarget, setMouseoverTarget] = useState(false);
 
   const onDragEnter = useCallback((e: DragEvent | React.DragEvent) => {
-    setIsVisible(true);
-    e.stopPropagation();
-    e.preventDefault();
-    return false;
+    if (e.dataTransfer?.items.length === 1 && 
+        e.dataTransfer?.items[0].kind==='file'){
+      setIsVisible(true);
+      e.stopPropagation();
+      e.preventDefault();
+      return false;
+    }
   }, []);
 
   const onDragOver = useCallback((e: DragEvent) => {

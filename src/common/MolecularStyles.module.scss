@@ -4,19 +4,19 @@
  * Style definitions for amino acids and nucleotides in e.g. an alignment or logo.
  *  
  * INDIVIDUAL AMINO ACID / NUCLEOTIDE CLASSES
- * The Ace editor prefixes all classes it adds in the alignment mode with "ace_". Because
+ * The Ace editor prefixes all classes it adds in the alignment mode with "resi_". Because
  * of this, any other components (e.g., logo plots) should also apply classes with this
  * prefix. Amino acids and nucleotides will be styled with the single letter upper case
- * character, prefixed with ace_ (e.g., Alanine and Adenine would both be ace_A).
+ * character, prefixed with resi_ (e.g., Alanine and Adenine would both be resi_A).
  * 
  * Positional modifying classes can be accessed via 4 exported parameters:
- *    preAceQueryClass:       string to indicate a residue matches the query sequence (this
- *                                (should only be used by the ace highlight parser)
- *    preAceConsensusClass:   string to indicate a residue matches the consensus sequence 
- *                                (should only be used by the ace highlight parser)
- *    aceQueryClass:          final ace_ prefixed class name to indicate a residue matches 
+ *    preQueryClass:       string to indicate a residue matches the query sequence (this
+ *                                (should only be used by the highlight parser)
+ *    preConsensusClass:   string to indicate a residue matches the consensus sequence 
+ *                                (should only be used by the highlight parser)
+ *    queryClass:          final resi_ prefixed class name to indicate a residue matches 
  *                            the query sequence 
- *    aceConsensusClass:      final ace_ prefixed class name to indicate a residue matches    
+ *    consensusClass:      final resi_ prefixed class name to indicate a residue matches    
  *                            the consensus sequence
  *
  * TOP LEVEL STYLING
@@ -29,10 +29,10 @@
  *    #1   ntAlignTypeClass            style alignment as nucleotide sequences
  *
  *    #2   styPosAllClass              style all positions 
- *    #2   styPosQueryClass            style only positions that have the ace_query class 
- *    #2   styPosQueryDiffClass        style only positions that don't have the ace_query class 
- *    #2   styPosConsensusClass        style only positions that have the ace_consensus class 
- *    #2   styPosConsensusDiffClass    style only positions that don't have the ace_consensus class 
+ *    #2   styPosQueryClass            style only positions that have the resi_query class 
+ *    #2   styPosQueryDiffClass        style only positions that don't have the resi_query class 
+ *    #2   styPosConsensusClass        style only positions that have the resi_consensus class 
+ *    #2   styPosConsensusDiffClass    style only positions that don't have the resi_consensus class 
  *
  *    #3   aaStyClass_{STYLENAME}      amino acid style with name {STYLENAME} excluding curly braces
  *    #3   aaStyColorOrder_{STYLENAME} order of amino acids in the colors object for this style. this
@@ -48,19 +48,19 @@
  *
  * Example: e.g.:
  *   <div class="$alignTypeAA $aaStyleDefault $styPosQuery">
- *     <logo .../> || <aceMSA .../>
+ *     <logo .../> || <msa .../>
  *   </div>
  */
 
 @use 'sass:math';
 
-//ace specific props
-$acePrefix: ace_;
-$preAceQueryClass: q;
-$preAceConsensusClass: c;
-$aceQueryClass: $preAceQueryClass;
-$aceConsensusClass: $preAceConsensusClass;
-$aceResidueParentClass: $acePrefix + line; //directly above ace residues
+//general props
+$resiPrefix: resi_;
+$preQueryClass: q;
+$preConsensusClass: c;
+$queryClass: $preQueryClass;
+$consensusClass: $preConsensusClass;
+$residueParentClass: $resiPrefix + line; //directly above residues
 
 //general global props
 $aaStyleClassPrefix: aa-alignment-style-;
@@ -651,8 +651,8 @@ $ntProps: (
     $defaultColor: map-get($styleObj, defaultLetterColor);
     :global
       .#{$alignmentClass}
-      .#{$aceResidueParentClass}
-      [class^="#{$acePrefix}"] {
+      .#{$residueParentClass}
+      [class^="#{$resiPrefix}"] {
       color: $defaultColor;
       fill: $defaultColor;
     }
@@ -664,51 +664,31 @@ $ntProps: (
     //
     :global
       .#{$alignmentClass}.#{$lettersOnlyHueClass}
-      [class^="#{$acePrefix}"] {
+      [class^="#{$resiPrefix}"] {
       background-color: transparent !important;
     }
 
-    //SPECIAL CASE 1
-    //the glyph for "S" needs to have a fill and stroke
-    //this selector captures an special case - when user selects
-    //nucleotide alignment and there is an S in the alignment
-    //it would disappear in the logo plot without this class.
-    :global .#{$alignmentClass} .#{$aceResidueParentClass} .#{$acePrefix}S {
-      color: $defaultColor;
-      stroke: $defaultColor;
-      fill: #ffffff;
-    }
-
-    //SPECIAL CASE 2.1
-    //logo plot fo "S" when rectangles are shown needs to have
-    //fill with the color, not white as required for the glyph
-    //NOTE: this for amino acids, this is handled by on a per-style
-    //      basis (see SPECIAL CASE 2.2 below)
-    :global .#{$alignmentClass} .#{$aceResidueParentClass} rect.#{$acePrefix}S {
-      fill: $defaultColor;
-    }
-
     @each $aa, $color in map-get($styleObj, colors) {
-      $aceAAClass: $acePrefix + $aa;
+      $aaClass: $resiPrefix + $aa;
 
       //
       // dark hues
       //
       :global
         .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosAll}
-        .#{$aceAAClass},
+        .#{$aaClass},
       :global
         .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosConsensus}
-        .#{$aceAAClass}.#{$aceConsensusClass},
+        .#{$aaClass}.#{$consensusClass},
       :global
         .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosConsensusDiff}
-        .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+        .#{$aaClass}:not(.#{$consensusClass}),
       :global
         .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosQuery}
-        .#{$aceAAClass}.#{$aceQueryClass},
+        .#{$aaClass}.#{$queryClass},
       :global
         .#{$alignmentClass}.#{$darkHueClass}.#{$styleClass}.#{$styPosQueryDiff}
-        .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+        .#{$aaClass}:not(.#{$queryClass}) {
         //set letter color based on brightness of background color
         color: getLetterColor($color) !important;
         background-color: $color !important;
@@ -717,43 +697,25 @@ $ntProps: (
       //
       // light hues - default of no class is added and also for logo
       //
-      :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aceAAClass},
+      :global .#{$alignmentClass}.#{$styleClass}.#{$styPosAll} .#{$aaClass},
       :global
         .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensus}
-        .#{$aceAAClass}.#{$aceConsensusClass},
+        .#{$aaClass}.#{$consensusClass},
       :global
         .#{$alignmentClass}.#{$styleClass}.#{$styPosConsensusDiff}
-        .#{$aceAAClass}:not(.#{$aceConsensusClass}),
+        .#{$aaClass}:not(.#{$consensusClass}),
       :global
         .#{$alignmentClass}.#{$styleClass}.#{$styPosQuery}
-        .#{$aceAAClass}.#{$aceQueryClass},
+        .#{$aaClass}.#{$queryClass},
       :global
         .#{$alignmentClass}.#{$styleClass}.#{$styPosQueryDiff}
-        .#{$aceAAClass}:not(.#{$aceQueryClass}) {
+        .#{$aaClass}:not(.#{$queryClass}) {
         color: $color;
         background-color: getNonTransparantAlphaEquivalant(
           $color,
           $backgroundAlpha
         );
-        @if $aa == S {
-          //serine glyph needs stoke coloring also
-          stroke: $color;
-          fill: #ffffff;
-        } @else {
           fill: $color;
-        }
-      }
-
-      //SPECIAL CASE 2.2
-      //logo plot fo "S" when rectangles are shown needs to have
-      //fill with the color, not white as required for the glyph
-      @if $aa == S {
-        :global
-          .#{$alignmentClass}.#{$styleClass}.#{$styPosAll}
-          svg
-          rect.#{$aceAAClass} {
-          fill: $color;
-        }
       }
     }
   }
@@ -777,12 +739,12 @@ $ntProps: (
  *
  */
 :export {
-  acePrefix: $acePrefix;
-  preAceQueryClass: $preAceQueryClass;
-  preAceConsensusClass: $preAceConsensusClass;
-  aceQueryClass: $aceQueryClass;
-  aceConsensusClass: $aceConsensusClass;
-  aceResidueParentClass: $aceResidueParentClass;
+  resiPrefix: $resiPrefix;
+  preQueryClass: $preQueryClass;
+  preConsensusClass: $preConsensusClass;
+  queryClass: $queryClass;
+  consensusClass: $consensusClass;
+  residueParentClass: $residueParentClass;
   darkHueClass: $darkHueClass;
   lightHueClass: $lightHueClass;
   lettersOnlyHueClass: $lettersOnlyHueClass;
