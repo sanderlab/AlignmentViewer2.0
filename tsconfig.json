@@ -21,6 +21,7 @@
   "include": [
     "src/components",
     "src/common",
+    "src/App.tsx",
     "src/index.ts",
     "types",
  ]

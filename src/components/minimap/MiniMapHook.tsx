@@ -16,7 +16,7 @@ import {
 } from "../../common/MolecularStyles";
 import { RootState, setWorldTopRowOffset } from "../../common/ReduxStore";
 import { stopSafariFromBlockingWindowWheel, useStateCallback } from "../../common/Utils";
-import { ReactResizeSensor } from "../ResizeSensorHook";
+import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 import { useAppDispatch, useAppSelector } from "../../common/Hooks";
 import { shallowEqual } from "react-redux";
 
@@ -168,11 +168,11 @@ export function MiniMap(props: IMiniMapProps) {
   //
   //callbacks
   //
-  const setRefElement = useCallback((ref) => {
+  const setRefElement = useCallback((ref: HTMLDivElement) => {
     setMinimapRef(ref);
   }, []);
 
-  const minimapHolderResized = useCallback((bounds) => {
+  const minimapHolderResized = useCallback((bounds: IBounds) => {
     if (
       !minimapHolderDimensions ||
       minimapHolderDimensions.width !== bounds.width ||
@@ -241,7 +241,7 @@ export function MiniMap(props: IMiniMapProps) {
     mmOffsets?.scale
   ]);*/
 
-  const handleHighlighterMoved = useCallback((deltaPx)=>{
+  const handleHighlighterMoved = useCallback((deltaPx: number)=>{
     //TODO clamp
     if (mmOffsets?.scale){
       const calculatedRowOffset = 
@@ -280,7 +280,7 @@ export function MiniMap(props: IMiniMapProps) {
         consensusSequence={alignment.getConsensus().sequence}
         querySequence={alignment.getQuerySequence().sequence}
         alignmentType={alignmentStyle.alignmentType}
-        colorScheme={alignmentStyle.colorScheme}
+        colorScheme={alignmentStyle.selectedColorScheme}
         positionsToStyle={positionsToStyle}
         residueColoring={ResidueColoring.DARK}
       />
@@ -288,7 +288,7 @@ export function MiniMap(props: IMiniMapProps) {
   }, [
     alignment,
     alignmentStyle.alignmentType,
-    alignmentStyle.colorScheme,
+    alignmentStyle.selectedColorScheme,
     positionsToStyle,
     sequences
   ]);

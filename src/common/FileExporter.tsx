@@ -25,7 +25,7 @@ export function downloadLogoSvg(style: AminoAcidAlignmentStyle | NucleotideAlign
       const newStyleDom = document.createElement('style')
       newStyleDom.setAttribute("type", "text/css");
       newStyleDom.textContent = Object.entries(
-        style.colorScheme.colors
+        style.selectedColorScheme.colors
       ).map(([resiCode, color])=>{
         return `.resi_${resiCode}{ 
           color: ${color}; 
@@ -49,7 +49,7 @@ export function downloadLogoSvg(style: AminoAcidAlignmentStyle | NucleotideAlign
       link.click();
       document.body.removeChild(link);
 
-      console.log('style', style.colorScheme)
+      console.log('style', style.selectedColorScheme)
       console.log('1 :: svgElement:', svgElement.outerHTML.replaceAll("resi_", "r"));
     }
   };

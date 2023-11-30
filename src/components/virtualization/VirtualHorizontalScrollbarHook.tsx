@@ -3,7 +3,7 @@
  */
 import "./VirtualScrollbars.scss";
 import React, { useState, useCallback } from "react";
-import { ReactResizeSensor } from "../ResizeSensorHook";
+import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 
 interface IVirtualScrollbarProps {
   visible: boolean;
@@ -42,7 +42,7 @@ export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
   });
   
   //useCallback
-  const scrollbarHolderSizeChanged = useCallback((bounds) => {
+  const scrollbarHolderSizeChanged = useCallback((bounds: IBounds) => {
     //sizing - could be passed as a prop, but doing this calculation here in case
     //         the parent does something odd with css and messes up the actual
     //         spacing that the scrollbar consumes.

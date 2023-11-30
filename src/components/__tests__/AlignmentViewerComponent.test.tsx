@@ -4,9 +4,9 @@ import * as React from "react";
 import { shallow } from "enzyme";
 
 import { Alignment } from "../../common/Alignment";
-import { AlignmentViewer } from "../AlignmentViewerComponent";
+import { AlignmentViewer } from "../AlignmentViewerHook";
 import { AlignmentStyle, AlignmentTypes } from "../../common/MolecularStyles";
-import { LOGO_TYPES } from "../SequenceLogoComponent";
+import { LOGO_TYPES } from "../SequenceLogoHook";
 import { SequenceSorter } from "../../common/AlignmentSorter";
 
 // Due to the runtime necessities of using styles, we need to explicitly mock out some stub data.
@@ -36,7 +36,7 @@ describe("AlignmentViewer", () => {
   it("Should render", () => {
     const wrapper = shallow(
       <AlignmentViewer
-        alignment={new Alignment("", [])}
+        alignment={new Alignment("", [], true)}
         style={AlignmentStyle.fromAlignmentType(AlignmentTypes.NUCLEOTIDE)}
         zoomLevel={0}
         sortBy={SequenceSorter.INPUT}

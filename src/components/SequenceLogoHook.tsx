@@ -192,7 +192,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           );
         }
         const selectedGlyph = GlyphFactory.glyphFromChar(
-          freq.letter.letter, LogoFonts.HELVETICA_BOLD//LogoFonts.ROBOTO_MONO_MEDIUM
+          freq.letter.letter, font//LogoFonts.ROBOTO_MONO_MEDIUM
         )({
           className: freq.letter.classNames,
           transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
@@ -200,7 +200,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         });
         return selectedGlyph;
       });
-  }, [logoType]);
+  }, [logoType, font]);
 
   const positionsCache = useMemo(()=>{
     const sequenceLength = alignment.getSequenceLength();
@@ -229,7 +229,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         ) as React.SVGProps<SVGGElement>
       );
     }
-    return positions;
+    return <>{positions}</>;
   }, [alignment, logoData, renderSinglePositionStack]);
 
   //setup cache - each glyph stack as a svg g element is saved in memory for quick render
@@ -267,7 +267,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const classNames = [
       "sequence-logo-holder",
       style.alignmentType.className,
-      style.colorScheme.className,
+      style.selectedColorScheme.className,
       PositionsToStyle.ALL.className,
     ];
 
@@ -292,7 +292,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     renderedSvg, 
     renderedTooltip, 
     style.alignmentType.className, 
-    style.colorScheme.className
+    style.selectedColorScheme.className
   ]);
 
   //OPTION 2: VIRTUALIZATION

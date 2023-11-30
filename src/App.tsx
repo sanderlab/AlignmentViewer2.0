@@ -4,7 +4,7 @@ import { Alignment } from "./common/Alignment";
 import { SequenceSorter } from "./common/AlignmentSorter";
 import { downloadLogoSvg } from "./common/FileExporter"
 import { UrlLocalstorageBooleanInputManager, UrlLocalstorageInputManager, UrlLocalstorageNumberInputManager, getURLParameters } from "./common/Utils";
-import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerComponent";
+import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerHook";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -22,14 +22,7 @@ import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
 import { PreconfiguredPositionalBarplots } from "./components/PositionalBarplotHook";
 
 interface AppProps {}
-interface AppState {
-  alignment?: Alignment;
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  positionsToStyle: PositionsToStyle;
-  residueColoring: ResidueColoring;
-  sortBy: SequenceSorter;
-  logoPlotStyle: LOGO_TYPES;
-  zoomLevel: number;
+interface BooleanStateVariables {
   showLogo: boolean;
   showMiniMap: boolean;
   showConservationBarplot: boolean;
@@ -38,12 +31,46 @@ interface AppState {
   showAnnotations: boolean;
   showSettings: boolean;
   loading?: boolean;
-  loadError?: AlignmentLoadError;
   removeDuplicateSeqs: boolean;
 }
+interface AlignmentStateVariables {
+  alignment?: Alignment;
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle;
+  residueColoring: ResidueColoring;
+  sortBy: SequenceSorter;
+  logoPlotStyle: LOGO_TYPES;
+  zoomLevel: number;
+  loadError?: AlignmentLoadError;
+};
+interface AppState extends BooleanStateVariables, AlignmentStateVariables {};
+
+
+interface ObjectURLInputs{
+  ALIGNMENT_STYLE: UrlLocalstorageInputManager<AlignmentStyle>,
+  POSITIONS_TO_STYLE: UrlLocalstorageInputManager<PositionsToStyle>,
+  RESIDUE_COLORING: UrlLocalstorageInputManager<ResidueColoring>,
+  SORT_BY: UrlLocalstorageInputManager<SequenceSorter>,
+  LOGO_STYLE: UrlLocalstorageInputManager<LOGO_TYPES>,
+}
+interface BooleanURLInputs {
+  MINIMAP: UrlLocalstorageBooleanInputManager,
+  CONSERVATION_BARPLOT: UrlLocalstorageBooleanInputManager,
+  ENTROPY_BARPLOT: UrlLocalstorageBooleanInputManager,
+  KLDIVERGENCE_BARPLOT: UrlLocalstorageBooleanInputManager,
+  ANNOTATIONS: UrlLocalstorageBooleanInputManager,
+  SHOW_LOGO: UrlLocalstorageBooleanInputManager,
+  REMOVE_DUPLICATE_SEQS: UrlLocalstorageBooleanInputManager
+}
+interface NumberURLInputs{
+  ZOOM_LEVEL: UrlLocalstorageNumberInputManager
+}
+interface URLInputs extends ObjectURLInputs, BooleanURLInputs, NumberURLInputs {};
+
+
 
 export default class App extends React.Component<AppProps, AppState> {
-  private urlInputs;
+  private urlInputs: URLInputs;
 
   constructor(props: AppProps) {
     super(props);
@@ -67,9 +94,10 @@ export default class App extends React.Component<AppProps, AppState> {
     //write defaults for all UI parameters
     UrlLocalstorageInputManager.initializeAllInputs()
     this.urlInputs = {
+      //objects
       ALIGNMENT_STYLE: new UrlLocalstorageInputManager<AlignmentStyle>(
         new AminoAcidAlignmentStyle(), 'alignment-style',
-        (as: AlignmentStyle) => {return as.alignmentType.key + '.' + as.colorScheme.commonName},
+        (as: AlignmentStyle) => {return as.alignmentType.key + '.' + as.selectedColorScheme.commonName},
         (str: string) => {
           const split = str.split('.');
           const at = AlignmentTypes.fromKey(split[0]) ? 
@@ -129,15 +157,16 @@ export default class App extends React.Component<AppProps, AppState> {
         },
       ),
 
+      //booleans
       MINIMAP: new UrlLocalstorageBooleanInputManager(true, 'minimap'),
       CONSERVATION_BARPLOT: new UrlLocalstorageBooleanInputManager(true, 'conservation-barplot'),
       ENTROPY_BARPLOT: new UrlLocalstorageBooleanInputManager(true, 'entropy-barplot'),
       KLDIVERGENCE_BARPLOT: new UrlLocalstorageBooleanInputManager(false, 'kl-divergence-barplot'),
       ANNOTATIONS: new UrlLocalstorageBooleanInputManager(true, 'annotations'),
       SHOW_LOGO: new UrlLocalstorageBooleanInputManager(true, 'show-logo'),
-
       REMOVE_DUPLICATE_SEQS: new UrlLocalstorageBooleanInputManager(true, 'remove-duplicates'),
 
+      //numbers
       ZOOM_LEVEL: new UrlLocalstorageNumberInputManager(12, 'zoom-level'),
     };
 
@@ -517,7 +546,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <strong>Color Scheme:</strong>
           <select
             value={style.alignmentType.allColorSchemes.indexOf(
-              style.colorScheme
+              style.selectedColorScheme
             )}
             onChange={(e) => {
               const newStyle = {
@@ -742,8 +771,8 @@ export default class App extends React.Component<AppProps, AppState> {
   protected renderToggle = (
     classInputName: string,
     label: string,
-    stateVar: string,
-    urlInputLabel: string,
+    stateVar: keyof BooleanStateVariables,
+    urlInputLabel: keyof BooleanURLInputs,
   ) => {
     return (
       <div className={classInputName}>
@@ -753,9 +782,9 @@ export default class App extends React.Component<AppProps, AppState> {
           <input
             name={classInputName}
             type="checkbox"
-            checked={this.state[stateVar]}
+            checked={this.state[stateVar] as boolean}
             onChange={(e) => {
-              const newState = {};
+              const newState = {} as AppState;
               newState[stateVar] = e.target.checked;
               this.setState(newState);
               this.urlInputs[urlInputLabel].onChange(e.target.checked);

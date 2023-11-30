@@ -224,8 +224,8 @@ export function stopSafariFromBlockingWindowWheel(cssClass: string) {
  */
 //inspired by https://pierrehedkvist.com/posts/react-state-url
 export class UrlLocalstorageInputManager<T>{
-  protected initialValue: T;
-  protected onChange: (newValue: T) => void;
+  public initialValue: T;
+  public onChange: (newValue: T) => void;
 
   static LOCAL_STORAGE_KEY = "UI_OPTIONS_CACHE";
   static initializeAllInputs = () => {

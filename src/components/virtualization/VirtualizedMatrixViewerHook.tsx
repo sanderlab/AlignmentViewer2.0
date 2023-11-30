@@ -5,7 +5,7 @@ import "./VirtualizedMatrixViewer.scss";
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import * as PIXI from "pixi.js";
 
-import { ReactResizeSensor } from "../ResizeSensorHook";
+import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 import {
   toggleSelectedPosition as toggleReduxSelectedPosition,
   toggleSelectedSequence as toggleReduxSelectedSequence,
@@ -97,7 +97,7 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
   //
   //useCallbacks
   //
-  const viewportSizeChanged = useCallback((bounds) => {
+  const viewportSizeChanged = useCallback((bounds: IBounds) => {
     setScreenHeight(bounds.height);
     setScreenWidth(bounds.width);
 

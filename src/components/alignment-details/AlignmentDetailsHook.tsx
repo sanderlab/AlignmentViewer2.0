@@ -127,7 +127,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                   consensusSequence={consensusSequence}
                   querySequence={querySequence}
                   alignmentType={alignmentStyle.alignmentType}
-                  colorScheme={alignmentStyle.colorScheme}
+                  colorScheme={alignmentStyle.selectedColorScheme}
                   positionsToStyle={positionsToStyle}
                   residueColoring={residueColoring}
                 />
@@ -260,10 +260,10 @@ export function AlignmentDetailsLetters(props: {
       }
     }
     return residueColoring === ResidueColoring.DARK
-      ? molecule.colors[alignmentStyle.colorScheme.commonName].darkTheme.letterColor
+      ? molecule.colors[alignmentStyle.selectedColorScheme.commonName].darkTheme.letterColor
       : residueColoring === ResidueColoring.LIGHT
-      ? molecule.colors[alignmentStyle.colorScheme.commonName].lightTheme.letterColor
-      : molecule.colors[alignmentStyle.colorScheme.commonName].lettersOnlyTheme.letterColor;
+      ? molecule.colors[alignmentStyle.selectedColorScheme.commonName].lightTheme.letterColor
+      : molecule.colors[alignmentStyle.selectedColorScheme.commonName].lettersOnlyTheme.letterColor;
   }, []);
 
 

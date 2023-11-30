@@ -237,7 +237,8 @@ export class ResidueColoring {
  */
 export abstract class AlignmentStyle {
   abstract readonly alignmentType: AlignmentTypes;
-  abstract colorScheme: IColorScheme;
+  abstract readonly allColorSchemes: IColorScheme[];
+  abstract selectedColorScheme: IColorScheme;
 
   static fromAlignmentType(alignmentType: AlignmentTypes) {
     if (alignmentType === AlignmentTypes.AMINOACID)
@@ -256,7 +257,7 @@ export class AminoAcidAlignmentStyle implements AlignmentStyle {
   readonly alignmentType = AlignmentTypes.AMINOACID;
 
   constructor(
-    public colorScheme: IColorScheme = ALL_AMINOACID_COLORSCHEMES[0],
+    public selectedColorScheme: IColorScheme = ALL_AMINOACID_COLORSCHEMES[0],
   ) {}
 }
 
@@ -272,7 +273,7 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
   readonly alignmentType = AlignmentTypes.NUCLEOTIDE;
 
   constructor(
-    public colorScheme: IColorScheme = ALL_NUCLEOTIDE_COLORSCHEMES[0],
+    public selectedColorScheme: IColorScheme = ALL_NUCLEOTIDE_COLORSCHEMES[0],
   ) {}
 }
 

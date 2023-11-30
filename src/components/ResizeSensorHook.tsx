@@ -8,13 +8,14 @@ import "./ResizeSensor.scss";
 import React, { useRef, ReactNode, useCallback } from "react";
 import { ResizeSensor } from "css-element-queries";
 
+export interface IBounds {
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+}
 export interface IAlignmentMetadataProps {
-  onSizeChanged(bounds: {
-    width: number;
-    height: number;
-    left: number;
-    top: number;
-  }): void;
+  onSizeChanged(bounds: IBounds): void;
   children?: ReactNode;
 }
 
@@ -30,37 +31,34 @@ export function ReactResizeSensor(props: IAlignmentMetadataProps) {
   const lastBounds = useRef<DOMRect>();
 
   //callback executed whenever ref changes
-  const resizeSensorRefCallback = useCallback(
-    (node) => {
-      if (resizeSensor.current) {
-        //cleanup
-        resizeSensor.current.detach();
-        resizeSensor.current = undefined;
-      }
+  const resizeSensorRefCallback = useCallback((node: HTMLDivElement) => {
+    if (resizeSensor.current) {
+      //cleanup
+      resizeSensor.current.detach();
+      resizeSensor.current = undefined;
+    }
 
-      if (node) {
-        // Check if a node is actually passed. Otherwise node would be null.
-        // You can now do what you need to, addEventListeners, measure, etc.
-        resizeSensor.current = new ResizeSensor(node, (dimensions) => {
-          const rect = node.getBoundingClientRect() as DOMRect;
-          if (
-            !lastBounds.current ||
-            lastBounds.current.left !== rect.left ||
-            lastBounds.current.top !== rect.top ||
-            lastBounds.current.width !== rect.width ||
-            lastBounds.current.height !== rect.height
-          ) {
-            lastBounds.current = rect;
-            onSizeChanged(rect);
-          }
-        });
-      }
+    if (node) {
+      // Check if a node is actually passed. Otherwise node would be null.
+      // You can now do what you need to, addEventListeners, measure, etc.
+      resizeSensor.current = new ResizeSensor(node, () => {
+        const rect = node.getBoundingClientRect() as DOMRect;
+        if (
+          !lastBounds.current ||
+          lastBounds.current.left !== rect.left ||
+          lastBounds.current.top !== rect.top ||
+          lastBounds.current.width !== rect.width ||
+          lastBounds.current.height !== rect.height
+        ) {
+          lastBounds.current = rect;
+          onSizeChanged(rect);
+        }
+      });
+    }
 
-      // Save a reference to the node
-      hiddenMeasuringDivRef.current = node;
-    },
-    [onSizeChanged]
-  );
+    // Save a reference to the node
+    hiddenMeasuringDivRef.current = node;
+  }, [onSizeChanged]);
 
   /**
    *
