@@ -3,7 +3,7 @@ import "./PositionalBarplot.scss";
 import { Tooltip } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
-import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { ScrollbarOptions, VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 export interface IPositionalBarplotDataSeries {
   id: string; //must be unique for each series
@@ -25,7 +25,7 @@ export interface IPositionalBarplotProps {
   //props that should be exposed in AlignmentViewer:
   dataSeriesSet: ArrayOneOrMore<IPositionalBarplotDataSeries>;
   tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
-  height?: string;
+  height: number;
   horizontalReduxId?: string;
 }
 
@@ -216,7 +216,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     dataSeriesSet,
     tooltipPlacement,
     horizontalReduxId,
-    height = "100px"
+    height
   } = props;
 
   //
@@ -499,8 +499,8 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         rowCount={1}
         rowHeight={75} //TODO unhardcode
         autoOffset={false}
-        suppressVerticalScrollbar={true}
-        suppressHorizontalScrollbar={true}
+        verticalScrollbar={ScrollbarOptions.NeverOn}
+        horizontalScrollbar={ScrollbarOptions.NeverOn}
         getContent={({
           colIdxsToRender,
           additionalHorizontalOffset,

@@ -4,7 +4,7 @@
 import "./AlignmentTextualMetadata.scss";
 import React, { useCallback } from "react";
 
-import { VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
+import { ScrollbarOptions, VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
 
 export interface IAlignmentTextualMetadataProps {
   horizontalReduxId: string;
@@ -55,6 +55,8 @@ export function AlignmentTextualMetadata(
       rowCount={textForEachSeq.length}
       rowHeight={letterHeight}
       autoOffset={true}
+      verticalScrollbar={ScrollbarOptions.OnHoverWhenOverflowed}
+      horizontalScrollbar={ScrollbarOptions.OnHoverWhenOverflowed}
       getContent={({
         rowIdxsToRender,
         colIdxsToRender

@@ -13,9 +13,8 @@ import {
   PositionsToStyle,
 } from "../../common/MolecularStyles";
 import { AminoAcid, Nucleotide } from "../../common/Residues";
-import { IVirtualizedContentParameters, VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
+import { IVirtualizedContentParameters, ScrollbarOptions, VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
-
 
 export interface IAlignmentDetailsProps {
   reduxVerticalId?: string;
@@ -29,8 +28,8 @@ export interface IAlignmentDetailsProps {
   residueHeight: number;
   residueWidth: number;
   fontSize: number;
-  suppressVerticalScrollbar?: boolean;
-  suppressHorizontalScrollbar?: boolean;
+  verticalScrollbar: ScrollbarOptions;
+  horizontalScrollbar: ScrollbarOptions;
 
   highlightedSequenceIdxs?: number[];
   highlightedPositionIdxs?: number[];
@@ -50,11 +49,10 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     residueHeight,
     residueWidth,
     fontSize,
-    suppressVerticalScrollbar,
-    suppressHorizontalScrollbar,
+    verticalScrollbar,
+    horizontalScrollbar,
   } = props;
   
-
   //
   //state
   //
@@ -186,8 +184,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       rowCount={sequences.length}
       rowHeight={residueHeight}
       autoOffset={false} //manually offset because of pixi funkyness (probably should recheck)
-      suppressVerticalScrollbar={suppressVerticalScrollbar}
-      suppressHorizontalScrollbar={suppressHorizontalScrollbar}
+      verticalScrollbar={verticalScrollbar}
+      horizontalScrollbar={horizontalScrollbar}
       getContent={renderMatrixContent}
     ></VirtualizedMatrixViewer>
   );

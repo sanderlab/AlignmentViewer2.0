@@ -207,7 +207,7 @@ export default class App extends React.Component<AppProps, AppState> {
     if (showConservationBarplot) {
       barplots.push({
         dataSeriesSet: [PreconfiguredPositionalBarplots.Conservation],
-        height: "75px",
+        height: 75,
       });
     }
     if (showEntropyGapBarplot) {
@@ -216,7 +216,7 @@ export default class App extends React.Component<AppProps, AppState> {
           PreconfiguredPositionalBarplots.ShannonEntropy,
           PreconfiguredPositionalBarplots.Gaps,
         ],
-        height: "75px",
+        height: 75,
       });
     }
     if (showKLDivergenceBarplot) {
@@ -224,7 +224,7 @@ export default class App extends React.Component<AppProps, AppState> {
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.KullbacLeiblerDivergence,
         ],
-        height: "75px",
+        height: 75,
       });
     }
 

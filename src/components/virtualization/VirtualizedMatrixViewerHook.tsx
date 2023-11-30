@@ -28,6 +28,10 @@ import { VirtualVerticalScrollbar } from "./VirtualVerticalScrollbarHook";
 import { VirtualHorizontalScrollbar } from "./VirtualHorizontalScrollbarHook";
 import { useAppDispatch, useAppSelector } from "../../common/Hooks";
 
+export enum ScrollbarOptions{
+  NeverOn, AlwaysOnWhenOverflowed, OnHoverWhenOverflowed
+}
+
 export interface IVirtualizedContentParameters {
   rowIdxsToRender: number[],
   colIdxsToRender: number[],
@@ -46,8 +50,8 @@ export interface IVirtualizedMatrixiewerProps {
   direction: "all" | "x" | "y";
   horizontalReduxId?: string;
   verticalReduxId?: string;
-  suppressHorizontalScrollbar?: boolean;
-  suppressVerticalScrollbar?: boolean;
+  horizontalScrollbar: ScrollbarOptions;
+  verticalScrollbar: ScrollbarOptions;
 }
 
 export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
@@ -59,8 +63,8 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     rowCount,
     columnWidth,
     rowHeight,
-    suppressHorizontalScrollbar,
-    suppressVerticalScrollbar
+    horizontalScrollbar = "never-on",
+    verticalScrollbar = "never-on"
   } = props;
   
   const {
@@ -189,11 +193,11 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //misc
   const disableVerticalScrolling =
-    !reduxStateVertical || !reduxStateVertical.initialized || suppressVerticalScrollbar
+    !reduxStateVertical || !reduxStateVertical.initialized || verticalScrollbar==='never-on'
       ? true
       : rowCount <= reduxStateVertical.idxsToRender.length;
   const disableHorizontalScrolling =
-    !reduxStateHorizontal || !reduxStateHorizontal.initialized || suppressHorizontalScrollbar
+    !reduxStateHorizontal || !reduxStateHorizontal.initialized || horizontalScrollbar==='never-on'
       ? true
       : columnCount <= reduxStateHorizontal.idxsToRender.length;
 
@@ -271,6 +275,213 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     reduxStateHorizontal?.idxsToRender,
   ]);
 
+  const horizontalSelectedRender = useMemo(()=>{
+    return reduxStateHorizontal?.selected.map((elem, idx)=>
+      <div 
+        style={{
+          position: "absolute",
+          top: 0,
+          left: elem.idxScreenMin-2, 
+          width: elem.idxScreenMax-elem.idxScreenMin+2,
+          bottom: "2px",
+          border: "dashed red 2px",
+          zIndex: 5000,
+          pointerEvents: "none"
+        }}
+        key={idx}/>
+    )
+  }, [reduxStateHorizontal?.selected]);
+
+  const verticalSelectedRender = useMemo(()=>{
+    return reduxStateVertical?.selected.map((elem, idx)=>
+      <div 
+        style={{
+          position: "absolute",
+          top: elem.idxScreenMin-1,
+          height: elem.idxScreenMax-elem.idxScreenMin+2,
+          left: 0, 
+          right: "2px",
+          border: "dashed red 2px",
+          zIndex: 5000,
+          pointerEvents: "none"
+        }}
+        key={idx}/>
+    )
+  }, [reduxStateVertical?.selected]);
+
+  const verticalScrollbarRender = useMemo(()=>{
+    return disableVerticalScrolling ? undefined : (
+      <VirtualVerticalScrollbar
+        visible={
+          verticalScrollbar===ScrollbarOptions.AlwaysOnWhenOverflowed || 
+          (verticalScrollbar===ScrollbarOptions.OnHoverWhenOverflowed && mouseHovering)
+        }
+        width={scrollbarWidthOrHeight}
+        horizontalScrollbarHeight={
+          !disableHorizontalScrolling ? scrollbarWidthOrHeight : 0
+        }
+        worldHeight={reduxStateVertical!.worldSize}
+        worldTopOffset={reduxStateVertical!.worldOffset}
+        scrollbarMoved={(newWorldTop) => {
+          if (verticalReduxId){
+            dispatch(
+              setReduxWorldTopPixelOffset({
+                id: verticalReduxId,
+                worldTopPixelOffset: newWorldTop,
+              })
+            );
+          }
+        }}
+      />
+    );
+  }, [
+    verticalScrollbar, 
+    disableHorizontalScrolling, 
+    disableVerticalScrolling,
+    dispatch,
+    mouseHovering,
+    reduxStateVertical,
+    verticalReduxId
+  ]);
+
+  const horizontalScrollbarRender = useMemo(()=>{
+    return disableHorizontalScrolling ? undefined : (
+      <VirtualHorizontalScrollbar
+        visible={
+          horizontalScrollbar===ScrollbarOptions.AlwaysOnWhenOverflowed || 
+          (horizontalScrollbar===ScrollbarOptions.OnHoverWhenOverflowed && mouseHovering)
+        }
+        height={scrollbarWidthOrHeight}
+        verticalScrollbarWidth={
+          !disableVerticalScrolling ? scrollbarWidthOrHeight : 0
+        }
+        worldWidth={reduxStateHorizontal!.worldSize}
+        worldLeftOffset={reduxStateHorizontal!.worldOffset}
+        scrollbarMoved={(newWorldLeft) => {
+          if (horizontalReduxId){
+            dispatch(
+              setReduxWorldLeftPixelOffset({
+                id: horizontalReduxId,
+                worldLeftPixelOffset: newWorldLeft,
+              })
+            );
+          }
+        }}
+      />
+    )
+  }, [
+    disableHorizontalScrolling,
+    disableVerticalScrolling,
+    dispatch,
+    horizontalReduxId,
+    horizontalScrollbar,
+    mouseHovering,
+    reduxStateHorizontal, 
+  ]);
+  
+  const handleWheelFn = useCallback((event: React.WheelEvent<HTMLDivElement>) => {
+    if (event.deltaX !== 0 && reduxStateHorizontal && horizontalReduxId){
+      dispatch(
+        setReduxWorldLeftPixelOffset({
+          id: horizontalReduxId,
+          worldLeftPixelOffset: reduxStateHorizontal.worldOffset + event.deltaX,
+        })
+      );
+    }
+    if (event.deltaY !== 0 && reduxStateVertical && verticalReduxId){
+      dispatch(
+        setReduxWorldTopPixelOffset({
+          id: verticalReduxId,
+          worldTopPixelOffset: reduxStateVertical.worldOffset + event.deltaY,
+        })
+      );
+    }
+  }, [
+    dispatch,
+    horizontalReduxId,
+    reduxStateHorizontal, 
+    reduxStateVertical,
+    verticalReduxId
+  ]);
+
+
+
+  const handleClickFn = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>)=>{
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
+    const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
+    if (horizontalReduxId){
+      dispatch(
+        toggleReduxSelectedPosition({
+          id: horizontalReduxId,
+          mouseViewportOffsetX: viewportX,
+        })
+      );
+    }
+    if (verticalReduxId){
+      dispatch(
+        toggleReduxSelectedSequence({
+          id: verticalReduxId,
+          mouseViewportOffsetY: viewportY,
+        })
+      );
+    }
+  }, [
+    dispatch,
+    horizontalReduxId, 
+    verticalReduxId
+  ]);
+
+  const handleMouseoutFn = useCallback(() =>{
+    if (verticalReduxId){
+      dispatch(
+        setReduxMouseOverY({
+          id: verticalReduxId,
+          mouseViewportOffsetY: undefined,
+        })
+      );
+    }
+    if (horizontalReduxId){
+      dispatch(
+        setReduxMouseOverX({
+          id: horizontalReduxId,
+          mouseViewportOffsetX: undefined,
+        })
+      );
+    }
+  }, [
+    dispatch, 
+    horizontalReduxId, 
+    verticalReduxId
+  ]);
+
+  const handleMousemoveFn = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
+    const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
+    
+    if (verticalReduxId){
+      dispatch(
+        setReduxMouseOverY({
+          id: verticalReduxId,
+          mouseViewportOffsetY: viewportY,
+        })
+      );
+    }
+    if (horizontalReduxId){
+      dispatch(
+        setReduxMouseOverX({
+          id: horizontalReduxId,
+          mouseViewportOffsetX: viewportX,
+        })
+      );
+    }
+  }, [
+    dispatch, 
+    horizontalReduxId,
+    verticalReduxId
+  ]);
+
   //
   //
   //
@@ -287,138 +498,24 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
         setMouseHovering(false);
       }}
     >
-      { 
-        reduxStateHorizontal?.selected.map((elem, idx)=>{
-          return (
-            <div 
-              style={{
-                position: "absolute",
-                top: 0,
-                left: elem.idxScreenMin-2, 
-                width: elem.idxScreenMax-elem.idxScreenMin+2,
-                bottom: "2px",
-                border: "dashed red 2px",
-                zIndex: 5000,
-                pointerEvents: "none"
-              }}
-              key={idx}/>
-          );
-        })
-      }
-
-      { 
-        reduxStateVertical?.selected.map((elem, idx)=>{
-          return (
-            <div 
-              style={{
-                position: "absolute",
-                top: elem.idxScreenMin-1,
-                height: elem.idxScreenMax-elem.idxScreenMin+2,
-                left: 0, 
-                right: "2px",
-                border: "dashed red 2px",
-                zIndex: 5000,
-                pointerEvents: "none"
-              }}
-              key={idx}/>
-          );
-        })
-      }
+      { horizontalSelectedRender }
+      { verticalSelectedRender }
 
       <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
         <div className="av2-virtualized-matrix" ref={ref}>
-          {!reduxInitialized ||
-            !ref ||
+          { !reduxInitialized ||
+            //!ref ||
             screenWidth === undefined ||
             screenHeight === undefined ? null : (
-            <>
-              {
-                // super simple way of enabling wheel scrolling and monitoring of
-                // mouse over events 
-              }
+              // simple way of enabling wheel scrolling and monitoring of
+              // mouse over events 
               <div 
                 className={'av2-wheel-scroller'} 
-                onClick={(event)=>{
-                  const bounds = event.currentTarget.getBoundingClientRect();
-                  const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
-                  const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
-                  if (horizontalReduxId){
-                    dispatch(
-                      toggleReduxSelectedPosition({
-                        id: horizontalReduxId,
-                        mouseViewportOffsetX: viewportX,
-                      })
-                    );
-                  }
-                  if (verticalReduxId){
-                    dispatch(
-                      toggleReduxSelectedSequence({
-                        id: verticalReduxId,
-                        mouseViewportOffsetY: viewportY,
-                      })
-                    );
-                  }
-                }}
-                onMouseOut={() =>{
-                  if (verticalReduxId){
-                    dispatch(
-                      setReduxMouseOverY({
-                        id: verticalReduxId,
-                        mouseViewportOffsetY: undefined,
-                      })
-                    );
-                  }
-                  if (horizontalReduxId){
-                    dispatch(
-                      setReduxMouseOverX({
-                        id: horizontalReduxId,
-                        mouseViewportOffsetX: undefined,
-                      })
-                    );
-                  }
-                }}
-                onMouseMove={(event) => {
-                  const bounds = event.currentTarget.getBoundingClientRect();
-                  const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
-                  const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
-                  
-                  if (verticalReduxId){
-                    dispatch(
-                      setReduxMouseOverY({
-                        id: verticalReduxId,
-                        mouseViewportOffsetY: viewportY,
-                      })
-                    );
-                  }
-                  if (horizontalReduxId){
-                    dispatch(
-                      setReduxMouseOverX({
-                        id: horizontalReduxId,
-                        mouseViewportOffsetX: viewportX,
-                      })
-                    );
-                  }
-                }}
-                onWheel={(event) => {
-                  if (event.deltaX !== 0 && reduxStateHorizontal && horizontalReduxId){
-                    dispatch(
-                      setReduxWorldLeftPixelOffset({
-                        id: horizontalReduxId,
-                        worldLeftPixelOffset: reduxStateHorizontal.worldOffset + event.deltaX,
-                      })
-                    );
-                  }
-                  if (event.deltaY !== 0 && reduxStateVertical && verticalReduxId){
-                    dispatch(
-                      setReduxWorldTopPixelOffset({
-                        id: verticalReduxId,
-                        worldTopPixelOffset: reduxStateVertical.worldOffset + event.deltaY,
-                      })
-                    );
-                  }
-                }}
+                onClick={handleClickFn}
+                onMouseOut={handleMouseoutFn}
+                onMouseMove={handleMousemoveFn}
+                onWheel={handleWheelFn}
               >
-
                 <div className="hover-tracker-y" style={!reduxStateVertical || !reduxStateVertical.mouseMove ? 
                   {display: "none"} : {
                     position: "absolute",
@@ -431,13 +528,6 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                     width:8, height:8, 
                     borderRadius: "50%",
                     backgroundColor:"red"
-
-                    //border: "solid red 1px",
-                    //top: reduxStateVertical.mouseMove.hoverIdxScreenMin-1, 
-                    //bottom: 0,
-                    //left:0, 
-                    //right:0,
-                    //height: reduxStateVertical.cellPixelSize,
                   }}
                 ></div>
 
@@ -453,12 +543,6 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                     width:8, height:8, 
                     borderRadius: "50%",
                     backgroundColor:"red"
-
-                    //border: "solid red 1px",
-                    //top: 0,
-                    //bottom: 0,
-                    //left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin-1, 
-                    //width: reduxStateHorizontal.cellPixelSize, 
                   }}
                 ></div>
 
@@ -483,53 +567,11 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                   } 
                 </div>
               </div>
-            </>
           )}
         </div>
 
-        {disableVerticalScrolling ? null : (
-          <VirtualVerticalScrollbar
-            visible={mouseHovering}
-            width={scrollbarWidthOrHeight}
-            horizontalScrollbarHeight={
-              !disableHorizontalScrolling ? scrollbarWidthOrHeight : 0
-            }
-            worldHeight={reduxStateVertical!.worldSize}
-            worldTopOffset={reduxStateVertical!.worldOffset}
-            scrollbarMoved={(newWorldTop) => {
-              if (verticalReduxId){
-                dispatch(
-                  setReduxWorldTopPixelOffset({
-                    id: verticalReduxId,
-                    worldTopPixelOffset: newWorldTop,
-                  })
-                );
-              }
-            }}
-          />
-        )}
-
-        {disableHorizontalScrolling ? null : (
-          <VirtualHorizontalScrollbar
-            visible={mouseHovering}
-            height={scrollbarWidthOrHeight}
-            verticalScrollbarWidth={
-              !disableVerticalScrolling ? scrollbarWidthOrHeight : 0
-            }
-            worldWidth={reduxStateHorizontal!.worldSize}
-            worldLeftOffset={reduxStateHorizontal!.worldOffset}
-            scrollbarMoved={(newWorldLeft) => {
-              if (horizontalReduxId){
-                dispatch(
-                  setReduxWorldLeftPixelOffset({
-                    id: horizontalReduxId,
-                    worldLeftPixelOffset: newWorldLeft,
-                  })
-                );
-              }
-            }}
-          />
-        )}
+        { verticalScrollbarRender }
+        { horizontalScrollbarRender }
       </ReactResizeSensor>
     </div>
   );

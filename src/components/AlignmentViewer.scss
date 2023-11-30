@@ -26,10 +26,10 @@
 
   .av-widget {
     display: flex;
-    margin: 2px 4px;
+    //margin: 2px 4px;
 
     .av-annotation,
-    .av-content {
+    .av-content-holder {
       display: flex;
       position: relative;
     }
@@ -44,11 +44,19 @@
       font-size: 14px; //default, but this is set as a style
     }
 
-    .av-content {
+    .av-content-holder {
       flex: 1 0 85%; //annotations take up 15%
       position: relative;
       align-items: center;
       overflow: hidden;
+
+      .av-content {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
     }
   }
 }

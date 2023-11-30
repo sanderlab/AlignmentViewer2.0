@@ -17,7 +17,7 @@ import {
   PositionsToStyle,
 } from "../common/MolecularStyles";
 import { AminoAcid, Nucleotide } from "../common/Residues";
-import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { ScrollbarOptions, VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
@@ -41,6 +41,7 @@ export interface ISequenceLogoProps {
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   refUpdated?: (newRef: HTMLElement | null) => void;
+  font?: LogoFonts;
 
   //props that should be exposed in AlignmentViewer:
   logoType?: LOGO_TYPES;
@@ -57,6 +58,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     tooltipPlacement = undefined,
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
+    font = LogoFonts.DEFAULT,
     horizontalReduxId,
   } = props;
 
@@ -190,7 +192,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           );
         }
         const selectedGlyph = GlyphFactory.glyphFromChar(
-          freq.letter.letter, LogoFonts.ROBOTO_MONO_MEDIUM
+          freq.letter.letter, LogoFonts.HELVETICA_BOLD//LogoFonts.ROBOTO_MONO_MEDIUM
         )({
           className: freq.letter.classNames,
           transform: `translate(0, ${dy}) scale(${xscale},${freq.frequency})`,
@@ -303,8 +305,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       rowCount={1}
       rowHeight={height}
       autoOffset={false} //manage the offset manually
-      suppressVerticalScrollbar={true}
-      suppressHorizontalScrollbar={true}
+      verticalScrollbar={ScrollbarOptions.NeverOn}
+      horizontalScrollbar={ScrollbarOptions.NeverOn}
       getContent={({
         colIdxsToRender,
         additionalHorizontalOffset,

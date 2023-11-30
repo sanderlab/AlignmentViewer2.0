@@ -3,7 +3,7 @@
  */
 import "./PositionalAxis.scss";
 import React, { useCallback, useMemo, useRef } from "react";
-import { VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { ScrollbarOptions, VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 /**
  * @param props
@@ -54,8 +54,9 @@ export function PositionalAxis(props: {
   }, [maxLength]);
 
   const renderAxis = useCallback((colIdxsToRender: number[])=>{ // example of caching. unnecessary here though
-    if (!renderCache.current[colIdxsToRender.toString()]){
-      renderCache.current[colIdxsToRender.toString()] = (
+    const cacheKey = `${colIdxsToRender.toString()}_fontsize${fontSize}`;
+    if (!renderCache.current[cacheKey]){
+      renderCache.current[cacheKey] = (
         <div className="av2-positional-axis" style={{ fontSize: fontSize }}>
           {colIdxsToRender.map((colIdx) => {
               return fullRuler[colIdx];
@@ -64,7 +65,7 @@ export function PositionalAxis(props: {
         </div>
       );
     }
-    return renderCache.current[colIdxsToRender.toString()];
+    return renderCache.current[cacheKey];
   }, [fullRuler, fontSize]);
 
   return (
@@ -77,8 +78,8 @@ export function PositionalAxis(props: {
       rowCount={1}
       rowHeight={residueHeight}
       autoOffset={true}
-      suppressVerticalScrollbar={true}
-      suppressHorizontalScrollbar={true}
+      verticalScrollbar={ScrollbarOptions.NeverOn}
+      horizontalScrollbar={ScrollbarOptions.NeverOn}
       getContent={({colIdxsToRender}) => {
         return renderAxis(colIdxsToRender);
       }}

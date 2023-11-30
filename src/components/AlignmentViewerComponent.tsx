@@ -26,15 +26,13 @@ import {
   PositionalBarplot, 
   PreconfiguredPositionalBarplots 
 } from "./PositionalBarplotHook";
+import { ScrollbarOptions } from "./virtualization/VirtualizedMatrixViewerHook";
 
 export type IAlignmentViewerProps = {
   alignment: Alignment;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   positionsToStyle: PositionsToStyle;
   residueColoring: ResidueColoring;
-
-  //event reporting
-  //minimapClicked?(mousePosition: IPosition): void;
 } & Partial<DefaultPropsTypes>;
 
 type DefaultPropsTypes = Readonly<typeof defaultProps>;
@@ -85,18 +83,13 @@ const defaultProps = {
         PreconfiguredPositionalBarplots.Gaps,
       ],
       tooltipPlacement: undefined,
-      height: "100px",
+      height: 100,
     },
   ] as undefined | IBarplotExposedProps[],
 };
 
 interface IAlignmentViewerState {
-  msaEditorVewport?: {
-    numberVisibleRows: number;
-    firstFullyVisibleRow: number;
-    lastFullyVisibleRow: number;
-  };
-
+  mouseHovering: boolean;
   //windowWidth: number;
 }
 
@@ -114,7 +107,9 @@ export class AlignmentViewer extends React.Component<
 
   constructor(props: IAlignmentViewerProps) {
     super(props);
-
+    this.state = {
+      mouseHovering: false
+    };
     this.windowDimensionsUpdated = this.windowDimensionsUpdated.bind(this);
   }
 
@@ -156,18 +151,38 @@ export class AlignmentViewer extends React.Component<
     className: string,
     annotation: string | JSX.Element,
     content: JSX.Element | null,
-    style?: React.CSSProperties,
+    contentHeightPx?: number, //height of the content
     key?: string
   ) {
+    const verticalPadding = 2;
+    const holderHeight = contentHeightPx 
+      ? contentHeightPx+(2*verticalPadding) 
+      : undefined;
+
     return (
-      <div className={`av-widget ${className}`} key={key} style={style}>
+      <div className={`av-widget ${className}`} key={key} style={{
+        height: holderHeight
+      }}>
         <div
           className="av-annotation"
           style={{ fontSize: this.getFontSize(true) }}
         >
           {annotation}
         </div>
-        <div className="av-content">{content}</div>
+        <div className="av-content-holder" //a flex div, which doesn't deal well with padding/margin, 
+          onMouseEnter={()=>{
+            this.setState({mouseHovering: true})
+          }}
+          onMouseLeave={()=>{
+            this.setState({mouseHovering: false})
+          }}>
+            <div className="av-content" style={{
+              padding: `${verticalPadding}px 0`,
+              height: holderHeight
+            }}>
+              {content}
+            </div>
+          </div>
       </div>
     );
   }
@@ -186,9 +201,6 @@ export class AlignmentViewer extends React.Component<
         tooltipPlacement={logoOpts.tooltipPlacement}
         height={logoOpts.height}
         horizontalReduxId={sharedHorizontalReduxId}
-        //refUpdated={(ref) => {
-          //console.log("LOGO REF UPDATED:", ref);
-        //}}
       />
     );
   };
@@ -257,13 +269,6 @@ export class AlignmentViewer extends React.Component<
    *
    *
    */
-  componentDidMount() {
-    //window.addEventListener("resize", this.windowDimensionsUpdated);
-  }
-
-  componentWillUnmount() {
-    //window.removeEventListener("resize", this.windowDimensionsUpdated);
-  }
 
   render() {
     const {
@@ -305,7 +310,10 @@ export class AlignmentViewer extends React.Component<
     const metadataReduxId = 'metadata_scroller_x'+alignment.getUUID();
 
     return (
-      <div className={classes.join(" ")} key={alignment.getUUID()}>
+      <div 
+        className={classes.join(" ")} 
+        key={alignment.getUUID()}
+      >
         <Provider store={store}>
            
           {this.renderMiniMap(sharedVerticalReduxId)}
@@ -320,7 +328,7 @@ export class AlignmentViewer extends React.Component<
                   barplot.dataSeriesSet.map((series) => series.name).join(" / ") +
                     ":",
                   this.renderBarplot(barplot, residueWidth, sharedHorizontalReduxId),
-                  undefined,
+                  barplot.height,
                   `${idx}-${barplot.dataSeriesSet
                     .map((dataseries) => dataseries.id)
                     .join("|")}`
@@ -333,12 +341,9 @@ export class AlignmentViewer extends React.Component<
                 "av2-sequence-logo-render",
                 "Logo:",
                 this.renderSequenceLogo(residueWidth, sharedHorizontalReduxId),
-                {
-                  height:
-                    logoOptions && logoOptions.height
-                      ? logoOptions.height
-                      : defaultProps.logoOptions.height,
-                }
+                logoOptions && logoOptions.height
+                  ? logoOptions.height
+                  : defaultProps.logoOptions.height,
               )}
 
           {!showConsensus
@@ -361,10 +366,10 @@ export class AlignmentViewer extends React.Component<
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
-                  suppressVerticalScrollbar={true}
-                  suppressHorizontalScrollbar={true}
+                  verticalScrollbar={ScrollbarOptions.NeverOn}
+                  horizontalScrollbar={ScrollbarOptions.NeverOn}
                 />,
-                { height: singleSeqDivHeight }
+                singleSeqDivHeight,
               )}
 
           {!showQuery
@@ -387,10 +392,10 @@ export class AlignmentViewer extends React.Component<
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
-                  suppressVerticalScrollbar={true}
-                  suppressHorizontalScrollbar={true}
+                  verticalScrollbar={ScrollbarOptions.NeverOn}
+                  horizontalScrollbar={ScrollbarOptions.NeverOn}
                 />,
-                { height: singleSeqDivHeight }
+                singleSeqDivHeight,
               )}
 
           {!showRuler 
@@ -407,7 +412,7 @@ export class AlignmentViewer extends React.Component<
                     residueWidth={residueWidth}
                   />
                 </div>,
-                { height: singleSeqDivHeight }
+                singleSeqDivHeight,
               )}
 
           {this.renderWidget(
@@ -442,8 +447,16 @@ export class AlignmentViewer extends React.Component<
               fontSize={fontSize}
               residueHeight={residueHeight}
               residueWidth={residueWidth}
+              verticalScrollbar={
+                ScrollbarOptions.OnHoverWhenOverflowed
+              }
+              horizontalScrollbar={
+                this.state.mouseHovering
+                  ? ScrollbarOptions.AlwaysOnWhenOverflowed
+                  : ScrollbarOptions.OnHoverWhenOverflowed
+              }
             ></AlignmentDetails>,
-            {}
+            undefined, //height
           )}
         </Provider>
       </div>
