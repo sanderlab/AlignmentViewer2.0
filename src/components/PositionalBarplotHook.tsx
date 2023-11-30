@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import "./SequenceBarplot.scss";
+import "./PositionalBarplot.scss";
 import { Tooltip } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
@@ -230,19 +230,6 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   // state
   //
   const [hoverKey] = useState<string>(generateUUIDv4());
-
-  /*
-  private ref: React.RefObject<HTMLDivElement>;
-
-  private cache: Partial<ISequenceBarplotProps> & {
-    bars?: ISingleBarDetailsFull[];
-    barsGroupedByPosition?: Map<number, ISingleBarDetailsFull[]>;
-    barsGroupedByDataseries?: Map<
-      ISequenceBarplotDataSeries,
-      ISingleBarDetailsFull[]
-    >;
-  } = {};*/
-
 
   //
   // callbacks
