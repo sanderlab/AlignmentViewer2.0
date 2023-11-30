@@ -195,7 +195,7 @@ export const AlignmentFileDrop = (props: {
 
   const onDragEnter = useCallback((e: DragEvent | React.DragEvent) => {
     if (e.dataTransfer?.items.length === 1 && 
-        e.dataTransfer?.items[0].kind==='file'){
+        e.dataTransfer?.types.indexOf('Files') !== -1){
       setIsVisible(true);
       e.stopPropagation();
       e.preventDefault();
