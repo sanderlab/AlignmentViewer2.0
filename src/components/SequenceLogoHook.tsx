@@ -3,9 +3,9 @@
  * Inspired / derived from https://github.com/weng-lab/logojs-package
  *  (but simpler)
  */
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import "./SequenceLogo.scss";
-import { Tooltip } from 'react-tooltip';
+import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { GlyphFactory, LogoFonts } from "../common/SequenceLogoGlyphs";
 import {
@@ -55,13 +55,15 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     alignment,
     glyphWidth,
     style,
-    tooltipPlacement = undefined,
+    tooltipPlacement = "bottom",
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
     font = LogoFonts.DEFAULT,
     horizontalReduxId,
   } = props;
 
+  const tooltipRef = useRef<TooltipRefProps>(null)
+  
   /**
    * Munge letter count data that was calculated during alignment creation
    * into a form appropriate for the glyph generation
@@ -104,69 +106,6 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     );
   }, [alignment, style.alignmentType]);
 
-  //render teh tooltip 
-  const renderedTooltip = useMemo(() => {
-    const getTooltipForPosition = (pos: string) => {
-      if (!pos || !logoData || !logoData[parseInt(pos)]) {
-        return;
-      }
-
-      const position = parseInt(pos) + 1;
-      const glyphData = logoData[parseInt(pos)];
-      return glyphData.length === 0 ? null : (
-        <div className="logo-tooltip">
-          <h1>Position: {position}</h1>
-          <div className="row">
-            <div className="col legend-square"></div>
-            <div className="col header name">Residue</div>
-            <div className="col header frequency">Frequency</div>
-            <div className="col header count">Count</div>
-          </div>
-          {glyphData
-            .slice()
-            .reverse()
-            .map((letterFreq, myidx) => {
-              return (
-                <div key={myidx} className="row">
-                  <div
-                    className={`col legend-square ${letterFreq.letter.classNames}`}
-                  ></div>
-                  <div className="col name">
-                    {`${letterFreq.residue.fullName} [${letterFreq.letter.letter}]`}
-                  </div>
-                  <div className="col frequency">
-                    {+(letterFreq.frequency * 100).toFixed(2)}%
-                  </div>
-                  <div className="col count">{letterFreq.count}</div>
-                </div>
-              );
-            })}
-        </div>
-      );
-    }
-
-    return !logoData ? null : (
-      <Tooltip
-        id="getLogoTooltip"
-        className="sequence-logo-tooltip-container"
-        border="solid black 1px"
-        openEvents={{"mouseenter": true, "focus": false}}
-        closeEvents={{"mouseleave": true, "blur": false}}
-        globalCloseEvents={{
-          "clickOutsideAnchor": true,
-          "escape": true, 
-          "scroll": true, 
-          "resize": true
-        }}
-        place={tooltipPlacement}
-        render={({ content }) => {
-          return getTooltipForPosition(content!);
-        }}
-      ></Tooltip>
-    );
-  }, [tooltipPlacement, logoData]);
-  
-
   /**
    * Generate the svg elements for a single position, i.e., column
    */
@@ -202,6 +141,111 @@ export function SequenceLogo(props: ISequenceLogoProps) {
       });
   }, [logoType, font]);
 
+  //
+  // tooltip stuff
+  //
+
+  //
+  //render the tooltip 
+  //
+
+  //
+  // the react tooltip declaration. enables us to grab a reference
+  // to the tooltip and show hide on mouseover of individual positions
+  //
+  const renderedTooltip = useMemo(() => {
+    return !logoData ? null : (
+      <Tooltip
+        ref={tooltipRef}
+        className="sequence-logo-tooltip-container"
+        border="solid black 1px"
+        positionStrategy="fixed"
+        variant="light"
+        imperativeModeOnly={true}
+        place={tooltipPlacement}
+      ></Tooltip>
+    );
+  }, [logoData, tooltipPlacement]);
+  
+
+  //
+  // generate the actual tooltip with logo stats
+  //
+  const getTooltipForPosition = useCallback((pos: string) => {
+    if (!pos || !logoData || !logoData[parseInt(pos)]) {
+      return null;
+    }
+
+    const position = parseInt(pos) + 1;
+    const glyphData = logoData[parseInt(pos)];
+    return glyphData.length === 0 ? null : (
+      <div className="logo-tooltip">
+        <h1>Position: {position}</h1>
+        <div className="row">
+          <div className="col legend-square"></div>
+          <div className="col header name">Residue</div>
+          <div className="col header frequency">Frequency</div>
+          <div className="col header count">Count</div>
+        </div>
+        {glyphData
+          .slice()
+          .reverse()
+          .map((letterFreq, myidx) => {
+            return (
+              <div key={myidx} className="row">
+                <div
+                  className={`col legend-square ${letterFreq.letter.classNames}`}
+                ></div>
+                <div className="col name">
+                  {`${letterFreq.residue.fullName} [${letterFreq.letter.letter}]`}
+                </div>
+                <div className="col frequency">
+                  {+(letterFreq.frequency * 100).toFixed(2)}%
+                </div>
+                <div className="col count">{letterFreq.count}</div>
+              </div>
+            );
+          })}
+      </div>
+    );
+  }, [logoData]);
+
+
+  //
+  // open the react tooltip
+  //
+  const openTooltip = useCallback((
+    e: React.MouseEvent<SVGRectElement, MouseEvent>
+  )=>{
+    const id = (e.target as SVGRectElement).getAttribute("data-tooltip-id")!;
+    const posIdx = (e.target as SVGRectElement).getAttribute("data-tooltip-content")!;
+    const boundingRect = (e.target as SVGRectElement).getBoundingClientRect();
+    const content = getTooltipForPosition(posIdx!);
+    if (content){
+      tooltipRef.current?.open({
+        anchorSelect: id,
+        content: content,
+        position: {
+          x:boundingRect.x + (boundingRect.width/2),
+          y:boundingRect.y + boundingRect.height,
+        }
+      })
+    }
+  }, [getTooltipForPosition]);
+
+  //
+  //close the react tooltip
+  //
+  const closeTooltip = useCallback((
+    e: React.MouseEvent<SVGRectElement, MouseEvent>
+  )=>{
+    tooltipRef.current?.close();
+  }, [tooltipRef]);
+
+
+  //
+  // cache the positions
+  //
   const positionsCache = useMemo(()=>{
     const sequenceLength = alignment.getSequenceLength();
     const positions: React.SVGProps<SVGGElement>[] = [];
@@ -217,20 +261,26 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           >
             {renderSinglePositionStack(singlePositionData, logoData.length)}
             <rect
+              data-tooltip-id={`logo${positionIdx}`}
               className="interaction-placeholder"
               width="1"
               height="100"
-              data-tooltip-id="getLogoTooltip"
               data-tooltip-content={positionIdx}
-              data-tooltip-position-strategy="fixed"
-              data-tooltip-variant="light"
+              onMouseEnter={openTooltip}
+              onMouseLeave={closeTooltip}
             ></rect>
           </g>
         ) as React.SVGProps<SVGGElement>
       );
     }
     return <>{positions}</>;
-  }, [alignment, logoData, renderSinglePositionStack]);
+  }, [
+    alignment, 
+    logoData, 
+    renderSinglePositionStack,
+    openTooltip, 
+    closeTooltip
+  ]);
 
   //setup cache - each glyph stack as a svg g element is saved in memory for quick render
   const renderedSvg = useMemo(() => {
