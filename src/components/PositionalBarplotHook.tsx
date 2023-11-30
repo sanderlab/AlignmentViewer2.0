@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import "./PositionalBarplot.scss";
-import { Tooltip } from 'react-tooltip';
+import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
 import { ScrollbarOptions, VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
@@ -24,7 +24,7 @@ export interface IPositionalBarplotProps {
 
   //props that should be exposed in AlignmentViewer:
   dataSeriesSet: ArrayOneOrMore<IPositionalBarplotDataSeries>;
-  tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
+  tooltipPlacement?: "top" | "bottom" | "left" | "right"; //default to undefined => automatic
   height: number;
   horizontalReduxId?: string;
 }
@@ -214,7 +214,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     alignment,
     positionWidth,
     dataSeriesSet,
-    tooltipPlacement,
+    tooltipPlacement = "top",
     horizontalReduxId,
     height
   } = props;
@@ -225,6 +225,10 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   const POSITION_VIEWBOX_HEIGHT = 100; //for svg viewport
   const POSITION_VIEWBOX_WIDTH = 1;    //for svg viewport
 
+  //
+  // ref
+  //
+  const tooltipRef = useRef<TooltipRefProps>(null);
 
   //
   // state
@@ -325,14 +329,19 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
 
 
 
-
+  //
   //
   // tooltip stuff
   //
+  //
 
-  const getTooltipForBar = useCallback((position: number)=>{
-    const posPlusOne = position + 1; // positions should be 1 based, not zero based
-    const barsAtPostion = barsObj.barsGroupedByPosition.get(position)!;
+  const getTooltipForPosition = useCallback((pos: string)=>{
+    if (!pos || !barsObj.barsGroupedByPosition.get(parseInt(pos))) {
+      return null;
+    }
+
+    const posPlusOne = parseInt(pos) + 1; // positions should be 1 based, not zero based
+    const barsAtPostion = barsObj.barsGroupedByPosition.get(parseInt(pos))!;
     const numValidBars = !barsAtPostion
       ? 0
       : barsAtPostion.reduce((acc, bar) => {
@@ -370,9 +379,70 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
       </div>
     );
   }, [barsObj]);
+  
+  //
+  // open the react tooltip
+  //
+  const openTooltip = useCallback((
+    e: React.MouseEvent<SVGRectElement, MouseEvent>
+  )=>{
+    const id = (e.target as SVGRectElement).getAttribute("data-tooltip-id")!;
+    const posIdx = (e.target as SVGRectElement).getAttribute("data-tooltip-content")!;
+    const boundingRect = (e.target as SVGRectElement).getBoundingClientRect();
+    const content = getTooltipForPosition(posIdx!);
+    if (content){
+      tooltipRef.current?.open({
+        anchorSelect: id,
+        content: content,
+        position: {
+          x: tooltipPlacement === "top" || tooltipPlacement === "bottom"
+            ? boundingRect.x + (boundingRect.width/2)
+            : tooltipPlacement === "right"
+            ? boundingRect.x + boundingRect.width
+            : boundingRect.x,//on left
+          y: tooltipPlacement === "left" || tooltipPlacement === "right" 
+            ? boundingRect.y + (boundingRect.height/2)
+            : tooltipPlacement === "bottom"
+            ? boundingRect.y + boundingRect.height
+            : boundingRect.y//on top
+        }
+      })
+    }
+  }, [getTooltipForPosition, tooltipPlacement]);
+
+  //
+  //close the react tooltip
+  //
+  const closeTooltip = useCallback((
+    e: React.MouseEvent<SVGRectElement, MouseEvent>
+  )=>{
+    tooltipRef.current?.close();
+  }, [tooltipRef]);
 
 
+  //
+  // the react tooltip declaration. enables us to grab a reference
+  // to the tooltip and show hide on mouseover of individual positions
+  //
+  const renderedTooltip = useMemo(() => {
+    return (
+      <Tooltip
+        ref={tooltipRef}
+        className="barplot-tooltip-holder"
+        border="solid black 1px"
+        positionStrategy="fixed"
+        variant="light"
+        imperativeModeOnly={true}
+        place={tooltipPlacement}
+      />
+    )
+  }, [tooltipPlacement]);
 
+  //
+  //
+  // SVG caching
+  //
+  //
 
   /**
    * Render the bar plot svg, with each bar appearing as a single rectangle.
@@ -428,10 +498,6 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
               <g
                 transform={`translate(${firstBarOffset},0)`}
                 className={"position-container pos" + pos}
-                data-tooltip-id={`getBarTooltip-${hoverKey}`}
-                data-tooltip-content={pos}
-                data-tooltip-position-strategy="fixed"
-                data-tooltip-variant="light"
                 key={pos}
               >
                 {bars.reduce((acc, bar, dataseriesIdx) => {
@@ -471,6 +537,10 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
                   })`}
                   width={POSITION_VIEWBOX_WIDTH}
                   height={maxBarHeight}
+                  data-tooltip-id={`bp${pos}${hoverKey}`}
+                  data-tooltip-content={pos}
+                  onMouseEnter={openTooltip}
+                  onMouseLeave={closeTooltip}
                 ></rect>
               </g>
             );
@@ -481,13 +551,17 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   }, [
     alignment, 
     barsObj, 
+    closeTooltip,
     height, 
     hoverKey, 
+    openTooltip,
     positionWidth
   ]);
 
   //
+  //
   // render
+  //
   //
   return !alignment ? null : (
     <div className="barplot">
@@ -521,25 +595,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
           );
         }}
       />
-
-      <Tooltip
-        id={`getBarTooltip-${hoverKey}`}
-        className="barplot-tooltip-holder"
-        border="solid black 1px"
-        place={tooltipPlacement}
-        openEvents={{"mouseenter": true, "focus": false}}
-        closeEvents={{"mouseleave": true, "blur": false}}
-        globalCloseEvents={{
-          "clickOutsideAnchor": true,
-          "escape": true, 
-          "scroll": true, 
-          "resize": true
-        }}
-        render={({ content }) => {
-          return getTooltipForBar(parseInt(content!));
-        }}
-      />
-
+      {renderedTooltip}
     </div>
   );
 

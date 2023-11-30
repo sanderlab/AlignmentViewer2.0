@@ -45,7 +45,7 @@ export interface ISequenceLogoProps {
 
   //props that should be exposed in AlignmentViewer:
   logoType?: LOGO_TYPES;
-  tooltipPlacement?: "top" | "right" | "bottom" | "left"; //default to undefined => automatic
+  tooltipPlacement?: "top" | "bottom" | "left" | "right"; //default to undefined => automatic
   height?: number;
   horizontalReduxId?: string;
 }
@@ -226,12 +226,20 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         anchorSelect: id,
         content: content,
         position: {
-          x:boundingRect.x + (boundingRect.width/2),
-          y:boundingRect.y + boundingRect.height,
+          x: tooltipPlacement === "top" || tooltipPlacement === "bottom"
+            ? boundingRect.x + (boundingRect.width/2)
+            : tooltipPlacement === "right"
+            ? boundingRect.x + boundingRect.width
+            : boundingRect.x,//on left
+          y: tooltipPlacement === "left" || tooltipPlacement === "right" 
+            ? boundingRect.y + (boundingRect.height/2)
+            : tooltipPlacement === "bottom"
+            ? boundingRect.y + boundingRect.height
+            : boundingRect.y//on top
         }
       })
     }
-  }, [getTooltipForPosition]);
+  }, [getTooltipForPosition, tooltipPlacement]);
 
   //
   //close the react tooltip
@@ -261,10 +269,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           >
             {renderSinglePositionStack(singlePositionData, logoData.length)}
             <rect
-              data-tooltip-id={`logo${positionIdx}`}
               className="interaction-placeholder"
               width="1"
               height="100"
+              data-tooltip-id={`logo${positionIdx}`}
               data-tooltip-content={positionIdx}
               onMouseEnter={openTooltip}
               onMouseLeave={closeTooltip}
