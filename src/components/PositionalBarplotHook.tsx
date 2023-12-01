@@ -24,7 +24,8 @@ export interface IPositionalBarplotProps {
 
   //props that should be exposed in AlignmentViewer:
   dataSeriesSet: ArrayOneOrMore<IPositionalBarplotDataSeries>;
-  tooltipPlacement?: "top" | "bottom" | "left" | "right"; //default to undefined => automatic
+  tooltipPlacement?: tooltipPlacement;
+  tooltipOffset?: number;
   height: number;
   horizontalReduxId?: string;
 }
@@ -215,6 +216,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     positionWidth,
     dataSeriesSet,
     tooltipPlacement = "top",
+    tooltipOffset = 4,
     horizontalReduxId,
     height
   } = props;
@@ -395,14 +397,16 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         anchorSelect: id,
         content: content,
         position: {
-          x: tooltipPlacement === "top" || tooltipPlacement === "bottom"
+          x: ["top", "top-start", "top-end",
+              "bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
             ? boundingRect.x + (boundingRect.width/2)
-            : tooltipPlacement === "right"
+            : ["right", "right-start", "right-end"].includes(tooltipPlacement)
             ? boundingRect.x + boundingRect.width
             : boundingRect.x,//on left
-          y: tooltipPlacement === "left" || tooltipPlacement === "right" 
+          y: ["left", "left-start", "left-end",
+              "right", "right-start", "right-end"].includes(tooltipPlacement)
             ? boundingRect.y + (boundingRect.height/2)
-            : tooltipPlacement === "bottom"
+            : ["bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
             ? boundingRect.y + boundingRect.height
             : boundingRect.y//on top
         }
@@ -434,9 +438,10 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         variant="light"
         imperativeModeOnly={true}
         place={tooltipPlacement}
+        offset={tooltipOffset}
       />
     )
-  }, [tooltipPlacement]);
+  }, [tooltipOffset, tooltipPlacement]);
 
   //
   //
@@ -493,7 +498,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
               (numDataSeries === 1 ? 0.9 : 1 / numDataSeries) * POSITION_VIEWBOX_WIDTH;
             const firstBarOffset =
               (numDataSeries === 1 ? pos + 0.05 : pos) * POSITION_VIEWBOX_WIDTH;
-
+            console.log();
             return allBarsHeightsAtPosition.length < 1 ? null : (
               <g
                 transform={`translate(${firstBarOffset},0)`}
@@ -529,7 +534,8 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
                   //something off here with typescript and this accumulator.
                   //can't specify type as rect
                 }, new Array<JSX.Element>())}
-  
+
+                {/* mouse interactions can happen only over the actual bar(s) */}
                 <rect
                   className="interaction-placeholder"
                   transform={`translate(0,${
@@ -542,6 +548,13 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
                   onMouseEnter={openTooltip}
                   onMouseLeave={closeTooltip}
                 ></rect>
+                {/* mouse interactions can happen over entire position (rather than just 
+                    over the bars) useful if we want to inform the parent etc
+                <rect
+                  className="interaction-placeholder-full"
+                  width={POSITION_VIEWBOX_WIDTH}
+                  height={POSITION_VIEWBOX_HEIGHT}
+                ></rect>  */}
               </g>
             );
           }

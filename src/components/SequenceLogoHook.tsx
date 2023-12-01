@@ -45,7 +45,8 @@ export interface ISequenceLogoProps {
 
   //props that should be exposed in AlignmentViewer:
   logoType?: LOGO_TYPES;
-  tooltipPlacement?: "top" | "bottom" | "left" | "right"; //default to undefined => automatic
+  tooltipPlacement?: tooltipPlacement;
+  tooltipOffset?: number;
   height?: number;
   horizontalReduxId?: string;
 }
@@ -55,7 +56,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     alignment,
     glyphWidth,
     style,
-    tooltipPlacement = "bottom",
+    tooltipPlacement = "left-start",
+    tooltipOffset = 4,
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
     font = LogoFonts.DEFAULT,
@@ -163,9 +165,14 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         variant="light"
         imperativeModeOnly={true}
         place={tooltipPlacement}
+        offset={tooltipOffset}
       ></Tooltip>
     );
-  }, [logoData, tooltipPlacement]);
+  }, [
+    logoData, 
+    tooltipOffset, 
+    tooltipPlacement
+  ]);
   
 
   //
@@ -221,19 +228,22 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const posIdx = (e.target as SVGRectElement).getAttribute("data-tooltip-content")!;
     const boundingRect = (e.target as SVGRectElement).getBoundingClientRect();
     const content = getTooltipForPosition(posIdx!);
+
     if (content){
       tooltipRef.current?.open({
         anchorSelect: id,
         content: content,
         position: {
-          x: tooltipPlacement === "top" || tooltipPlacement === "bottom"
+          x: ["top", "top-start", "top-end",
+              "bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
             ? boundingRect.x + (boundingRect.width/2)
-            : tooltipPlacement === "right"
+            : ["right", "right-start", "right-end"].includes(tooltipPlacement)
             ? boundingRect.x + boundingRect.width
             : boundingRect.x,//on left
-          y: tooltipPlacement === "left" || tooltipPlacement === "right" 
+          y: ["left", "left-start", "left-end",
+              "right", "right-start", "right-end"].includes(tooltipPlacement)
             ? boundingRect.y + (boundingRect.height/2)
-            : tooltipPlacement === "bottom"
+            : ["bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
             ? boundingRect.y + boundingRect.height
             : boundingRect.y//on top
         }
