@@ -216,7 +216,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     positionWidth,
     dataSeriesSet,
     tooltipPlacement = "top",
-    tooltipOffset = 4,
+    tooltipOffset = 8, //distance that the arrow will be from the hovered bar
     horizontalReduxId,
     height
   } = props;
@@ -236,6 +236,9 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   // state
   //
   const [hoverKey] = useState<string>(generateUUIDv4());
+  const [
+    calculatedTooltipOffset, setCalculatedTooltipOffset
+  ] = useState<number>(0);
 
   //
   // callbacks
@@ -393,26 +396,30 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     const boundingRect = (e.target as SVGRectElement).getBoundingClientRect();
     const content = getTooltipForPosition(posIdx!);
     if (content){
+      setCalculatedTooltipOffset(
+        tooltipOffset + (
+          [
+            "top", "top-start", "top-end", "bottom", "bottom-start", "bottom-end"
+          ].includes(tooltipPlacement)
+            ? (boundingRect.height/2)
+            : (boundingRect.width/2)
+        )
+      );
+
       tooltipRef.current?.open({
         anchorSelect: id,
         content: content,
         position: {
-          x: ["top", "top-start", "top-end",
-              "bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
-            ? boundingRect.x + (boundingRect.width/2)
-            : ["right", "right-start", "right-end"].includes(tooltipPlacement)
-            ? boundingRect.x + boundingRect.width
-            : boundingRect.x,//on left
-          y: ["left", "left-start", "left-end",
-              "right", "right-start", "right-end"].includes(tooltipPlacement)
-            ? boundingRect.y + (boundingRect.height/2)
-            : ["bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
-            ? boundingRect.y + boundingRect.height
-            : boundingRect.y//on top
+          x: boundingRect.x + (boundingRect.width/2),
+          y: boundingRect.y + (boundingRect.height/2),
         }
-      })
+      });
     }
-  }, [getTooltipForPosition, tooltipPlacement]);
+  }, [
+    getTooltipForPosition, 
+    tooltipOffset,
+    tooltipPlacement
+  ]);
 
   //
   //close the react tooltip
@@ -438,10 +445,13 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         variant="light"
         imperativeModeOnly={true}
         place={tooltipPlacement}
-        offset={tooltipOffset}
+        offset={calculatedTooltipOffset}
       />
     )
-  }, [tooltipOffset, tooltipPlacement]);
+  }, [
+    calculatedTooltipOffset, 
+    tooltipPlacement
+  ]);
 
   //
   //

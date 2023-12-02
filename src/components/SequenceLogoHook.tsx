@@ -3,7 +3,7 @@
  * Inspired / derived from https://github.com/weng-lab/logojs-package
  *  (but simpler)
  */
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import "./SequenceLogo.scss";
 import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
@@ -57,7 +57,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     glyphWidth,
     style,
     tooltipPlacement = "left-start",
-    tooltipOffset = 4,
+    tooltipOffset = 8, //distance that the arrow will be from the hoverd letter stack
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
     font = LogoFonts.DEFAULT,
@@ -65,7 +65,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   } = props;
 
   const tooltipRef = useRef<TooltipRefProps>(null)
-  
+  const [
+    calculatedTooltipOffset, setCalculatedTooltipOffset
+  ] = useState<number>(0);
+
   /**
    * Munge letter count data that was calculated during alignment creation
    * into a form appropriate for the glyph generation
@@ -165,12 +168,12 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         variant="light"
         imperativeModeOnly={true}
         place={tooltipPlacement}
-        offset={tooltipOffset}
+        offset={calculatedTooltipOffset}
       ></Tooltip>
     );
   }, [
-    logoData, 
-    tooltipOffset, 
+    calculatedTooltipOffset,
+    logoData,
     tooltipPlacement
   ]);
   
@@ -230,26 +233,30 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const content = getTooltipForPosition(posIdx!);
 
     if (content){
+      setCalculatedTooltipOffset(
+        tooltipOffset + (
+          [
+            "top", "top-start", "top-end", "bottom", "bottom-start", "bottom-end"
+          ].includes(tooltipPlacement)
+            ? (boundingRect.height/2)
+            : (boundingRect.width/2)
+        )
+      );
+
       tooltipRef.current?.open({
         anchorSelect: id,
         content: content,
         position: {
-          x: ["top", "top-start", "top-end",
-              "bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
-            ? boundingRect.x + (boundingRect.width/2)
-            : ["right", "right-start", "right-end"].includes(tooltipPlacement)
-            ? boundingRect.x + boundingRect.width
-            : boundingRect.x,//on left
-          y: ["left", "left-start", "left-end",
-              "right", "right-start", "right-end"].includes(tooltipPlacement)
-            ? boundingRect.y + (boundingRect.height/2)
-            : ["bottom", "bottom-start", "bottom-end"].includes(tooltipPlacement)
-            ? boundingRect.y + boundingRect.height
-            : boundingRect.y//on top
+          x: boundingRect.x + (boundingRect.width/2),
+          y: boundingRect.y + (boundingRect.height/2),
         }
-      })
+      });
     }
-  }, [getTooltipForPosition, tooltipPlacement]);
+  }, [
+    getTooltipForPosition,
+    tooltipPlacement, 
+    tooltipOffset
+  ]);
 
   //
   //close the react tooltip
