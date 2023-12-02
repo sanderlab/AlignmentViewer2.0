@@ -203,7 +203,6 @@ export default function App(props: AppProps){
   const onceHappened = useRef<boolean>(false);
   useEffect(()=>{
     if (!onceHappened.current){
-      console.log('looking to load');
       onceHappened.current = true;
 
       //is there an alignment in the URL?
@@ -214,7 +213,6 @@ export default function App(props: AppProps){
         try {
           const url = new URL(potentialUrl);  //throws an exception 
           if (url.protocol !== "http:" && url.protocol !== "https:"){
-            console.error(`URL provided "${url.protocol}" was valid but is not http or https`);
             throw new Error(
               `URL protocol is "${url.protocol}" not "http:" or "https:"`
             );
@@ -231,13 +229,17 @@ export default function App(props: AppProps){
             onAlignmentLoadError
           );
         } catch (e) {
+          console.error(
+            `Loading URL from parameter (${alignmentUrlName}="${potentialUrl}") failed:`, 
+            e
+          );
           setState({
             ...state,
             loadError: new AlignmentLoadError(
               "Alignment URL Parse Error", [{
                 name: "URL invalid",
                 message: `The alignment link in the URL is not a valid http or https
-                link (parameter="${alignmentUrlName}", link="${potentialUrl}")`
+                link (parameter="${alignmentUrlName}", link="${potentialUrl}").`
               }]
             )
           })
