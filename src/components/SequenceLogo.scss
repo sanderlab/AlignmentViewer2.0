@@ -19,6 +19,7 @@
     z-index: 5001;
 
     .logo-tooltip {
+      pointer-events: all;
       display: table;
       width: auto;
       line-height: 16px;

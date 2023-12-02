@@ -27,6 +27,7 @@
     z-index: 5001;
   
     .bar-position-textblock {
+      pointer-events: all;
       h1 {
         text-align: center;
         padding-bottom: 4px;

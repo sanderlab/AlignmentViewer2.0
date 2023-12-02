@@ -64,7 +64,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     horizontalReduxId,
   } = props;
 
-  const tooltipRef = useRef<TooltipRefProps>(null)
+  const tooltipRef = useRef<TooltipRefProps>(null);
+  const tooltipClosingTimeoutRef = useRef<NodeJS.Timeout>();
   const [
     calculatedTooltipOffset, setCalculatedTooltipOffset
   ] = useState<number>(0);
@@ -177,6 +178,23 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     tooltipPlacement
   ]);
   
+  //
+  // tooltip itself is hovered .. keep it open
+  //
+  const tooltipHovered = useCallback(()=>{
+    clearTimeout(tooltipClosingTimeoutRef.current); 
+  }, []);
+
+  //
+  //close the tooltip
+  //
+  const closeTooltip = useCallback(()=>{
+    tooltipClosingTimeoutRef.current = setTimeout(()=>{ 
+      //allow a bit of time before closing in case the user wants
+      //to interact with the tooltip
+      tooltipRef.current?.close();
+    }, 500);
+  }, []);
 
   //
   // generate the actual tooltip with logo stats
@@ -189,7 +207,15 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const position = parseInt(pos) + 1;
     const glyphData = logoData[parseInt(pos)];
     return glyphData.length === 0 ? null : (
-      <div className="logo-tooltip">
+      <div 
+        className="logo-tooltip"
+        onMouseEnter={tooltipHovered}
+        onMouseLeave={closeTooltip}
+        onClick={(e)=>{
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
         <h1>Position: {position}</h1>
         <div className="row">
           <div className="col legend-square"></div>
@@ -218,8 +244,11 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           })}
       </div>
     );
-  }, [logoData]);
-
+  }, [
+    logoData, 
+    closeTooltip, 
+    tooltipHovered
+  ]);
 
   //
   // open the react tooltip
@@ -227,6 +256,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   const openTooltip = useCallback((
     e: React.MouseEvent<SVGRectElement, MouseEvent>
   )=>{
+    //stop any close timeout as an adjacent tip is now being opened 
+    //and it uses the same tooltip.
+    clearTimeout(tooltipClosingTimeoutRef.current); 
+
     const id = (e.target as SVGRectElement).getAttribute("data-tooltip-id")!;
     const posIdx = (e.target as SVGRectElement).getAttribute("data-tooltip-content")!;
     const boundingRect = (e.target as SVGRectElement).getBoundingClientRect();
@@ -257,16 +290,6 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     tooltipPlacement, 
     tooltipOffset
   ]);
-
-  //
-  //close the react tooltip
-  //
-  const closeTooltip = useCallback((
-    e: React.MouseEvent<SVGRectElement, MouseEvent>
-  )=>{
-    tooltipRef.current?.close();
-  }, [tooltipRef]);
-
 
   //
   // cache the positions

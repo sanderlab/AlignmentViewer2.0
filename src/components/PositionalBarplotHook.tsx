@@ -231,6 +231,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   // ref
   //
   const tooltipRef = useRef<TooltipRefProps>(null);
+  const tooltipClosingTimeoutRef = useRef<NodeJS.Timeout>()
 
   //
   // state
@@ -332,14 +333,29 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     };
   }, [alignment, dataSeriesSet, normalizeBarHeights])
 
+  //
+  // tooltip itself is hovered .. keep it open
+  //
+  const tooltipHovered = useCallback(()=>{
+    clearTimeout(tooltipClosingTimeoutRef.current); 
+  }, []);
 
+  //
+  //close the tooltip
+  //
+  const closeTooltip = useCallback(()=>{
+    tooltipClosingTimeoutRef.current = setTimeout(()=>{ 
+      //allow a bit of time before closing in case the user wants
+      //to interact with the tooltip
+      tooltipRef.current?.close();
+    }, 500);
+  }, []);
 
   //
   //
   // tooltip stuff
   //
   //
-
   const getTooltipForPosition = useCallback((pos: string)=>{
     if (!pos || !barsObj.barsGroupedByPosition.get(parseInt(pos))) {
       return null;
@@ -354,7 +370,15 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         }, 0 as number);
 
     return numValidBars < 1 ? undefined : (
-      <div className="bar-position-textblock">
+      <div 
+        className="bar-position-textblock"
+        onMouseEnter={tooltipHovered}
+        onMouseLeave={closeTooltip}
+        onClick={(e)=>{
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
         <h1>Position: {posPlusOne}</h1>
         {barsAtPostion.map((bar) => {
           return (
@@ -383,7 +407,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         })}
       </div>
     );
-  }, [barsObj]);
+  }, [barsObj, closeTooltip, tooltipHovered]);
   
   //
   // open the react tooltip
@@ -391,6 +415,10 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   const openTooltip = useCallback((
     e: React.MouseEvent<SVGRectElement, MouseEvent>
   )=>{
+    //stop any close timeout as an adjacent tip is now being opened 
+    //and it uses the same tooltip.
+    clearTimeout(tooltipClosingTimeoutRef.current); 
+
     const id = (e.target as SVGRectElement).getAttribute("data-tooltip-id")!;
     const posIdx = (e.target as SVGRectElement).getAttribute("data-tooltip-content")!;
     const boundingRect = (e.target as SVGRectElement).getBoundingClientRect();
@@ -420,16 +448,6 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     tooltipOffset,
     tooltipPlacement
   ]);
-
-  //
-  //close the react tooltip
-  //
-  const closeTooltip = useCallback((
-    e: React.MouseEvent<SVGRectElement, MouseEvent>
-  )=>{
-    tooltipRef.current?.close();
-  }, [tooltipRef]);
-
 
   //
   // the react tooltip declaration. enables us to grab a reference
