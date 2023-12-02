@@ -92,7 +92,6 @@ export default class App extends React.Component<AppProps, AppState> {
     };
 
     //write defaults for all UI parameters
-    UrlLocalstorageInputManager.initializeAllInputs()
     this.urlInputs = {
       //objects
       ALIGNMENT_STYLE: new UrlLocalstorageInputManager<AlignmentStyle>(

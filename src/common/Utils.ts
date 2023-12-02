@@ -224,24 +224,11 @@ export function stopSafariFromBlockingWindowWheel(cssClass: string) {
  */
 //inspired by https://pierrehedkvist.com/posts/react-state-url
 export class UrlLocalstorageInputManager<T>{
+  private static initialized: boolean = false;
   public initialValue: T;
   public onChange: (newValue: T) => void;
 
   static LOCAL_STORAGE_KEY = "UI_OPTIONS_CACHE";
-  static initializeAllInputs = () => {
-    const urlSearchParams = new URLSearchParams( window.location.search )
-    const finalParams = new URLSearchParams( 
-      localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY) ? 
-      localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY)! : 
-      undefined
-    )
-
-    //overwrite or add url parameters to local storage parameters 
-    for (const [key, value] of urlSearchParams) {
-      finalParams.set(key, value);
-    }
-    UrlLocalstorageInputManager.writeParamsToUrlAndLocalstorage(finalParams);
-  }
 
   static writeParamsToUrlAndLocalstorage = (params: URLSearchParams) => {
     //write the complete parameter list to both the url and local storage
@@ -253,12 +240,31 @@ export class UrlLocalstorageInputManager<T>{
     );
   }
 
+  static initializeAsNeeded = () => {
+    if(!UrlLocalstorageInputManager.initialized){
+      const urlSearchParams = new URLSearchParams( window.location.search )
+      const finalParams = new URLSearchParams( 
+        localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY) ? 
+        localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY)! : 
+        undefined
+      )
+  
+      //overwrite or add url parameters to local storage parameters 
+      for (const [key, value] of urlSearchParams) {
+        finalParams.set(key, value);
+      }
+      UrlLocalstorageInputManager.writeParamsToUrlAndLocalstorage(finalParams);
+      UrlLocalstorageInputManager.initialized = true;
+    }
+  }
+
   constructor(
     defaultValue: T,
     paramName: string,
     serialize: (state: T) => string,
     deserialize: (state: string) => T
   ) {
+    UrlLocalstorageInputManager.initializeAsNeeded();
     function loadValue(searchStr: string | null, db: "URL" | "Local Storage"){
       const val = new URLSearchParams( searchStr ? searchStr : undefined ).get(paramName);
       if (val){ return deserialize(val); }
