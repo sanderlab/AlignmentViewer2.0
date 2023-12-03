@@ -40,14 +40,19 @@ export interface ISequenceLogoProps {
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  refUpdated?: (newRef: HTMLElement | null) => void;
-  font?: LogoFonts;
 
   //props that should be exposed in AlignmentViewer:
-  logoType?: LOGO_TYPES;
+  logoType?: LOGO_TYPES; //letters or bars
+  font?: LogoFonts;
+
+  //height of the svg
+  height?: number;
+
+  //tooltip
   tooltipPlacement?: tooltipPlacement;
   tooltipOffset?: number;
-  height?: number;
+
+  //redux id for tracking shift in x-axis
   horizontalReduxId?: string;
 }
 

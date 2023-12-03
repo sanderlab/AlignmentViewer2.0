@@ -24,9 +24,15 @@ export interface IPositionalBarplotProps {
 
   //props that should be exposed in AlignmentViewer:
   dataSeriesSet: ArrayOneOrMore<IPositionalBarplotDataSeries>;
+
+  //height of the svg
+  height: number;
+
+  //tooltip props
   tooltipPlacement?: tooltipPlacement;
   tooltipOffset?: number;
-  height: number;
+
+  //redux id for tracking shift in x-axis
   horizontalReduxId?: string;
 }
 
