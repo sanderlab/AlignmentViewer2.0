@@ -1,13 +1,17 @@
 /** WebGLAlignmentComponent.scss */
 
 // make scrollbar transparent on query and consensus sequences
-.query-alignment-details .av-viewport::-webkit-scrollbar,
-.consensus-alignment-details .av-viewport::-webkit-scrollbar {
+.query-alignment-details .av2-viewport::-webkit-scrollbar,
+.consensus-alignment-details .av2-viewport::-webkit-scrollbar {
   background: transparent;
   height: 0;
 }
 
-.av-viewport {
+.av2-viewport canvas.stage.hidden {
+  display: none;
+}
+
+.av2-viewport {
   overflow-x: hidden;
   overflow-y: hidden;
   position: absolute;
@@ -15,11 +19,10 @@
   bottom: 0;
   left: 0;
   right: 0;
-
-  /*
-  canvas.stage.interaction-viewport {
-    pointer-events: none;
-  }*/
+  
+  .testing{
+    position: absolute;
+  }
 
   canvas.stage {
     position: absolute;
@@ -30,6 +33,7 @@
     image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor;
   }
+
   .sequence-text-holder {
     position: absolute;
     font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,

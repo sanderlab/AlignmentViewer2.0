@@ -1,5 +1,5 @@
 import "./AlignmentViewer.scss";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
 import {
@@ -119,11 +119,12 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   //TODO: this should probably be calculated right?
   const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
+  const MIN_WIDTH = 200;
+  const MAX_WIDTH = 500;
 
   const verticalPaddingAroundContent = 2; // in px
   const sharedHorizontalReduxId = 'x_scroller_'+alignment.getUUID();
   const sharedVerticalReduxId = 'y_scroller_'+alignment.getUUID();
-  const metadataReduxId = 'metadata_scroller_x'+alignment.getUUID();
   const fontSize = zoomLevel;
   const annotationFontSize = zoomLevel + 4;
   const residueWidth = getAlignmentFontDetails(fontSize).width;
@@ -140,6 +141,101 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   // state
   //
   const [mouseHoveringContent, setMouseHoveringContent] = useState<boolean>(false);
+  const [annotationResizeDragging, setAnnotationResizeDragging] = useState<boolean>(false);
+  //custom callback that enables us to call function (draggerMoved) only
+  //after the state has been set.
+  const mouseLastXPx = useRef<number|undefined>();
+  const annotationWidth = useRef<number>(220);
+  const oneDraggerRef = useRef<HTMLDivElement | null>(null);
+
+  const getCorrectedAnnotationWidth = useCallback((proposedWith: number) => {
+    return proposedWith < MIN_WIDTH 
+      ? MIN_WIDTH 
+      : proposedWith > MAX_WIDTH
+        ? MAX_WIDTH
+        : proposedWith;
+  }, [MIN_WIDTH, MAX_WIDTH]);
+
+  //
+  // cache
+  //
+  const sequences = useMemo(()=>{
+    return alignment.getSequences(
+      sortBy ? sortBy : defaultProps.sortBy
+    )
+    .map((iseq) => iseq.sequence)
+  }, [alignment, sortBy]);
+
+  const singleQuerySequenceArray = useMemo(()=>{
+    return [alignment.getQuerySequence().sequence]
+  }, [alignment]);
+
+  const singleConsensusSequenceArray = useMemo(()=>{
+    return [alignment.getConsensus().sequence]
+  }, [alignment]);
+
+  const handleMouseHovering = useCallback(()=>{
+    setMouseHoveringContent(true); 
+  }, []);
+
+  const handleMouseStoppedHovering = useCallback(()=>{
+    setMouseHoveringContent(false); 
+  }, []);
+
+  //
+  // resize dragging
+  //
+  const startAnnotationResizeDragging = useCallback((
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  )=>{
+    e.stopPropagation();
+    e.preventDefault();
+    setAnnotationResizeDragging(true);
+    mouseLastXPx.current=e.pageX;
+  }, []);
+
+  const endAnnotationResizeDragging = useCallback((
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setAnnotationResizeDragging(false);
+    mouseLastXPx.current=undefined;
+  }, []);
+
+  const annotationResizeDragged = useCallback((
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (annotationResizeDragging && 
+        mouseLastXPx.current !== undefined){
+      const delta = e.pageX - mouseLastXPx.current;
+      mouseLastXPx.current = e.pageX < MIN_WIDTH 
+        ? MIN_WIDTH 
+        : e.pageX > MAX_WIDTH
+          ? MAX_WIDTH 
+          : e.pageX;
+
+      const proposedNewWidth = annotationWidth.current + delta;
+      annotationWidth.current = getCorrectedAnnotationWidth(
+        proposedNewWidth
+      );
+
+      //Directly mutate DOM. All other attempted methods - setting state variables, using 
+      //useStateCallback - fail due to sync issues with state changes happening after the
+      //mousevents fire too quickly.
+      var annotationElements = document.querySelectorAll('.av2-title-or-annotation');
+      for(let i = 0; i < annotationElements.length; i++) {
+        (annotationElements[i] as HTMLElement).style['flexBasis'] = 
+          getCorrectedAnnotationWidth(annotationWidth.current)+'px';
+      }
+    }
+  }, [
+    annotationResizeDragging,
+    getCorrectedAnnotationWidth,
+    MIN_WIDTH, MAX_WIDTH
+  ]);
 
   //
   // render functions
@@ -174,18 +270,26 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       }}>
         <div
           className="av2-title-or-annotation"
-          style={{ fontSize: annotationFontSize }}
+          style={{ 
+            fontSize: annotationFontSize,
+            flexBasis: getCorrectedAnnotationWidth(annotationWidth.current)+"px"
+          }}
         >
           {titleOrAnnotation}
         </div>
+       {<div 
+          ref={oneDraggerRef}
+          className="av2-title-resize-separator"
+          onMouseDown={startAnnotationResizeDragging}
+        />}
         <div 
           className="av2-content-holder" //a flex div, which doesn't deal well with padding/margin, 
-          onMouseEnter={()=>{ setMouseHoveringContent(true) }}
-          onMouseLeave={()=>{ setMouseHoveringContent(false) }}
+          onMouseEnter={handleMouseHovering}
+          onMouseLeave={handleMouseStoppedHovering}
         >
             <div className="av2-content" style={{
-              padding: `${verticalPaddingAroundContent}px 0`,
-              height: holderHeight
+              //padding: `${verticalPaddingAroundContent}px 0`,
+              //height: holderHeight
             }}>
               {content}
             </div>
@@ -194,8 +298,11 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     );
   }, [
     annotationFontSize, 
+    getCorrectedAnnotationWidth,
+    handleMouseHovering,
+    handleMouseStoppedHovering,
     verticalPaddingAroundContent, 
-    setMouseHoveringContent
+    startAnnotationResizeDragging
   ]);
 
   const renderedSequenceLogo = useMemo(() => {
@@ -275,11 +382,24 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     sharedHorizontalReduxId
   ]);
 
+  //
+  // final render
+  //
   return (
     <div 
       className={classes.join(" ")} 
       key={alignment.getUUID()}
-    >
+    > 
+      <div 
+        className="full-screen-annotation-resize-dragger"
+        style={{
+          display: !annotationResizeDragging ? "none" : "block"
+        }}
+        onMouseMove={annotationResizeDragged}
+        onMouseUp={endAnnotationResizeDragging}
+        onMouseOut={endAnnotationResizeDragging}
+        onMouseLeave={endAnnotationResizeDragging}
+      />
       <Provider store={store}>
           
         {renderedMinimap}
@@ -321,7 +441,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
               content: 
                 <AlignmentDetails
                   reduxHorizontalId={sharedHorizontalReduxId}
-                  sequences={[alignment.getConsensus().sequence]}
+                  sequences={singleConsensusSequenceArray}
                   consensusSequence={
                     alignment.getConsensus().sequence
                   }
@@ -348,7 +468,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
               content: 
                 <AlignmentDetails
                   reduxHorizontalId={sharedHorizontalReduxId}
-                  sequences={[alignment.getQuerySequence().sequence]}
+                  sequences={singleQuerySequenceArray}
                   consensusSequence={
                     alignment.getConsensus().sequence
                   }
@@ -388,29 +508,24 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         {renderWidget({
           className: "av2-alignment-details-render",
           titleOrAnnotation: 
-            <div className="alignment-metadata-box">
-              { <AlignmentTextualMetadata
-                horizontalReduxId={metadataReduxId}
-                verticalReduxId={sharedVerticalReduxId}
-                textForEachSeq={alignment
-                  .getSequences(
-                    sortBy ? sortBy : defaultProps.sortBy
-                  )
-                  .map((iseq) => iseq.id)}
-                fontSize={fontSize}
-                letterHeight={residueHeight}
-                letterWidth={residueWidth}
-              /> }
-            </div>,
-          content: 
-            <AlignmentDetails
-              reduxVerticalId={sharedVerticalReduxId}
-              reduxHorizontalId={sharedHorizontalReduxId}
-              sequences={alignment
+            <AlignmentTextualMetadata
+              alignmentUUID={alignment.getUUID()}
+              verticalReduxId={sharedVerticalReduxId}
+              textForEachSeq={alignment
                 .getSequences(
                   sortBy ? sortBy : defaultProps.sortBy
                 )
-                .map((iseq) => iseq.sequence)}
+                .map((iseq) => iseq.id)}
+              fontSize={fontSize}
+              tabFontSize={annotationFontSize}
+              letterHeight={residueHeight}
+              letterWidth={residueWidth}
+            />,
+          content:
+            <AlignmentDetails
+              reduxVerticalId={sharedVerticalReduxId}
+              reduxHorizontalId={sharedHorizontalReduxId}
+              sequences={sequences}
               consensusSequence={alignment.getConsensus().sequence}
               querySequence={alignment.getQuerySequence().sequence}
               alignmentStyle={style}

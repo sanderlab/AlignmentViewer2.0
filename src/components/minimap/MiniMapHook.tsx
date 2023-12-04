@@ -460,7 +460,7 @@ export function MinimapDragger(props: IMinimapDraggerProps){
     e.preventDefault();
     setDragging(true);
     setMouseLastYPx(e.screenY)
-  }, [setDragging, setMouseLastYPx]);
+  }, [setMouseLastYPx]);
 
   const dragEnd = useCallback((
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -469,15 +469,15 @@ export function MinimapDragger(props: IMinimapDraggerProps){
     e.preventDefault();
     setDragging(false);
     setMouseLastYPx(undefined)
-  }, [setDragging, setMouseLastYPx]);
+  }, [setMouseLastYPx]);
   
   return (
     <>
       <div
+        className="minimap-dragger"
         style={{
-          position: "absolute",
-          left: 0, right:0, 
-          top: highlighterYPx, height: highlighterHeightPx,
+          top: highlighterYPx, 
+          height: highlighterHeightPx,
           opacity: dragging ? draggingOpacity
             : mouseover ? mouseoverOpacity
             : baselineOpacity,
@@ -490,14 +490,11 @@ export function MinimapDragger(props: IMinimapDraggerProps){
         //onTouchStart={(dragStart)}
       />
       {!dragging ? undefined : 
-        //secondary sprite object takes over the entire canvas during dragging. this
-        //enables the mouse to move out of the dragger as long is it is pressed. dragging
-        //stops when the mouse button is lived up.
-        <div style={{
-            position: "fixed",
-            left: 0, top: 0, right: 0, bottom: 0,
-            opacity: 0, backgroundColor: "white",
-          }}
+        //secondary div takes over the entire page during dragging. this enables the
+        //mouse to move out of the dragger as long is it is pressed. dragging stops
+        //when the mouse button is lived up.
+        <div 
+          className="minimap-full-page-drag-detector"
           onMouseMove={dragMove}
           //onPointerMove={dragMove}
           //onTouchMove={dragMove}

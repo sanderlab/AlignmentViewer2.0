@@ -52,7 +52,12 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     verticalScrollbar,
     horizontalScrollbar,
   } = props;
-  
+  //useMemo(()=>{ //check for property changes
+  //  console.log('horizontalScrollbar changed ('+sequences.length+'):'+horizontalScrollbar);
+  //}, [
+  //  horizontalScrollbar,
+  //]);
+
   //
   //state
   //
@@ -102,36 +107,34 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
         -rowIdxsToRender[0]*residueHeight + additionalVerticalOffset
       );
       app.stage.scale.set(residueWidth, residueHeight);
-      //app.render();  
     }
 
     return (
-      <div className="av-viewport">
+      <div className="av2-viewport">
         <Stage
-          className="stage"
+          className={
+            ["stage", ...(
+              residueColoring === ResidueColoring.NO_BACKGROUND
+                ? ["hidden"]
+                : []
+            )].join(" ")
+          }
           width={stageDimensions.width}
           height={stageDimensions.height}
           raf={false}
           renderOnComponentChange={true}
           onMount={setApp}
           options={{ antialias: false, backgroundAlpha: 0 }}
-          style={{ //might not be needed
-            imageRendering: "pixelated",
-          }}
         >
-          {
-            residueColoring === ResidueColoring.NO_BACKGROUND 
-              ? undefined 
-              : <CanvasAlignmentTiled
-                  sequences={sequences}
-                  consensusSequence={consensusSequence}
-                  querySequence={querySequence}
-                  alignmentType={alignmentStyle.alignmentType}
-                  colorScheme={alignmentStyle.selectedColorScheme}
-                  positionsToStyle={positionsToStyle}
-                  residueColoring={residueColoring}
-                />
-          }
+          <CanvasAlignmentTiled
+            sequences={sequences}
+            consensusSequence={consensusSequence}
+            querySequence={querySequence}
+            alignmentType={alignmentStyle.alignmentType}
+            colorScheme={alignmentStyle.selectedColorScheme}
+            positionsToStyle={positionsToStyle}
+            residueColoring={residueColoring}
+          />
         </Stage>
 
         <AlignmentDetailsLetters
@@ -315,38 +318,40 @@ export function AlignmentDetailsLetters(props: {
   //Array of JSX elements - one for each letter color. Each contains
   //a character for every position in the rendered sequences, (each
   //position will be blank for all except one of the elemnets)
-  const individualColors = Object.entries(letterColorToLocations).map(
-    ([color, locations]) => {
-      const colorStrings = slicedSequences.map((seqStr, seqIdx) => {
-        return seqStr
-          .split("")
-          .map((letter, colIdx) => {
-            if (seqIdx in locations && locations[seqIdx].indexOf(colIdx) >= 0) {
-              return letter;
-            }
-            return "\u00A0";
-          })
-          .join("");
-      });
+  const individualColors = useMemo(()=>{
+    return Object.entries(letterColorToLocations).map(
+      ([color, locations]) => {
+        const colorStrings = slicedSequences.map((seqStr, seqIdx) => {
+          return seqStr
+            .split("")
+            .map((letter, colIdx) => {
+              if (seqIdx in locations && locations[seqIdx].indexOf(colIdx) >= 0) {
+                return letter;
+              }
+              return "\u00A0";
+            })
+            .join("");
+        });
 
-      return (
-        <div
-          className={`letters-with-specific-color`}
-          style={{ color: color }}
-          key={`${color}_${colorStrings.join("")}`}
-        >
-          {colorStrings.map((seqStr, idx) => {
-            return (
-              <React.Fragment key={idx + seqStr}>
-                {seqStr}
-                <br />
-              </React.Fragment>
-            );
-          })}
-        </div>
-      );
-    }
-  );
+        return (
+          <div
+            className={`letters-with-specific-color`}
+            style={{ color: color }}
+            key={`${color}_${colorStrings.join("")}`}
+          >
+            {colorStrings.map((seqStr, idx) => {
+              return (
+                <React.Fragment key={idx + seqStr}>
+                  {seqStr}
+                  <br />
+                </React.Fragment>
+              );
+            })}
+          </div>
+        );
+      }
+    );
+  }, [letterColorToLocations, slicedSequences]);
 
   return (
     <div

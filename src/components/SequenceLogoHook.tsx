@@ -305,26 +305,28 @@ export function SequenceLogo(props: ISequenceLogoProps) {
 
     for (let positionIdx = 0; positionIdx < sequenceLength; positionIdx++) {
       const singlePositionData = logoData[positionIdx];
-      positions.push(
-        (
-          <g
-            transform={`translate(${positionIdx},0)`}
-            className={residueParentClass} //required for default coloring
-            key={"p_" + positionIdx}
-          >
-            {renderSinglePositionStack(singlePositionData, logoData.length)}
-            <rect
-              className="interaction-placeholder"
-              width="1"
-              height="100"
-              data-tooltip-id={`logo${positionIdx}`}
-              data-tooltip-content={positionIdx}
-              onMouseEnter={openTooltip}
-              onMouseLeave={closeTooltip}
-            ></rect>
-          </g>
-        ) as React.SVGProps<SVGGElement>
-      );
+      if (singlePositionData.length > 0){
+        positions.push(
+          (
+            <g
+              transform={`translate(${positionIdx},0)`}
+              className={residueParentClass} //required for default coloring
+              key={"p_" + positionIdx}
+            >
+              {renderSinglePositionStack(singlePositionData, logoData.length)}
+              <rect
+                className="interaction-placeholder"
+                width="1"
+                height="100"
+                data-tooltip-id={`logo${positionIdx}`}
+                data-tooltip-content={positionIdx}
+                onMouseEnter={openTooltip}
+                onMouseLeave={closeTooltip}
+              ></rect>
+            </g>
+          ) as React.SVGProps<SVGGElement>
+        );
+      }
     }
     return <>{positions}</>;
   }, [

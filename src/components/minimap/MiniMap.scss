@@ -10,4 +10,20 @@
 
   overflow: hidden; //needed for resize handle (set as style in react)
   //min-width: 100px; //now set in javascript code
+
+  .minimap-dragger{
+    position: absolute;
+    left: 0; 
+    right:0;
+  }
+
+  .minimap-full-page-drag-detector{
+    position: fixed;
+    left: 0;
+    top: 0; 
+    right: 0; 
+    bottom: 0;
+    opacity: 0;
+    background-color: white;
+  }
 }

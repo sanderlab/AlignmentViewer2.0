@@ -52,6 +52,8 @@ export interface IVirtualizedMatrixiewerProps {
   verticalReduxId?: string;
   horizontalScrollbar: ScrollbarOptions;
   verticalScrollbar: ScrollbarOptions;
+  suppressVerticalHoverTracker?: boolean;
+  suppressHorizontalHoverTracker?: boolean;
 }
 
 export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
@@ -64,7 +66,9 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     columnWidth,
     rowHeight,
     horizontalScrollbar = "never-on",
-    verticalScrollbar = "never-on"
+    verticalScrollbar = "never-on",
+    suppressVerticalHoverTracker = false,
+    suppressHorizontalHoverTracker = false,
   } = props;
   
   const {
@@ -226,17 +230,17 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
       horizontalAdditionalOffset: reduxStateHorizontal?.scrollingAdditionalOffset
         ? reduxStateHorizontal.scrollingAdditionalOffset : 0,
       stageHeight: reduxStateVertical?.renderSize 
-        ? reduxStateVertical.renderSize : screenHeight,
+        ? reduxStateVertical.renderSize : rowHeight*rowCount,
       stageWidth: reduxStateHorizontal?.renderSize
-        ? reduxStateHorizontal?.renderSize : screenWidth
+        ? reduxStateHorizontal?.renderSize : columnWidth*columnCount
     }
   }, [
     reduxStateVertical?.scrollingAdditionalOffset,
     reduxStateVertical?.renderSize,
     reduxStateHorizontal?.scrollingAdditionalOffset, 
     reduxStateHorizontal?.renderSize,
-    screenHeight,
-    screenWidth
+    rowHeight, rowCount,
+    columnWidth, columnCount
   ]);
 
   //
@@ -498,8 +502,8 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
         setMouseHovering(false);
       }}
     >
-      { horizontalSelectedRender }
-      { verticalSelectedRender }
+      { /*horizontalSelectedRender*/ }
+      { /*verticalSelectedRender*/ }
 
       <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
         <div className="av2-virtualized-matrix" ref={ref}>
@@ -516,34 +520,40 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
                 onMouseMove={handleMousemoveFn}
                 onWheel={handleWheelFn}
               >
-                <div className="hover-tracker-y" style={!reduxStateVertical || !reduxStateVertical.mouseMove ? 
-                  {display: "none"} : {
-                    position: "absolute",
-                    zIndex: 1000,
+                <div className="hover-tracker-y" style={
+                  !reduxStateVertical || !reduxStateVertical.mouseMove || suppressVerticalHoverTracker
+                    ? {display: "none"}
+                    : {
+                        position: "absolute",
+                        zIndex: 1000,
 
-                    left: -4, //1/2 the width
-                    top: reduxStateVertical.mouseMove.hoverIdxScreenMin
-                          + .5*reduxStateVertical.cellPixelSize
-                          - 4, // 1/2 the height
-                    width:8, height:8, 
-                    borderRadius: "50%",
-                    backgroundColor:"red"
-                  }}
+                        left: -4, //1/2 the width
+                        top: reduxStateVertical.mouseMove.hoverIdxScreenMin
+                              + .5*reduxStateVertical.cellPixelSize
+                              - 4, // 1/2 the height
+                        width:8, height:8, 
+                        borderRadius: "50%",
+                        backgroundColor:"red"
+                      }
+                  }
                 ></div>
 
-                <div className="hover-tracker-x" style={!reduxStateHorizontal || !reduxStateHorizontal.mouseMove ? 
-                  {display: "none"} : {
-                    position: "absolute",
-                    zIndex: 1000,
+                <div className="hover-tracker-x" style={
+                  !reduxStateHorizontal || !reduxStateHorizontal.mouseMove || suppressHorizontalHoverTracker 
+                    ? {display: "none"} 
+                    : {
+                        position: "absolute",
+                        zIndex: 1000,
 
-                    top: -4, //1/2 the height
-                    left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin
-                          + .5*reduxStateHorizontal.cellPixelSize
-                          - 4, // 1/2 the width
-                    width:8, height:8, 
-                    borderRadius: "50%",
-                    backgroundColor:"red"
-                  }}
+                        top: -4, //1/2 the height
+                        left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin
+                              + .5*reduxStateHorizontal.cellPixelSize
+                              - 4, // 1/2 the width
+                        width:8, height:8, 
+                        borderRadius: "50%",
+                        backgroundColor:"red"
+                      }
+                  }
                 ></div>
 
                 <div
