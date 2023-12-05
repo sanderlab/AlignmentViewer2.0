@@ -19,14 +19,14 @@ import {
   setRowHeight as setReduxRowHeight,
   setScreenHeight as setReduxScreenHeight,
   setWorldTopPixelOffset as setReduxWorldTopPixelOffset,
-  RootState,
+  ReduxState,
 } from "../../redux/ReduxStore";
 import {
   stopSafariFromBlockingWindowWheel,
 } from "../../common/Utils";
 import { VirtualVerticalScrollbar } from "./VirtualVerticalScrollbarHook";
 import { VirtualHorizontalScrollbar } from "./VirtualHorizontalScrollbarHook";
-import { useAppDispatch, useAppSelector } from "../../common/Hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/ReduxStore";
 
 export enum ScrollbarOptions{
   NeverOn, AlwaysOnWhenOverflowed, OnHoverWhenOverflowed
@@ -86,12 +86,12 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //redux stores
   const dispatch = useAppDispatch();
-  const reduxStateVertical = useAppSelector((state: RootState) => {
+  const reduxStateVertical = useAppSelector((state: ReduxState) => {
     return !verticalReduxId 
       ? undefined 
       : state.virtualizedVerticalSlice[verticalReduxId]
   });
-  const reduxStateHorizontal = useAppSelector((state: RootState) =>{
+  const reduxStateHorizontal = useAppSelector((state: ReduxState) =>{
     return !horizontalReduxId 
       ? undefined 
       : state.virtualizedHorizontalSlice[horizontalReduxId]

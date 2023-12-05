@@ -14,10 +14,10 @@ import {
   PositionsToStyle,
   ResidueColoring
 } from "../../common/MolecularStyles";
-import { RootState, setWorldTopRowOffset } from "../../redux/ReduxStore";
+import { ReduxState, setWorldTopRowOffset } from "../../redux/ReduxStore";
 import { stopSafariFromBlockingWindowWheel, useStateCallback } from "../../common/Utils";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
-import { useAppDispatch, useAppSelector } from "../../common/Hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/ReduxStore";
 import { shallowEqual } from "react-redux";
 
 export interface IMiniMapProps {
@@ -70,7 +70,7 @@ export function MiniMap(props: IMiniMapProps) {
   //
   const dispatch = useAppDispatch();
 
-  const idxsToRender = useAppSelector((state: RootState) => {
+  const idxsToRender = useAppSelector((state: ReduxState) => {
     return !verticalReduxId ||
            !state.virtualizedVerticalSlice[verticalReduxId] ||
            !state.virtualizedVerticalSlice[verticalReduxId].initialized
@@ -78,7 +78,7 @@ export function MiniMap(props: IMiniMapProps) {
       : state.virtualizedVerticalSlice[verticalReduxId].idxsToRender
   }, shallowEqual);
 
-  const viewportFullyRendersAlignment = useAppSelector((state: RootState) => {
+  const viewportFullyRendersAlignment = useAppSelector((state: ReduxState) => {
     return !verticalReduxId || 
            !state.virtualizedVerticalSlice[verticalReduxId] || 
            !state.virtualizedVerticalSlice[verticalReduxId].initialized 

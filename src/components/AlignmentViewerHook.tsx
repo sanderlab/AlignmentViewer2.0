@@ -13,7 +13,7 @@ import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
-import { store } from "../redux/ReduxStore";
+import { reduxStore } from "../redux/ReduxStore";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -400,7 +400,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         onMouseOut={endAnnotationResizeDragging}
         onMouseLeave={endAnnotationResizeDragging}
       />
-      <Provider store={store}>
+      <Provider store={reduxStore}>
           
         {renderedMinimap}
 

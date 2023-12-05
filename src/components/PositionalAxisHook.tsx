@@ -2,7 +2,7 @@
  * Hook for rendering the position axis
  */
 import "./PositionalAxis.scss";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ScrollbarOptions, VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 /**

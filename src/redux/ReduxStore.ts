@@ -5,7 +5,12 @@ import {
   createSlice,
   PayloadAction,
 } from "@reduxjs/toolkit";
-import { shallowEqual } from "react-redux";
+import { 
+  shallowEqual,
+  useSelector as useReduxSelector,
+  useDispatch as useReduxDispatch,
+  type TypedUseSelectorHook,
+ } from "react-redux";
 
 export interface IVirtualizedMatrixState {
   //
@@ -636,18 +641,23 @@ export const {
  *
  *
  */
-export const store = configureStore({
+export const reduxStore = configureStore({
   reducer: {
     virtualizedHorizontalSlice: virtualizedHorizontalSlice.reducer,
     virtualizedVerticalSlice: virtualizedVerticalSlice.reducer,
   },
 });
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppThunk<ReturnType = void> = ThunkAction<
+export const useAppDispatch = () => useReduxDispatch<ReduxDispatch>()
+export const useAppSelector: TypedUseSelectorHook<ReduxState> = useReduxSelector
+
+/* Types */
+export type ReduxStore = typeof reduxStore
+export type ReduxState = ReturnType<typeof reduxStore.getState>
+export type ReduxDispatch = typeof reduxStore.dispatch
+export type ReduxThunkAction<ReturnType = void> = ThunkAction<
   ReturnType,
-  RootState,
+  ReduxState,
   unknown,
-  Action<string>
->;
-export type AppDispatch = typeof store.dispatch
+  Action
+>
