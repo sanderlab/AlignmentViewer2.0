@@ -31,7 +31,9 @@ export function PositionalAxis(props: {
    * through the maxLength. Taken from alignmentviewer 1.0:
    *     https://github.com/sanderlab/alignmentviewer
    * May want to implement this better in the future (SVG + sliding tooltip for cursor?)
-   * @param maxLength
+   * UPDATE: actually works pretty well even for large numbers
+   * |....:..10|....:..20|....:..30|....:..40| ->
+   *        |....12310|....12320|....12330|....12340|....12350|....12360|
    */
   const fullRuler = useMemo((): string => {
     let s = ""; // should be a better way to do this to be honest
@@ -47,8 +49,7 @@ export function PositionalAxis(props: {
       if (np < 0) {
         continue;
       }
-      s = s.substring(0, )
-      s = s.substr(0, np) + sn + "|";
+      s = s.substring(0, np) + sn + "|";
     }
     return s; // this.hruler = s.replace(/ /g, '.');
   }, [maxLength]);
@@ -70,7 +71,6 @@ export function PositionalAxis(props: {
 
   return (
     <VirtualizedMatrixViewer
-      //id={id}
       horizontalReduxId={horizontalReduxId}
       direction="x"
       columnCount={positions.length}
