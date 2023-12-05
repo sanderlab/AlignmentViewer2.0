@@ -20,7 +20,7 @@ import {
   setScreenHeight as setReduxScreenHeight,
   setWorldTopPixelOffset as setReduxWorldTopPixelOffset,
   RootState,
-} from "../../redux/ReduxStore";
+} from "../../common/ReduxStore";
 import {
   stopSafariFromBlockingWindowWheel,
 } from "../../common/Utils";
@@ -32,49 +32,103 @@ export enum ScrollbarOptions{
   NeverOn, AlwaysOnWhenOverflowed, OnHoverWhenOverflowed
 }
 
-export interface IVirtualizedContentParameters {
-  rowIdxsToRender: number[],
-  colIdxsToRender: number[],
-  additionalVerticalOffset: number,
-  additionalHorizontalOffset: number,
+//
+// Interfaces for the getMatrixContent, getRowContent, getColumnContent that
+// clients must implement
+//
+interface IVirtualizedContentBasics {
   stageDimensions: { width: number; height: number }
 }
+export interface IVirtualizedRowContents extends IVirtualizedContentBasics {
+  colIdxsToRender: number[];
+  additionalHorizontalOffset: number;
+}
+export interface IVirtualizedColumnContents extends IVirtualizedContentBasics {
+  rowIdxsToRender: number[];
+  additionalVerticalOffset: number;
+}
+export interface IVirtualizedMatrixContent extends IVirtualizedRowContents, IVirtualizedColumnContents{}
 
-export interface IVirtualizedMatrixiewerProps {
-  getContent(params: IVirtualizedContentParameters): JSX.Element;
-  columnCount: number;
-  rowCount: number;
-  columnWidth: number;
-  rowHeight: number;
-  autoOffset: boolean;
-  direction: "all" | "x" | "y";
-  horizontalReduxId?: string;
-  verticalReduxId?: string;
-  horizontalScrollbar: ScrollbarOptions;
-  verticalScrollbar: ScrollbarOptions;
-  suppressVerticalHoverTracker?: boolean;
-  suppressHorizontalHoverTracker?: boolean;
+//
+// 
+//
+interface IVirtualizeRowOrColumnParameters {
+  reduxId: string;
+  scrollbar: ScrollbarOptions;
+  autoOffset?: boolean; //default to true
+  hoverTracker?: boolean; //default to true
 }
 
-export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
+//
+// Entry points
+//
+export interface IVirtualizedRowViewer {
+  getRowContent(params: IVirtualizedRowContents): JSX.Element;
+  horizontalParams: IVirtualizeRowOrColumnParameters;
+}
+export interface IVirtualizedColumnViewer {
+  getColumnContent(params: IVirtualizedColumnContents): JSX.Element;
+  verticalParams: IVirtualizeRowOrColumnParameters;
+}
+export interface IVirtualizedMatrix {
+  getMatrixContent(params: IVirtualizedMatrixContent): JSX.Element;
+  horizontalParams: IVirtualizeRowOrColumnParameters;
+  verticalParams: IVirtualizeRowOrColumnParameters;
+}
+
+//
+// exported functions for each virtualized viewport - full matrix, x-axis only, y-axis only
+//
+export function VirtualizedRowViewer(props: IVirtualizedRowViewer) {
+  return GenericVirtualizedMatrixViewer({
+    getContent: props.getRowContent,
+    directionParams: {
+      horizontalParams: props.horizontalParams,
+    }
+  });
+}
+export function VirtualizedColumnViewer(props: IVirtualizedColumnViewer) {
+  return GenericVirtualizedMatrixViewer({
+    getContent: props.getColumnContent,
+    directionParams: {
+      verticalParams: props.verticalParams,
+    }
+  });
+}
+export function VirtualizedMatrixViewer(props: IVirtualizedMatrix) {
+  return GenericVirtualizedMatrixViewer({
+    getContent: props.getMatrixContent,
+    directionParams: {
+      horizontalParams: props.horizontalParams,
+      verticalParams: props.verticalParams,
+    }
+  });
+}
+
+//
+// non-exported function - uses same mechanism x/y/xy virtualization
+//
+interface IVirtualizedMatrixOrRowOrColumn {
+  getContent(params: 
+    IVirtualizedRowContents | 
+    IVirtualizedColumnContents | 
+    IVirtualizedMatrixContent
+  ): JSX.Element;
+  directionParams: {
+    horizontalParams?: IVirtualizeRowOrColumnParameters
+    verticalParams?: IVirtualizeRowOrColumnParameters
+  }
+}
+
+function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) {
   const {
-    autoOffset,
-    direction,
-    getContent,
-    columnCount,
-    rowCount,
-    columnWidth,
-    rowHeight,
-    horizontalScrollbar = "never-on",
-    verticalScrollbar = "never-on",
-    suppressVerticalHoverTracker = false,
-    suppressHorizontalHoverTracker = false,
+    getContent
   } = props;
   
   const {
-    horizontalReduxId,//generateUUIDv4(),
-    verticalReduxId,//generateUUIDv4(),
-  } = props;
+    horizontalParams,
+    verticalParams
+  } = props.directionParams;
 
   //ref
   const ref = useRef<HTMLDivElement>(null);
@@ -87,17 +141,16 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
   //redux stores
   const dispatch = useAppDispatch();
   const reduxStateVertical = useAppSelector((state: RootState) => {
-    return !verticalReduxId 
+    return !verticalParams 
       ? undefined 
-      : state.virtualizedVerticalSlice[verticalReduxId]
+      : state.virtualizedVerticalSlice[verticalParams.reduxId]
   });
   const reduxStateHorizontal = useAppSelector((state: RootState) =>{
-    return !horizontalReduxId 
+    return !horizontalParams 
       ? undefined 
-      : state.virtualizedHorizontalSlice[horizontalReduxId]
+      : state.virtualizedHorizontalSlice[horizontalParams.reduxId]
   });
   
-
   //
   //useCallbacks
   //
@@ -105,27 +158,26 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
     setScreenHeight(bounds.height);
     setScreenWidth(bounds.width);
 
-    if (horizontalReduxId && (direction === "x" || direction === "all")) {
+    if (horizontalParams?.reduxId) {
       dispatch(
         setReduxScreenWidth({
-          id: horizontalReduxId,
+          id: horizontalParams.reduxId,
           screenWidth: bounds.width,
         })
       );
     }
-    if (verticalReduxId && (direction === "y" || direction === "all")) {
+    if (verticalParams?.reduxId) {
       dispatch(
         setReduxScreenHeight({
-          id: verticalReduxId,
+          id: verticalParams?.reduxId,
           screenHeight: bounds.height,
         })
       );
     }
   }, [
-    direction, 
-    dispatch, 
-    horizontalReduxId,  
-    verticalReduxId
+    dispatch,
+    horizontalParams?.reduxId,
+    verticalParams?.reduxId
   ]);
 
   //
@@ -143,80 +195,77 @@ export function VirtualizedMatrixViewer(props: IVirtualizedMatrixiewerProps) {
 
   //set row and column height in pixels
   useEffect(() => {
-    if (horizontalReduxId && (direction === "x" || direction === "all")) {
+    if (horizontalParams?.reduxId) {
       dispatch(
         setReduxColumnWidth({
-          id: horizontalReduxId,
-          columnWidth: columnWidth,
+          id: horizontalParams?.reduxId,
+          columnWidth: horizontalParams?.columnWidth
         })
       );
     }
-    if (verticalReduxId && (direction === "y" || direction === "all")) {
+    if (verticalParams?.reduxId) {
       dispatch(
         setReduxRowHeight({
-          id: verticalReduxId,
-          rowHeight: rowHeight,
+          id: verticalParams?.reduxId,
+          rowHeight: verticalParams?.rowWidth,
         })
       );
     }
   }, [
     dispatch,
-    direction,
-    verticalReduxId,
-    horizontalReduxId,
-    columnWidth,
-    rowHeight,
+    verticalParams?.reduxId,
+    verticalParams?.columnWidth,
+    horizontalParams?.reduxId,
+    horizontalParams?.rowWidth
   ]);
 
   //set num columns / num rows
   useEffect(() => {
-    if (horizontalReduxId && (direction === "x" || direction === "all")) {
+    if (virtualizeXAxis?.reduxId) {
       dispatch(
         setReduxColumnCount({
-          id: horizontalReduxId,
-          columnCount: columnCount,
+          id: virtualizeXAxis?.reduxId,
+          columnCount: virtualizeXAxis?.columnCount,
         })
       );
     }
-    if (verticalReduxId && (direction === "y" || direction === "all")) {
+    if (virtualizeYAxis?.reduxId) {
       dispatch(
         setReduxRowCount({
-          id: verticalReduxId,
-          rowCount: rowCount,
+          id: virtualizeYAxis?.reduxId,
+          rowCount: virtualizeYAxis?.rowCount,
         })
       );
     }
   }, [
     dispatch,
-    direction,
-    verticalReduxId,
-    horizontalReduxId,
-    rowCount,
-    columnCount,
+    virtualizeXAxis?.reduxId,
+    virtualizeXAxis?.columnCount,
+    virtualizeYAxis?.reduxId,
+    virtualizeYAxis?.rowCount,
   ]);
 
   //misc
   const disableVerticalScrolling =
     !reduxStateVertical || !reduxStateVertical.initialized || verticalScrollbar==='never-on'
       ? true
-      : rowCount <= reduxStateVertical.idxsToRender.length;
+      : reduxStateVertical.cellCount <= reduxStateVertical.idxsToRender.length;
   const disableHorizontalScrolling =
     !reduxStateHorizontal || !reduxStateHorizontal.initialized || horizontalScrollbar==='never-on'
       ? true
-      : columnCount <= reduxStateHorizontal.idxsToRender.length;
+      : reduxStateHorizontal.cellCount <= reduxStateHorizontal.idxsToRender.length;
 
   const reduxInitialized =
-    (direction === "x" &&
-      reduxStateHorizontal &&
-      reduxStateHorizontal.initialized) ||
-    (direction === "y" &&
-      reduxStateVertical &&
-      reduxStateVertical.initialized) ||
-    (direction === "all" &&
-      reduxStateVertical &&
-      reduxStateVertical.initialized &&
-      reduxStateHorizontal &&
-      reduxStateHorizontal.initialized);
+    (!reduxStateVertical &&
+     reduxStateHorizontal &&
+     reduxStateHorizontal?.initialized) ||
+    (!reduxStateHorizontal && 
+     reduxStateVertical &&
+     reduxStateVertical.initialized) ||
+    (reduxStateVertical &&
+     reduxStateVertical.initialized &&
+     reduxStateHorizontal &&
+     reduxStateHorizontal.initialized);
 
   const scrollbarWidthOrHeight = 12;
 

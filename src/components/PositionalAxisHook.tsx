@@ -24,7 +24,15 @@ export function PositionalAxis(props: {
   } = props;
 
   const maxLength = Math.max(...positions);
-  const renderCache = useRef({} as {[colIdsStr: string]: JSX.Element});
+
+  //const mouseHoverStarted = useCallback((
+  //  idx: number, 
+  //  e: React.MouseEvent<HTMLSpanElement, MouseEvent>
+  //)=>{ }, []);
+  //const mouseHoverEnded = useCallback((
+  //  idx: number, 
+  //  e: React.MouseEvent<HTMLSpanElement, MouseEvent>
+  //)=>{ }, []);
 
   /**
    * Generate a string axis (positional information) with one character per position
@@ -35,7 +43,7 @@ export function PositionalAxis(props: {
    * |....:..10|....:..20|....:..30|....:..40| ->
    *        |....12310|....12320|....12330|....12340|....12350|....12360|
    */
-  const fullRuler = useMemo((): string => {
+  const fullRuler = useMemo((): React.JSX.Element[] => {
     let s = ""; // should be a better way to do this to be honest
     for (let i = 1; i <= maxLength + 1; i++) {
       const Q = i % 10 === 0;
@@ -51,22 +59,29 @@ export function PositionalAxis(props: {
       }
       s = s.substring(0, np) + sn + "|";
     }
-    return s; // this.hruler = s.replace(/ /g, '.');
+    return s.split("").map((char, idx)=>{
+      return (
+        <span
+          key={idx} 
+          //onMouseEnter={(e)=>{mouseHoverStarted(idx, e)}}
+          //onMouseLeave={(e)=>{mouseHoverEnded(idx, e)}}
+        >
+          {char}
+        </span>
+      );
+    });
   }, [maxLength]);
 
   const renderAxis = useCallback((colIdxsToRender: number[])=>{ // example of caching. unnecessary here though
-    const cacheKey = `${colIdxsToRender.toString()}_fontsize${fontSize}`;
-    if (!renderCache.current[cacheKey]){
-      renderCache.current[cacheKey] = (
-        <div className="av2-positional-axis" style={{ fontSize: fontSize }}>
-          {colIdxsToRender.map((colIdx) => {
-              return fullRuler[colIdx];
-            })
-            .join("")}
-        </div>
-      );
-    }
-    return renderCache.current[cacheKey];
+    return (
+      <div className="av2-positional-axis" style={{ fontSize: fontSize }}>
+        {
+          colIdxsToRender.map((colIdx) => {
+            return fullRuler[colIdx];
+          })
+        }
+      </div>
+    );
   }, [fullRuler, fontSize]);
 
   return (

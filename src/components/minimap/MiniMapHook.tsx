@@ -14,7 +14,7 @@ import {
   PositionsToStyle,
   ResidueColoring
 } from "../../common/MolecularStyles";
-import { RootState, setWorldTopRowOffset } from "../../common/ReduxStore";
+import { RootState, setWorldTopRowOffset } from "../../redux/ReduxStore";
 import { stopSafariFromBlockingWindowWheel, useStateCallback } from "../../common/Utils";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 import { useAppDispatch, useAppSelector } from "../../common/Hooks";

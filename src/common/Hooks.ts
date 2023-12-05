@@ -1,5 +1,5 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from './ReduxStore'
+import { AppDispatch, RootState } from '../redux/ReduxStore'
 
 // Use instead of plain `useDispatch` and `useSelector` 
 // - allows typing and was suggested by react-redux

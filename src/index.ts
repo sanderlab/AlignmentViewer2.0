@@ -4,7 +4,7 @@ export * from "./common/AlignmentSorter.js";
 export * from "./common/BLOSUM.js";
 export * from "./common/FastaAlignment.js";
 export * from "./common/MolecularStyles.js";
-export * from "./common/ReduxStore.js";
+export * from "./redux/ReduxStore.js";
 export * from "./common/Residues.js";
 export * from "./common/SequenceLogoGlyphs.js";
 export * from "./common/StockholmAlignment.js";

@@ -13,7 +13,7 @@ import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
-import { store } from "../common/ReduxStore";
+import { store } from "../redux/ReduxStore";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
