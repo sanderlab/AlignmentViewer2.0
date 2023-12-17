@@ -9,20 +9,30 @@ import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { GlyphFactory, LogoFonts } from "../common/SequenceLogoGlyphs";
 import {
-  residueParentClass,
   getLetterClassNames,
   AlignmentTypes,
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   PositionsToStyle,
+  ResidueColoring,
 } from "../common/MolecularStyles";
 import { AminoAcid, Nucleotide } from "../common/Residues";
-import { ScrollbarOptions, VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import {
+  VirtualizedHorizontalViewer 
+} from "./virtualization/VirtualizedMatrixViewerHook";
+import { 
+  IControllerRole, 
+  IResponderRole, 
+  ScrollbarOptions,
+  VirtualizationStrategy 
+} from "./virtualization/VirtualizationTypes";
+
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
   BARS = "Bar Plot",
 }
+
 interface ILetterWithClasses {
   letter: AvailableGlyphs;
   classNames: string;
@@ -40,6 +50,7 @@ export interface ISequenceLogoProps {
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle;
 
   //props that should be exposed in AlignmentViewer:
   logoType?: LOGO_TYPES; //letters or bars
@@ -52,21 +63,23 @@ export interface ISequenceLogoProps {
   tooltipPlacement?: tooltipPlacement;
   tooltipOffset?: number;
 
-  //redux id for tracking shift in x-axis
-  horizontalReduxId?: string;
+  //for the virtualization .. directly decomposed to VirtualizedHorizontalViewer 
+  horizontalVirtualization: IControllerRole | IResponderRole;
 }
+
 
 export function SequenceLogo(props: ISequenceLogoProps) {
   const {
     alignment,
     glyphWidth,
     style,
+    positionsToStyle,
     tooltipPlacement = "left-start",
     tooltipOffset = 8, //distance that the arrow will be from the hoverd letter stack
     logoType = LOGO_TYPES.LETTERS,
     height = 100,
     font = LogoFonts.DEFAULT,
-    horizontalReduxId,
+    horizontalVirtualization,
   } = props;
 
   const tooltipRef = useRef<TooltipRefProps>(null);
@@ -86,25 +99,26 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const moleculeClass =
       style.alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
 
-    //load class names for each letter
-    const letterObjects = lettersSorted.reduce((arr, letter) => {
-      arr[letter] = {
-        letter: letter,
-        classNames: getLetterClassNames(letter, false, false),
-      };
-      return arr;
-    }, {} as { [letter: string]: ILetterWithClasses });
-
     //note: removes invalid letters, but letterCount (value) isn't sorted
     const plc = alignment.getPositionalLetterCounts(false, lettersSorted);
     return Array.from(plc).map(
       ([pos, letterCounts]): IGlyphStackData => {
+        const queryLetter = alignment.getQuery().sequence[pos.valueOf()];
+        const consensusLetter = alignment.getConsensus().sequence[pos.valueOf()];
+
         return Object.entries(letterCounts)
           .map(([letter, count]) => {
             return {
               count: count,
               frequency: count / numberSequences,
-              letter: letterObjects[letter],
+              letter: {
+                letter: letter,
+                classNames: getLetterClassNames(
+                  letter, 
+                  letter===consensusLetter, //can force coloring to always be gray by setting
+                  letter===queryLetter      //these two parameters to false.
+                ),
+              } as ILetterWithClasses,
               residue: moleculeClass.fromSingleLetterCode(letter),
             };
           })
@@ -310,7 +324,6 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           (
             <g
               transform={`translate(${positionIdx},0)`}
-              className={residueParentClass} //required for default coloring
               key={"p_" + positionIdx}
             >
               {renderSinglePositionStack(singlePositionData, logoData.length)}
@@ -342,6 +355,15 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const sequenceLength = alignment.getSequenceLength();
     const totalWidth = sequenceLength * glyphWidth;
 
+    const moleculeClass =
+      style.alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
+
+    const defaultColor = moleculeClass.UNKNOWN.colors.get(
+        style.selectedColorScheme
+      )?.get(
+        ResidueColoring.NO_BACKGROUND
+      )?.letterColor.hexString;
+  
     return (
       <svg
         className="av2-sequence-logo"
@@ -355,6 +377,14 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         }}
         xmlns="http://www.w3.org/2000/svg"
       >
+        {!defaultColor ? undefined : (
+          <style type="text/css">{`
+            path{
+              color: ${defaultColor};
+              fill: ${defaultColor};
+            }
+          `}</style>
+        )}
         {positionsCache}
       </svg>
     );
@@ -363,17 +393,16 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     glyphWidth,
     height,
     positionsCache,
+    style.alignmentType,
+    style.selectedColorScheme
   ]);
 
-  const renderFullLogoAndOffset = useCallback((
-    colIdxsToRender: number[],
-    additionalHorizontalOffset: number
-  )=>{
+  const fullLogoRendered = useMemo(()=>{
     const classNames = [
       "sequence-logo-holder",
       style.alignmentType.className,
       style.selectedColorScheme.className,
-      PositionsToStyle.ALL.className,
+      positionsToStyle.className
     ];
 
     return (
@@ -381,10 +410,6 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         className={classNames.join(" ")}
         style={{
           width: alignment.getSequenceLength() * glyphWidth,
-          left:
-            colIdxsToRender.length > 0
-              ? colIdxsToRender[0] * glyphWidth * -1 + additionalHorizontalOffset
-              : additionalHorizontalOffset,
         }}
       >
         {renderedSvg}
@@ -394,6 +419,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   }, [
     alignment, 
     glyphWidth, 
+    positionsToStyle,
     renderedSvg, 
     renderedTooltip, 
     style.alignmentType.className, 
@@ -402,64 +428,24 @@ export function SequenceLogo(props: ISequenceLogoProps) {
 
   //OPTION 2: VIRTUALIZATION
   return (
-    <VirtualizedMatrixViewer
-      horizontalReduxId={horizontalReduxId}
-      direction="x"
-      columnCount={alignment.getSequenceLength()}
-      columnWidth={glyphWidth}
-      rowCount={1}
-      rowHeight={height}
-      autoOffset={false} //manage the offset manually
-      verticalScrollbar={ScrollbarOptions.NeverOn}
-      horizontalScrollbar={ScrollbarOptions.NeverOn}
-      getContent={({
-        colIdxsToRender,
-        additionalHorizontalOffset,
-      }) => {
-        //OPTION 2A: RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET. Quick on
-        //sequences of reasonable length - need to check for longer sequences. It adds
-        //~20 x length of sequences dom elements, which could add up, but is probably
-        //fine
-        return renderFullLogoAndOffset(
-          colIdxsToRender, 
-          additionalHorizontalOffset
-        );
-
-        /* //OPTION 2B: USING VIRTUALIZATION, BUT CACHE POSITIONS - this is slow
-        return (
-          <>
-            <div
-              className={classNames.join(" ")}
-            >
-              <svg
-                preserveAspectRatio="none"
-                viewBox={`0 0 ${colIdxsToRender.length} 100`}
-                style={{
-                  width: colIdxsToRender.length * glyphWidth,
-                  height: height ? height : height,
-                }}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {colIdxsToRender.map((colIdx, arrIdx) => {
-                  if (!positionsCache || !positionsCache[colIdx]) {
-                    return;
-                  }
-                  const pos = positionsCache[colIdx];
-                  return (
-                    <g
-                      transform={`translate(${arrIdx},0)`}
-                      className={residueParentClass} //required for default coloring
-                      key={"p_" + pos.positionIdx}
-                    >
-                      {pos.positionStack}
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-          </>
-        );*/
-      }}
-    />
+    !horizontalVirtualization 
+      ? fullLogoRendered
+      : (
+        <VirtualizedHorizontalViewer
+          getContentForColumns={() => {
+            
+            //RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET. Quick on
+            //sequences of reasonable length - need to check for longer sequences. It adds
+            //~20 x length of sequences dom elements, which could add up, but is probably
+            //fine
+            return fullLogoRendered;
+          }}
+          horizontalParams={{
+            ...horizontalVirtualization,
+            virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
+            scrollbar: ScrollbarOptions.NeverOn
+          }}
+        />
+      )
   );
 }

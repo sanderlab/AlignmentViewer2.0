@@ -6,14 +6,31 @@
   }
 }
 
+.alignment-viewer.annotation-resize-hovered 
+.av2-widget .av2-metadata-resize-separator{
+  background-color: #0099ff;
+  border-left-color: #0099ff;
+  border-right-color: #0099ff;
+  opacity: 0.2;
+}
+
+.alignment-viewer.annotations-being-resized 
+.av2-widget .av2-metadata-resize-separator,
+.alignment-viewer.annotations-being-resized.annotation-resize-hovered 
+.av2-widget .av2-metadata-resize-separator{
+  background-color: #0099ff;
+  border-left-color: #0099ff;
+  border-right-color: #0099ff;
+}
+
 .alignment-viewer {
   display: flex;
   flex-flow: column;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
 
   .full-screen-annotation-resize-dragger{
     position: fixed;
@@ -23,15 +40,8 @@
     bottom: 0;
     opacity: 0;
     background-color: white;
-    z-index: 100000;
+    z-index: 1800;
     cursor: col-resize;
-  }
-
-  //single row editors
-  .av2-widget.av2-consensus-seq-render,
-  .av2-widget.av2-query-seq-render,
-  .av2-widget.av2-position-indicator-render {
-    height: 24px; //default, but this is set as a style
   }
 
   //the main editor
@@ -43,11 +53,14 @@
     display: flex;
     //margin: 2px 4px;
 
-    .av2-title-resize-separator{
+    .av2-metadata-resize-separator{
       //background: red;
-      width: 4px;
-      border-left: solid #f2f2f2 1px;
-      border-right: solid #f2f2f2 1px;
+      width: 1px;
+      //border-left: solid #f2f2f2 1px;
+      //border-right: solid #f2f2f2 1px;
+      background-color: #f2f2f2;
+      border-left: solid white 2px;
+      border-right: solid white 2px;
       margin-left: 5px;
       margin-right: 5px;
     	cursor: ew-resize;

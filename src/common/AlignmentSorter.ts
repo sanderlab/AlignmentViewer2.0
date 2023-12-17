@@ -70,7 +70,7 @@ export class SequenceSorter {
     true,
     "both",
     (sequences, alignment) => {
-      const querySeq = alignment.getQuerySequence();
+      const querySeq = alignment.getQuery();
       return sequences
         .map((s) => s)
         .sort((seq1, seq2) => {
@@ -121,7 +121,7 @@ export class SequenceSorter {
     true,
     "aminoacid",
     (sequences, alignment) => {
-      const querySeq = alignment.getQuerySequence();
+      const querySeq = alignment.getQuery();
       return sequences
         .map((s) => s)
         .sort((seq1, seq2) => {

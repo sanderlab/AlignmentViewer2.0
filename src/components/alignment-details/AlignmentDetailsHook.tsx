@@ -9,16 +9,28 @@ import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
   ResidueColoring,
-  AlignmentTypes,
   PositionsToStyle,
 } from "../../common/MolecularStyles";
-import { AminoAcid, Nucleotide } from "../../common/Residues";
-import { IVirtualizedContentParameters, ScrollbarOptions, VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
+import { 
+  VirtualizedHorizontalViewer, 
+  VirtualizedMatrixViewer, 
+  VirtualizedVerticalViewer 
+} from "../virtualization/VirtualizedMatrixViewerHook";
 import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
+import { 
+  IControllerRole, 
+  IResponderRole, 
+  IVirtualizedMatrixContent, 
+  ScrollbarOptions, 
+  VirtualizationRole, 
+  VirtualizationStrategy 
+} from "../virtualization/VirtualizationTypes";
+import { generateUUIDv4, startEndIdxToArray } from "../../common/Utils";
+import { Alignment } from "../../common/Alignment";
+
 
 export interface IAlignmentDetailsProps {
-  reduxVerticalId?: string;
-  reduxHorizontalId?: string;
+  alignmentUUID: string;
   sequences: string[];
   consensusSequence: string;
   querySequence: string;
@@ -28,18 +40,21 @@ export interface IAlignmentDetailsProps {
   residueHeight: number;
   residueWidth: number;
   fontSize: number;
-  verticalScrollbar: ScrollbarOptions;
-  horizontalScrollbar: ScrollbarOptions;
 
   highlightedSequenceIdxs?: number[];
   highlightedPositionIdxs?: number[];
+
+  //virtualization
+  horizVirtualization: IControllerRole | IResponderRole | "Automatic" | "None";
+  vertVirtualization: IControllerRole | IResponderRole | "Automatic" | "None";
+  verticalScrollbar?: ScrollbarOptions;
+  horizontalScrollbar?: ScrollbarOptions;
 }
 
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //props
   const {
-    reduxHorizontalId,
-    reduxVerticalId,
+    alignmentUUID,
     sequences,
     consensusSequence,
     querySequence,
@@ -49,14 +64,54 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     residueHeight,
     residueWidth,
     fontSize,
-    verticalScrollbar,
-    horizontalScrollbar,
+    verticalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
+    horizontalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
   } = props;
-  //useMemo(()=>{ //check for property changes
-  //  console.log('horizontalScrollbar changed ('+sequences.length+'):'+horizontalScrollbar);
-  //}, [
-  //  horizontalScrollbar,
-  //]);
+
+  //user can either supply a virtualization, set it to be automatically created, or turn it off
+  //completely. Initialize here based on user request.
+  const containerId = useState<string>(generateUUIDv4());
+  const horizVirtualization = useMemo(()=>{
+    return props.horizVirtualization === "None"
+      ? undefined
+      : props.horizVirtualization === "Automatic"
+        ? {
+            virtualizationId: 
+              `x_auto_generated_alignmentdetails_virtualization_${alignmentUUID}_${containerId}`,
+            axisId: `x_auto_generated_alignmentdetails_axis_${alignmentUUID}_${containerId}`,
+            role: VirtualizationRole.Controller,
+            cellCount: sequences[0].length,
+            cellSizePx: residueWidth,
+          } as IControllerRole
+        : props.horizVirtualization;
+  }, [
+    alignmentUUID,
+    containerId,
+    props.horizVirtualization,
+    residueWidth,
+    sequences,
+  ]);
+
+  const vertVirtualization = useMemo(()=>{
+    return props.vertVirtualization === "None"
+      ? undefined
+      : props.vertVirtualization === "Automatic"
+        ? {
+            virtualizationId: 
+              `y_auto_generated_alignmentdetails_virtualization_${alignmentUUID}_${containerId}`,
+            axisId: `y_auto_generated_alignmentdetails_axis_${alignmentUUID}_${containerId}`,
+            role: VirtualizationRole.Controller,
+            cellCount: sequences.length,
+            cellSizePx: residueHeight
+          } as IControllerRole
+        : props.vertVirtualization;
+  }, [
+    alignmentUUID,
+    containerId,
+    props.vertVirtualization,
+    residueHeight,
+    sequences
+  ]);
 
   //
   //state
@@ -68,46 +123,74 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //
   const sliceSequences = useCallback((
     sequencesToSlice: string[],
-    rowIdxsToRender: number[], 
-    colIdxsToRender: number[],
+    firstRowIdx: number, lastRowIdx: number,
+    firstColIdx: number, lastColIdx: number
   )=>{
-    return rowIdxsToRender.map((seqIdx) => {
+    const toReturn: string[] = [];
+    for(let seqIdx = firstRowIdx; seqIdx <= lastRowIdx; seqIdx++){
       const seq = sequencesToSlice[seqIdx];
-      return colIdxsToRender.map((colIdx) => seq[colIdx]).join("");
-    });
+      const slicedSeq = [];
+      for(let posIdx = firstColIdx; posIdx <= lastColIdx; posIdx++){
+        slicedSeq.push(seq[posIdx]);
+      }
+      toReturn.push(slicedSeq.join(""));
+    }
+    return toReturn;
   }, []);
 
+
+
+
   const renderMatrixContent = useCallback(({
-    rowIdxsToRender,
-    colIdxsToRender,
-    additionalVerticalOffset,
-    additionalHorizontalOffset,
-    stageDimensions
-  }: IVirtualizedContentParameters) => {
-    //issue with loading new alignment (a second alignment): virutalizedmatrix can end up not loading 
-    //the redux store after calling getContent 
+    firstColIdxToRender, lastColIdxToRender,
+    renderWidthPx, renderShiftLeftPx,
+    worldWidthPx, worldShiftLeftPx,
+
+    firstRowIdxToRender, lastRowIdxToRender,
+    renderHeightPx, renderShiftTopPx,
+    worldHeightPx, worldShiftTopPx,
+  }: IVirtualizedMatrixContent) => {
+    //called by vertical only, horizontal only, and full matrix - if vertical or hoizontal
+    //only these would be undefined, so set to zero.
+    firstColIdxToRender = firstColIdxToRender ? firstColIdxToRender : 0;
+    lastColIdxToRender = lastColIdxToRender ? lastColIdxToRender : 0;
+    firstRowIdxToRender = firstRowIdxToRender ? firstRowIdxToRender : 0;
+    lastRowIdxToRender = lastRowIdxToRender ? lastRowIdxToRender : 0;
+    renderShiftTopPx = renderShiftTopPx ? renderShiftTopPx : 0;
+
+    //issue with loading new alignment (a second alignment): virutalizedmatrix can end up 
+    //not loading the redux store after calling getContent 
     const seqsSliced = sliceSequences(
-      sequences, rowIdxsToRender, colIdxsToRender
+      sequences, 
+      firstRowIdxToRender, lastRowIdxToRender, 
+      firstColIdxToRender, lastColIdxToRender
     );
     const querySliced = sliceSequences(
-      [querySequence], [0], colIdxsToRender
+      [querySequence], 0, 0, firstColIdxToRender, lastColIdxToRender
     )[0];
     const consensusSliced = sliceSequences(
-      [consensusSequence], [0], colIdxsToRender
+      [consensusSequence], 0, 0, firstColIdxToRender, lastColIdxToRender
     )[0];
-    const sequencesInViewport = rowIdxsToRender.map((seqIdx) => {
+    const fullSequencesInViewport = startEndIdxToArray(
+      firstRowIdxToRender, lastRowIdxToRender).map((seqIdx) => {
       return sequences[seqIdx];
     }, []);
 
     if(app){
+      const xPos = worldShiftLeftPx ? -worldShiftLeftPx : 0;
+      const yPos = worldShiftTopPx ? -worldShiftTopPx : 0;
       //move and scale the background "squares" of the alignment around based on
       //the scroll amount and residue sizing
-      app.stage.position.set(
-        -colIdxsToRender[0]*residueWidth + additionalHorizontalOffset, 
-        -rowIdxsToRender[0]*residueHeight + additionalVerticalOffset
-      );
-      app.stage.scale.set(residueWidth, residueHeight);
+      if(app.stage.position.x !== xPos || app.stage.position.y !== yPos){
+        app.stage.position.set(xPos, yPos);
+      }
+      if(app.stage.scale.x !== residueWidth || app.stage.scale.y !== residueHeight){
+        app.stage.scale.set(residueWidth, residueHeight);
+      }
     }
+
+    const finalHeight = renderHeightPx ? renderHeightPx : residueHeight * seqsSliced.length;
+    const finalWidth = renderWidthPx ? renderWidthPx : residueWidth * seqsSliced[0].length;
 
     return (
       <div className="av2-viewport">
@@ -119,8 +202,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
                 : []
             )].join(" ")
           }
-          width={stageDimensions.width}
-          height={stageDimensions.height}
+          width={finalWidth}
+          height={finalHeight}
           raf={false}
           renderOnComponentChange={true}
           onMount={setApp}
@@ -136,9 +219,9 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
             residueColoring={residueColoring}
           />
         </Stage>
-
+        
         <AlignmentDetailsLetters
-          sequencesInViewport={sequencesInViewport}
+          sequencesInViewport={fullSequencesInViewport}
           slicedSequences={seqsSliced}
           consensusSequence={consensusSliced}
           querySequence={querySliced}
@@ -147,8 +230,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           residueColoring={residueColoring}
           fontSize={fontSize}
           lineHeight={residueHeight}
-          verticalOffset={additionalVerticalOffset}
-          horizontalOffset={additionalHorizontalOffset}
+          verticalOffset={renderShiftTopPx}
+          horizontalOffset={renderShiftLeftPx}
         ></AlignmentDetailsLetters>
       </div>
     );
@@ -166,7 +249,29 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     app
   ]);
 
+  const horizontalParams = useMemo(()=>{
+    return !horizVirtualization ? undefined : {
+      ...horizVirtualization,
+      virtualizationStrategy: VirtualizationStrategy.Manual,
+      scrollbar: horizontalScrollbar
+    };
+  }, [
+    horizVirtualization, 
+    horizontalScrollbar
+  ]);
 
+  const vertticalParams = useMemo(()=>{
+    return !vertVirtualization ? undefined : {
+      ...vertVirtualization,
+      virtualizationStrategy: VirtualizationStrategy.Manual,
+      scrollbar: verticalScrollbar
+    };
+  }, [
+    vertVirtualization, 
+    verticalScrollbar
+  ]);
+
+  
 
   /**
    *
@@ -178,19 +283,23 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
    *
    */
   return (
-    <VirtualizedMatrixViewer
-      horizontalReduxId={reduxHorizontalId}
-      verticalReduxId={reduxVerticalId}
-      direction={sequences.length > 1 ? "all" : "x"}
-      columnCount={sequences.length > 0 ? sequences[0].length : 0}
-      columnWidth={residueWidth}
-      rowCount={sequences.length}
-      rowHeight={residueHeight}
-      autoOffset={false} //manually offset because of pixi funkyness (probably should recheck)
-      verticalScrollbar={verticalScrollbar}
-      horizontalScrollbar={horizontalScrollbar}
-      getContent={renderMatrixContent}
-    ></VirtualizedMatrixViewer>
+    horizVirtualization && vertVirtualization
+      ? <VirtualizedMatrixViewer
+          horizontalParams={horizontalParams!}
+          verticalParams={vertticalParams!}
+          getMatrixContent={renderMatrixContent}
+        ></VirtualizedMatrixViewer>
+      : horizVirtualization && !vertVirtualization
+        ? <VirtualizedHorizontalViewer
+            horizontalParams={horizontalParams!}
+            getContentForColumns={renderMatrixContent}
+          ></VirtualizedHorizontalViewer>
+        : !horizVirtualization && vertVirtualization
+          ? <VirtualizedVerticalViewer
+              verticalParams={vertticalParams!}
+              getContentForRows={renderMatrixContent}
+            ></VirtualizedVerticalViewer>
+          : <div>initializing...</div> //TODO: create a getInitializationContent function
   );
 }
 
@@ -212,7 +321,7 @@ export function AlignmentDetailsLetters(props: {
   residueColoring: ResidueColoring,
   fontSize: number;
   lineHeight: number;
-  verticalOffset: number;
+  verticalOffset?: number;
   horizontalOffset?: number;
 }) {
   const {
@@ -229,47 +338,6 @@ export function AlignmentDetailsLetters(props: {
     horizontalOffset,
   } = props;
 
-  /**
-   * Get the color of a single letter.
-   */
-  const getLetterColor = useCallback((
-    letter: string,
-    positionIdx: number,
-    consensusSequence: string,
-    querySequence: string,
-    alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle,
-    positionsToStyle: PositionsToStyle,
-    residueColoring: ResidueColoring
-  ) => {
-    const moleculeClass =
-      alignmentStyle.alignmentType === AlignmentTypes.AMINOACID
-        ? AminoAcid
-        : Nucleotide;
-    let molecule = moleculeClass.UNKNOWN;
-
-    if (positionsToStyle === PositionsToStyle.ALL) {
-      molecule = moleculeClass.fromSingleLetterCode(letter);
-    } else {
-      const isConsensus = consensusSequence[positionIdx] === letter;
-      const isQuery = querySequence[positionIdx] === letter;
-      if (
-        (positionsToStyle === PositionsToStyle.CONSENSUS && isConsensus) ||
-        (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && !isConsensus) ||
-        (positionsToStyle === PositionsToStyle.QUERY && isQuery) ||
-        (positionsToStyle === PositionsToStyle.QUERY_DIFF &&
-          !isQuery)
-      ) {
-        molecule = moleculeClass.fromSingleLetterCode(letter);
-      }
-    }
-    return residueColoring === ResidueColoring.DARK
-      ? molecule.colors[alignmentStyle.selectedColorScheme.commonName].darkTheme.letterColor
-      : residueColoring === ResidueColoring.LIGHT
-      ? molecule.colors[alignmentStyle.selectedColorScheme.commonName].lightTheme.letterColor
-      : molecule.colors[alignmentStyle.selectedColorScheme.commonName].lettersOnlyTheme.letterColor;
-  }, []);
-
-
   //each sequence style will be rendered as a single separate div.
   //munge the data first. letterColorToLocations contains:
   //  { 
@@ -283,7 +351,31 @@ export function AlignmentDetailsLetters(props: {
   //with each letter color as key and each value is an array of
   //with each entry 
   const letterColorToLocations = useMemo(()=>{
-    return slicedSequences.reduce((colorsAcc, seqStr, seqIdx)=>{
+    const msaColors = Alignment.getMSAColors(
+      slicedSequences,
+      querySequence,
+      consensusSequence,
+      alignmentStyle.alignmentType,
+      positionsToStyle,
+      residueColoring,
+      alignmentStyle.selectedColorScheme
+    );
+
+    return msaColors.reduce((acc, seqColorArr, seqIdx)=>{
+      seqColorArr.forEach((letterColor, posIdx) => {
+        if(!acc[letterColor.letterColor.hexString]){
+          acc[letterColor.letterColor.hexString] = {};
+        }
+        if(!acc[letterColor.letterColor.hexString][seqIdx]){
+          acc[letterColor.letterColor.hexString][seqIdx] = [];
+        }
+        acc[letterColor.letterColor.hexString][seqIdx].push(posIdx);
+      });
+      return acc;
+    }, {} as {[letterColor: string]: { [seqId: number]: number[] }});
+
+
+    /*return slicedSequences.reduce((colorsAcc, seqStr, seqIdx)=>{
       for (let positionIdx=0, n = seqStr.length; positionIdx < n; ++positionIdx){
         const letter = seqStr[positionIdx];
         const color = getLetterColor(
@@ -304,14 +396,13 @@ export function AlignmentDetailsLetters(props: {
         colorsAcc[color.hexString][seqIdx].push(positionIdx);
       }
       return colorsAcc;
-    }, {} as {[letterColor: string]: { [seqId: number]: number[] }})
+    }, {} as {[letterColor: string]: { [seqId: number]: number[] }})*/
   }, [
     slicedSequences, //changes too frequently. what is that about?
     alignmentStyle, 
     positionsToStyle,
     residueColoring,
     consensusSequence, 
-    getLetterColor, 
     querySequence
   ]);
   
@@ -351,7 +442,10 @@ export function AlignmentDetailsLetters(props: {
         );
       }
     );
-  }, [letterColorToLocations, slicedSequences]);
+  }, [
+    letterColorToLocations, 
+    slicedSequences
+  ]);
 
   return (
     <div

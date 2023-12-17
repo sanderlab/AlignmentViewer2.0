@@ -2,10 +2,13 @@
 
 .av2-metadata-box{
 
-  .tab-bar.hidden{
-    display: none;
+  .metadata-tab-bar.hidden{
+    //display: none;
+    visibility: hidden;
+    opacity: 0;
+    //transition: opacity 200ms ease-in, visibility 0ms ease-in 250ms;
   }
-  .tab-bar{
+  .metadata-tab-bar{
     display: flex;
     background-color: white;
     display: flex;
@@ -13,12 +16,17 @@
     justify-content: center;
     align-items: flex-end;
 
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 250ms ease-in, visibility 250ms ease-in;
+    transition: opacity 250ms ease-out, visibility 250ms ease-out;
+
     position: absolute;
     right: 0px; 
     left: 0px;
     border-bottom: solid black 1px;
 
-    background: linear-gradient(0deg, rgba(255,255,255,100) 60%, rgba(255,255,255,0));
+    background: linear-gradient(0deg, rgba(255,255,255,100) 70%, rgba(255,255,255,0));
 
     .tab-holder{
       text-align: center;
@@ -33,7 +41,7 @@
         border: #c9c9c9 solid 1px;
         border-bottom: black solid 1px;
         margin-top: 1px;
-        padding: 0 .9em 0 .9em;
+        padding: 0 .7em 0 .7em;
         background-color: #f2f2f2;
         height:100%;
         cursor: pointer;
@@ -74,6 +82,25 @@
     bottom: 0;
     left: 0;
     right: 0;
+
+    .virtualized-sequence-name{
+      pointer-events: none;
+      user-select: none;
+
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .hidden-sequence-names-for-copy-paste{
+      pointer-events: all;
+      position: absolute;
+      top: 0;
+      left: 0;
+      color: rgba(0, 0, 0, 0);
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
   }
 }
 //.alignment-textual-metadataaxis::-webkit-scrollbar {

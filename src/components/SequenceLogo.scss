@@ -8,7 +8,7 @@
 .sequence-logo-holder {
   overflow-x: auto;
   overflow-y: hidden;
-  position: relative;
+  position: absolute;
 
   rect.interaction-placeholder {
     opacity: 0;
@@ -16,7 +16,7 @@
 
   .sequence-logo-tooltip-container {
     margin: 0;
-    z-index: 5001;
+    z-index: 1001;
 
     .logo-tooltip {
       pointer-events: all;

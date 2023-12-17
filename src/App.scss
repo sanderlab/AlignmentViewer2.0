@@ -29,87 +29,67 @@ body {
   flex-direction: column;
 
   .app-header {
-    padding: 5px;
-    height: 120px;
+    padding: 0;
+    height: 50px;
     position: relative;
 
     display: flex; // make us of Flexbox
     justify-content: center; // horizontally centers single line items
 
     .settings-box {
+      height: 30px;
+      width: 100%;
+      padding-top: 8px;
+      padding-left: 8px;
+      padding-right: 8px;
       font-size: 11px;
-      margin: auto;
-      width: 450px;
-      border: 2px solid black;
-      padding: 15px;
-      position: absolute;
-      z-index: 500;
+      z-index: 1000;
       background-color: white;
-
-      h3,
-      h4 {
-        text-align: center;
-      }
-      h3 {
-        margin-bottom: 0;
-      }
-      h4 {
-        margin-top: 0;
-        .duplicates-removed {
-          display: block;
-          font-weight: normal;
-        }
-      }
+      position:relative;
 
       .settings-header {
         display: flex;
         flex-direction: row;
         align-items: center;
-        margin: 8px 0;
+        gap: 10px;
+        justify-content: space-between;
+        padding-bottom: 8px;
+        border-bottom: solid 1px #e6e6e6;
+        //margin: 8px 0;
 
         h2 {
           margin: 0;
-          display: inline-block;
+          //display: inline-block;
           order: 1;
-          flex-grow: 4;
+          flex-grow: 1;
           font-size: 2em;
         }
-        a.github-link {
+
+        .settings-alignment-description{
+          font-size: 10px;
           order: 2;
-          font-size: 0;
-          padding-right: 10px;
+          flex-grow: 50;
+          display: flex;
+          flex-direction: column;
+          h3 {
+            margin: 0;
+          }
+          h4 {
+            margin: 0;
+          }
         }
-        button.download {
+
+        a.github-link {
           order: 3;
           font-size: 0;
-          padding-right: 10px;
         }
-        button {
+        button.download {
           order: 4;
           font-size: 0;
-          padding: 0;
         }
-      }
-
-      .settings-content {
-        position: relative;
-
-        label strong {
-          width: 225px;
-          display: inline-block;
-        }
-        label select,
-        label .zoom-level {
-          width: 225px;
-          display: inline-block;
-        }
-
-        .examples button.button-link {
-          border: 1px solid transparent;
-        }
-
-        .load-error {
-          color: red;
+        button {
+          order: 5;
+          font-size: 0;
         }
       }
     }
@@ -120,6 +100,53 @@ body {
     flex: 1;
   }
 }
+
+.outside-settings-tooltip{
+  position: fixed;
+  z-index: 900;
+  top:0;
+  bottom: 0;
+  left:0;
+  right:0;
+  background-color: white;
+
+  transition: opacity 200ms ease-in, visibility 200ms ease-in;
+  transition: opacity 200ms ease-out, visibility 200msms ease-out;
+  opacity: 0.75;
+  visibility: visible;
+}
+.outside-settings-tooltip.hidden{
+  //display: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.react-tooltip{
+  z-index: 1600;
+
+  .settings-content {
+    pointer-events: all;
+
+    label strong {
+      width: 225px;
+      display: inline-block;
+    }
+    label select,
+    label .zoom-level {
+      width: 225px;
+      display: inline-block;
+    }
+
+    .examples button.button-link {
+      border: 1px solid transparent;
+    }
+
+    .load-error {
+      color: red;
+    }
+  }
+}
+
 
 button.button-link {
   background: none !important;

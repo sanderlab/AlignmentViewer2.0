@@ -142,6 +142,20 @@ export function getParseError(parserName: string, errorMessage: string): Error {
 }
 
 /**
+ * Create an array of indicies from a start and end index (inclusive of start and end)
+ * see https://stackoverflow.com/questions/66858701/
+ * @param startIdx 
+ * @param endIdx 
+ * @returns 
+ */
+export function startEndIdxToArray(startIdx: number, endIdx: number){
+  return Array.from(
+    { length: endIdx - startIdx + 1 },
+    (_, i) => startIdx + i
+  );
+}
+
+/**
  * Get the font family, width and height of the fixed width font used for the
  * alignments
  * inspired by https://stackoverflow.com/questions/118241

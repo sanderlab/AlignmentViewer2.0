@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo } from "react";
 import { Sprite } from "@pixi/react";
-import { Nucleotide, AminoAcid } from "../common/Residues";
 
 import {
   PositionsToStyle,
@@ -9,6 +8,7 @@ import {
   ResidueColoring,
 } from "../common/MolecularStyles";
 import { generateUUIDv4 } from "../common/Utils";
+import { Alignment } from "../common/Alignment";
 
 interface ISingleTile {
   tileX: number;
@@ -62,68 +62,41 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
   const fullWidth = sequences.length > 0 ? sequences[0].length : 0;
   const fullHeight = sequences.length;
 
-  const getCurrentMoleculeColors = useCallback((
-    letter: string,
-    letterIdx: number,
-    offsets: { seqY: number; letterX: number }
-  ) => {
-    const WHITE_RGB = { red: 255, green: 255, blue: 255 };
-    
-    const moleculeClass =
-      alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
-    let molecule = moleculeClass.UNKNOWN;
-
-    if (positionsToStyle === PositionsToStyle.ALL) {
-      molecule = moleculeClass.fromSingleLetterCode(letter);
-    } else {
-      const isConsensus =
-        consensusSequence[letterIdx + offsets.letterX] === letter;
-      const isQuery = querySequence[letterIdx + offsets.letterX] === letter;
-      if (
-        (positionsToStyle === PositionsToStyle.CONSENSUS && isConsensus) ||
-        (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF &&
-          !isConsensus) ||
-        (positionsToStyle === PositionsToStyle.QUERY && isQuery) ||
-        (positionsToStyle === PositionsToStyle.QUERY_DIFF && !isQuery)
-      ) {
-        molecule = moleculeClass.fromSingleLetterCode(letter);
-      }
-    }
-
-    //TODO: ripe for speed increases / caching etc
-    return residueColoring === ResidueColoring.DARK
-      ? molecule.colors[colorScheme.commonName].darkTheme.backgroundColor.rgb
-      : residueColoring === ResidueColoring.LIGHT
-      ? molecule.colors[colorScheme.commonName].lightTheme.backgroundColor.rgb
-      : WHITE_RGB;
+  const msaColors = useMemo(()=>{
+    return Alignment.getMSAColors(
+      sequences,
+      querySequence,
+      consensusSequence,
+      alignmentType,
+      positionsToStyle,
+      residueColoring,
+      colorScheme
+    );
   }, [
+    sequences,
+    querySequence,
+    consensusSequence,
     alignmentType,
-    colorScheme.commonName,
+    positionsToStyle,
     residueColoring,
-    consensusSequence, 
-    querySequence, 
-    positionsToStyle
+    colorScheme
   ]);
 
   const colorCanvasWithSequences = useCallback((
     tileImageData: ImageData,
     tileCanvasContext: CanvasRenderingContext2D,
     tileCanvas: HTMLCanvasElement,
-    sequences: string[],
     offsets: { seqY: number; letterX: number }
   ) => {
     let imageDataIdx = 0;
 
     for (let seqIdx = 0; seqIdx < tileCanvas.height; seqIdx++) {
-      const seq = sequences[seqIdx + offsets.seqY];
       for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
-        const letter = seq[letterIdx + offsets.letterX];
-        const colorScheme = getCurrentMoleculeColors(
-          letter,
-          letterIdx,
-          offsets
-        );
-
+        const colorScheme = msaColors[
+            seqIdx + offsets.seqY
+          ][
+            letterIdx + offsets.letterX
+          ].backgroundColor.rgb;
         tileImageData.data[imageDataIdx] = colorScheme.red;
         tileImageData.data[imageDataIdx + 1] = colorScheme.green;
         tileImageData.data[imageDataIdx + 2] = colorScheme.blue;
@@ -133,7 +106,7 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
       }
     }
     tileCanvasContext.putImageData(tileImageData, 0, 0);
-  }, [getCurrentMoleculeColors]);
+  }, [msaColors]);
 
   const generateCanvasForTile = useCallback((
     tileXNumber: number,
@@ -141,8 +114,7 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
     tileWidth: number,
     tileHeight: number,
     targetTileWidth: number,
-    targetTileHeight: number,
-    sequences: string[]
+    targetTileHeight: number
   ): ISingleTile => {
     const tileCanvas = document.createElement("canvas") as HTMLCanvasElement;
     tileCanvas.height = tileHeight;
@@ -167,7 +139,6 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
         tileImageData,
         tileCanvasContext,
         tileCanvas,
-        sequences,
         offsets
       );
     }
@@ -233,8 +204,6 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
 
           targetTileWidth,
           targetTileHeight,
-
-          sequences
         );
         toreturn.tiles.push(tiledImage);
       }
@@ -243,8 +212,7 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
   }, [
     fullHeight,
     fullWidth, 
-    generateCanvasForTile,
-    sequences
+    generateCanvasForTile
   ]);
 
   const renderedAlignment = useMemo(()=>{

@@ -14,11 +14,10 @@ import {
   PositionsToStyle,
   ResidueColoring
 } from "../../common/MolecularStyles";
-import { ReduxState, setWorldTopRowOffset } from "../../redux/ReduxStore";
-import { stopSafariFromBlockingWindowWheel, useStateCallback } from "../../common/Utils";
+import { generateUUIDv4, stopSafariFromBlockingWindowWheel, useStateCallback } from "../../common/Utils";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
-import { useAppDispatch, useAppSelector } from "../../redux/ReduxStore";
-import { shallowEqual } from "react-redux";
+import { IResponderRole, VirtualizationStrategy } from "../virtualization/VirtualizationTypes";
+import { useReduxVirtualization } from "../virtualization/VirtualizedMatrixReduxHook";
 
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
@@ -35,7 +34,7 @@ export interface IMiniMapProps {
   verticalHeight?: "div" | "window";
 
   //maintain sync with this vertical scroller
-  verticalReduxId: string;
+  syncWithVerticalVirtualization: IResponderRole;
 }
 
 export function MiniMap(props: IMiniMapProps) {
@@ -44,7 +43,7 @@ export function MiniMap(props: IMiniMapProps) {
     sortBy,
     alignmentStyle,
     positionsToStyle,
-    verticalReduxId,
+    syncWithVerticalVirtualization,
   } = props;
 
   //default props
@@ -59,6 +58,7 @@ export function MiniMap(props: IMiniMapProps) {
   //
   //state
   //
+  const [containerId] = useState<string>(generateUUIDv4()); //unique id for virtualization
   const [app, setApp] = useState<PIXI.Application<PIXI.ICanvas>>();
   const [minimapRef, setMinimapRef] = useState<HTMLDivElement>();
   const [minimapHolderDimensions, setMinimapHolderDimensions] = useState<
@@ -66,49 +66,69 @@ export function MiniMap(props: IMiniMapProps) {
   >(undefined);
 
   //
-  //redux
+  // load virtualization for sync with main viewport. it is also possible
+  // for this to be standalone (if syncWithVerticalVirtualization === undefined)
   //
-  const dispatch = useAppDispatch();
+  //const vertVirtualizationParams = useMemo(()=>{
+  //  return yncWithVerticalVirtualization === undefined
+  //    ? {
+  //        virtualizationId: 
+  //          `y_minimap_virtualization_${alignment.getUUID()}_${containerId}`,
+  //        role: VirtualizationRole.Controller,
+  //        cellCount: alignment.getSequenceCount(),
+  //        cellSizePx: 1,
+  //      } as IControllerRole
+  //    : syncWithVerticalVirtualization;
+  //}, [alignment, syncWithVerticalVirtualization]);
 
-  const idxsToRender = useAppSelector((state: ReduxState) => {
-    return !verticalReduxId ||
-           !state.virtualizedVerticalSlice[verticalReduxId] ||
-           !state.virtualizedVerticalSlice[verticalReduxId].initialized
-      ? [] 
-      : state.virtualizedVerticalSlice[verticalReduxId].idxsToRender
-  }, shallowEqual);
+  const vertVirtualizationParams = useMemo(()=>{
+    return {
+      ...syncWithVerticalVirtualization,
+      virtualizationStrategy: VirtualizationStrategy.Manual //not sure why this is here
+    }
+  }, [syncWithVerticalVirtualization])
 
-  const viewportFullyRendersAlignment = useAppSelector((state: ReduxState) => {
-    return !verticalReduxId || 
-           !state.virtualizedVerticalSlice[verticalReduxId] || 
-           !state.virtualizedVerticalSlice[verticalReduxId].initialized 
-      ? false
-      : state.virtualizedVerticalSlice[verticalReduxId].cellCount <= 
-        state.virtualizedVerticalSlice[verticalReduxId].idxsToRender.length
-  });
+  const vertVirtualizationAxis = useReduxVirtualization(
+    vertVirtualizationParams,
+    containerId,
+    minimapHolderDimensions?.height
+  );
+
+  const viewportFullyRendersAlignment = !vertVirtualizationAxis
+    ? false
+    : vertVirtualizationAxis?.cellCount <= vertVirtualizationAxis?.offsets.numIdxsToRender;
 
   //
   //cache
   //
+  const sequences = useMemo(()=>{
+    return alignment.getSequences(sortBy).map((seq) => seq.sequence)
+  }, [alignment, sortBy]);
+
   const frameSizing = useMemo(()=>{
-    return !minimapHolderDimensions ? undefined : {
-      borderWidth: 1, // in pixels
-      margin: 2,      // in pixels
-      frameHeight: minimapHolderDimensions.height,
-      frameWidth: minimapHolderDimensions.width
-        ? minimapHolderDimensions.width
-        : startingWidth
-    }
+    return !minimapHolderDimensions?.height || !minimapHolderDimensions?.width 
+      ? undefined : 
+      {
+        borderWidth: 1, // in pixels
+        margin: 2,      // in pixels
+        frameHeight: minimapHolderDimensions.height,
+        frameWidth: minimapHolderDimensions.width
+          ? minimapHolderDimensions.width
+          : startingWidth
+      }
   }, [
-    minimapHolderDimensions, 
+    minimapHolderDimensions?.height, 
+    minimapHolderDimensions?.width, 
     startingWidth,
   ]);
 
   const mmOffsets = useMemo(()=>{
     //calculate offset of the minimap and minmap dragger 
-    if (idxsToRender.length < 1 ||
-        !frameSizing?.frameHeight ||
-        !frameSizing?.frameWidth){
+    if (vertVirtualizationAxis?.offsets.numIdxsToRender === undefined ||
+        vertVirtualizationAxis.offsets.numIdxsToRender < 1 ||
+        !(frameSizing?.frameHeight) ||
+        !(frameSizing?.frameWidth)
+    ){
       return undefined;
     }
     
@@ -117,8 +137,8 @@ export function MiniMap(props: IMiniMapProps) {
     const scale = frameSizing.frameWidth / alignment.getSequenceLength();
     const totalSeqCount = alignment.getSequenceCount();
 
-    const vpVisibleSeqCount = idxsToRender.length;
-    const vpNumSeqsHiddenAbove = idxsToRender[0];
+    const vpVisibleSeqCount = vertVirtualizationAxis.offsets.numIdxsToRender;
+    const vpNumSeqsHiddenAbove = vertVirtualizationAxis.offsets.firstIdxToRender;
     
     const mmVisibleSeqCount = (frameSizing.frameHeight / scale) > totalSeqCount 
       ? totalSeqCount 
@@ -147,10 +167,10 @@ export function MiniMap(props: IMiniMapProps) {
       minimapDraggerSequenceOffset: vpNumSeqsHiddenAbove
     };
   }, [
-    idxsToRender,
+    alignment,
     frameSizing?.frameHeight, 
     frameSizing?.frameWidth,
-    alignment
+    vertVirtualizationAxis?.offsets
   ]); //TODO: always changing because of mouseover stuff. move mouseover top new state?
 
   //
@@ -185,49 +205,46 @@ export function MiniMap(props: IMiniMapProps) {
     }
   }, [minimapHolderDimensions, minimapRef]);
 
+  //define setWorldOffsetPx outside callback - upsets typescript otherwise
+  const setWorldOffsetPx = vertVirtualizationAxis?.setWorldOffsetPx;
+
+  //move center of viewport to where mouse was clicked
   const mmClicked = useCallback((e: React.MouseEvent) => {
-    //move center of viewport to where mouse was clicked
     e.stopPropagation();
     e.preventDefault();
-    if (mmOffsets){
+    if (mmOffsets && setWorldOffsetPx){
       const clickTopPx = e.pageY - e.currentTarget.getBoundingClientRect().top;
-      dispatch(
-        setWorldTopRowOffset({
-          id: verticalReduxId,
-          rowOffset: (
-            (clickTopPx / mmOffsets.scale)     //alignment row offset of the click on the minimap
-            + mmOffsets.minimapY               //add the existing offset
-            - mmOffsets.minimapDraggerHeight/2 //center the dragger / scrollbar
-          ),
-        })
-      );
+      setWorldOffsetPx(
+        (
+          (clickTopPx / mmOffsets.scale)     //alignment row offset of the click on the minimap
+          + mmOffsets.minimapY               //add the existing offset
+          - mmOffsets.minimapDraggerHeight/2 //center the dragger / scrollbar
+        ) * vertVirtualizationAxis.cellSizePx
+      )
     }
-  }, [dispatch, verticalReduxId, mmOffsets]);
+  }, [
+    setWorldOffsetPx, 
+    vertVirtualizationAxis?.cellSizePx,
+    mmOffsets
+  ]);
 
-  const sequences = useMemo(()=>{
-    return alignment.getSequences(sortBy).map((seq) => seq.sequence)
-  }, [alignment, sortBy]);
 
   const mmWheeled = useCallback((e: React.WheelEvent) => {
     if (
-      mmOffsets &&
-      idxsToRender.length>0 &&
-      e.deltaY !== 0
+      mmOffsets?.scale && setWorldOffsetPx && e.deltaY !== 0
     ){
-      dispatch(
-        setWorldTopRowOffset({
-          id: verticalReduxId,
-          rowOffset: 
-            idxsToRender[0]
-            + (e.deltaY / mmOffsets.scale)
-        })
+      setWorldOffsetPx(
+        (
+          vertVirtualizationAxis.offsets.firstIdxToRender 
+          + (e.deltaY / mmOffsets.scale)
+        ) * vertVirtualizationAxis.cellSizePx
       );
     }
   }, [
-    dispatch,
-    idxsToRender, 
-    verticalReduxId, 
-    mmOffsets
+    mmOffsets?.scale,
+    setWorldOffsetPx,
+    vertVirtualizationAxis?.offsets.firstIdxToRender,
+    vertVirtualizationAxis?.cellSizePx
   ]);
 
   /*useEffect(()=>{ //out of sync when used in an effect. unclear why.
@@ -243,31 +260,30 @@ export function MiniMap(props: IMiniMapProps) {
 
   const handleHighlighterMoved = useCallback((deltaPx: number)=>{
     //TODO clamp
-    if (mmOffsets?.scale){
+    if (mmOffsets?.scale && setWorldOffsetPx){
+      const numIdxsToRender = vertVirtualizationAxis.offsets.numIdxsToRender;
       const calculatedRowOffset = 
         (deltaPx * mmOffsets.minimapPixelToWorldOffset / mmOffsets.scale) +
         (mmOffsets.minimapDraggerSequenceOffset);
       const suggestedRowOffset = 
         calculatedRowOffset < 0 
           ? 0 
-          : calculatedRowOffset > alignment.getSequenceCount() - idxsToRender.length
-            ? alignment.getSequenceCount() - idxsToRender.length 
+          : calculatedRowOffset > alignment.getSequenceCount() - numIdxsToRender
+            ? alignment.getSequenceCount() - numIdxsToRender 
             : calculatedRowOffset
-      dispatch(
-        setWorldTopRowOffset({
-          id: verticalReduxId,
-          rowOffset: suggestedRowOffset,
-        })
+
+      setWorldOffsetPx(
+        suggestedRowOffset * vertVirtualizationAxis.cellSizePx
       );
     }
   }, [
     alignment, 
-    dispatch, 
-    idxsToRender.length, 
-    verticalReduxId, 
     mmOffsets?.minimapDraggerSequenceOffset,
     mmOffsets?.minimapPixelToWorldOffset,
     mmOffsets?.scale,
+    setWorldOffsetPx,
+    vertVirtualizationAxis?.offsets.numIdxsToRender,
+    vertVirtualizationAxis?.cellSizePx
   ]);
 
   //
@@ -278,7 +294,7 @@ export function MiniMap(props: IMiniMapProps) {
       <CanvasAlignmentTiled
         sequences={sequences}
         consensusSequence={alignment.getConsensus().sequence}
-        querySequence={alignment.getQuerySequence().sequence}
+        querySequence={alignment.getQuery().sequence}
         alignmentType={alignmentStyle.alignmentType}
         colorScheme={alignmentStyle.selectedColorScheme}
         positionsToStyle={positionsToStyle}

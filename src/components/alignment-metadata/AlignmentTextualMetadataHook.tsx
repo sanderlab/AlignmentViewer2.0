@@ -4,11 +4,12 @@
 import "./AlignmentTextualMetadata.scss";
 import React, { useCallback, useMemo, useState } from "react";
 
-import { ScrollbarOptions, VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
+import { VirtualizedMatrixViewer } from "../virtualization/VirtualizedMatrixViewerHook";
+import { generateUUIDv4, startEndIdxToArray } from "../../common/Utils";
+import { IControllerRole, IResponderRole, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "../virtualization/VirtualizationTypes";
 
 export interface IAlignmentTextualMetadataProps {
   alignmentUUID: string;
-  verticalReduxId: string;
   textForEachSeq: string[];
   letterHeight: number;
   letterWidth: number;
@@ -16,6 +17,10 @@ export interface IAlignmentTextualMetadataProps {
   tabFontSize?: number;
   //disableAnnotations?: boolean; //maybe later?
   annotationData?: string[]
+
+  vertVirtualization: IControllerRole | IResponderRole | "Automatic";
+  genenameHorizVirtualization: IControllerRole | IResponderRole | "Automatic";
+  annotationHorizVirtualization: IControllerRole | IResponderRole | "Automatic";
 }
 
 export function AlignmentTextualMetadata(
@@ -24,7 +29,6 @@ export function AlignmentTextualMetadata(
   //props
   const {
     alignmentUUID,
-    verticalReduxId,
     textForEachSeq,
     letterHeight,
     letterWidth,
@@ -33,18 +37,14 @@ export function AlignmentTextualMetadata(
     annotationData
   } = props;
 
+  //
+  //state and callbacks
+  //
+  const containerId = useState<string>(generateUUIDv4()); //unique id for virtualization
   const [showTabs, setShowTabs] = useState(false);
   const [selectedTab, setSelectedTabIdx] = useState<
     "id" | "annotations"
   >("id");
-
-  const genenameReduxId = useMemo(()=>{
-    return 'genename_x_'+alignmentUUID;
-  }, [alignmentUUID]);
-
-  const annotationsReduxId = useMemo(()=>{
-    return 'annotations_x_'+alignmentUUID;
-  }, [alignmentUUID]);
 
   const maxTextLength = useMemo(() => {
     return textForEachSeq.reduce((acc, txt) => {
@@ -59,6 +59,97 @@ export function AlignmentTextualMetadata(
   const mouseExited = useCallback(()=>{
     setShowTabs(false);
   }, []);
+
+  //
+  //load virtualizations - either from props or auto generate. or don't virtualize
+  //
+  const vertVirtualization = useMemo(()=>{
+    return props.vertVirtualization === "Automatic"
+      ? {
+          virtualizationId: 
+            `y_auto_generated_metadata_virtualization_${alignmentUUID}_${containerId}`,
+          role: VirtualizationRole.Controller,
+          cellCount: textForEachSeq[0].length,
+          cellSizePx: letterHeight,
+        } as IControllerRole
+      : props.vertVirtualization;
+  }, [
+    alignmentUUID, 
+    props.vertVirtualization, 
+    textForEachSeq[0].length, 
+    letterHeight
+  ]); 
+
+  const genenameHorizVirtualization = useMemo(()=>{
+    return props.genenameHorizVirtualization === "Automatic"
+      ? {
+          virtualizationId: 
+            `x_auto_generated_genename_virtualization_${alignmentUUID}_${containerId}`,
+          role: VirtualizationRole.Controller,
+          cellCount: maxTextLength,
+          cellSizePx: letterWidth
+        } as IControllerRole
+      : props.genenameHorizVirtualization;
+  }, []);
+
+  const annotationHorizVirtualization = props.annotationHorizVirtualization === "Automatic"
+    ? {
+        virtualizationId: 
+          `x_auto_generated_annotation_virtualization_${alignmentUUID}_${containerId}`,
+        axisId: `x_auto_generated_annotation_axis_${alignmentUUID}_${containerId}`,
+        role: VirtualizationRole.Controller,
+        cellCount: 10, //TODO Update when implemented
+        cellSizePx: letterHeight //TODO Update when implemented
+      } as IControllerRole
+    : props.annotationHorizVirtualization;
+
+  const renderGenenames = useCallback((props: {
+    firstRowIdxToRender: number, lastRowIdxToRender: number,
+    firstColIdxToRender: number, lastColIdxToRender: number
+  })=>{
+    const {
+      firstRowIdxToRender, lastRowIdxToRender,
+      firstColIdxToRender, lastColIdxToRender
+    } = props;
+    
+    return (
+      <div
+        className="av2-sequence-names"
+        style={{
+          fontSize: fontSize,
+          lineHeight: letterHeight + "px",
+        }}
+      >
+        <div className="virtualized-sequence-name">
+          {startEndIdxToArray(firstRowIdxToRender, lastRowIdxToRender).map((rowIdx)=>{
+            const fullTextLine = textForEachSeq[rowIdx];
+            return (
+              <React.Fragment key={fullTextLine}>
+                {startEndIdxToArray(firstColIdxToRender, lastColIdxToRender).map(
+                    (colIdx) => {
+                      return fullTextLine.length > colIdx
+                        ? fullTextLine[colIdx]
+                        : "";//"\u00A0";
+                  }).join("")}
+                <br />
+              </React.Fragment>
+            );
+          })}
+        </div>
+        <div className="hidden-sequence-names-for-copy-paste">
+          {startEndIdxToArray(firstRowIdxToRender, lastRowIdxToRender).map((rowIdx)=>{
+            const fullTextLine = textForEachSeq[rowIdx];
+            return (
+              <React.Fragment key={`cp_${fullTextLine}`}>
+                {fullTextLine}
+                <br />
+              </React.Fragment>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }, [fontSize, letterHeight, textForEachSeq]);
 
   /**
    *
@@ -77,7 +168,7 @@ export function AlignmentTextualMetadata(
       {/* The tabs that allow for viewing of annotations or gene names */}
       <div 
         className={
-          ["tab-bar", ...(showTabs ? [] : ["hidden"])].join(' ')
+          ["metadata-tab-bar", ...(showTabs ? [] : ["hidden"])].join(' ')
         }
         style={{ 
           height: tabFontSize*3,
@@ -123,46 +214,19 @@ export function AlignmentTextualMetadata(
         display: selectedTab === "id" ? "block" : "none"
       }}>
         <VirtualizedMatrixViewer
-          verticalReduxId={verticalReduxId}
-          horizontalReduxId={genenameReduxId}
-          direction="all"
-          columnCount={maxTextLength}
-          columnWidth={letterWidth}
-          rowCount={textForEachSeq.length}
-          rowHeight={letterHeight}
-          suppressHorizontalHoverTracker={true}
-          autoOffset={true}
-          verticalScrollbar={ScrollbarOptions.OnHoverWhenOverflowed}
-          horizontalScrollbar={ScrollbarOptions.OnHoverWhenOverflowed}
-          getContent={({
-            rowIdxsToRender,
-            colIdxsToRender
-          }) => {
-            return (
-              <div
-                className="av2-sequence-names"
-                style={{
-                  fontSize: fontSize,
-                  lineHeight: letterHeight + "px",
-                }}
-              >
-                {rowIdxsToRender.map((rowIdx) => {
-                  const fullTextLine = textForEachSeq[rowIdx];
-                  return (
-                    <div key={fullTextLine}>
-                      {colIdxsToRender
-                        .map((colIdx) => {
-                          return fullTextLine.length > colIdx
-                            ? fullTextLine[colIdx]
-                            : "";
-                        })
-                        .join("")}
-                    </div>
-                  );
-                })}
-              </div>
-            );
+          horizontalParams={{
+            ...genenameHorizVirtualization,
+            scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
+            virtualizationStrategy: VirtualizationStrategy.Virtualize,
+            hoverTracker: false
           }}
+          verticalParams={{
+            ...vertVirtualization,
+            scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
+            virtualizationStrategy: VirtualizationStrategy.Virtualize,
+            hoverTracker: true
+          }}
+          getMatrixContent={renderGenenames}
         />
       </div>
       
@@ -173,36 +237,34 @@ export function AlignmentTextualMetadata(
             : "none"
         }}
       >
-        <VirtualizedMatrixViewer
-          verticalReduxId={verticalReduxId}
-          horizontalReduxId={annotationsReduxId}
-          direction="all"
-          columnCount={5} //todo
-          columnWidth={1} //todo
-          rowCount={textForEachSeq.length}
-          rowHeight={letterHeight}
-          autoOffset={true}
-          verticalScrollbar={ScrollbarOptions.NeverOn}//ScrollbarOptions.OnHoverWhenOverflowed} //todo
-          horizontalScrollbar={ScrollbarOptions.NeverOn}//ScrollbarOptions.OnHoverWhenOverflowed} //todo
-          suppressHorizontalHoverTracker={true}
-          suppressVerticalHoverTracker={true}
-          getContent={({
-            rowIdxsToRender,
-            colIdxsToRender
-          }) => {
-
-            return (
-              <div
-                className="av2-annotations"
-                style={{
-                  fontSize: fontSize,
-                  lineHeight: letterHeight + "px",
-                }}>
-                  {/* annotations will go here */}
-              </div>
-            );
-          }}
-        />
+        {
+          <VirtualizedMatrixViewer
+            horizontalParams={{
+              ...annotationHorizVirtualization,
+              virtualizationStrategy: VirtualizationStrategy.Virtualize,
+              scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
+              hoverTracker: false
+            }}
+            verticalParams={{
+              ...vertVirtualization,
+              virtualizationStrategy: VirtualizationStrategy.Virtualize,
+              scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
+              hoverTracker: false
+            }}
+            getMatrixContent={(params)=>{
+              return (
+                <div
+                  className="av2-annotations"
+                  style={{
+                    fontSize: fontSize,
+                    lineHeight: letterHeight + "px",
+                  }}>
+                    {/* annotations will go here */}
+                </div>
+              );
+            }}
+          />
+        }
       </div>
     </div>
   );

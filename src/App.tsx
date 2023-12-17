@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import "./App.scss";
 import { Alignment } from "./common/Alignment";
 import { SequenceSorter } from "./common/AlignmentSorter";
-import { downloadLogoSvg } from "./common/FileExporter"
+import { downloadLogoSvg, downloadAlignment } from "./common/FileExporter"
 import { UrlLocalstorageBooleanInputManager, UrlLocalstorageInputManager, UrlLocalstorageNumberInputManager, getURLParameters } from "./common/Utils";
 import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerHook";
 import {
@@ -20,6 +20,7 @@ import { LOGO_TYPES } from "./components/SequenceLogoHook";
 import { AlignmentFileDrop, AlignmentFileLoader } from "./components/AlignmentFileLoaderHook";
 import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
 import { PreconfiguredPositionalBarplots } from "./components/PositionalBarplotHook";
+import { Tooltip, TooltipRefProps } from "react-tooltip";
 
 interface AppProps {}
 interface BooleanStateVariables {
@@ -148,6 +149,8 @@ export default function App(props: AppProps){
     };
   }, []);
 
+  const settingsTooltipRef = useRef<TooltipRefProps>(null);
+  
   const [state, setState] = useState<AppState>({
     alignment: undefined,
     style: urlInputs.ALIGNMENT_STYLE.initialValue,
@@ -178,6 +181,7 @@ export default function App(props: AppProps){
       loading: false,
     });
   }, [state, setState]);
+
 
   //
   // new alignment loaded
@@ -431,7 +435,7 @@ export default function App(props: AppProps){
             onChange={(e) => {
               const newStyle = {
                 ...style!, 
-                colorScheme: style.alignmentType.allColorSchemes[
+                selectedColorScheme: style.alignmentType.allColorSchemes[
                   parseInt(e.target.value)
                 ],
               }
@@ -712,196 +716,278 @@ export default function App(props: AppProps){
     );
   }, [setState, state, urlInputs]);
 
-  const renderedSettingsBox = useMemo(()=>{
 
-    const alignmentDescription = alignment ? (
-      <div>
-        <h3>{alignment.getName()}</h3>
-        <h4>
-          {`${alignment.getSequenceCount()} sequences (rows) and ${alignment.getSequenceLength()} positions (columns)`}
-          {alignment.getNumberRemovedDuplicateSequences() > 0 ||
-          alignment.getNumberDuplicateSequencesInAlignment() > 0 ? (
-            <span className="duplicates-removed">
-              {alignment.getNumberRemovedDuplicateSequences() > 0
-                ? `${"\u2605"} ${alignment.getNumberRemovedDuplicateSequences()} duplicate sequences were removed`
-                : `${"\u2605"} alignment contains ${alignment.getNumberDuplicateSequencesInAlignment()} duplicate sequences`}
-            </span>
-          ) : null}
-        </h4>
-      </div>
-    ) : (
-      <></>
-    );
-  
+  const renderedSettings = useMemo(()=>{
     return (
-      <div className="app-header">
-        {renderedFileDropZone}
-        <div className="settings-box">
-          <form>
-            <div className="settings-header">
-              <h2>{`AlignmentViewer 2.0`}</h2>
-              <a
-                className="github-link"
-                href="https://github.com/sanderlab/AlignmentViewer2.0"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  alt="Alignment Viewer 2.0 GitHub Repo"
-                  width="16"
-                  height="16"
-                  src={`${process.env.PUBLIC_URL}/GitHub-Mark-32px.png`}
-                /> 
-              </a>
-  
-              <button
-                className={`download button-link${!alignment ? " hide" : ""}`}
-                type="button"
-                style={{ margin: 0, border: "none" }}
-                onClick={()=>{downloadLogoSvg(style)}}
-              >
-                <img
-                  alt="Download Alignment" 
-                  width="16"
-                  height="16"
-                  src={`${process.env.PUBLIC_URL}/download_32px.png`}
-                />
-              </button>
-  
-              <button
-                className={`button-link${showSettings ? " hide" : ""}`}
-                type="button"
-                style={{ padding: 0, margin: 0, border: "none" }}
-                onClick={(e) => {
-                  setState({
-                    ...state,
-                    showSettings: true,
-                  });
-                }}
-              >
-                <img
-                  alt="Show Settings Box"
-                  width="16"
-                  height="16"
-                  src={`${process.env.PUBLIC_URL}/settings_32px.png`}
-                />
-              </button>
-              <button
-                className={`button-link${showSettings ? "" : " hide"}`}
-                type="button"
-                style={{ padding: 0, margin: 0, border: "none" }}
-                onClick={(e) => {
-                  setState({
-                    ...state,
-                    showSettings: false,
-                  });
-                }}
-              >
-                <img
-                  alt="Hide Settings Box"
-                  width="16px"
-                  height="16px"
-                  src={`${process.env.PUBLIC_URL}/hide_contract_icon_32px.png`}
-                />
-              </button>
-            </div>
-  
-            <div className="settings-alignment-description">
-              {alignmentDescription}
-            </div>
-            <div
-              className={"settings-content"}
-              style={{
-                display: showSettings ? "block" : "none",
-              }}
-            >
-              {renderedAlignmentTypeLabel}
-              {renderedSortControl}
-              {renderedColorScheme}
-              {renderedResidueColoring}
-              {renderedPositionStyling}
-              {renderedSequenceLogo}
-              {renderedZoomButtons}
-  
-              {renderToggle(
-                "annotation-toggle",
-                "Show Logo", 
-                "showLogo",
-                "SHOW_LOGO"
-              )}
-  
-              {renderToggle(
-                "annotation-toggle",
-                "Show Annotations",
-                "showAnnotations",
-                "ANNOTATIONS"
-              )}
-              {renderToggle(
-                "minimap-toggle",
-                "Show MiniMap",
-                "showMiniMap",
-                "MINIMAP"
-              )}
-              {renderToggle(
-                "barplot-conservation-toggle",
-                "Show Conservation Barplot",
-                "showConservationBarplot",
-                "CONSERVATION_BARPLOT"
-              )}
-              {renderToggle(
-                "barplot-entropy-gaps-toggle",
-                "Show Entropy / Gaps Barplot",
-                "showEntropyGapBarplot",
-                "ENTROPY_BARPLOT"
-              )}
-              {renderToggle(
-                "barplot-kldivergence-toggle",
-                "Show KL Divergence Barplot",
-                "showKLDivergenceBarplot",
-                "KLDIVERGENCE_BARPLOT"
-              )}
-  
-              <br></br>
-              {renderedFileUpload()}
-              {!loading ? null : <div className="loader" />}
-              {!loadError ? null : (
-                <div className={`load-error`}>
-                  <h3>
-                    <strong>{loadError.message}</strong>
-                  </h3>
-                  <ul>
-                    {loadError.errors.map((e) => {
-                      return (
-                        <li key={e.name}>
-                          <strong>{e.name}:</strong> {e.message}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  {!loadError.possibleResolution ? null : (
-                    <div>{loadError.possibleResolution}</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </form>
-        </div>
+      <div className={"settings-content"}>
+        {renderedAlignmentTypeLabel}
+        {renderedSortControl}
+        {renderedColorScheme}
+        {renderedResidueColoring}
+        {renderedPositionStyling}
+        {renderedSequenceLogo}
+        {renderedZoomButtons}
+
+        {renderToggle(
+          "annotation-toggle",
+          "Show Logo", 
+          "showLogo",
+          "SHOW_LOGO"
+        )}
+
+        {renderToggle(
+          "annotation-toggle",
+          "Show Annotations",
+          "showAnnotations",
+          "ANNOTATIONS"
+        )}
+        {renderToggle(
+          "minimap-toggle",
+          "Show MiniMap",
+          "showMiniMap",
+          "MINIMAP"
+        )}
+        {renderToggle(
+          "barplot-conservation-toggle",
+          "Show Conservation Barplot",
+          "showConservationBarplot",
+          "CONSERVATION_BARPLOT"
+        )}
+        {renderToggle(
+          "barplot-entropy-gaps-toggle",
+          "Show Entropy / Gaps Barplot",
+          "showEntropyGapBarplot",
+          "ENTROPY_BARPLOT"
+        )}
+        {renderToggle(
+          "barplot-kldivergence-toggle",
+          "Show KL Divergence Barplot",
+          "showKLDivergenceBarplot",
+          "KLDIVERGENCE_BARPLOT"
+        )}
+
+        <br></br>
+        {renderedFileUpload()}
+        {!loading ? null : <div className="loader" />}
+        {!loadError ? null : (
+          <div className={`load-error`}>
+            <h3>
+              <strong>{loadError.message}</strong>
+            </h3>
+            <ul>
+              {loadError.errors.map((e) => {
+                return (
+                  <li key={e.name}>
+                    <strong>{e.name}:</strong> {e.message}
+                  </li>
+                );
+              })}
+            </ul>
+            {!loadError.possibleResolution ? null : (
+              <div>{loadError.possibleResolution}</div>
+            )}
+          </div>
+        )}
       </div>
-    );
+    )
   }, [
-    alignment,
-    loadError, 
-    loading, 
-    renderToggle, 
+    loadError,
+    //loadError?.message,
+    //loadError?.possibleResolution,
+    //loadError?.errors,
+    loading,
+    renderToggle,
     renderedAlignmentTypeLabel,
-    renderedColorScheme, 
-    renderedFileDropZone, 
-    renderedFileUpload, 
-    renderedPositionStyling, 
+    renderedColorScheme,
+    renderedFileUpload,
+    renderedPositionStyling,
     renderedResidueColoring,
     renderedSequenceLogo,
     renderedSortControl,
     renderedZoomButtons,
+  ]);
+  
+  //
+  // open or close the react tooltip
+  //
+  useEffect(()=>{
+    if(showSettings){
+      settingsTooltipRef.current?.open({
+        anchorSelect: "#settings-toggle-button",
+        content: renderedSettings,
+      });
+    }
+    else{
+      settingsTooltipRef.current?.close();
+    }
+  }, [
+    renderedSettings,
+    showSettings
+  ]);
+
+  //
+  // the react tooltip declaration. enables us to grab a reference
+  // to the tooltip and show hide on mouseover of individual positions
+  //
+  const renderedTooltip = useMemo(() => {
+    return (
+      <Tooltip
+        ref={settingsTooltipRef}
+        className="settings-tooltip-holder"
+        border="solid black 1px"
+        positionStrategy="fixed"
+        variant="light"
+        imperativeModeOnly={true}
+        place={"top-end"}
+        offset={14}
+      />
+    )
+  }, []);
+
+
+  //
+  // the full settings box
+  //
+  const renderedSettingsBox = useMemo(()=>{
+
+    const alignmentDescription = alignment ? (
+      <>
+        <h3><strong>Alignment:</strong> {alignment.getName()}</h3>
+        <h4>
+          {`${alignment.getSequenceCount()} sequences (rows) and ${alignment.getSequenceLength()} positions (columns)`}
+          {alignment.getNumberRemovedDuplicateSequences() > 0 ||
+           alignment.getNumberDuplicateSequencesInAlignment() > 0 ? (
+             <span className="duplicates-removed">
+               {alignment.getNumberRemovedDuplicateSequences() > 0
+                 ? `${"\u2605"} ${alignment.getNumberRemovedDuplicateSequences()} duplicate sequences were removed`
+                 : `${"\u2605"} alignment contains ${alignment.getNumberDuplicateSequencesInAlignment()} duplicate sequences`}
+             </span>
+           ) : null}
+        </h4>
+      </>
+    ) : (
+      <></>
+    );
+
+    //
+    // settings tooltip
+    //
+  
+    return (
+      <>
+        {renderedTooltip}
+        {renderedFileDropZone}
+
+        <div className={`outside-settings-tooltip${!showSettings ? " hidden" : ""}`}
+          onMouseDown={()=>{
+            setState({
+              ...state,
+              showSettings: false,
+            });
+          }}
+        />
+
+        <div className="app-header">
+          <div className="settings-box">
+            <form>
+              <div className="settings-header">
+                <h2>{`AlignmentViewer 2.0`}</h2>
+
+                <div className="settings-alignment-description">
+                  {alignmentDescription}
+                </div>
+
+                <a
+                  className="github-link"
+                  href="https://github.com/sanderlab/AlignmentViewer2.0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    alt="Alignment Viewer 2.0 GitHub Repo"
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/GitHub-Mark-32px.png`}
+                  /> 
+                </a>
+    
+                <button
+                  className={`download button-link${!alignment ? " hide" : ""}`}
+                  type="button"
+                  style={{ margin: 0, border: "none" }}
+                  onClick={()=>{
+                    if (alignment){
+                      downloadAlignment({
+                        alignment: alignment,
+                        alignmentType: style.alignmentType, 
+                        positionsToStyle: positionsToStyle, 
+                        residueColoring: residueColoring, 
+                        colorScheme:  style.selectedColorScheme,
+                      });
+                    }
+                  }}
+                >
+                  <img
+                    alt="Download Alignment" 
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/download_32px.png`}
+                  />
+                </button>
+
+    
+                <button
+                  className={`download button-link${!alignment ? " hide" : ""}`}
+                  type="button"
+                  style={{ margin: 0, border: "none" }}
+                  onClick={()=>{
+                    if (alignment){
+                      downloadLogoSvg({
+                        alignment: alignment, 
+                        style: style
+                      });
+                    }
+                  }}
+                >
+                  <img
+                    alt="Download Logo" 
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/download_32px.png`}
+                  />
+                </button>
+    
+                <button
+                  id="settings-toggle-button"
+                  className={`button-link`}//${showSettings ? " hide" : ""}`}
+                  type="button"
+                  style={{ padding: 0, margin: 0, border: "none" }}
+                  onClick={()=>{
+                    setState({
+                      ...state,
+                      showSettings: !showSettings,
+                    });
+                  }}
+                >
+                  <img
+                    alt="Show Settings Box"
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/settings_32px.png`}
+                  />
+                </button>
+              </div> 
+            </form>
+          </div>
+        </div>
+      </>
+    );
+  }, [
+    alignment,
+    positionsToStyle, 
+    renderedFileDropZone,
+    renderedTooltip,
+    residueColoring,
     showSettings,
     state,
     style

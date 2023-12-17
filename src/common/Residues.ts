@@ -2,9 +2,11 @@ import { stringToColor } from "./Utils";
 import {
   ALL_AMINOACID_COLORSCHEMES,
   ALL_NUCLEOTIDE_COLORSCHEMES,
+  IColorScheme,
+  ResidueColoring,
 } from "./MolecularStyles";
 
-interface ICombinedColor {
+export interface ICombinedColor {
   hexString: string;
   rgb: {
     red: number;
@@ -13,38 +15,31 @@ interface ICombinedColor {
   };
 }
 
-interface IResidueColor {
-  [colorScheme: string]: {
-    lightTheme: {
-      letterColor: ICombinedColor;
-      backgroundColor: ICombinedColor;
-    };
-    darkTheme: {
-      letterColor: ICombinedColor;
-      backgroundColor: ICombinedColor;
-    };
-    lettersOnlyTheme: {
-      letterColor: ICombinedColor;
-      backgroundColor: ICombinedColor;
-    };
-  };
-}
+
+type IColoringToLetterAndBackgroundColor = Map<ResidueColoring, {
+  letterColor: ICombinedColor;
+  backgroundColor: ICombinedColor;
+}>;
+type ISingleResidueColor = Map<
+  IColorScheme, 
+  IColoringToLetterAndBackgroundColor
+>;
 
 interface IAminoAcid {
   singleLetterCode: string;
   threeLetterCode: string;
   fullName: string;
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 }
 
 interface INucleotide {
   singleLetterCode: string;
   fullName: string;
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 }
 
 export class AminoAcid implements IAminoAcid {
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 
   public static readonly canonicalAminoAcids: AminoAcid[] = [
     new AminoAcid("A", "ALA", "Alanine"),
@@ -89,6 +84,10 @@ export class AminoAcid implements IAminoAcid {
 
   public static readonly UNKNOWN = AminoAcid.bySingleLetterCode["X"];
 
+  static list(): IAminoAcid[] {
+    return AminoAcid.canonicalAminoAcids;
+  }
+
   static fromSingleLetterCode(singleLetterCode: string): IAminoAcid {
     if (singleLetterCode in this.bySingleLetterCode) {
       return AminoAcid.bySingleLetterCode[singleLetterCode];
@@ -112,47 +111,54 @@ export class AminoAcid implements IAminoAcid {
     this.threeLetterCode = threeLetterCode;
     this.fullName = fullName;
     this.colors = ALL_AMINOACID_COLORSCHEMES.reduce((acc, cs) => {
-      acc[cs.commonName] = {
-        lightTheme: {
-          letterColor: stringToColor(
-            cs.colors[singleLetterCode]
-              ? cs.colors[singleLetterCode]
-              : cs.defaultLetterColor
-          ),
-          backgroundColor: stringToColor(
-            cs.backgroundColorsLightTheme[singleLetterCode]
-              ? cs.backgroundColorsLightTheme[singleLetterCode]
-              : "#ffffff"
-          ),
-        },
-        darkTheme: {
-          letterColor: stringToColor(
-            cs.letterColorsDarkTheme[singleLetterCode]
-              ? cs.letterColorsDarkTheme[singleLetterCode]
-              : cs.defaultLetterColor
-          ),
-          backgroundColor: stringToColor(
-            cs.colors[singleLetterCode]
-              ? cs.colors[singleLetterCode]
-              : "#ffffff"
-          ),
-        },
-        lettersOnlyTheme: {
-          letterColor: stringToColor(
-            cs.colors[singleLetterCode]
-              ? cs.colors[singleLetterCode]
-              : cs.defaultLetterColor
-          ),
-          backgroundColor: stringToColor("#ffffff"),
-        },
-      };
+      const themesMap = new Map() as IColoringToLetterAndBackgroundColor;
+      //todo update sass to be more consistant with how we use this
+      //i.e., we should be able to loop ResidueColoring.list to
+      //set these, but presently the prop keys are different for
+      //each coloring type Light/Dark/NoBackground
+      //props: colors, backgroundColorsLightTheme, letterColorsDarkTheme
+      themesMap.set(ResidueColoring.LIGHT, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.backgroundColorsLightTheme[singleLetterCode]
+            ? cs.backgroundColorsLightTheme[singleLetterCode]
+            : "#ffffff"
+        ),
+      });
+
+      themesMap.set(ResidueColoring.DARK, {
+        letterColor: stringToColor(
+          cs.letterColorsDarkTheme[singleLetterCode]
+            ? cs.letterColorsDarkTheme[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : "#ffffff"
+        ),
+      });
+
+      themesMap.set(ResidueColoring.NO_BACKGROUND, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor("#ffffff"),
+      });
+      acc.set(cs, themesMap);
       return acc;
-    }, {} as IResidueColor);
+    }, new Map() as ISingleResidueColor);
   }
 }
 
 export class Nucleotide implements INucleotide {
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 
   static allNucleotides: Nucleotide[] = [
     new Nucleotide("A", "Adenine"),
@@ -177,53 +183,60 @@ export class Nucleotide implements INucleotide {
 
   public static UNKNOWN = Nucleotide.bySingleLetterCode["X"];
 
+  static list(): INucleotide[] {
+    return Nucleotide.allNucleotides;
+  }
+
   static fromSingleLetterCode(singleLetterCode: string): Nucleotide {
-    singleLetterCode = singleLetterCode.toUpperCase();
-    if (this.bySingleLetterCode[singleLetterCode]) {
+    if (singleLetterCode in this.bySingleLetterCode) {
       return Nucleotide.bySingleLetterCode[singleLetterCode];
     }
     return Nucleotide.UNKNOWN;
   }
-
-  constructor(public singleLetterCode: string, public fullName: string) {
+  
+  constructor(
+    public singleLetterCode: string, public fullName: string
+  ) {
     this.singleLetterCode = singleLetterCode;
     this.fullName = fullName;
     this.colors = ALL_NUCLEOTIDE_COLORSCHEMES.reduce((acc, cs) => {
-      acc[cs.commonName] = {
-        lightTheme: {
-          letterColor: stringToColor(
-            cs.colors[singleLetterCode]
-              ? cs.colors[singleLetterCode]
-              : cs.defaultLetterColor
-          ),
-          backgroundColor: stringToColor(
-            cs.backgroundColorsLightTheme[singleLetterCode]
-              ? cs.backgroundColorsLightTheme[singleLetterCode]
-              : "#ffffff"
-          ),
-        },
-        darkTheme: {
-          letterColor: stringToColor(
-            cs.letterColorsDarkTheme[singleLetterCode]
-              ? cs.letterColorsDarkTheme[singleLetterCode]
-              : cs.defaultLetterColor
-          ),
-          backgroundColor: stringToColor(
-            cs.colors[singleLetterCode]
-              ? cs.colors[singleLetterCode]
-              : "#ffffff"
-          ),
-        },
-        lettersOnlyTheme: {
-          letterColor: stringToColor(
-            cs.colors[singleLetterCode]
-              ? cs.colors[singleLetterCode]
-              : cs.defaultLetterColor
-          ),
-          backgroundColor: stringToColor("#ffffff"),
-        },
-      };
+      const themesMap = new Map() as IColoringToLetterAndBackgroundColor;
+      themesMap.set(ResidueColoring.LIGHT, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.backgroundColorsLightTheme[singleLetterCode]
+            ? cs.backgroundColorsLightTheme[singleLetterCode]
+            : "#ffffff"
+        ),
+      });
+
+      themesMap.set(ResidueColoring.DARK, {
+        letterColor: stringToColor(
+          cs.letterColorsDarkTheme[singleLetterCode]
+            ? cs.letterColorsDarkTheme[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : "#ffffff"
+        ),
+      });
+
+      themesMap.set(ResidueColoring.NO_BACKGROUND, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor("#ffffff"),
+      });
+      acc.set(cs, themesMap);
       return acc;
-    }, {} as IResidueColor);
-  }
+    }, new Map() as ISingleResidueColor);
+  };
 }

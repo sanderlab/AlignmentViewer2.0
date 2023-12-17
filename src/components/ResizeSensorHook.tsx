@@ -1,5 +1,6 @@
 /**
- * Hook for monitoring resizes
+ * Hook for monitoring resizes. This needs to be placed in an absolute or relatively
+ * positioned element to work.
  *
  * partially inspired by:
  * https://medium.com/@teh_builder/ref-objects-inside-useeffect-hooks-eb7c15198780

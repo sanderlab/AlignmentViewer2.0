@@ -1,10 +1,13 @@
 import { generateUUIDv4 } from "./Utils";
-import { Nucleotide } from "./Residues";
+import { AminoAcid, ICombinedColor, Nucleotide } from "./Residues";
 import { SequenceSorter } from "./AlignmentSorter";
 import {
   AlignmentTypes,
   AminoAcidAlignmentStyle,
+  IColorScheme,
   NucleotideAlignmentStyle,
+  PositionsToStyle,
+  ResidueColoring,
 } from "./MolecularStyles";
 
 export interface ISequence {
@@ -508,10 +511,87 @@ export class Alignment {
    * Get all the first sequence in the alignment, aka, target / query / first
    * @returns all sequences in this alignment
    */
-  getQuerySequence(): ISequence {
+  getQuery(): ISequence {
     return this.querySequence;
   }
 
+
+  static getMSAColors = (
+    sequences: string[],
+    querySequence: string,
+    consensusSequence: string,
+    alignmentType: AlignmentTypes,
+    positionsToStyle: PositionsToStyle,
+    residueColoring: ResidueColoring,
+    colorScheme: IColorScheme
+  ): {
+    letter: string,
+    backgroundColor: ICombinedColor,
+    letterColor: ICombinedColor
+  }[][] => {
+    const moleculeClass = alignmentType === AlignmentTypes.AMINOACID 
+      ? AminoAcid 
+      : Nucleotide;
+
+    const letterToColor = moleculeClass.list().reduce((acc, mol)=>{
+      const letter = mol.singleLetterCode;
+      const letterColoring = moleculeClass.fromSingleLetterCode(
+          letter
+        ).colors.get(
+          colorScheme
+        )!.get(
+          residueColoring
+        )!;
+      acc[letter] = {
+        letter: letter,
+        backgroundColor: letterColoring.backgroundColor,
+        letterColor: letterColoring.letterColor
+      }
+      return acc;
+    }, {} as {
+      [letter: string]: ReturnType<typeof Alignment.getMSAColors>[number][number]
+    });
+
+    const UNKNOWN_COLORS = moleculeClass.UNKNOWN.colors.get(
+        colorScheme
+      )!.get(
+        residueColoring
+      )!;
+
+    return sequences.map((seq) => {
+      return seq.split("").map((letter, posIdx)=>{
+        const unknownLetterColor = {
+          ...UNKNOWN_COLORS,
+          letter: letter
+        };
+        const letterColor = letterToColor[letter]
+          ? letterToColor[letter]
+          : unknownLetterColor;
+
+        //if all positions are colored, return the colors immeditally
+        if (positionsToStyle===PositionsToStyle.ALL) return letterColor;
+        
+        //only some positions are styled, figure out if this is one of
+        //them otherwise return default
+        return positionsToStyle === PositionsToStyle.QUERY
+          ? querySequence[posIdx] === letter
+            ? letterColor 
+            : unknownLetterColor
+          : positionsToStyle === PositionsToStyle.QUERY_DIFF
+            ? querySequence[posIdx] !== letter
+              ? letterColor
+              : unknownLetterColor
+            : positionsToStyle === PositionsToStyle.CONSENSUS
+              ? consensusSequence[posIdx] === letter
+                ? letterColor
+                : unknownLetterColor
+              : consensusSequence[posIdx] !== letter
+                ? letterColor
+                : unknownLetterColor
+      });
+    });
+  }
+  
   /**
    * Set the query sequence
    * @param newQuery The new query sequence. Must already exist in the alignment.

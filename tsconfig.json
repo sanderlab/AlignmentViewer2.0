@@ -24,6 +24,6 @@
     "src/redux",
     "src/App.tsx",
     "src/index.ts",
-    "types",
+    "types"
  ]
 }

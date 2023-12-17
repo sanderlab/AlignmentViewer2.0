@@ -3,7 +3,8 @@ import "./PositionalBarplot.scss";
 import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
-import { ScrollbarOptions, VirtualizedMatrixViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { IControllerRole, IResponderRole, ScrollbarOptions, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
 
 export interface IPositionalBarplotDataSeries {
   id: string; //must be unique for each series
@@ -32,8 +33,8 @@ export interface IPositionalBarplotProps {
   tooltipPlacement?: tooltipPlacement;
   tooltipOffset?: number;
 
-  //redux id for tracking shift in x-axis
-  horizontalReduxId?: string;
+  //for the virtualization .. directly decomposed to VirtualizedHorizontalViewer 
+  horizontalVirtualization: IControllerRole | IResponderRole;
 }
 
 interface ISingleBarDetails {
@@ -223,7 +224,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     dataSeriesSet,
     tooltipPlacement = "top",
     tooltipOffset = 8, //distance that the arrow will be from the hovered bar
-    horizontalReduxId,
+    horizontalVirtualization,
     height
   } = props;
 
@@ -610,36 +611,25 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   // render
   //
   //
-  return !alignment ? null : (
+  return !alignment || !horizontalVirtualization ? undefined : (
     <div className="barplot">
-      <VirtualizedMatrixViewer
-        horizontalReduxId={horizontalReduxId}
-        direction="x"
-        columnCount={alignment.getSequenceLength()}
-        columnWidth={positionWidth}
-        rowCount={1}
-        rowHeight={75} //TODO unhardcode
-        autoOffset={false}
-        verticalScrollbar={ScrollbarOptions.NeverOn}
-        horizontalScrollbar={ScrollbarOptions.NeverOn}
-        getContent={({
-          colIdxsToRender,
-          additionalHorizontalOffset,
-        }) => {
+      <VirtualizedHorizontalViewer
+        getContentForColumns={() => {
           return (
             <div
               style={{
                 position:"absolute",
-                width: alignment.getSequenceLength() * positionWidth,
-                left:
-                  colIdxsToRender.length > 0
-                    ? colIdxsToRender[0] * positionWidth * -1 + additionalHorizontalOffset
-                    : additionalHorizontalOffset,
+                width: alignment.getSequenceLength() * positionWidth
               }}
             >
               {cachedBarplot}
             </div>
           );
+        }}
+        horizontalParams={{
+          ...horizontalVirtualization,
+          virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
+          scrollbar: ScrollbarOptions.NeverOn
         }}
       />
       {renderedTooltip}

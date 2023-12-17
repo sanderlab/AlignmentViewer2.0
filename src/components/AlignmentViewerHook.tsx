@@ -26,9 +26,32 @@ import {
   PositionalBarplot, 
   PreconfiguredPositionalBarplots 
 } from "./PositionalBarplotHook";
-import { ScrollbarOptions } from "./virtualization/VirtualizedMatrixViewerHook";
+import { ScrollbarOptions } from "./virtualization/VirtualizationTypes";
+import { 
+  IControllerRole, 
+  IResponderRole, 
+  VirtualizationRole
+} from "./virtualization/VirtualizationTypes";
 
 
+//
+// TYPES / INTERFACES
+//
+export type IAlignmentViewerProps = {
+  alignment: Alignment;
+  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  positionsToStyle: PositionsToStyle;
+  residueColoring: ResidueColoring;
+} & Partial<Readonly<typeof defaultProps>>;
+
+export type IBarplotExposedProps = Pick<
+  IPositionalBarplotProps,
+  "dataSeriesSet" | "tooltipPlacement" | "height"
+>;
+
+//
+// DEFAULT PROPS
+//
 const defaultProps = {
   zoomLevel: 13 as number,
   sortBy: SequenceSorter.INPUT as SequenceSorter,
@@ -76,21 +99,10 @@ const defaultProps = {
   ] as IBarplotExposedProps[],
 };
 
-export type IAlignmentViewerProps = {
-  alignment: Alignment;
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  positionsToStyle: PositionsToStyle;
-  residueColoring: ResidueColoring;
-} & Partial<Readonly<typeof defaultProps>>;
-
-export type IBarplotExposedProps = Pick<
-  IPositionalBarplotProps,
-  "dataSeriesSet" | "tooltipPlacement" | "height"
->;
 
 
 /**
- * 
+ * Main react hook for generating the entire alignment viewer visualization.
  * @param props 
  * @returns 
  */
@@ -117,38 +129,83 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     ...props
   };
 
-  //TODO: this should probably be calculated right?
-  const CHARACTER_HEIGHT_TO_WIDTH_RATIO = 36 / 16;
-  const MIN_WIDTH = 200;
+  const MIN_WIDTH = 150;
   const MAX_WIDTH = 500;
 
   const verticalPaddingAroundContent = 2; // in px
-  const sharedHorizontalReduxId = 'x_scroller_'+alignment.getUUID();
-  const sharedVerticalReduxId = 'y_scroller_'+alignment.getUUID();
+
   const fontSize = zoomLevel;
   const annotationFontSize = zoomLevel + 4;
   const residueWidth = getAlignmentFontDetails(fontSize).width;
-  const residueHeight = Math.round(
-    residueWidth * CHARACTER_HEIGHT_TO_WIDTH_RATIO
-  );
+  const residueHeight = getAlignmentFontDetails(fontSize).height;
+  
+  //
+  //virtualization 
+  //
 
-  const classes = ["alignment-viewer"];
-  if (!showAnnotations) {
-    classes.push("annotation-closed");
-  }
+  //load virtualization states from redux - there are 4 virtualizations
+  const alignmentUUID = alignment.getUUID();
+
+  //primary x-axis virtualization - main viewport, logo, positional axis, logo, barplots
+  const [
+    xViewportResponderVirtualization,
+    xViewportControllerVirtualization,
+  ]: [IResponderRole, IControllerRole] = useMemo(()=>{
+    const responder = {
+      virtualizationId: `x_viewport_virtualization_${alignmentUUID}`,
+      role: VirtualizationRole.Responder
+    } as IResponderRole;
+
+    return [responder, {
+      ...responder,
+      role: VirtualizationRole.Controller,
+      cellCount: alignment.getSequenceLength(),
+      cellSizePx: residueWidth
+    } as IControllerRole]
+  }, [alignment, alignmentUUID, residueWidth]);
+
+  //primary y-axis virtualization - main viewport, logo, positional axis, logo, barplots
+  const [
+    yViewportResponderVirtualization,
+    yViewportControllerVirtualization,
+  ]: [IResponderRole, IControllerRole] = useMemo(()=>{
+    const responder = {
+      virtualizationId: `y_viewport_virtualization_${alignmentUUID}`,
+      role: VirtualizationRole.Responder
+    } as IResponderRole;
+
+    return [responder, {
+      ...responder,
+      role: VirtualizationRole.Controller,
+      cellCount: alignment.getSequenceCount(),
+      cellSizePx: residueHeight
+    } as IControllerRole]
+  }, [alignment, alignmentUUID, residueHeight]);
 
   //
   // state
   //
   const [mouseHoveringContent, setMouseHoveringContent] = useState<boolean>(false);
+  const [annotationResizeBarHovered, setAnnotationResizeBarHovered] = useState<boolean>(false);
   const [annotationResizeDragging, setAnnotationResizeDragging] = useState<boolean>(false);
+
+  //
+  // state
+  //
+  const classes = ["alignment-viewer"];
+  if (!showAnnotations) classes.push("annotation-closed");
+  if (annotationResizeDragging) classes.push("annotations-being-resized");
+  if (annotationResizeBarHovered) classes.push("annotation-resize-hovered");
+  
   //custom callback that enables us to call function (draggerMoved) only
   //after the state has been set.
   const mouseLastXPx = useRef<number|undefined>();
   const annotationWidth = useRef<number>(220);
   const oneDraggerRef = useRef<HTMLDivElement | null>(null);
 
-  const getCorrectedAnnotationWidth = useCallback((proposedWith: number) => {
+  const getCorrectedAnnotationWidth = useCallback((
+    proposedWith: number
+  ) => {
     return proposedWith < MIN_WIDTH 
       ? MIN_WIDTH 
       : proposedWith > MAX_WIDTH
@@ -166,8 +223,15 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     .map((iseq) => iseq.sequence)
   }, [alignment, sortBy]);
 
+  const sequenceIds = useMemo(()=>{
+    return alignment.getSequences(
+      sortBy ? sortBy : defaultProps.sortBy
+    )
+    .map((iseq) => iseq.id)
+  }, [alignment, sortBy]);
+
   const singleQuerySequenceArray = useMemo(()=>{
-    return [alignment.getQuerySequence().sequence]
+    return [alignment.getQuery().sequence]
   }, [alignment]);
 
   const singleConsensusSequenceArray = useMemo(()=>{
@@ -183,8 +247,15 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   }, []);
 
   //
-  // resize dragging
+  // resize dragging - TODO: need to move this into its own component
   //
+  const handleAnnotationResizeBarMouseenter = useCallback(()=>{
+    setAnnotationResizeBarHovered(true);
+  }, []);
+  const handleAnnotationResizeBarMouseleave = useCallback(()=>{
+    setAnnotationResizeBarHovered(false);
+  }, []);
+
   const startAnnotationResizeDragging = useCallback((
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   )=>{
@@ -241,28 +312,33 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   // render functions
   //
 
-  /**
-   * Render a single row in the alignment viewer. This consists
-   * of a title or annotation and the content.
-   */
+  //Render a single row in the alignment viewer. This consists
+  //of a title or annotation and the content.
   const renderWidget = useCallback((params: {
     className: string,
     titleOrAnnotation: string | JSX.Element,
     content: JSX.Element | null,
     contentHeightPx?: number, //height of the content
-    key?: string
+    noBottomMarginOnTitle?: boolean, 
+    key?: string,
   })=>{
     const {
       className,
       titleOrAnnotation,
       content,
       contentHeightPx,
-      key
+      key,
+      noBottomMarginOnTitle
     } = params;
 
     const holderHeight = contentHeightPx 
       ? contentHeightPx+(2*verticalPaddingAroundContent) 
       : undefined;
+
+    //kind of a hack, but content doesn't center well so we add padding to the title 
+    //to keep the title centered with the conten. However, this doesn't work for the 
+    //metadata/annotation block, hence a "noBottomMarginOnTitle" flag.
+    const marginBottom = noBottomMarginOnTitle ? 0 : verticalPaddingAroundContent*2;
 
     return (
       <div className={`av2-widget ${className}`} key={key} style={{
@@ -272,36 +348,41 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           className="av2-title-or-annotation"
           style={{ 
             fontSize: annotationFontSize,
-            flexBasis: getCorrectedAnnotationWidth(annotationWidth.current)+"px"
+            flexBasis: `${getCorrectedAnnotationWidth(annotationWidth.current)}px`,
+            marginBottom: `${marginBottom}px`
           }}
         >
           {titleOrAnnotation}
         </div>
-       {<div 
+        <div 
+          style={{
+            display: showAnnotations ? "block" : "none"
+          }}
           ref={oneDraggerRef}
-          className="av2-title-resize-separator"
+          className="av2-metadata-resize-separator"
           onMouseDown={startAnnotationResizeDragging}
-        />}
+          onMouseEnter={handleAnnotationResizeBarMouseenter}
+          onMouseLeave={handleAnnotationResizeBarMouseleave}/>
         <div 
           className="av2-content-holder" //a flex div, which doesn't deal well with padding/margin, 
           onMouseEnter={handleMouseHovering}
-          onMouseLeave={handleMouseStoppedHovering}
-        >
-            <div className="av2-content" style={{
-              //padding: `${verticalPaddingAroundContent}px 0`,
-              //height: holderHeight
-            }}>
-              {content}
-            </div>
+          onMouseLeave={handleMouseStoppedHovering}>
+          <div className="av2-content">
+            {content}
           </div>
+        </div>
+        <div className="av2-close-metadata-option" onMouseEnter={()=>{console.log('MOUSE ENTER');}}></div>
       </div>
     );
   }, [
     annotationFontSize, 
     getCorrectedAnnotationWidth,
+    handleAnnotationResizeBarMouseenter,
+    handleAnnotationResizeBarMouseleave,
     handleMouseHovering,
     handleMouseStoppedHovering,
     verticalPaddingAroundContent, 
+    showAnnotations,
     startAnnotationResizeDragging
   ]);
 
@@ -310,22 +391,23 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       <SequenceLogo
         alignment={alignment}
         style={style}
+        positionsToStyle={positionsToStyle}
         glyphWidth={residueWidth}
         logoType={logoOptions.logoType}
         tooltipPlacement={logoOptions.tooltipPlacement}
         height={logoOptions.height}
-        horizontalReduxId={sharedHorizontalReduxId}
+        horizontalVirtualization={xViewportResponderVirtualization}
       />
     );
   }, [
     alignment,
     logoOptions,
+    positionsToStyle,
     residueWidth,
-    sharedHorizontalReduxId,
+    xViewportResponderVirtualization,
     style
   ]);
-
-
+  
   const renderedMinimap = useMemo(() => {
     return (
       alignment &&
@@ -346,8 +428,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
               startingWidth={minimapOptions.startingWidth}
               minWidth={minimapOptions.minWidth}
               verticalHeight={minimapOptions.verticalHeight}
-              //sync
-              verticalReduxId={sharedVerticalReduxId}
+              syncWithVerticalVirtualization={
+                yViewportResponderVirtualization
+              }
             />
           }
         </div>
@@ -357,10 +440,10 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     alignment,
     minimapOptions, 
     positionsToStyle, 
-    sharedVerticalReduxId,
     showMinimap, 
     sortBy,
-    style
+    style,
+    yViewportResponderVirtualization
   ]);
 
   const renderBarplot = useCallback((
@@ -373,13 +456,13 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={residueWidth}
         height={barplotProps.height}
-        horizontalReduxId={sharedHorizontalReduxId}
+        horizontalVirtualization={xViewportResponderVirtualization}
       ></PositionalBarplot>
     );
   }, [
     alignment,
     residueWidth, 
-    sharedHorizontalReduxId
+    xViewportResponderVirtualization
   ]);
 
   //
@@ -388,7 +471,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   return (
     <div 
       className={classes.join(" ")} 
-      key={alignment.getUUID()}
+      key={alignmentUUID}
     > 
       <div 
         className="full-screen-annotation-resize-dragger"
@@ -402,11 +485,13 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       />
       <Provider store={reduxStore}>
           
-        {renderedMinimap}
+        { renderedMinimap }
 
-        {/*<div id="column_mouseover"></div>*/}
+        {
+          //<div id="column_mouseover"></div>
+        }
 
-        {!barplots || barplots.length < 1 
+        {!barplots || barplots.length < 1
           ? null
           : barplots.map((barplot, idx) =>
               renderWidget({
@@ -422,7 +507,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
               })
             )}
 
-        {!showLogo || !logoOptions 
+        {!showLogo || !logoOptions
           ? null
           : renderWidget({
               className: "av2-sequence-logo-render",
@@ -438,15 +523,17 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           : renderWidget({
               className: "av2-consensus-seq-render",
               titleOrAnnotation: "Consensus:",
-              content: 
+              content:
                 <AlignmentDetails
-                  reduxHorizontalId={sharedHorizontalReduxId}
+                  alignmentUUID={alignmentUUID}
+                  horizVirtualization={xViewportResponderVirtualization}
+                  vertVirtualization={"None"}
                   sequences={singleConsensusSequenceArray}
                   consensusSequence={
                     alignment.getConsensus().sequence
                   }
                   querySequence={
-                    alignment.getQuerySequence().sequence
+                    alignment.getQuery().sequence
                   }
                   alignmentStyle={style}
                   positionsToStyle={positionsToStyle}
@@ -454,7 +541,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
-                  verticalScrollbar={ScrollbarOptions.NeverOn}
                   horizontalScrollbar={ScrollbarOptions.NeverOn}
                 />,
               contentHeightPx: residueHeight,
@@ -465,15 +551,18 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           : renderWidget({
               className: "av2-query-seq-render",
               titleOrAnnotation: "Query:",
-              content: 
+              content:
                 <AlignmentDetails
-                  reduxHorizontalId={sharedHorizontalReduxId}
+                  alignmentUUID={alignmentUUID}
+                  //horizVirtualization={xViewportControllerVirtualization}
+                  horizVirtualization={xViewportResponderVirtualization}
+                  vertVirtualization={"None"}
                   sequences={singleQuerySequenceArray}
                   consensusSequence={
                     alignment.getConsensus().sequence
                   }
                   querySequence={
-                    alignment.getQuerySequence().sequence
+                    alignment.getQuery().sequence
                   }
                   alignmentStyle={style}
                   positionsToStyle={positionsToStyle}
@@ -481,24 +570,23 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
                   fontSize={fontSize}
                   residueHeight={residueHeight}
                   residueWidth={residueWidth}
-                  verticalScrollbar={ScrollbarOptions.NeverOn}
                   horizontalScrollbar={ScrollbarOptions.NeverOn}
                 />,
               contentHeightPx: residueHeight,
             })}
 
-        {!showRuler 
+        {!showRuler
           ? null
           : renderWidget({
               className: "av2-position-indicator-render",
               titleOrAnnotation: "Position:",
-              content: 
+              content:
                 <div className="position-box">
                   <PositionalAxis
-                    horizontalReduxId={sharedHorizontalReduxId}
+                    alignmentUUID={alignmentUUID}
+                    horizVirtualization={xViewportResponderVirtualization}
                     positions={[...Array(alignment.getSequenceLength()).keys()]}
                     fontSize={fontSize}
-                    residueHeight={residueHeight}
                     residueWidth={residueWidth}
                   />
                 </div>,
@@ -507,15 +595,14 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
         {renderWidget({
           className: "av2-alignment-details-render",
+          noBottomMarginOnTitle:true,
           titleOrAnnotation: 
             <AlignmentTextualMetadata
-              alignmentUUID={alignment.getUUID()}
-              verticalReduxId={sharedVerticalReduxId}
-              textForEachSeq={alignment
-                .getSequences(
-                  sortBy ? sortBy : defaultProps.sortBy
-                )
-                .map((iseq) => iseq.id)}
+              alignmentUUID={alignmentUUID}
+              vertVirtualization={yViewportResponderVirtualization}
+              genenameHorizVirtualization={"Automatic"} 
+              annotationHorizVirtualization={"Automatic"}
+              textForEachSeq={sequenceIds}
               fontSize={fontSize}
               tabFontSize={annotationFontSize}
               letterHeight={residueHeight}
@@ -523,11 +610,12 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
             />,
           content:
             <AlignmentDetails
-              reduxVerticalId={sharedVerticalReduxId}
-              reduxHorizontalId={sharedHorizontalReduxId}
+              alignmentUUID={alignmentUUID}
+              vertVirtualization={yViewportControllerVirtualization}
+              horizVirtualization={xViewportControllerVirtualization}
               sequences={sequences}
               consensusSequence={alignment.getConsensus().sequence}
-              querySequence={alignment.getQuerySequence().sequence}
+              querySequence={alignment.getQuery().sequence}
               alignmentStyle={style}
               positionsToStyle={positionsToStyle}
               residueColoring={residueColoring}
