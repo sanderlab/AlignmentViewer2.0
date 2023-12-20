@@ -2,9 +2,17 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import "./App.scss";
 import { Alignment } from "./common/Alignment";
 import { SequenceSorter } from "./common/AlignmentSorter";
-import { downloadLogoSvg, downloadAlignment } from "./common/FileExporter"
-import { UrlLocalstorageBooleanInputManager, UrlLocalstorageInputManager, UrlLocalstorageNumberInputManager, getURLParameters } from "./common/Utils";
-import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerHook";
+import { downloadFullViewportSVG } from "./common/FileExporter"
+import { 
+  UrlLocalstorageBooleanInputManager, 
+  UrlLocalstorageInputManager, 
+  UrlLocalstorageNumberInputManager, 
+  getURLParameters 
+} from "./common/Utils";
+import { 
+  AlignmentViewer, 
+  IBarplotExposedProps
+} from "./components/AlignmentViewerHook";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -21,6 +29,7 @@ import { AlignmentFileDrop, AlignmentFileLoader } from "./components/AlignmentFi
 import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
 import { PreconfiguredPositionalBarplots } from "./components/PositionalBarplotHook";
 import { Tooltip, TooltipRefProps } from "react-tooltip";
+import { shallowEqual } from "react-redux";
 
 interface AppProps {}
 interface BooleanStateVariables {
@@ -42,8 +51,12 @@ interface AlignmentStateVariables {
   sortBy: SequenceSorter;
   logoPlotStyle: LOGO_TYPES;
   zoomLevel: number;
+  mainViewportVisibleIdxs?: {
+    seqIdxStart: number, seqIdxEnd: number,
+    posIdxStart: number, posIdxEnd: number
+  };
   loadError?: AlignmentLoadError;
-};
+} ;
 interface AppState extends BooleanStateVariables, AlignmentStateVariables {};
 
 
@@ -317,6 +330,14 @@ export default function App(props: AppProps){
             style={style}
             residueColoring={residueColoring}
             positionsToStyle={positionsToStyle}
+            mainViewportVisibleChanged={(newIdxs)=>{
+              if(!shallowEqual(state.mainViewportVisibleIdxs, newIdxs)){
+                setState({
+                  ...state,
+                  mainViewportVisibleIdxs: newIdxs
+                })
+              }
+            }}
             zoomLevel={zoomLevel}
             sortBy={sortBy}
             showMinimap={showMiniMap}
@@ -347,6 +368,7 @@ export default function App(props: AppProps){
     showAnnotations,
     showLogo,
     sortBy,
+    state,
     style,
     zoomLevel
   ]);
@@ -917,12 +939,17 @@ export default function App(props: AppProps){
                   style={{ margin: 0, border: "none" }}
                   onClick={()=>{
                     if (alignment){
-                      downloadAlignment({
+                      downloadFullViewportSVG({
                         alignment: alignment,
                         alignmentType: style.alignmentType, 
+                        colorScheme:  style.selectedColorScheme,
                         positionsToStyle: positionsToStyle, 
                         residueColoring: residueColoring, 
-                        colorScheme:  style.selectedColorScheme,
+                        includeLogo: showLogo,
+                        includePositionAxis: true,
+                        includeMetadata: true,
+                        startSeqIdx: state.mainViewportVisibleIdxs?.seqIdxStart, 
+                        endSeqIdx: state.mainViewportVisibleIdxs?.seqIdxEnd,
                       });
                     }
                   }}
@@ -935,28 +962,6 @@ export default function App(props: AppProps){
                   />
                 </button>
 
-    
-                <button
-                  className={`download button-link${!alignment ? " hide" : ""}`}
-                  type="button"
-                  style={{ margin: 0, border: "none" }}
-                  onClick={()=>{
-                    if (alignment){
-                      downloadLogoSvg({
-                        alignment: alignment, 
-                        style: style
-                      });
-                    }
-                  }}
-                >
-                  <img
-                    alt="Download Logo" 
-                    width="16"
-                    height="16"
-                    src={`${process.env.PUBLIC_URL}/download_32px.png`}
-                  />
-                </button>
-    
                 <button
                   id="settings-toggle-button"
                   className={`button-link`}//${showSettings ? " hide" : ""}`}
@@ -988,6 +993,7 @@ export default function App(props: AppProps){
     renderedFileDropZone,
     renderedTooltip,
     residueColoring,
+    showLogo,
     showSettings,
     state,
     style

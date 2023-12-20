@@ -44,6 +44,14 @@ export interface IAlignmentDetailsProps {
   highlightedSequenceIdxs?: number[];
   highlightedPositionIdxs?: number[];
 
+  //inform parent of viewport renders
+  matrixRendered?: (visibleInViewport: {
+    seqIdxStart: number, 
+    seqIdxEnd: number,
+    posIdxStart: number, 
+    posIdxEnd: number
+  }) => void;
+
   //virtualization
   horizVirtualization: IControllerRole | IResponderRole | "Automatic" | "None";
   vertVirtualization: IControllerRole | IResponderRole | "Automatic" | "None";
@@ -66,6 +74,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     fontSize,
     verticalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
     horizontalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
+    matrixRendered
   } = props;
 
   //user can either supply a virtualization, set it to be automatically created, or turn it off
@@ -158,6 +167,15 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     lastRowIdxToRender = lastRowIdxToRender ? lastRowIdxToRender : 0;
     renderShiftTopPx = renderShiftTopPx ? renderShiftTopPx : 0;
 
+    if(matrixRendered){
+      matrixRendered({
+        seqIdxStart: firstRowIdxToRender,
+        seqIdxEnd: lastRowIdxToRender,
+        posIdxStart: firstColIdxToRender,
+        posIdxEnd: lastColIdxToRender
+      });
+    }
+
     //issue with loading new alignment (a second alignment): virutalizedmatrix can end up 
     //not loading the redux store after calling getContent 
     const seqsSliced = sliceSequences(
@@ -240,6 +258,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     positionsToStyle,
     residueColoring,
     consensusSequence,
+    matrixRendered,
     fontSize,
     querySequence,
     residueHeight,

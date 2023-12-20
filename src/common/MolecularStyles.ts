@@ -152,7 +152,8 @@ export class PositionsToStyle {
   static readonly QUERY = new PositionsToStyle(
     "query",
     "Same as Query",
-    styles.styPosQueryClass
+    styles.styPosQueryClass,
+    styles.queryClass
   );
   static readonly QUERY_DIFF = new PositionsToStyle(
     "query-diff",
@@ -162,7 +163,8 @@ export class PositionsToStyle {
   static readonly CONSENSUS = new PositionsToStyle(
     "consensus",
     "Same as Consensus",
-    styles.styPosConsensusClass
+    styles.styPosConsensusClass,
+    styles.consensusClass
   );
   static readonly CONSENSUS_DIFF = new PositionsToStyle(
     "consensus-diff",
@@ -188,7 +190,8 @@ export class PositionsToStyle {
   private constructor(
     public readonly key: string,
     public readonly description: string,
-    public readonly className: string
+    public readonly className: string,
+    public readonly shortClassname?: string
   ) {}
 }
 
@@ -280,10 +283,12 @@ export class NucleotideAlignmentStyle implements AlignmentStyle {
 /**
  * Export globals
  */
+const resiPrefix = styles.resiPrefix
 const darkHueClass = styles.darkHueClass;
 const lightHueClass = styles.lightHueClass;
 const residueParentClass = styles.residueParentClass;
 export {
+  resiPrefix as resiClassPrefix,
   lightHueClass,
   darkHueClass,
   residueParentClass, // place above any residue (e.g., resi_A) to get default coloring
@@ -305,7 +310,7 @@ function generateFastClassLookup() {
   return ALL_POSSIBLE_CHARS.split("") //".-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     .reduce((acc, letter) => {
       const letterInClass = letter === "." ? "dot" : letter;
-      const prefix = styles.resiPrefix + letterInClass;
+      const prefix = resiPrefix + letterInClass;
       acc.set(
         letter,
         new Map([
@@ -316,17 +321,17 @@ function generateFastClassLookup() {
                 true,
                 prefix +
                   " " +
-                  styles.preConsensusClass +
+                  styles.consensusClass +
                   " " +
-                  styles.preQueryClass,
+                  styles.queryClass,
               ], //is consensus and query
-              [false, prefix + " " + styles.preConsensusClass], //is consensus, not query
+              [false, prefix + " " + styles.consensusClass], //is consensus, not query
             ]),
           ],
           [
             false,
             new Map([
-              [true, prefix + " " + styles.preQueryClass], //is query, not consensus
+              [true, prefix + " " + styles.queryClass], //is query, not consensus
               [false, prefix], //not query and not consensus
             ]),
           ],

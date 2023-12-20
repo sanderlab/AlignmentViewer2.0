@@ -10,10 +10,6 @@
  * character, prefixed with resi_ (e.g., Alanine and Adenine would both be resi_A).
  * 
  * Positional modifying classes can be accessed via 4 exported parameters:
- *    preQueryClass:       string to indicate a residue matches the query sequence (this
- *                                (should only be used by the highlight parser)
- *    preConsensusClass:   string to indicate a residue matches the consensus sequence 
- *                                (should only be used by the highlight parser)
  *    queryClass:          final resi_ prefixed class name to indicate a residue matches 
  *                            the query sequence 
  *    consensusClass:      final resi_ prefixed class name to indicate a residue matches    
@@ -56,13 +52,11 @@
 
 //general props
 $resiPrefix: resi_;
-$preQueryClass: q;
-$preConsensusClass: c;
-$queryClass: $preQueryClass;
-$consensusClass: $preConsensusClass;
+$queryClass: q;
+$consensusClass: c;
 $residueParentClass: $resiPrefix + line; //directly above residues
 
-//general global props
+//general global propsqueryClass
 $aaStyleClassPrefix: aa-alignment-style-;
 $ntStyleClassPrefix: nt-alignment-style-;
 $styPosClassPrefix: alignment-positions-tostyle-;
@@ -740,8 +734,8 @@ $ntProps: (
  */
 :export {
   resiPrefix: $resiPrefix;
-  preQueryClass: $preQueryClass;
-  preConsensusClass: $preConsensusClass;
+  queryClass: $queryClass;
+  consensusClass: $consensusClass;
   queryClass: $queryClass;
   consensusClass: $consensusClass;
   residueParentClass: $residueParentClass;

@@ -42,6 +42,12 @@ export type IAlignmentViewerProps = {
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   positionsToStyle: PositionsToStyle;
   residueColoring: ResidueColoring;
+  mainViewportVisibleChanged?: (props: {
+    seqIdxStart: number,
+    seqIdxEnd: number,
+    posIdxStart: number,
+    posIdxEnd: number
+  }) => void;
 } & Partial<Readonly<typeof defaultProps>>;
 
 export type IBarplotExposedProps = Pick<
@@ -113,6 +119,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     barplots,
     style,
     logoOptions,
+    mainViewportVisibleChanged,
     minimapOptions,
     positionsToStyle,
     residueColoring,
@@ -190,13 +197,13 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   const [annotationResizeDragging, setAnnotationResizeDragging] = useState<boolean>(false);
 
   //
-  // state
+  // css
   //
   const classes = ["alignment-viewer"];
   if (!showAnnotations) classes.push("annotation-closed");
   if (annotationResizeDragging) classes.push("annotations-being-resized");
   if (annotationResizeBarHovered) classes.push("annotation-resize-hovered");
-  
+
   //custom callback that enables us to call function (draggerMoved) only
   //after the state has been set.
   const mouseLastXPx = useRef<number|undefined>();
@@ -630,6 +637,11 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
                   ? ScrollbarOptions.AlwaysOnWhenOverflowed
                   : ScrollbarOptions.OnHoverWhenOverflowed
               }
+              matrixRendered={(props)=>{
+                if (mainViewportVisibleChanged){
+                  mainViewportVisibleChanged(props)
+                }
+              }}
             ></AlignmentDetails>
         })}
       </Provider>
