@@ -10,6 +10,365 @@ import {
 import { AminoAcid, Nucleotide } from "./Residues";
 import { startEndIdxToArray } from "./Utils";
 
+const FONT_FAMILY = "monospace";
+const FONT_SIZE = "10";
+
+/**
+ * Pull the logo dom element off the page, clean up the dom a bit, add styling
+ * and intiate a download.
+ * @param style 
+ */
+export function downloadBarplotSVG(props: {
+  alignment: Alignment;
+  svgId: string;
+  x?: number; 
+  y?: number;
+  width?: number;
+  height?: number;
+  positionalAxis?: {
+    numPos: number;
+    posHeight: number;
+    posWidth: number;
+    spaceBtwBarplotAndPositionalAxis: number;
+  };
+  svgFilename?: string;
+}){
+  const {
+    alignment,
+    svgFilename
+  } = props;
+
+  const barplotString = getBarplotSvgString(props);
+  if(barplotString){
+    var url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(barplotString)}`;
+    var link = document.createElement("a");
+    link.download = svgFilename ? svgFilename : `barplot_${alignment.getName()}.svg`;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+
+/**
+ * Pull the logo dom element off the page, clean up the dom a bit, add styling
+ * and intiate a download.
+ * @param style 
+ */
+export function downloadLogoSVG(props: {
+  svgId: string,
+  alignment: Alignment, 
+  alignmentType: AlignmentTypes,
+  colorScheme: IColorScheme,
+  positionsToStyle: PositionsToStyle,
+  positionalAxis?: {
+    numPos: number;
+    posHeight: number;
+    posWidth: number;
+    spaceBtwBarplotAndPositionalAxis: number;
+  };
+  svgFilename?: string;
+}){
+  const {
+    alignment,
+    svgFilename
+  } = props;
+
+  const logoString = getLogoSvgString(props);
+  if(logoString){
+    var url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(logoString)}`;
+    var link = document.createElement("a");
+    link.download = svgFilename ? svgFilename : `logo_${alignment.getName()}.svg`;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+/**
+ * From scratch generation of an alignment svg.
+ * @param props 
+ */
+export function downloadFullViewportSVG(props: {
+  alignment: Alignment, 
+  svgFilename?: string;
+} & Parameters<typeof getFullViewportSvgString>[0]){
+
+  const {
+    alignment,
+    svgFilename
+  } = props;
+
+  const alignmentString = getFullViewportSvgString(props);
+  var url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(alignmentString)}`;
+  var link = document.createElement("a");
+  link.download = svgFilename ? svgFilename : `msa_${alignment.getName()}.svg`;
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+//
+//
+// non-exposed methods
+//
+//
+//const getBarplotSvgString = (props: {
+//  svgId: string;
+//  positionalAxis?: {
+//    numPos: number;
+//    posHeight: number;
+//    posWidth: number;
+//    spaceBtwBarplotAndPositionalAxis: number;
+//  };
+//  x: number;
+//  y: number;
+//  width: number;
+//  height: number;
+//}) =>{
+//
+//  const {
+//    svgId,
+//    positionalAxis,
+//    x,
+//    y,
+//    width,
+//    height
+//  } = props;
+//  
+//  const barplotHeight = !positionalAxis 
+//    ? height 
+//    : height - 
+//      positionalAxis.spaceBtwBarplotAndPositionalAxis -
+//      positionalAxis.posHeight;
+//
+//  const svgBarplotElement = document.getElementById(svgId);
+//  if (!svgBarplotElement){
+//    console.error(
+//      `ERROR: no barplot (no elements with '${svgId}' found on the page)`
+//    );
+//    return undefined;
+//  }
+//  const svgElement = svgBarplotElement.cloneNode(true) as SVGElement;
+//  const placeholders = svgElement.getElementsByClassName("interaction-placeholder");
+//  for (var i = placeholders.length - 1; i >= 0; --i) {
+//    placeholders[i].remove();
+//  }
+//  svgElement.removeAttribute("style");
+//  svgElement.setAttribute("width", `${width}`);
+//  svgElement.setAttribute("height", `${barplotHeight}`);
+//  svgElement.setAttribute("x", `${x}`);
+//  svgElement.setAttribute("y", `${y}`);
+//
+//  if(positionalAxis){
+//    const positionalAxisText = getPositionalAxisRuler(positionalAxis.numPos);
+//    const positionalTextElem = [
+//      `<svg>`
+//      `<g transform="translate(${x}, ${height-positionalAxis.posHeight})">`,
+//        ...positionalAxisText.split("").map((char, charIdx)=>{
+//          return [
+//            '<text ',
+//              `dx="${charIdx*positionalAxis.posWidth}"`,
+//              'font-family="monospace"',
+//              'font-size="10px"',
+//              `dominant-baseline="hanging"`,
+//              `text-anchor="start"`,
+//              `fill="black">${char}</text>`
+//          ].join(" ");
+//        }),
+//      `</g></svg>`
+//    ].join(" ")
+//
+//  }
+//
+//  return svgElement.outerHTML;
+//}
+
+const getPositionAxisString = (positionalAxis: {
+  numPos: number;
+  posHeight: number;
+  posWidth: number;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+}) => {
+
+  const {
+    numPos,
+    posHeight,
+    posWidth,
+    x=0, 
+    y=0,
+    width=numPos * posWidth,
+    height=posHeight
+  } = positionalAxis;
+
+  const positionalAxisText = getPositionalAxisRuler(positionalAxis.numPos);
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 ${numPos * posWidth} ${posHeight}" 
+          x="${x}" y="${y}" width="${width}" height="${height}">`,
+      ...positionalAxisText.split("").map((char, charIdx)=>{
+        return [
+          '<text ',
+            `dx="${charIdx * posWidth}"`,
+            `font-family="${FONT_FAMILY}"`,
+            `font-size="${FONT_SIZE}"`,
+            `dominant-baseline="hanging"`,
+            `text-anchor="start"`,
+            `fill="black">${char}</text>`
+        ].join(" ");
+      }),
+    `</svg>`
+  ].join(" ");
+}
+
+/**
+ * 
+ *   <svg 
+ *     x={props.x} y={props.y}
+ *     width={props.width } height={props.height}/>
+ *    <svg from SVG element/>
+ *    <svg positionalAxis [generated by this function]/>
+ *   </svg>
+ * @param svgElem 
+ * @param positionalAxis 
+ * @returns 
+ */
+const injectPositionalAxisIntoSVG = (props: {
+  svgElement: SVGElement,
+  positionalAxis: {
+    numPos: number;
+    posHeight: number;
+    posWidth: number;
+    spaceBtwBarplotAndPositionalAxis: number;
+  },
+  x?: number,
+  y?: number,
+  width?: number,
+  height?: number,
+}) => {
+  const {
+    svgElement,
+    positionalAxis,
+    x=0, 
+    y=0,
+    width=positionalAxis.numPos * positionalAxis.posWidth, 
+    height=100,
+  } = props;
+
+  const {
+    numPos,
+    posWidth,
+    posHeight,
+    spaceBtwBarplotAndPositionalAxis
+  } = positionalAxis;
+
+  svgElement.setAttribute("y", "0");
+  svgElement.setAttribute("x", "0");
+  svgElement.setAttribute("width", `${numPos * posWidth}`); //same as position string
+  svgElement.setAttribute("height", `${height - posHeight - spaceBtwBarplotAndPositionalAxis}`);
+  const axisString = getPositionAxisString({
+    ...positionalAxis,
+    x: 0, 
+    y: height - posHeight,
+    width: numPos * posWidth, 
+    height: posHeight
+  });
+  return [
+    `<svg x="${x}" y="${y}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`,
+    svgElement.outerHTML,
+    axisString,
+    `</svg>`
+  ].join("\n");
+}
+
+/**
+ * Extract the SVG directly from the page, remove extraneous
+ * elements (e.g., interaction elements) and convert to a
+ * string. Also, update the x and y and width and height if props
+ * are provided. Final SVG output if not positionalAxis is 
+ * requested looks like:
+ *   <svg barplot [directly from page]
+ *     x={props.x} y={props.y}
+ *     width={props.width } height={props.height}/>
+ * 
+ * If the positionalAxis parameter is provided, generates a
+ * positional axis and adds it directly under the barplot, nesting
+ * the svg elements with the final SVG output like:
+ *   <svg 
+ *     x={props.x} y={props.y}
+ *     width={props.width } height={props.height}/>
+ *    <svg barplot [directly from page]/>
+ *    <svg positionalAxis [generated by this function]/>
+ *   </svg>
+ * 
+ * @param props 
+ * @returns 
+ */
+const getBarplotSvgString = (props: {
+  svgId: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  positionalAxis?: {
+    numPos: number;
+    posHeight: number;
+    posWidth: number;
+    spaceBtwBarplotAndPositionalAxis: number;
+  };
+}) => {
+
+  const {
+    svgId,
+    x, 
+    y, 
+    width, 
+    height,
+    positionalAxis
+  } = props;
+
+  const svgBarplotElement = document.getElementById(svgId);
+  if (!svgBarplotElement){
+    console.error(
+      `ERROR: no barplot (no elements with '${svgId}' found on the page)`
+    );
+    return undefined;
+  }
+
+  const svgElement = svgBarplotElement.cloneNode(true) as SVGElement;
+
+  //remove interaction elements
+  const placeholders = svgElement.getElementsByClassName("interaction-placeholder");
+  for (var i = placeholders.length - 1; i >= 0; --i) placeholders[i].remove();
+
+  //remove classnames
+  ["g", "rect"].forEach((tagName) => {
+    const elems = svgElement.getElementsByTagName(tagName);
+    for (var i = elems.length - 1; i >= 0; --i) elems[i].removeAttribute("class");
+  })
+  svgElement.removeAttribute("style");
+
+  if(positionalAxis){
+    return injectPositionalAxisIntoSVG({
+      svgElement, positionalAxis, x, y, width, height
+    });
+  }
+  
+  //don't remove from element if caller doesn't want to override.
+  if(x !== undefined) svgElement.setAttribute("x", `${x}`);
+  if(y !== undefined) svgElement.setAttribute("y", `${y}`);
+  if(width !== undefined) svgElement.setAttribute("width", `${width}`);
+  if(height !== undefined) svgElement.setAttribute("height", `${height}`);
+  return svgElement.outerHTML;
+}
+
+
 
 /**
  * Get a string representation of the svg logo. Appropriate for immediate
@@ -18,40 +377,46 @@ import { startEndIdxToArray } from "./Utils";
  * @param props 
  * @returns 
  */
-const getSvgLogoString = (props: {
+const getLogoSvgString = (props: {
+  svgId: string,
   alignment: Alignment, 
   alignmentType: AlignmentTypes;
   colorScheme: IColorScheme;
   positionsToStyle: PositionsToStyle,
-  forceX?: number | string;
-  forceY?: number | string;
-  forceWidth?: number | string;
-  forceHeight?: number | string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  positionalAxis?: {
+    numPos: number;
+    posHeight: number;
+    posWidth: number;
+    spaceBtwBarplotAndPositionalAxis: number;
+  };
 }) =>{
   const {
+    svgId,
     alignmentType,
     colorScheme,
     positionsToStyle,
-    forceX,
-    forceY,
-    forceWidth,
-    forceHeight
+    x,
+    y,
+    width,
+    height,
+    positionalAxis
   } = props;
 
-  const svgLogoElements = document.getElementsByClassName("av2-sequence-logo");
-  if (svgLogoElements.length < 1){
+  //const svgLogoElements = document.getElementsByClassName("av2-sequence-logo");
+  const svgLogoElement = document.getElementById(svgId);
+  if (!svgLogoElement){
     console.error(
-      "ERROR: no logo on page (no elements with 'av2-sequence-logo' found on the page)"
+      `ERROR: no logo (no elements id '${svgId}' found on the page)`
     );
     return undefined;
   }
 
-  const svgElement = svgLogoElements[0].cloneNode(true) as SVGElement;
+  const svgElement = svgLogoElement.cloneNode(true) as SVGElement;
   svgElement.removeAttribute("style");
-  if(forceWidth !== undefined) svgElement.setAttribute("width", `${forceWidth}`);
-  if(forceHeight !== undefined) svgElement.setAttribute("height", `${forceHeight}`);
-  if(forceX !== undefined) svgElement.setAttribute("x", `${forceX}`);
-  if(forceY !== undefined) svgElement.setAttribute("y", `${forceY}`);
 
   //
   //1. remove the interaction placeholder rectangles
@@ -107,10 +472,23 @@ const getSvgLogoString = (props: {
     })
   });
 
+  //set height width
+  if(width !== undefined) svgElement.setAttribute("width", `${width}`);
+  if(height !== undefined) svgElement.setAttribute("height", `${height}`);
+  if(x) svgElement.setAttribute("x", `${x}`);
+  if(y !== undefined) svgElement.setAttribute("y", `${y}`);
+
   //
   // 3. encode into a string and modify the residue class name. TODO: lots of extraneous
   //    stuff here, e.g., all class names can be removed.
   //
+  if(positionalAxis){
+    return injectPositionalAxisIntoSVG({
+      svgElement, positionalAxis, x, y, width, height
+    }).replaceAll(
+      resiClassPrefix, "r" //illustrator can't handle underscores in class names
+    );
+  }
   return svgElement.outerHTML.replaceAll(
     resiClassPrefix, "r" //illustrator can't handle underscores in class names
   )
@@ -134,12 +512,16 @@ const getFullViewportSvgString = (props: {
   positionsToStyle: PositionsToStyle, 
   residueColoring: ResidueColoring, 
   colorScheme: IColorScheme,
-  includeLogo: boolean,
+
+  logoSvgId?: string, // undefined means don't render
+  barplotSvgIds?: string[], // undefined or empty means don't render
+
   includePositionAxis: boolean,
   includeMetadata: boolean,
   startSeqIdx?: number, 
   endSeqIdx?: number,
-  logoHeight?: number
+  logoHeight?: number,
+  barplotHeights?: number,
   moleculeHeight?: number,
   moleculeWidth?: number,
   gapBetweenPlots?: number,
@@ -151,14 +533,18 @@ const getFullViewportSvgString = (props: {
     colorScheme,
     positionsToStyle, 
     residueColoring, 
-    includeLogo,
+    logoSvgId,
+    barplotSvgIds = [],
     includePositionAxis,
     includeMetadata,
     endSeqIdx: endIdx,
     startSeqIdx: startIdx = 0,
     moleculeWidth = 7,
     moleculeHeight = 10,
-    logoHeight = includeLogo ? moleculeHeight*10 : 0,
+
+    logoHeight = moleculeHeight*10,
+    barplotHeights = moleculeHeight*10,
+
     gapBetweenPlots = 5
   } = props;
 
@@ -179,7 +565,11 @@ const getFullViewportSvgString = (props: {
   const genenameWidth = maxGenenameCharCount * moleculeWidth;
 
   //where should things go?
-  const LOG0_Y_SPACE_REQ = !includeLogo 
+  const BARPLOTS_SPACE_REQ = barplotSvgIds.length < 1
+    ? 0
+    : barplotSvgIds.length * (barplotHeights + gapBetweenPlots);
+
+  const LOG0_Y_SPACE_REQ = !logoSvgId 
     ? 0 : logoHeight + gapBetweenPlots; //100+5 = 105
 
   const POSITION_AXIS_Y_SPACE_REQ = !includePositionAxis 
@@ -187,20 +577,23 @@ const getFullViewportSvgString = (props: {
   
   const X_OFFSETS = includeMetadata ? genenameWidth : 0;
   const offsets = {
+    barplots: {
+      y: 0,
+      x: X_OFFSETS
+    },
     logo: {
-      y: 0, 
+      y: BARPLOTS_SPACE_REQ, 
       x: X_OFFSETS
     },
     position_axis: {
-      y: LOG0_Y_SPACE_REQ, 
+      y: BARPLOTS_SPACE_REQ + LOG0_Y_SPACE_REQ, 
       x: X_OFFSETS
     },
     msa: {
-      y: LOG0_Y_SPACE_REQ + POSITION_AXIS_Y_SPACE_REQ, 
+      y: BARPLOTS_SPACE_REQ + LOG0_Y_SPACE_REQ + POSITION_AXIS_Y_SPACE_REQ, 
       x: X_OFFSETS
     }
   }
-
 
   const moleculeClass = alignmentType === AlignmentTypes.AMINOACID 
     ? AminoAcid 
@@ -262,39 +655,43 @@ const getFullViewportSvgString = (props: {
   }
 
   //
+  // (0) get the barplots plots
+  //
+  const barplotsString = barplotSvgIds.map((svgId, idx) => {
+    return getBarplotSvgString({
+      svgId: svgId,
+      x: offsets.barplots.x,
+      y: offsets.barplots.y + (idx * (barplotHeights + gapBetweenPlots)),
+      height: barplotHeights,
+      width: (alignment.getSequenceLength() * moleculeWidth)
+    });
+  }).join("");
+
+  //
   // (0) get the logo plot
   //
-  const logoString = getSvgLogoString({
+  const logoString = !logoSvgId ? "" : getLogoSvgString({
+    svgId: logoSvgId,
     alignment: alignment, 
     alignmentType: alignmentType,
     colorScheme: colorScheme,
     positionsToStyle: positionsToStyle,
-    forceX: offsets.logo.x,
-    forceHeight: logoHeight,
-    forceWidth: (alignment.getSequenceLength() * moleculeWidth),
-  })
-
+    x: offsets.logo.x,
+    y: offsets.logo.y,
+    height: logoHeight,
+    width: (alignment.getSequenceLength() * moleculeWidth)
+  });
 
   //
   // (1) setup the position axis
   //
-  const positionalAxisText = getPositionalAxisRuler(exportedSeqs[0].sequence.length);
-  const positionalTextElem = [
-    `<g transform="translate(${offsets.position_axis.x}, ${offsets.position_axis.y})">`,
-      ...positionalAxisText.split("").map((char, charIdx)=>{
-        return [
-          '<text ',
-            `dx="${charIdx*moleculeWidth}"`,
-            'font-family="monospace"',
-            'font-size="10px"',
-            `dominant-baseline="hanging"`,
-            `text-anchor="start"`,
-            `fill="black">${char}</text>`
-        ].join(" ");
-      }),
-    `</g>`
-  ].join(" ")
-
+  const positionalTextElem = getPositionAxisString({
+    numPos: alignment.getSequenceLength(),
+    posHeight: moleculeHeight,
+    posWidth: moleculeWidth,
+    x: offsets.position_axis.x,
+    y: offsets.position_axis.y
+  });
 
   //
   // (2) setup the names
@@ -414,7 +811,8 @@ const getFullViewportSvgString = (props: {
     "<defs>",
     ...letterDefs,
     "</defs>",
-    includeLogo ? logoString : "",
+    barplotsString,
+    logoString,
     includePositionAxis ? positionalTextElem : "",
     ...(includeMetadata ? idElements : []),
     ...msa,
@@ -422,67 +820,3 @@ const getFullViewportSvgString = (props: {
   ].join("\n");
   return fileContentsArr;
 }
-
-
-
-
-/**
- * Pull the logo dom element off the page, clean up the dom a bit, add styling
- * and intiate a download.
- * @param style 
- */
-export function downloadLogoSVG(props: {
-  alignment: Alignment, 
-  alignmentType: AlignmentTypes,
-  colorScheme: IColorScheme,
-  positionsToStyle: PositionsToStyle,
-  svgFilename?: string;
-}){
-  const {
-    alignment,
-    svgFilename
-  } = props;
-
-  const logoString = getSvgLogoString(props);
-  if(logoString){
-    var url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(logoString)}`;
-    var link = document.createElement("a");
-    link.download = svgFilename ? svgFilename : `logo_${alignment.getName()}.svg`;
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-};
-
-
-/**
- * From scratch generation of an alignment svg.
- * @param props 
- */
-export function downloadFullViewportSVG(props: {
-  alignment: Alignment, 
-  alignmentType: AlignmentTypes, 
-  positionsToStyle: PositionsToStyle, 
-  residueColoring: ResidueColoring, 
-  colorScheme: IColorScheme,
-  includeLogo: boolean,
-  includePositionAxis: boolean,
-  includeMetadata: boolean,
-  startSeqIdx?: number, 
-  endSeqIdx?: number,
-  svgFilename?: string;
-}){
-  const {
-    alignment,
-    svgFilename
-  } = props;
-  const alignmentString = getFullViewportSvgString(props);
-  var url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(alignmentString)}`;
-  var link = document.createElement("a");
-  link.download = svgFilename ? svgFilename : `msa_${alignment.getName()}.svg`;
-  link.href = url;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};

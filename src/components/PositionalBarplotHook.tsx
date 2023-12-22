@@ -20,6 +20,7 @@ export interface IPositionalBarplotDataSeries {
 
 export interface IPositionalBarplotProps {
   //don't expose these props in AlignmentViewer
+  svgId: string; //used for exporting
   alignment: Alignment;
   positionWidth: number;
 
@@ -219,6 +220,7 @@ export const PreconfiguredPositionalBarplots: IPreconfiguredBarplots = {
 
 export function PositionalBarplot(props: IPositionalBarplotProps){
   const {
+    svgId,
     alignment,
     positionWidth,
     dataSeriesSet,
@@ -334,11 +336,17 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     );
 
     return {
+      svgId: svgId,
       normaliedBars: normalizedBars,
       barsGroupedByPosition: barsGroupedByPosition,
       barsGroupedByDataseries: barsGroupedByDataseries,
     };
-  }, [alignment, dataSeriesSet, normalizeBarHeights])
+  }, [
+    alignment, 
+    dataSeriesSet, 
+    normalizeBarHeights, 
+    svgId
+  ])
 
   //
   // tooltip itself is hovered .. keep it open
@@ -505,7 +513,10 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     const totalWidth = positionWidth * maxSeqLength;
     return (
       <svg
+        id={svgId}
         preserveAspectRatio="none"
+        width={`${totalWidth}px`}
+        height={`${height}px`}
         viewBox={`0 0 ${
           maxSeqLength * POSITION_VIEWBOX_WIDTH
         } ${POSITION_VIEWBOX_HEIGHT}`}
@@ -603,7 +614,8 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     height, 
     hoverKey, 
     openTooltip,
-    positionWidth
+    positionWidth,
+    svgId
   ]);
 
   //

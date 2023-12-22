@@ -20,7 +20,7 @@ import {
   PositionsToStyle,
   ResidueColoring
 } from "../common/MolecularStyles";
-import { getAlignmentFontDetails } from "../common/Utils";
+import { generateUUIDv4, getAlignmentFontDetails } from "../common/Utils";
 import { 
   IPositionalBarplotProps,
   PositionalBarplot, 
@@ -52,7 +52,7 @@ export type IAlignmentViewerProps = {
 
 export type IBarplotExposedProps = Pick<
   IPositionalBarplotProps,
-  "dataSeriesSet" | "tooltipPlacement" | "height"
+  "svgId" | "dataSeriesSet" | "tooltipPlacement" | "height"
 >;
 
 //
@@ -73,8 +73,9 @@ const defaultProps = {
     logoType: LOGO_TYPES.LETTERS,
     height: 100,
     tooltipPlacement: undefined,
-  } as Partial<
-    Pick<ISequenceLogoProps, "tooltipPlacement" | "logoType" | "height">
+  } as Pick<
+    ISequenceLogoProps, 
+    "svgId" | "tooltipPlacement" | "logoType" | "height"
   >,
 
   minimapOptions: {
@@ -95,6 +96,7 @@ const defaultProps = {
   //is difficult to understand and more than 3 is pretty much impossible
   barplots: [
     {
+      svgId: `shannon-entropy-plus-gaps-${generateUUIDv4()}`,
       dataSeriesSet: [
         PreconfiguredPositionalBarplots.ShannonEntropy,
         PreconfiguredPositionalBarplots.Gaps,
@@ -396,6 +398,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   const renderedSequenceLogo = useMemo(() => {
     return (
       <SequenceLogo
+        svgId={logoOptions.svgId}
         alignment={alignment}
         style={style}
         positionsToStyle={positionsToStyle}
@@ -458,6 +461,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   ) => {
     return (
       <PositionalBarplot
+        svgId={barplotProps.svgId}
         alignment={alignment}
         tooltipPlacement={barplotProps.tooltipPlacement}
         dataSeriesSet={barplotProps.dataSeriesSet}

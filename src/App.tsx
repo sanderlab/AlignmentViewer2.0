@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import "./App.scss";
 import { Alignment } from "./common/Alignment";
 import { SequenceSorter } from "./common/AlignmentSorter";
-import { downloadFullViewportSVG } from "./common/FileExporter"
+import { downloadBarplotSVG, downloadFullViewportSVG, downloadLogoSVG } from "./common/FileExporter"
 import { 
   UrlLocalstorageBooleanInputManager, 
   UrlLocalstorageInputManager, 
@@ -292,14 +292,18 @@ export default function App(props: AppProps){
     zoomLevel,
   } = state;
 
+  const logoSvgId = alignment ? `logo-${alignment.getUUID()}` : "logoplot";
+
   const barplots: IBarplotExposedProps[] = useMemo(()=>{
-    return [
+    return !alignment ? [] : [
       ...(!showConservationBarplot ? [] : [{
+        svgId: `conservation-barplot-${alignment?.getUUID()}`,
         dataSeriesSet: [PreconfiguredPositionalBarplots.Conservation],
         height: 75,
       }] as IBarplotExposedProps[]),
 
       ...(!showEntropyGapBarplot ? [] : [{
+        svgId: `entropy-and-gaps-barplot-${alignment?.getUUID()}`,
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.ShannonEntropy,
           PreconfiguredPositionalBarplots.Gaps,
@@ -308,6 +312,7 @@ export default function App(props: AppProps){
       }] as IBarplotExposedProps[]),
 
       ...(!showKLDivergenceBarplot ? [] : [{
+        svgId: `kullbac-leibler-divergence-barplot-${alignment?.getUUID()}`,
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.KullbacLeiblerDivergence,
         ],
@@ -315,6 +320,7 @@ export default function App(props: AppProps){
       }] as IBarplotExposedProps[]),
     ];
   }, [
+    alignment,
     showConservationBarplot, 
     showEntropyGapBarplot, 
     showKLDivergenceBarplot
@@ -332,10 +338,12 @@ export default function App(props: AppProps){
             positionsToStyle={positionsToStyle}
             mainViewportVisibleChanged={(newIdxs)=>{
               if(!shallowEqual(state.mainViewportVisibleIdxs, newIdxs)){
-                setState({
-                  ...state,
-                  mainViewportVisibleIdxs: newIdxs
-                })
+                //setTimeout(() => {
+                  setState({
+                    ...state,
+                    mainViewportVisibleIdxs: newIdxs
+                  })
+                //});
               }
             }}
             zoomLevel={zoomLevel}
@@ -344,6 +352,7 @@ export default function App(props: AppProps){
             showAnnotations={showAnnotations}
             showLogo={showLogo}
             logoOptions={{
+              svgId: logoSvgId,
               logoType: logoPlotStyle,
               height: 80,
             }}
@@ -364,6 +373,7 @@ export default function App(props: AppProps){
     logoPlotStyle,
     positionsToStyle,
     residueColoring,
+    logoSvgId,
     showMiniMap,
     showAnnotations,
     showLogo,
@@ -924,6 +934,7 @@ export default function App(props: AppProps){
                   href="https://github.com/sanderlab/AlignmentViewer2.0"
                   target="_blank"
                   rel="noopener noreferrer"
+                  title="Github Repository"
                 >
                   <img
                     alt="Alignment Viewer 2.0 GitHub Repo"
@@ -937,6 +948,7 @@ export default function App(props: AppProps){
                   className={`download button-link${!alignment ? " hide" : ""}`}
                   type="button"
                   style={{ margin: 0, border: "none" }}
+                  title="Download Full Viewport"
                   onClick={()=>{
                     if (alignment){
                       downloadFullViewportSVG({
@@ -945,12 +957,36 @@ export default function App(props: AppProps){
                         colorScheme:  style.selectedColorScheme,
                         positionsToStyle: positionsToStyle, 
                         residueColoring: residueColoring, 
-                        includeLogo: showLogo,
+                        logoSvgId: logoSvgId,
+                        barplotSvgIds: barplots.map(bp => bp.svgId),
                         includePositionAxis: true,
                         includeMetadata: true,
                         startSeqIdx: state.mainViewportVisibleIdxs?.seqIdxStart, 
                         endSeqIdx: state.mainViewportVisibleIdxs?.seqIdxEnd,
                       });
+
+                      //downloadLogoSVG({
+                      //  svgId: logoSvgId,
+                      //  alignment: alignment,
+                      //  alignmentType: style.alignmentType,
+                      //  colorScheme: style.selectedColorScheme,
+                      //  positionsToStyle: positionsToStyle,
+                      //  positionalAxis: {
+                      //    numPos: alignment.getSequenceLength(),
+                      //    posHeight: 10, posWidth: 7,
+                      //    spaceBtwBarplotAndPositionalAxis: 5
+                      //  }
+                      //})
+
+                      //downloadBarplotSVG({
+                      //  alignment: alignment,
+                      //  svgId: barplots[0].svgId,
+                      //  positionalAxis: {
+                      //    numPos: alignment.getSequenceLength(),
+                      //    posHeight: 10, posWidth: 7,
+                      //    spaceBtwBarplotAndPositionalAxis: 5
+                      //  }
+                      //})
                     }
                   }}
                 >
@@ -967,6 +1003,7 @@ export default function App(props: AppProps){
                   className={`button-link`}//${showSettings ? " hide" : ""}`}
                   type="button"
                   style={{ padding: 0, margin: 0, border: "none" }}
+                  title={showSettings ? "Hide Settings" : "Show Settings"}
                   onClick={()=>{
                     setState({
                       ...state,
@@ -989,11 +1026,12 @@ export default function App(props: AppProps){
     );
   }, [
     alignment,
+    barplots,
     positionsToStyle, 
     renderedFileDropZone,
     renderedTooltip,
     residueColoring,
-    showLogo,
+    logoSvgId,
     showSettings,
     state,
     style

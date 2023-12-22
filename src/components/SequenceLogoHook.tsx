@@ -47,6 +47,7 @@ interface IGlyphStackData extends Array<IGlyphFrequency> {}
 
 export interface ISequenceLogoProps {
   //don't expose these props in AlignmentViewer
+  svgId: string;
   alignment: Alignment;
   glyphWidth: number;
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
@@ -70,6 +71,7 @@ export interface ISequenceLogoProps {
 
 export function SequenceLogo(props: ISequenceLogoProps) {
   const {
+    svgId,
     alignment,
     glyphWidth,
     style,
@@ -366,6 +368,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   
     return (
       <svg
+        id={svgId}
         className="av2-sequence-logo"
         preserveAspectRatio="none"
         viewBox={`0 0 ${sequenceLength} 100`}
@@ -394,7 +397,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     height,
     positionsCache,
     style.alignmentType,
-    style.selectedColorScheme
+    style.selectedColorScheme,
+    svgId
   ]);
 
   const fullLogoRendered = useMemo(()=>{
