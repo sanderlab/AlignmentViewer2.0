@@ -3,39 +3,39 @@
  */
 import "./PositionalAxis.scss";
 import React, { useCallback, useMemo, useState } from "react";
-import { generateUUIDv4, startEndIdxToArray } from "../common/Utils";
+import { generateUUIDv4 } from "../common/Utils";
 import { IControllerRole, IResponderRole, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
 import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 
 
-  /**
-   * Generate a string axis (positional information) with one character per position
-   * through the maxLength. Taken from alignmentviewer 1.0:
-   *     https://github.com/sanderlab/alignmentviewer
-   * May want to implement this better in the future (SVG + sliding tooltip for cursor?)
-   * UPDATE: actually works pretty well even for large numbers
-   * |....:..10|....:..20|....:..30|....:..40| ->
-   *        |....12310|....12320|....12330|....12340|....12350|....12360|
-   */
-  export const getPositionalAxisRuler = (maxLength: number): string => {
-    let s = ""; // should be a better way to do this to be honest
-    for (let i = 1; i <= maxLength + 1; i++) {
-      const Q = i % 10 === 0;
-      const Q5 = !Q && i % 5 === 0;
-      s += Q ? "|" : Q5 ? ":" : ".";
-      if (!Q) {
-        continue;
-      }
-      const sn = "" + i;
-      const np = s.length - sn.length - 1; // where num starts
-      if (np < 0) {
-        continue;
-      }
-      s = s.substring(0, np) + sn + "|";
+/**
+ * Generate a string axis (positional information) with one character per position
+ * through the maxLength. Taken from alignmentviewer 1.0:
+ *     https://github.com/sanderlab/alignmentviewer
+ * May want to implement this better in the future (SVG + sliding tooltip for cursor?)
+ * UPDATE: actually works pretty well even for large numbers
+ * |....:..10|....:..20|....:..30|....:..40| ->
+ *        |....12310|....12320|....12330|....12340|....12350|....12360|
+ */
+export const getPositionalAxisRuler = (maxLength: number): string => {
+  let s = ""; // should be a better way to do this to be honest
+  for (let i = 1; i <= maxLength; i++) {
+    const Q = i % 10 === 0;
+    const Q5 = !Q && i % 5 === 0;
+    s += Q ? "|" : Q5 ? ":" : ".";
+    if (!Q) {
+      continue;
     }
-    return s;
-  };
+    const sn = "" + i;
+    const np = s.length - sn.length - 1; // where num starts
+    if (np < 0) {
+      continue;
+    }
+    s = s.substring(0, np) + sn + "|";
+  }
+  return s;
+};
 
 
 /**
@@ -55,7 +55,7 @@ export function PositionalAxis(props: {
     residueWidth,
   } = props;
 
-  const maxLength = Math.max(...positions);
+  const maxLength = Math.max(...positions) + 1; // positions is index based so add 1
 
   const containerId = useState<string>(generateUUIDv4());
   const horizVirtualization = useMemo(()=>{

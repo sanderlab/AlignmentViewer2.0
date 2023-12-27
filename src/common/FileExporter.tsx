@@ -17,8 +17,8 @@ import {
 import { AminoAcid, Nucleotide } from "./Residues";
 import { startEndIdxToArray } from "./Utils";
 
-const FONT_FAMILY = "monospace";
-const FONT_SIZE = "10";
+const CLASSNAME_MSA_TEXT = "msa";
+const CLASSNAME_POSITIONAL_AXIS_TEXT = "posaxis";
 
 /**
  * Pull the logo dom element off the page, clean up the dom a bit, add styling
@@ -28,8 +28,6 @@ const FONT_SIZE = "10";
 export function downloadBarplotSVG(props: {
   alignment: Alignment;
   svgId: string;
-  x?: number; 
-  y?: number;
   width?: number;
   height?: number;
   positionalAxis?: {
@@ -123,77 +121,12 @@ export function downloadFullViewportSVG(props: {
 // non-exposed methods
 //
 //
-//const getBarplotSvgString = (props: {
-//  svgId: string;
-//  positionalAxis?: {
-//    numPos: number;
-//    posHeight: number;
-//    posWidth: number;
-//    spaceBtwBarplotAndPositionalAxis: number;
-//  };
-//  x: number;
-//  y: number;
-//  width: number;
-//  height: number;
-//}) =>{
-//
-//  const {
-//    svgId,
-//    positionalAxis,
-//    x,
-//    y,
-//    width,
-//    height
-//  } = props;
-//  
-//  const barplotHeight = !positionalAxis 
-//    ? height 
-//    : height - 
-//      positionalAxis.spaceBtwBarplotAndPositionalAxis -
-//      positionalAxis.posHeight;
-//
-//  const svgBarplotElement = document.getElementById(svgId);
-//  if (!svgBarplotElement){
-//    console.error(
-//      `ERROR: no barplot (no elements with '${svgId}' found on the page)`
-//    );
-//    return undefined;
-//  }
-//  const svgElement = svgBarplotElement.cloneNode(true) as SVGElement;
-//  const placeholders = svgElement.getElementsByClassName("interaction-placeholder");
-//  for (var i = placeholders.length - 1; i >= 0; --i) {
-//    placeholders[i].remove();
-//  }
-//  svgElement.removeAttribute("style");
-//  svgElement.setAttribute("width", `${width}`);
-//  svgElement.setAttribute("height", `${barplotHeight}`);
-//  svgElement.setAttribute("x", `${x}`);
-//  svgElement.setAttribute("y", `${y}`);
-//
-//  if(positionalAxis){
-//    const positionalAxisText = getPositionalAxisRuler(positionalAxis.numPos);
-//    const positionalTextElem = [
-//      `<svg>`
-//      `<g transform="translate(${x}, ${height-positionalAxis.posHeight})">`,
-//        ...positionalAxisText.split("").map((char, charIdx)=>{
-//          return [
-//            '<text ',
-//              `dx="${charIdx*positionalAxis.posWidth}"`,
-//              'font-family="monospace"',
-//              'font-size="10px"',
-//              `dominant-baseline="hanging"`,
-//              `text-anchor="start"`,
-//              `fill="black">${char}</text>`
-//          ].join(" ");
-//        }),
-//      `</g></svg>`
-//    ].join(" ")
-//
-//  }
-//
-//  return svgElement.outerHTML;
-//}
 
+/**
+ * 
+ * @param positionalAxis 
+ * @returns 
+ */
 const getPositionAxisString = (positionalAxis: {
   numPos: number;
   posHeight: number;
@@ -217,11 +150,9 @@ const getPositionAxisString = (positionalAxis: {
          width={width} height={height}>
       {positionalAxisText.split("").map((char, charIdx)=>{
         return (
-          <text dx={charIdx * posWidth}
-                fontFamily={FONT_FAMILY}
-                fontSize={FONT_SIZE}
-                dominantBaseline="hanging"
-                textAnchor="start">
+          <text className={CLASSNAME_POSITIONAL_AXIS_TEXT}
+                dx={charIdx * posWidth}
+                key={charIdx}>
             {char}
           </text>
         )
@@ -414,7 +345,7 @@ const getLogoSvgString = (props: {
     height,
     positionalAxis
   } = props;
-
+  
   //const svgLogoElements = document.getElementsByClassName("av2-sequence-logo");
   const svgLogoElement = document.getElementById(svgId);
   if (!svgLogoElement){
@@ -509,18 +440,75 @@ const getLogoSvgString = (props: {
  * @returns 
  */
 const getTitleTextElemString = (
-  title: string, x: number, y: number
+  title: string, 
+  x: number, 
+  y: number
 ) => {
   return [
-    `<text x="${x}" y="${y}"`,
-    `text-anchor="end"`,
-    `font-family="monospace"`,
-    `font-size="12px"`,
-    `font-weight="bold"`,
-    `dominant-baseline="middle"`,
-    `fill="black" border="black">${title}:</text>`
+    `<text class="title" x="${x}" y="${y}">${title}:</text>`
   ].join(" ");
 } 
+
+/**
+ * Get the css for some common elements.
+ * @returns the css
+ */
+const getStylesheet = () => {
+  return [
+    `<style type="text/css">`,
+    [ //the metadata gene ids
+      `text.geneid{`,
+        `text-anchor: end;`,
+        `font-family: monospace;`,
+        `font-size: 10px;`,
+        `dominant-baseline: hanging;`,
+      `}`,
+    ].join(""),
+
+    [ //the msa squares
+      `text.${CLASSNAME_POSITIONAL_AXIS_TEXT}{`,
+        `text-anchor: start;`,
+        `font-family: monospace;`,
+        `font-size: 10px;`,
+        `dominant-baseline: hanging;`,
+      `}`,
+    //`rect.msa{`, //illustrator doesn't respect x,y,width,height as css (attr only)
+      //`x: 0px;`,
+      //`y: 0px;`,
+      //`width: ${moleculeWidth}px;`,
+      //`height: ${moleculeHeight}px;`,
+    //`}`,
+    ].join(""),
+
+    [ //the msa squares
+      `text.${CLASSNAME_MSA_TEXT}{`,
+        `text-anchor: middle;`,
+        `font-family: monospace;`,
+        `font-size: 10px;`,
+        `dominant-baseline: hanging;`,
+      `}`,
+    //`rect.msa{`, //illustrator doesn't respect x,y,width,height as css (attr only)
+      //`x: 0px;`,
+      //`y: 0px;`,
+      //`width: ${moleculeWidth}px;`,
+      //`height: ${moleculeHeight}px;`,
+    //`}`,
+    ].join(""),
+
+    [ //the titles for barplot/logo/query/consenus/position etc
+      `text.title{`,
+        `text-anchor: end;`,
+        `font-family: monospace;`,
+        `font-size: 12px;`,
+        `font-weight: bold;`,
+        `dominant-baseline: middle;`,
+      `}`,
+    ].join(""),
+
+    `</style>`
+  ].join("\n");
+};
+
 
 /**
  * Layout:
@@ -650,6 +638,7 @@ const getFullViewportSvgString = (props: {
     }
   }
 
+  //load style stuff
   const moleculeClass = alignmentType === AlignmentTypes.AMINOACID 
     ? AminoAcid 
     : Nucleotide;
@@ -762,7 +751,7 @@ const getFullViewportSvgString = (props: {
   //
   // get the the position axis
   //
-  const positionalTextElem = 
+  const positionAxisString = 
   [
     !includeMetadata 
       ? ""
@@ -781,7 +770,7 @@ const getFullViewportSvgString = (props: {
   ].join("");
 
   //
-  // get the metaadata genenames
+  // [MSA] prepare the genename / geneid metadata
   //
   const idElements = exportedSeqs.map((seq, seqIdx) => {
     return [
@@ -791,17 +780,13 @@ const getFullViewportSvgString = (props: {
       //to make it exact and we could do so here, but I think having the sequence ids as
       //full strings is more useful.
       `<g transform="translate(${offsets.metadata_and_titles.x}, ${offsets.msa.y + (seqIdx * moleculeHeight)})">`,
-        '<text text-anchor="end"',
-          'font-family="monospace"',
-          'font-size="10px"',
-          'dominant-baseline="hanging"',
-          `fill="black" border="black">${seq.id}</text>`,
+        `<text class="geneid">${seq.id}</text>`,
       `</g>`
-    ].join(" ")
+    ].join("")
   });
 
   //
-  // (3) generate the definitions for each square - color box + AA/NT code
+  // [MSA] generate the definitions for each square - color box + AA/NT code
   //
   const getLetterDef = (
     id: string,
@@ -810,20 +795,15 @@ const getFullViewportSvgString = (props: {
     letterColor: string
   ) => {
     const textElem = [
-      '<text ',
-      'font-family="monospace"',
-      'font-size="10px"',
-      `x="${moleculeWidth/2}"`,
-      `dominant-baseline="hanging"`,
-      `text-anchor="middle"`,
+      `<text class="${CLASSNAME_MSA_TEXT}"`,
+      `x="${moleculeWidth/2}"`, //only works as attribute with illustrator (not css)
       `fill="${letterColor}">${letter}</text>`
     ].join(" ");
 
     const rectElem = [
       `<rect`,
-      `x="0" y="0"`,
-      `width="${moleculeWidth}"`,
-      `height="${moleculeHeight}"`,
+      `width="${moleculeWidth}px"`, //only works as attribute with illustrator (not css)
+      `height="${moleculeHeight}px"`, //only works as attribute with illustrator (not css)
       `fill="${bgColor}"/>`
     ].join(" ");
 
@@ -866,7 +846,7 @@ const getFullViewportSvgString = (props: {
       });
 
   //
-  // (4) the consensus and query msa squares (color box + AA/NT code)
+  // [MSA] the consensus and query msa squares (color box + AA/NT code)
   //
   const consensusString = [
     !includeMetadata 
@@ -899,7 +879,8 @@ const getFullViewportSvgString = (props: {
   ].join("\n");
 
   //
-  // (4) generate the MSA matrix of squares (color box + AA/NT code)
+  // [MSA] generate the MSA matrix of squares (color box + AA/NT code), each line represents
+  // a single sequence and each use element is a single aa/nt
   //
   const msa = exportedSeqs.map((seq, seqIdx)=>{
     return [
@@ -912,7 +893,7 @@ const getFullViewportSvgString = (props: {
   });
 
   //
-  // (3) create the file
+  // create the full file string
   //
   const totalWidth = (
     offsets.msa.x +
@@ -927,17 +908,18 @@ const getFullViewportSvgString = (props: {
     `<svg viewBox="0 0 ${totalWidth} ${totalHeight}" 
           xmlns="http://www.w3.org/2000/svg" 
           xmlns:xlink="http://www.w3.org/1999/xlink">`,
-    "<defs>",
+    getStylesheet(),
+    `<defs>`,
     ...letterDefs,
-    "</defs>",
+    `</defs>`,
     barplotsString,
     logoString,
-    includePositionAxis ? positionalTextElem : "",
     includeConsensus ? consensusString : "",
     includeQuery ? queryString : "",
+    includePositionAxis ? positionAxisString : "",
     ...(includeMetadata ? idElements : []),
     ...msa,
-    "</svg>"
+    `</svg>`
   ].join("\n");
   return fileContentsArr;
 }
