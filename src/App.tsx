@@ -958,7 +958,12 @@ export default function App(props: AppProps){
                         positionsToStyle: positionsToStyle, 
                         residueColoring: residueColoring, 
                         logoSvgId: logoSvgId,
-                        barplotSvgIds: barplots.map(bp => bp.svgId),
+                        barplots: barplots.map(bp => {
+                          return {
+                            svgId: bp.svgId, 
+                            title: bp.dataSeriesSet.map(ds=>ds.name).join("/")
+                          };
+                        }),
                         includePositionAxis: true,
                         includeMetadata: true,
                         startSeqIdx: state.mainViewportVisibleIdxs?.seqIdxStart, 
