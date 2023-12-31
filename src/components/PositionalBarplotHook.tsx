@@ -36,6 +36,9 @@ export interface IPositionalBarplotProps {
 
   //for the virtualization .. directly decomposed to VirtualizedHorizontalViewer 
   horizontalVirtualization: IControllerRole | IResponderRole;
+
+  //for the virtualization
+  hoverTracker?: boolean;
 }
 
 interface ISingleBarDetails {
@@ -227,7 +230,8 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     tooltipPlacement = "top",
     tooltipOffset = 8, //distance that the arrow will be from the hovered bar
     horizontalVirtualization,
-    height
+    height,
+    hoverTracker = true
   } = props;
 
   //
@@ -641,7 +645,8 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
         horizontalParams={{
           ...horizontalVirtualization,
           virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
-          scrollbar: ScrollbarOptions.NeverOn
+          scrollbar: ScrollbarOptions.NeverOn,
+          hoverTracker: hoverTracker
         }}
       />
       {renderedTooltip}

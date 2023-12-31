@@ -85,7 +85,7 @@ interface IVirtualizeParamBasics {
   //misc params
   virtualizationStrategy: VirtualizationStrategy;
   scrollbar: ScrollbarOptions;
-  hoverTracker?: boolean;         //default to true
+  hoverTracker: boolean;         //default to true
 }
 export interface IResponderVirtualizeParams extends IVirtualizeParamBasics{
   //is the caller the owner of the axis? and should this virtualization

@@ -131,7 +131,8 @@ export function PositionalAxis(props: {
         horizontalParams={{
           ...horizVirtualization,
           scrollbar: ScrollbarOptions.NeverOn,
-          virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered
+          virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
+          hoverTracker: true
         }}
         getContentForColumns={getContent}
      />

@@ -66,6 +66,9 @@ export interface ISequenceLogoProps {
 
   //for the virtualization .. directly decomposed to VirtualizedHorizontalViewer 
   horizontalVirtualization: IControllerRole | IResponderRole;
+
+  //for the virtualization 
+  hoverTracker?: boolean;
 }
 
 
@@ -82,6 +85,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     height = 100,
     font = LogoFonts.DEFAULT,
     horizontalVirtualization,
+    hoverTracker = true
   } = props;
 
   const tooltipRef = useRef<TooltipRefProps>(null);
@@ -447,7 +451,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           horizontalParams={{
             ...horizontalVirtualization,
             virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
-            scrollbar: ScrollbarOptions.NeverOn
+            scrollbar: ScrollbarOptions.NeverOn,
+            hoverTracker: hoverTracker
           }}
         />
       )

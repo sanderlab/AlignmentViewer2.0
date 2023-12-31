@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 //
 // Virtualization is done on each axis individually. 
-// Synchronization:
+// Synchronization (NOT IMPLEMENTED):
 // - If 2+ axes are to be synced and have the same cellSizePx (e.g., 
 //   horizontal sync between logo, barplot and main msa viewport), they 
 //   should use the same "IGenericAxis" state. 
@@ -13,7 +13,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 //   but edge cases make it difficult to synchronize algorithmically (see
 //   UPDATE below - I tried and ran into issues).
 //
-export interface IGenericVirtualization {
+export interface IGenericVirtualizationEditable {
   //ONLY SET BY CALLER - used to enforce only a single controller 
   //container is used for initialization and sizing
   controllerContainerId: string;  
@@ -30,11 +30,22 @@ export interface IGenericVirtualization {
   //CALCULATED AND SET BY CALLER [will be clamped if out of bounds] 
   worldOffsetPx: number; 
 
-  offsets?: ReturnType<typeof attachOffsets>;
+  //CALCULATED FROM CALLER-PROVIDED PIXEL OFFSET
+  hoveredEvent?: {
+    cellIdx: number;
+    containerOffsetCellStartPx: number;
+    containerOffsetCellMiddlePx: number;
+    containerOffsetCellEndPx: number;
+  };
 }
 
+type CalculatedOffsetsType = ReturnType<typeof calculateOffsets>;
+export interface IGenericVirtualizationComplete extends 
+  IGenericVirtualizationEditable, 
+  CalculatedOffsetsType {}
+
 export interface IGenericVirtualizations {
-  [virtualizationUUID: string]: IGenericVirtualization
+  [virtualizationUUID: string]: IGenericVirtualizationComplete
 }
 
 //
@@ -105,12 +116,16 @@ export interface IGenericVirtualizations {
 
 
 
-const attachOffsets = (
-  cellCount: number,
-  cellSizePx: number,
-  containerSizePx: number,
-  worldOffsetPx: number
+const calculateOffsets = (
+  props: IGenericVirtualizationEditable
 ) => {
+  const {
+    cellCount,
+    cellSizePx,
+    containerSizePx,
+    worldOffsetPx
+  } = props;
+
   //initialize return object assuming render fully fits into viewport container
   const toReturn = {
 
@@ -171,7 +186,7 @@ const attachOffsets = (
       : numCellsToRender;
 
     //update return object
-    toReturn.offsetForRenderingIdxsOnly = -( //wrong
+    toReturn.offsetForRenderingIdxsOnly = -( //wrong?
       worldOffsetPx % cellSizePx
     );
     toReturn.subsetRenderSizePx = cellSizePx * numCellsToRender;
@@ -185,8 +200,10 @@ const attachOffsets = (
 //
 // Functions for mutating state based on update requests
 //
+
+//called at each update to the main virtualization
 const checkAndFixWorldOffset = (
-  virtualization: IGenericVirtualization
+  virtualization: IGenericVirtualizationComplete
 ) => {
   const {
     cellCount,
@@ -211,12 +228,14 @@ const checkAndFixWorldOffset = (
       : worldOffsetPx;
   
   //attach offsets
-  virtualization.offsets = attachOffsets(
-    virtualization.cellCount, 
-    virtualization.cellSizePx, 
-    virtualization.containerSizePx, 
-    virtualization.worldOffsetPx
-  )
+  const offsets = calculateOffsets(virtualization);
+  virtualization.offsetForFullWorldRender = offsets.offsetForFullWorldRender;
+  virtualization.worldRenderSizePx = offsets.worldRenderSizePx;
+  virtualization.firstIdxToRender = offsets.firstIdxToRender;
+  virtualization.lastIdxToRender = offsets.lastIdxToRender;
+  virtualization.numIdxsToRender = offsets.numIdxsToRender;
+  virtualization.offsetForRenderingIdxsOnly = offsets.offsetForRenderingIdxsOnly;
+  virtualization.subsetRenderSizePx = offsets.subsetRenderSizePx;
 }
 
 
@@ -232,15 +251,21 @@ const genericReducers = {
     state: IGenericVirtualizations,
     action: PayloadAction<{
       virtualizationId: string;
-      virtualization: IGenericVirtualization;
+      virtualization: IGenericVirtualizationEditable;
     }>
   ) => {
     const {
       virtualizationId,
       virtualization
     } = action.payload;
-    checkAndFixWorldOffset(virtualization);
-    state[virtualizationId] = virtualization;
+
+    const newCompleteVirtualization = {
+      ...virtualization,
+      ...calculateOffsets(virtualization)
+    };
+
+    //checkAndFixWorldOffset(newCompleteVirtualization);
+    state[virtualizationId] = newCompleteVirtualization;
   },
 
   //
@@ -325,6 +350,50 @@ const genericReducers = {
       checkAndFixWorldOffset(state[virtualizationId]);
     }
   },
+
+  //
+  //
+  //
+  setHoveredOffset: (
+    state: IGenericVirtualizations,
+    action: PayloadAction<{
+      virtualizationId: string;
+      mouseContainerOffsetPx?: number;
+    }>
+  ) => {
+    const {
+      virtualizationId,
+      mouseContainerOffsetPx,
+    } = action.payload;
+
+    if(mouseContainerOffsetPx === undefined){
+      state[virtualizationId].hoveredEvent = undefined;
+    }
+    else{ //compute what cell the offset refers to
+      const {
+        offsetForRenderingIdxsOnly,
+        firstIdxToRender,
+        cellSizePx,
+        hoveredEvent
+      } = state[virtualizationId];
+
+      const mouseOffsetFromFirstIdx = (
+        mouseContainerOffsetPx - offsetForRenderingIdxsOnly
+      );
+      const numCellsFromStartIdx = Math.floor(mouseOffsetFromFirstIdx/cellSizePx);
+      const cellIdxHovered = firstIdxToRender + numCellsFromStartIdx;
+      if(!hoveredEvent || hoveredEvent.cellIdx !== cellIdxHovered){ //only mutate if changed
+        const startPx = (numCellsFromStartIdx * cellSizePx) + offsetForRenderingIdxsOnly;
+
+        state[virtualizationId].hoveredEvent = {
+          cellIdx: cellIdxHovered,
+          containerOffsetCellStartPx: startPx,
+          containerOffsetCellMiddlePx: startPx+(cellSizePx/2),
+          containerOffsetCellEndPx: startPx+cellSizePx
+        };
+      }
+    }
+  }
 };
 
 
@@ -332,94 +401,6 @@ export const alignmentVirtualizationsSlice = createSlice({
   name: "alignment-virtualization",
   initialState: {} as IGenericVirtualizations,
   reducers: genericReducers,
-  selectors: {
-    //returns the details about a specific axis or undefined
-    //if either the virtualizationId or axisId do not exist
-    getAxisOffsets: (
-      state: IGenericVirtualizations, 
-      virtualizationId: string
-    ) => {
-      const virtualization = state[virtualizationId];
-      if(!virtualization) return undefined;
-
-      const {
-        cellSizePx,
-        containerSizePx,
-        worldOffsetPx
-      } = virtualization;
-      
-      //initialize return object assuming render fully fits into viewport container
-      const toReturn = {
-
-        //
-        //FIXED PROPERTIES
-        //
-
-        //for virtualizaitons that fully render all ids and then shift
-        //within the viewport
-        offsetForFullWorldRender: worldOffsetPx, //FIXED
-
-        //the size of a full render (if all cells are rendered)
-        worldRenderSizePx: virtualization.cellCount * cellSizePx, //FIXED
-
-        //
-        //PROPERTIES ADJUSTED BELOW AS NEEDED
-        //
-
-        //the first and last idx to render //adjusted below
-        firstIdxToRender: 0,
-        lastIdxToRender: virtualization.cellCount-1,
-        numIdxsToRender: virtualization.cellCount,
-
-        //for virtualizaitons that render only the idxs in the viewport container
-        offsetForRenderingIdxsOnly: 0, //adjusted below
-
-        //the rendered size if everything doesn't fit into the container viewport
-        //later this is equal to:
-        //    (lastIdxToRender-firstIdxToRender+1) * cellSize
-        subsetRenderSizePx: virtualization.cellCount * cellSizePx,
-      }
-      
-      if (toReturn.worldRenderSizePx > containerSizePx){ 
-        //the viewport isn't large enough to fit the entire virtualization 
-        //without offsetting - do some math
-        const startInMiddleOfCell = worldOffsetPx % cellSizePx !== 0;
-        const endInMiddleOfCell = 
-          (worldOffsetPx + containerSizePx) % cellSizePx !== 0;
-
-        let firstRenderedCellIdx = Math.ceil(worldOffsetPx / cellSizePx);
-        let numCellsToRender = Math.floor(containerSizePx / cellSizePx);
-        if (startInMiddleOfCell && (firstRenderedCellIdx - 1) >= 0) {
-          numCellsToRender += 1;
-          firstRenderedCellIdx -= 1;
-        }
-        if (
-          endInMiddleOfCell && (firstRenderedCellIdx + numCellsToRender + 1) < 
-          virtualization.cellCount
-        ) {
-          numCellsToRender += 1;
-        }
-
-        //edge case: screen height < 1 line or width < 1 column. Show at least one in that case.
-        numCellsToRender = (
-          (numCellsToRender < 1) && (virtualization.cellCount > 0) 
-        )
-          ? 1 
-          : numCellsToRender;
-
-        //update return object
-        toReturn.offsetForRenderingIdxsOnly = -( //wrong
-          worldOffsetPx % cellSizePx
-        );
-        toReturn.subsetRenderSizePx = cellSizePx * numCellsToRender;
-        toReturn.firstIdxToRender = firstRenderedCellIdx;
-        toReturn.lastIdxToRender = firstRenderedCellIdx+numCellsToRender-1;
-        toReturn.numIdxsToRender = numCellsToRender;
-      }
-      return toReturn;
-    }
-
-  }
 });
 
 export const {
@@ -428,11 +409,8 @@ export const {
   setCellSize,
   setContainerSize,
   setWorldOffset,
+  setHoveredOffset
 } = alignmentVirtualizationsSlice.actions;
-
-export const {
-  getAxisOffsets
-} = alignmentVirtualizationsSlice.selectors;
 
 //example selector usage
 //const blah = useSelector((state: IGenericVirtualizations)  =>

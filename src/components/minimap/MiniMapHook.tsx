@@ -14,7 +14,7 @@ import {
   PositionsToStyle,
   ResidueColoring
 } from "../../common/MolecularStyles";
-import { generateUUIDv4, stopSafariFromBlockingWindowWheel, useStateCallback } from "../../common/Utils";
+import { generateUUIDv4, stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 import { IResponderRole, VirtualizationStrategy } from "../virtualization/VirtualizationTypes";
 import { useReduxVirtualization } from "../virtualization/VirtualizedMatrixReduxHook";
@@ -96,7 +96,7 @@ export function MiniMap(props: IMiniMapProps) {
 
   const viewportFullyRendersAlignment = !vertVirtualizationAxis
     ? false
-    : vertVirtualizationAxis?.cellCount <= vertVirtualizationAxis?.offsets.numIdxsToRender;
+    : vertVirtualizationAxis?.cellCount <= vertVirtualizationAxis.numIdxsToRender;
 
   //
   //cache
@@ -124,8 +124,8 @@ export function MiniMap(props: IMiniMapProps) {
 
   const mmOffsets = useMemo(()=>{
     //calculate offset of the minimap and minmap dragger 
-    if (vertVirtualizationAxis?.offsets.numIdxsToRender === undefined ||
-        vertVirtualizationAxis.offsets.numIdxsToRender < 1 ||
+    if (vertVirtualizationAxis?.numIdxsToRender === undefined ||
+        vertVirtualizationAxis.numIdxsToRender < 1 ||
         !(frameSizing?.frameHeight) ||
         !(frameSizing?.frameWidth)
     ){
@@ -137,8 +137,8 @@ export function MiniMap(props: IMiniMapProps) {
     const scale = frameSizing.frameWidth / alignment.getSequenceLength();
     const totalSeqCount = alignment.getSequenceCount();
 
-    const vpVisibleSeqCount = vertVirtualizationAxis.offsets.numIdxsToRender;
-    const vpNumSeqsHiddenAbove = vertVirtualizationAxis.offsets.firstIdxToRender;
+    const vpVisibleSeqCount = vertVirtualizationAxis.numIdxsToRender;
+    const vpNumSeqsHiddenAbove = vertVirtualizationAxis.firstIdxToRender;
     
     const mmVisibleSeqCount = (frameSizing.frameHeight / scale) > totalSeqCount 
       ? totalSeqCount 
@@ -170,7 +170,8 @@ export function MiniMap(props: IMiniMapProps) {
     alignment,
     frameSizing?.frameHeight, 
     frameSizing?.frameWidth,
-    vertVirtualizationAxis?.offsets
+    vertVirtualizationAxis?.numIdxsToRender,
+    vertVirtualizationAxis?.firstIdxToRender,
   ]); //TODO: always changing because of mouseover stuff. move mouseover top new state?
 
   //
@@ -235,7 +236,7 @@ export function MiniMap(props: IMiniMapProps) {
     ){
       setWorldOffsetPx(
         (
-          vertVirtualizationAxis.offsets.firstIdxToRender 
+          vertVirtualizationAxis.firstIdxToRender 
           + (e.deltaY / mmOffsets.scale)
         ) * vertVirtualizationAxis.cellSizePx
       );
@@ -243,7 +244,7 @@ export function MiniMap(props: IMiniMapProps) {
   }, [
     mmOffsets?.scale,
     setWorldOffsetPx,
-    vertVirtualizationAxis?.offsets.firstIdxToRender,
+    vertVirtualizationAxis?.firstIdxToRender,
     vertVirtualizationAxis?.cellSizePx
   ]);
 
@@ -258,31 +259,33 @@ export function MiniMap(props: IMiniMapProps) {
     mmOffsets?.scale
   ]);*/
 
-  const handleHighlighterMoved = useCallback((deltaPx: number)=>{
+  const handleHighlighterMoved = useCallback((mouseYPx: number)=>{
     //TODO clamp
     if (mmOffsets?.scale && setWorldOffsetPx){
-      const numIdxsToRender = vertVirtualizationAxis.offsets.numIdxsToRender;
-      const calculatedRowOffset = 
-        (deltaPx * mmOffsets.minimapPixelToWorldOffset / mmOffsets.scale) +
-        (mmOffsets.minimapDraggerSequenceOffset);
+      const numIdxsToRender = vertVirtualizationAxis.numIdxsToRender;
+      const calculatedRowOffset = (
+          (mouseYPx) *// + (mmOffsets.minimapDraggerHeight/2)) * 
+          mmOffsets.minimapPixelToWorldOffset / 
+          mmOffsets.scale
+        )
+        //+ mmOffsets.minimapDraggerHeight; //center of dragger
       const suggestedRowOffset = 
         calculatedRowOffset < 0 
           ? 0 
           : calculatedRowOffset > alignment.getSequenceCount() - numIdxsToRender
             ? alignment.getSequenceCount() - numIdxsToRender 
-            : calculatedRowOffset
+            : calculatedRowOffset;
 
       setWorldOffsetPx(
         suggestedRowOffset * vertVirtualizationAxis.cellSizePx
       );
     }
   }, [
-    alignment, 
-    mmOffsets?.minimapDraggerSequenceOffset,
+    alignment,
     mmOffsets?.minimapPixelToWorldOffset,
     mmOffsets?.scale,
     setWorldOffsetPx,
-    vertVirtualizationAxis?.offsets.numIdxsToRender,
+    vertVirtualizationAxis?.numIdxsToRender,
     vertVirtualizationAxis?.cellSizePx
   ]);
 
@@ -340,7 +343,7 @@ export function MiniMap(props: IMiniMapProps) {
             {renderedCanvas}
           </Stage>
 
-          {viewportFullyRendersAlignment || !mmOffsets
+          {viewportFullyRendersAlignment || !mmOffsets || !minimapRef
           ? undefined 
           : <MinimapDragger
               fillColor={'#000000'}
@@ -356,12 +359,14 @@ export function MiniMap(props: IMiniMapProps) {
                 mmOffsets.minimapDraggerY * mmOffsets.scale
               }
               highlighterMoved={handleHighlighterMoved}
+              mainMinimapContainerY={minimapRef.getBoundingClientRect().y}
             />}
           </div>
     )
   }, [
     frameSizing, 
     handleHighlighterMoved,
+    minimapRef,
     mmClicked,
     mmOffsets,
     mmWheeled,
@@ -416,7 +421,9 @@ interface IMinimapDraggerProps {
   mouseoverOpacity: number;
   draggingOpacity: number;
 
-  highlighterMoved: (deltaPx: number) => void;
+  mainMinimapContainerY: number;
+
+  highlighterMoved: (middleHighlighterYPx: number) => void;
 
   //passthrough wheel event - otherwise wheeling minimap stops in safari 
   //when dragger passes under mouse
@@ -428,6 +435,7 @@ export function MinimapDragger(props: IMinimapDraggerProps){
     highlighterHeightPx, 
     highlighterYPx,
     highlighterMoved,
+    mainMinimapContainerY,
     fillColor,
     baselineOpacity,
     mouseoverOpacity,
@@ -437,11 +445,7 @@ export function MinimapDragger(props: IMinimapDraggerProps){
 
   const [dragging, setDragging] = useState<boolean>(false);
   const [mouseover, setMouseover] = useState<boolean>(false);
-  //custom callback that enables us to call function (highlighterMoved) only
-  //after the state has been set.
-  const [mouseLastYPx, setMouseLastYPx] = useStateCallback< 
-    number | undefined
-  >(undefined);
+  const [dragStartFraction, setDragStartFraction] = useState<number>(0);
 
   /*
    *
@@ -455,28 +459,29 @@ export function MinimapDragger(props: IMinimapDraggerProps){
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    if (dragging && mouseLastYPx !== undefined) {
-      setMouseLastYPx(
-        e.screenY, 
-        () => highlighterMoved(e.screenY-mouseLastYPx)
+    if (dragging) {
+      highlighterMoved(
+        e.pageY - mainMinimapContainerY - (highlighterHeightPx * dragStartFraction)
       );
     }
   }, [
     dragging,
+    dragStartFraction,
+    highlighterHeightPx,
     highlighterMoved,
-    setMouseLastYPx, 
-    mouseLastYPx
+    mainMinimapContainerY,
   ]);
 
   const dragStart = useCallback((
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>// | 
-       //React.TouchEvent<HTMLDivElement>
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     e.stopPropagation();
     e.preventDefault();
+    let rect = e.currentTarget.getBoundingClientRect();
+    let y = e.clientY - rect.top;
     setDragging(true);
-    setMouseLastYPx(e.screenY)
-  }, [setMouseLastYPx]);
+    setDragStartFraction(y/rect.height);
+  }, []);
 
   const dragEnd = useCallback((
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -484,8 +489,7 @@ export function MinimapDragger(props: IMinimapDraggerProps){
     e.stopPropagation();
     e.preventDefault();
     setDragging(false);
-    setMouseLastYPx(undefined)
-  }, [setMouseLastYPx]);
+  }, []);
   
   return (
     <>

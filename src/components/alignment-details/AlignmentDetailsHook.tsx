@@ -20,6 +20,7 @@ import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
 import { 
   IControllerRole, 
   IResponderRole, 
+  IVirtualizeParams, 
   IVirtualizedMatrixContent, 
   ScrollbarOptions, 
   VirtualizationRole, 
@@ -57,6 +58,8 @@ export interface IAlignmentDetailsProps {
   vertVirtualization: IControllerRole | IResponderRole | "Automatic" | "None";
   verticalScrollbar?: ScrollbarOptions;
   horizontalScrollbar?: ScrollbarOptions;
+  verticalHoverTracker?: boolean;
+  horizontalHoverTracker?: boolean;
 }
 
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
@@ -74,6 +77,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     fontSize,
     verticalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
     horizontalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
+    verticalHoverTracker = true,
+    horizontalHoverTracker = true,
     matrixRendered
   } = props;
 
@@ -147,9 +152,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     return toReturn;
   }, []);
 
-
-
-
   const renderMatrixContent = useCallback(({
     firstColIdxToRender, lastColIdxToRender,
     renderWidthPx, renderShiftLeftPx,
@@ -168,11 +170,13 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     renderShiftTopPx = renderShiftTopPx ? renderShiftTopPx : 0;
 
     if(matrixRendered){
-      matrixRendered({
-        seqIdxStart: firstRowIdxToRender,
-        seqIdxEnd: lastRowIdxToRender,
-        posIdxStart: firstColIdxToRender,
-        posIdxEnd: lastColIdxToRender
+      setTimeout(()=>{ //unclear why this is needed, but prevents a startup error
+        matrixRendered({
+          seqIdxStart: firstRowIdxToRender,
+          seqIdxEnd: lastRowIdxToRender,
+          posIdxStart: firstColIdxToRender,
+          posIdxEnd: lastColIdxToRender
+        });
       });
     }
 
@@ -268,29 +272,31 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     app
   ]);
 
-  const horizontalParams = useMemo(()=>{
+  const horizontalParams: IVirtualizeParams | undefined = useMemo(()=>{
     return !horizVirtualization ? undefined : {
       ...horizVirtualization,
       virtualizationStrategy: VirtualizationStrategy.Manual,
-      scrollbar: horizontalScrollbar
+      scrollbar: horizontalScrollbar,
+      hoverTracker: horizontalHoverTracker
     };
   }, [
     horizVirtualization, 
-    horizontalScrollbar
+    horizontalScrollbar,
+    horizontalHoverTracker
   ]);
 
-  const vertticalParams = useMemo(()=>{
+  const verticalParams: IVirtualizeParams | undefined = useMemo(()=>{
     return !vertVirtualization ? undefined : {
       ...vertVirtualization,
       virtualizationStrategy: VirtualizationStrategy.Manual,
-      scrollbar: verticalScrollbar
+      scrollbar: verticalScrollbar,
+      hoverTracker: verticalHoverTracker
     };
   }, [
     vertVirtualization, 
-    verticalScrollbar
+    verticalScrollbar,
+    verticalHoverTracker
   ]);
-
-  
 
   /**
    *
@@ -305,7 +311,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     horizVirtualization && vertVirtualization
       ? <VirtualizedMatrixViewer
           horizontalParams={horizontalParams!}
-          verticalParams={vertticalParams!}
+          verticalParams={verticalParams!}
           getMatrixContent={renderMatrixContent}
         ></VirtualizedMatrixViewer>
       : horizVirtualization && !vertVirtualization
@@ -315,7 +321,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           ></VirtualizedHorizontalViewer>
         : !horizVirtualization && vertVirtualization
           ? <VirtualizedVerticalViewer
-              verticalParams={vertticalParams!}
+              verticalParams={verticalParams!}
               getContentForRows={renderMatrixContent}
             ></VirtualizedVerticalViewer>
           : <div>initializing...</div> //TODO: create a getInitializationContent function

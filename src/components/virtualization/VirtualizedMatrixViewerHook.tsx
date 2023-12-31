@@ -20,8 +20,7 @@ import {
   IVirtualizedMatrixViewer, 
   IVirtualizedVerticalContents, 
   IVirtualizedVerticalViewer, 
-  ScrollbarOptions, 
-  VirtualizationRole,
+  ScrollbarOptions,
   VirtualizationStrategy
 } from "./VirtualizationTypes";
 import { useReduxVirtualization } from "./VirtualizedMatrixReduxHook";
@@ -100,20 +99,21 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
 
   //state
   const [mouseHovering, setMouseHovering] = useState<boolean>(false);
-  const [screenWidth, setScreenWidth] = useState<number | undefined>(undefined);
-  const [screenHeight, setScreenHeight] = useState<number | undefined>(undefined);
+  //const [screenWidth, setScreenWidth] = useState<number | undefined>(undefined);
+  //const [screenHeight, setScreenHeight] = useState<number | undefined>(undefined);
+  const [countainerBounds, setCountainerBounds] = useState<IBounds | undefined>(undefined);
   const [containerUniqueId] = useState<string>(generateUUIDv4());
 
   //virtualization initialization
   const horizVirtualizationAxis = useReduxVirtualization(
     horizParams,
     containerUniqueId,
-    screenWidth
+    countainerBounds?.width
   );
   const vertVirtualizationAxis = useReduxVirtualization(
     vertParams,
     containerUniqueId,
-    screenHeight
+    countainerBounds?.height
   );
 
   //
@@ -122,8 +122,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   const horizUpdateContainerSizePx = horizVirtualizationAxis?.updateContainerSizePx;
   const vertUpdateContainerSizePx = vertVirtualizationAxis?.updateContainerSizePx;
   const viewportSizeChanged = useCallback((bounds: IBounds) => {
-    setScreenHeight(bounds.height);
-    setScreenWidth(bounds.width);
+    setCountainerBounds(bounds);
 
     if(horizUpdateContainerSizePx){
       horizUpdateContainerSizePx(bounds.width);
@@ -153,10 +152,10 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   const horizUpdateCellSizePx = horizVirtualizationAxis?.updateCellSizePx;
   const vertUpdateCellSizePx = vertVirtualizationAxis?.updateCellSizePx;
   useEffect(() => {
-    if(horizParams?.cellSizePx && horizUpdateCellSizePx){
+    if(horizParams?.cellSizePx !== undefined && horizUpdateCellSizePx){
       horizUpdateCellSizePx(horizParams.cellSizePx);
     }
-    if(vertParams?.cellSizePx && vertUpdateCellSizePx){
+    if(vertParams?.cellSizePx !== undefined && vertUpdateCellSizePx){
       vertUpdateCellSizePx(vertParams?.cellSizePx);
     }
   }, [
@@ -170,10 +169,10 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   const horizUpdateCellCount = horizVirtualizationAxis?.updateCellCount;
   const vertUpdateCellCount = vertVirtualizationAxis?.updateCellCount;
   useEffect(() => {
-    if(horizUpdateCellCount && horizParams?.cellCount){
+    if(horizUpdateCellCount !== undefined && horizParams?.cellCount){
       horizUpdateCellCount(horizParams.cellCount);
     }
-    if(vertUpdateCellCount && vertParams?.cellCount){
+    if(vertUpdateCellCount !== undefined && vertParams?.cellCount){
       vertUpdateCellCount(vertParams.cellCount);
     }
   }, [
@@ -192,11 +191,11 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   const disableVerticalScrolling = 
     !vertVirtualizationAxis || vertParams?.scrollbar===ScrollbarOptions.NeverOn
       ? true
-      : vertVirtualizationAxis.containerSizePx > vertVirtualizationAxis.offsets.worldRenderSizePx;
+      : vertVirtualizationAxis.containerSizePx > vertVirtualizationAxis.worldRenderSizePx;
   const disableHorizontalScrolling =
     !horizVirtualizationAxis || horizParams?.scrollbar===ScrollbarOptions.NeverOn
       ? true
-      : horizVirtualizationAxis.containerSizePx > horizVirtualizationAxis.offsets.worldRenderSizePx;
+      : horizVirtualizationAxis.containerSizePx > horizVirtualizationAxis.worldRenderSizePx;
       
   const reduxInitialized = 
     (!vertParams || (vertParams && vertVirtualizationAxis)) &&
@@ -207,31 +206,31 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   // load the content requested from the parent
   //
   const contentFromParent = useMemo(() => {
-    const horizContentParams = !horizVirtualizationAxis?.offsets
+    const horizContentParams = horizVirtualizationAxis?.firstIdxToRender === undefined
       ? undefined : {
-        firstColIdxToRender: horizVirtualizationAxis.offsets.firstIdxToRender,
-        lastColIdxToRender: horizVirtualizationAxis.offsets.lastIdxToRender,
-        renderWidthPx: horizVirtualizationAxis.offsets.subsetRenderSizePx,
-        renderShiftLeftPx: horizVirtualizationAxis.offsets.offsetForRenderingIdxsOnly,
-        worldWidthPx: horizVirtualizationAxis.offsets.worldRenderSizePx,
-        worldShiftLeftPx: horizVirtualizationAxis.offsets.offsetForFullWorldRender,
+        firstColIdxToRender: horizVirtualizationAxis.firstIdxToRender,
+        lastColIdxToRender: horizVirtualizationAxis.lastIdxToRender,
+        renderWidthPx: horizVirtualizationAxis.subsetRenderSizePx,
+        renderShiftLeftPx: horizVirtualizationAxis.offsetForRenderingIdxsOnly,
+        worldWidthPx: horizVirtualizationAxis.worldRenderSizePx,
+        worldShiftLeftPx: horizVirtualizationAxis.offsetForFullWorldRender,
       } as IVirtualizedHorizontalContents;
 
-    const vertContentParams = !vertVirtualizationAxis?.offsets
+    const vertContentParams = vertVirtualizationAxis?.firstIdxToRender === undefined
       ? undefined : {
-        firstRowIdxToRender: vertVirtualizationAxis.offsets.firstIdxToRender,
-        lastRowIdxToRender: vertVirtualizationAxis.offsets.lastIdxToRender,
-        renderHeightPx: vertVirtualizationAxis.offsets.subsetRenderSizePx,
-        renderShiftTopPx: vertVirtualizationAxis.offsets.offsetForRenderingIdxsOnly,
-        worldHeightPx: vertVirtualizationAxis.offsets.worldRenderSizePx,
-        worldShiftTopPx: vertVirtualizationAxis.offsets.offsetForFullWorldRender,
+        firstRowIdxToRender: vertVirtualizationAxis.firstIdxToRender,
+        lastRowIdxToRender: vertVirtualizationAxis.lastIdxToRender,
+        renderHeightPx: vertVirtualizationAxis.subsetRenderSizePx,
+        renderShiftTopPx: vertVirtualizationAxis.offsetForRenderingIdxsOnly,
+        worldHeightPx: vertVirtualizationAxis.worldRenderSizePx,
+        worldShiftTopPx: vertVirtualizationAxis.offsetForFullWorldRender,
       } as IVirtualizedVerticalContents;
       
     if(horizContentParams && vertContentParams){
       return getContent({
         ...horizContentParams,
         ...vertContentParams
-      });
+      } as IVirtualizedMatrixContent);
     }
     else if(horizContentParams){
       return getContent(horizContentParams);
@@ -242,8 +241,19 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     return <div>uninitialized?</div>;//todo: maybe let parent pass an "uninitialized message?"
   }, [
     getContent,
-    horizVirtualizationAxis?.offsets,
-    vertVirtualizationAxis?.offsets
+    horizVirtualizationAxis?.firstIdxToRender,
+    horizVirtualizationAxis?.lastIdxToRender,
+    horizVirtualizationAxis?.subsetRenderSizePx,
+    horizVirtualizationAxis?.offsetForRenderingIdxsOnly,
+    horizVirtualizationAxis?.worldRenderSizePx,
+    horizVirtualizationAxis?.offsetForFullWorldRender,
+
+    vertVirtualizationAxis?.firstIdxToRender,
+    vertVirtualizationAxis?.lastIdxToRender,
+    vertVirtualizationAxis?.subsetRenderSizePx,
+    vertVirtualizationAxis?.offsetForRenderingIdxsOnly,
+    vertVirtualizationAxis?.worldRenderSizePx,
+    vertVirtualizationAxis?.offsetForFullWorldRender
   ]);
 
   /*const horizontalSelectedRender = useMemo(()=>{
@@ -280,7 +290,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     )
   }, [reduxStateVertical?.selected]);*/
 
-  const vertSetWorldOffsetPx = vertVirtualizationAxis?.setWorldOffsetPx
+  const vertSetWorldOffsetPx = vertVirtualizationAxis?.setWorldOffsetPx;
   const verticalScrollbarRender = useMemo(()=>{
     return disableVerticalScrolling || !vertSetWorldOffsetPx
       ? undefined 
@@ -294,7 +304,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
             horizontalScrollbarHeight={
               !disableHorizontalScrolling ? scrollbarWidthOrHeight : 0
             }
-            worldHeight={vertVirtualizationAxis.offsets.worldRenderSizePx}
+            worldHeight={vertVirtualizationAxis.worldRenderSizePx}
             worldTopOffset={vertVirtualizationAxis.worldOffsetPx}
             scrollbarMoved={(newWorldTop) => {
               vertSetWorldOffsetPx(newWorldTop);
@@ -307,11 +317,11 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     mouseHovering,
     vertParams?.scrollbar,
     vertSetWorldOffsetPx,
-    vertVirtualizationAxis?.offsets.worldRenderSizePx,
+    vertVirtualizationAxis?.worldRenderSizePx,
     vertVirtualizationAxis?.worldOffsetPx,
   ]);
 
-  const horizSetWorldOffsetPx = horizVirtualizationAxis?.setWorldOffsetPx
+  const horizSetWorldOffsetPx = horizVirtualizationAxis?.setWorldOffsetPx;
   const horizontalScrollbarRender = useMemo(()=>{
     return disableHorizontalScrolling || !horizSetWorldOffsetPx
       ? undefined 
@@ -325,7 +335,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
             verticalScrollbarWidth={
               !disableVerticalScrolling ? scrollbarWidthOrHeight : 0
             }
-            worldWidth={horizVirtualizationAxis.offsets.worldRenderSizePx}
+            worldWidth={horizVirtualizationAxis.worldRenderSizePx}
             worldLeftOffset={horizVirtualizationAxis.worldOffsetPx}
             scrollbarMoved={(newWorldLeft) => {
               horizSetWorldOffsetPx(newWorldLeft);
@@ -338,7 +348,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     mouseHovering,
     horizParams?.scrollbar,
     horizSetWorldOffsetPx,
-    horizVirtualizationAxis?.offsets.worldRenderSizePx,
+    horizVirtualizationAxis?.worldRenderSizePx,
     horizVirtualizationAxis?.worldOffsetPx
   ]);
   
@@ -385,57 +395,30 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     dispatch,
     horizontalReduxId, 
     verticalReduxId
-  ]);
+  ]);*/
 
-  const handleMouseoutFn = useCallback(() =>{
-    if (verticalReduxId){
-      dispatch(
-        setReduxMouseOverY({
-          id: verticalReduxId,
-          mouseViewportOffsetY: undefined,
-        })
-      );
-    }
-    if (horizontalReduxId){
-      dispatch(
-        setReduxMouseOverX({
-          id: horizontalReduxId,
-          mouseViewportOffsetX: undefined,
-        })
-      );
-    }
-  }, [
-    dispatch, 
-    horizontalReduxId, 
-    verticalReduxId
-  ]);
+  const setColHovered = horizVirtualizationAxis?.setHoveredOffsetPx;
+  const setRowHovered = vertVirtualizationAxis?.setHoveredOffsetPx;
 
   const handleMousemoveFn = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
     const viewportX = event.clientX - bounds.left < 0 ? 0 : event.clientX - bounds.left;
     const viewportY = event.clientY - bounds.top < 0 ? 0 : event.clientY - bounds.top;
-    
-    if (verticalReduxId){
-      dispatch(
-        setReduxMouseOverY({
-          id: verticalReduxId,
-          mouseViewportOffsetY: viewportY,
-        })
-      );
-    }
-    if (horizontalReduxId){
-      dispatch(
-        setReduxMouseOverX({
-          id: horizontalReduxId,
-          mouseViewportOffsetX: viewportX,
-        })
-      );
-    }
+
+    if(setColHovered) setColHovered(viewportX);
+    if(setRowHovered) setRowHovered(viewportY);
   }, [
-    dispatch, 
-    horizontalReduxId,
-    verticalReduxId
-  ]);*/
+    setColHovered,
+    setRowHovered
+  ]);
+
+  const handleMouseoutFn = useCallback(() => {
+    if(setColHovered) setColHovered(undefined);
+    if(setRowHovered) setRowHovered(undefined);
+  }, [
+    setColHovered,
+    setRowHovered
+  ]);
 
   const finalRenderedContent = useMemo(()=>{
     return (
@@ -449,63 +432,65 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
                 <div 
                   className={'av2-wheel-scroller'} 
                   //onClick={handleClickFn}
-                  //onMouseOut={handleMouseoutFn}
-                  //onMouseMove={handleMousemoveFn}
+                  onMouseOut={handleMouseoutFn}
+                  onMouseMove={handleMousemoveFn}
                   onWheel={handleWheelFn}
                 >
                   {
-                    //<div className="hover-tracker-y" style={
-                    //  !reduxStateVertical || !reduxStateVertical.mouseMove || suppressVerticalHoverTracker
-                    //    ? {display: "none"}
-                    //    : {
-                    //        position: "absolute",
-                    //        zIndex: 1000,
+                    <>
+                      <div className="hover-tracker-y" style={
+                        !vertVirtualizationAxis?.hoveredEvent || !countainerBounds || !vertParams?.hoverTracker
+                          ? {display: "none"}
+                          : {
+                              position: "fixed",
+                              zIndex: 1000,
 
-                    //        left: -4, //1/2 the width
-                    //        top: reduxStateVertical.mouseMove.hoverIdxScreenMin
-                    //              + .5*reduxStateVertical.cellPixelSize
-                    //              - 4, // 1/2 the height
-                    //        width:8, height:8, 
-                    //        borderRadius: "50%",
-                    //        backgroundColor:"red"
-                    //      }
-                    //  }
-                    //></div>
+                              left: countainerBounds?.left-2.5, //1/2 the width
+                              top: countainerBounds?.top +
+                                   vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
+                                   - 2.5, // 1/2 the height
+                              width:5, height:5,
+                              borderRadius: "50%",
+                              backgroundColor:"red"
+                            }
+                        }
+                      ></div>
 
-                    //<div className="hover-tracker-x" style={
-                    //  !reduxStateHorizontal || !reduxStateHorizontal.mouseMove || suppressHorizontalHoverTracker 
-                    //    ? {display: "none"} 
-                    //    : {
-                    //        position: "absolute",
-                    //        zIndex: 1000,
+                      <div className="hover-tracker-x" style={
+                        !horizVirtualizationAxis?.hoveredEvent || !countainerBounds || !horizParams?.hoverTracker
+                          ? {display: "none"} 
+                          : {
+                              position: "fixed",
+                              zIndex: 1000,
                     
-                    //        top: -4, //1/2 the height
-                    //        left: reduxStateHorizontal.mouseMove.hoverIdxScreenMin
-                    //              + .5*reduxStateHorizontal.cellPixelSize
-                    //              - 4, // 1/2 the width
-                    //        width:8, height:8, 
-                    //        borderRadius: "50%",
-                    //        backgroundColor:"red"
-                    //      }
-                    //  }
-                    //></div>
+                              top: countainerBounds?.top-2.5, //1/2 the height
+                              left: countainerBounds?.left +
+                                    horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
+                                    - 2.5, // 1/2 the width
+                              width:5, height:5,
+                              borderRadius: "50%",
+                              backgroundColor:"red"
+                            }
+                        }
+                      ></div>
+                    </>
                   }
 
                   <div
                     className="av2-data"
                     style={{
-                      top: vertVirtualizationAxis?.offsets
+                      top: vertVirtualizationAxis?.offsetForFullWorldRender !== undefined
                         ? vertParams?.virtualizationStrategy === VirtualizationStrategy.ShiftOnlyFullyRendered
-                          ? -vertVirtualizationAxis.offsets.offsetForFullWorldRender
+                          ? -vertVirtualizationAxis.offsetForFullWorldRender
                           : vertParams?.virtualizationStrategy === VirtualizationStrategy.Virtualize
-                            ? vertVirtualizationAxis.offsets.offsetForRenderingIdxsOnly
+                            ? vertVirtualizationAxis.offsetForRenderingIdxsOnly
                             : undefined
                         : undefined,
-                      left: horizVirtualizationAxis?.offsets
+                      left: horizVirtualizationAxis?.offsetForFullWorldRender !== undefined
                         ? horizParams?.virtualizationStrategy === VirtualizationStrategy.ShiftOnlyFullyRendered
-                          ? -horizVirtualizationAxis.offsets.offsetForFullWorldRender
+                          ? -horizVirtualizationAxis.offsetForFullWorldRender
                           : horizParams?.virtualizationStrategy === VirtualizationStrategy.Virtualize
-                            ? horizVirtualizationAxis.offsets.offsetForRenderingIdxsOnly
+                            ? horizVirtualizationAxis.offsetForRenderingIdxsOnly
                             : undefined
                         : undefined
                     }}
@@ -525,13 +510,22 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   }, [
     reduxInitialized,
     contentFromParent, 
+    countainerBounds,
     handleWheelFn, 
-    horizVirtualizationAxis?.offsets,
-    vertVirtualizationAxis?.offsets,
+    horizVirtualizationAxis?.offsetForFullWorldRender,
+    horizVirtualizationAxis?.offsetForRenderingIdxsOnly,
+    horizVirtualizationAxis?.hoveredEvent,
+    vertVirtualizationAxis?.offsetForFullWorldRender,
+    vertVirtualizationAxis?.offsetForRenderingIdxsOnly,
+    vertVirtualizationAxis?.hoveredEvent,
     horizParams?.virtualizationStrategy,
     vertParams?.virtualizationStrategy,
+    horizParams?.hoverTracker,
+    vertParams?.hoverTracker,
     horizontalScrollbarRender, 
-    verticalScrollbarRender
+    verticalScrollbarRender,
+    handleMousemoveFn,
+    handleMouseoutFn
   ]);
 
   //
@@ -553,12 +547,15 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
       { /*horizontalSelectedRender*/ }
       { /*verticalSelectedRender*/ }
       {
-        horizParams?.role === VirtualizationRole.Controller ||
-        vertParams?.role === VirtualizationRole.Controller
-          ? <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
-              {finalRenderedContent}
-            </ReactResizeSensor>
-          : finalRenderedContent
+        //horizParams?.role === VirtualizationRole.Controller ||
+        //vertParams?.role === VirtualizationRole.Controller
+        //  ? <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
+        //      {finalRenderedContent}
+        //    </ReactResizeSensor>
+        //  : finalRenderedContent
+        <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
+          {finalRenderedContent}
+        </ReactResizeSensor>
       }
     </div>
   );

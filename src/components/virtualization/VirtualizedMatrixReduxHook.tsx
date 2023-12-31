@@ -5,13 +5,14 @@
 import{ useEffect, useCallback } from "react";
 
 import { 
-  IGenericVirtualization,
-  getAxisOffsets, 
+  IGenericVirtualizationComplete,
+  //getAxisOffsets, 
   initializeNewVirtualization as reduxInitializeNewVirtualization,
   setCellCount as reduxSetCellCount,
   setCellSize as reduxSetCellSize,
   setContainerSize as reduxSetContainerSize,
-  setWorldOffset as reduxSetWorldOffset
+  setWorldOffset as reduxSetWorldOffset,
+  setHoveredOffset as reduxSetHoveredOffset
 } from "../../redux/Reducers";
 import { 
   IControllerVirtualizeReduxParams,
@@ -24,32 +25,21 @@ import { useAppDispatch, useAppSelector } from "../../redux/ReduxStore";
 //
 // typing
 //
-interface IFullyInitializedResponderReturn extends IGenericVirtualization {
-  offsets: Exclude<ReturnType<typeof getAxisOffsets>, undefined>,
-  cellCount: number;
+interface IFullyInitializedResponderReturn extends IGenericVirtualizationComplete {
   setWorldOffsetPx: (newWorldOffsetPx: number) => void;
-  updateCellSizePx: never;
-  updateCellCount: never;
-  updateContainerSizePx: never;
+  setHoveredOffsetPx: (mouseContainerOffsetPx?: number) => void;
+  updateContainerSizePx: undefined;
+  updateCellSizePx: undefined;
+  updateCellCount: undefined;
 }
-interface IFullyInitControllerReturn extends IGenericVirtualization {
-  offsets: Exclude<ReturnType<typeof getAxisOffsets>, undefined>,
-  cellCount: number;
+interface IFullyInitControllerReturn extends IGenericVirtualizationComplete {
   setWorldOffsetPx: (newWorldOffsetPx: number) => void;
+  setHoveredOffsetPx: (mouseContainerOffsetPx?: number) => void;
   updateContainerSizePx: (newContainerSizePx: number) => void;
   updateCellSizePx: (newCellSizePx: number) => void;
   updateCellCount: (newCellCount: number) => void;
 }
 
-//IResponderVirtualizeReduxParams
-/*
-type VirtualizationInputParams = IResponderVirtualizeParams | IControllerVirtualizeParams | undefined;
-type VirtualizationReturnType<T extends VirtualizationInputParams> = 
-    T extends undefined 
-      ? undefined 
-      : T extends IControllerVirtualizeParams 
-        ? IFullyInitControllerReturn 
-        : IFullyInitializedResponderReturn;*/
 export type VirtualizationInputParams = IResponderVirtualizeReduxParams | IControllerVirtualizeReduxParams | undefined;
 export type VirtualizationReturnType<T extends VirtualizationInputParams> = 
     T extends undefined 
@@ -128,6 +118,18 @@ export function useReduxVirtualization<
     params?.virtualizationId,
   ]);
 
+  const setHoveredOffsetPx = useCallback((mouseContainerOffsetPx?: number)=>{
+    if (params?.virtualizationId){
+      dispatch(reduxSetHoveredOffset({
+        virtualizationId: params.virtualizationId,
+        mouseContainerOffsetPx: mouseContainerOffsetPx
+      }))
+    }
+  }, [
+    dispatch,
+    params?.virtualizationId,
+  ]);
+
   const updateContainerSizePx = useCallback((newContainerSizePx: number)=>{
     if (params?.virtualizationId){
       dispatch(reduxSetContainerSize({
@@ -164,34 +166,27 @@ export function useReduxVirtualization<
     params?.virtualizationId,
   ]);
 
-  
-  const offsets = virtualization?.offsets;/*useAppSelector(state => !params
-    ? undefined 
-    : getAxisOffsets(
-      {"alignment-virtualization": state.virtualizations}, 
-      params.virtualizationId
-    )
-  );*/
-  //console.log('offsets:',offsets);
-
   //
   // return nothing if not initialized
   // otherwise
   //    - return the axis+cellCount if not a controller
   //    - return the axis+cellCount+update functions if it is a controller
   //
-  return !virtualization || !offsets
+  return !virtualization
     ? undefined
     : !isController
       ? { 
-        ...virtualization, 
-        offsets: offsets, //should throw a type error - TS says it could be undefined (pretty sure impossible)
+        ...virtualization,
         setWorldOffsetPx: setWorldOffsetPx,
+        setHoveredOffsetPx: setHoveredOffsetPx,
+        updateContainerSizePx: undefined,
+        updateCellSizePx: undefined,
+        updateCellCount: undefined
       } as IFullyInitializedResponderReturn
       : {
-        ...virtualization, 
-        offsets: offsets,  //should throw a type error - TS says it could be undefined (pretty sure impossible)
+        ...virtualization,
         setWorldOffsetPx: setWorldOffsetPx,
+        setHoveredOffsetPx: setHoveredOffsetPx,
         updateContainerSizePx: updateContainerSizePx,
         updateCellSizePx: updateCellSizePx,
         updateCellCount: updateCellCount
