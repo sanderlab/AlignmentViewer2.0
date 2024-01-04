@@ -135,7 +135,7 @@ const calculateOffsets = (
 
     //for virtualizaitons that fully render all ids and then shift
     //within the viewport
-    offsetForFullWorldRender: worldOffsetPx, //FIXED
+    worldOffsetPx: worldOffsetPx, //FIXED
 
     //the size of a full render (if all cells are rendered)
     worldRenderSizePx: cellCount * cellSizePx, //FIXED
@@ -153,7 +153,7 @@ const calculateOffsets = (
     offsetForRenderingIdxsOnly: 0, //adjusted below
 
     //the rendered size if everything doesn't fit into the container viewport
-    //later this is equal to:
+    //later this is adjusted to equal:
     //    (lastIdxToRender-firstIdxToRender+1) * cellSize
     subsetRenderSizePx: cellCount * cellSizePx,
   }
@@ -229,7 +229,7 @@ const checkAndFixWorldOffset = (
   
   //attach offsets
   const offsets = calculateOffsets(virtualization);
-  virtualization.offsetForFullWorldRender = offsets.offsetForFullWorldRender;
+  virtualization.worldOffsetPx = offsets.worldOffsetPx;
   virtualization.worldRenderSizePx = offsets.worldRenderSizePx;
   virtualization.firstIdxToRender = offsets.firstIdxToRender;
   virtualization.lastIdxToRender = offsets.lastIdxToRender;
@@ -264,7 +264,6 @@ const genericReducers = {
       ...calculateOffsets(virtualization)
     };
 
-    //checkAndFixWorldOffset(newCompleteVirtualization);
     state[virtualizationId] = newCompleteVirtualization;
   },
 
@@ -305,6 +304,13 @@ const genericReducers = {
     } = action.payload;
 
     if(state[virtualizationId].cellSizePx !== cellSizePx){
+      //recalculate world offset keep it in the same position as it was
+      //originally even though the cell size is changing
+      state[virtualizationId].worldOffsetPx = 
+        state[virtualizationId].worldOffsetPx /  //original offset
+        state[virtualizationId].cellSizePx *     //put into "cell space"
+        cellSizePx; //update to new cell size
+
       state[virtualizationId].cellSizePx = cellSizePx;
       checkAndFixWorldOffset(state[virtualizationId]);
     }
@@ -373,6 +379,7 @@ const genericReducers = {
       const {
         offsetForRenderingIdxsOnly,
         firstIdxToRender,
+        lastIdxToRender,
         cellSizePx,
         hoveredEvent
       } = state[virtualizationId];
@@ -382,7 +389,13 @@ const genericReducers = {
       );
       const numCellsFromStartIdx = Math.floor(mouseOffsetFromFirstIdx/cellSizePx);
       const cellIdxHovered = firstIdxToRender + numCellsFromStartIdx;
-      if(!hoveredEvent || hoveredEvent.cellIdx !== cellIdxHovered){ //only mutate if changed
+      if(cellIdxHovered > lastIdxToRender){ 
+        //don't allow  hover events outside viewport (matters when small)
+        if(hoveredEvent !== undefined){  //only mutate if changed
+          state[virtualizationId].hoveredEvent = undefined;
+        }
+      }
+      else if(!hoveredEvent || hoveredEvent.cellIdx !== cellIdxHovered){ //only mutate if changed
         const startPx = (numCellsFromStartIdx * cellSizePx) + offsetForRenderingIdxsOnly;
 
         state[virtualizationId].hoveredEvent = {

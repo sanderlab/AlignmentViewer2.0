@@ -99,8 +99,6 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
 
   //state
   const [mouseHovering, setMouseHovering] = useState<boolean>(false);
-  //const [screenWidth, setScreenWidth] = useState<number | undefined>(undefined);
-  //const [screenHeight, setScreenHeight] = useState<number | undefined>(undefined);
   const [countainerBounds, setCountainerBounds] = useState<IBounds | undefined>(undefined);
   const [containerUniqueId] = useState<string>(generateUUIDv4());
 
@@ -121,6 +119,8 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   //
   const horizUpdateContainerSizePx = horizVirtualizationAxis?.updateContainerSizePx;
   const vertUpdateContainerSizePx = vertVirtualizationAxis?.updateContainerSizePx;
+  const horizBoundsUpdated = horizParams?.containerBoundsUpdated;
+  const vertBoundsUpdated = vertParams?.containerBoundsUpdated;
   const viewportSizeChanged = useCallback((bounds: IBounds) => {
     setCountainerBounds(bounds);
 
@@ -130,7 +130,15 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     if(vertUpdateContainerSizePx){
       vertUpdateContainerSizePx(bounds.height);
     }
+    if(horizBoundsUpdated){
+      horizBoundsUpdated(bounds);
+    }
+    if(vertBoundsUpdated){
+      vertBoundsUpdated(bounds);
+    }
   }, [
+    horizBoundsUpdated,
+    vertBoundsUpdated,
     horizUpdateContainerSizePx,
     vertUpdateContainerSizePx,
   ]);
@@ -213,7 +221,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
         renderWidthPx: horizVirtualizationAxis.subsetRenderSizePx,
         renderShiftLeftPx: horizVirtualizationAxis.offsetForRenderingIdxsOnly,
         worldWidthPx: horizVirtualizationAxis.worldRenderSizePx,
-        worldShiftLeftPx: horizVirtualizationAxis.offsetForFullWorldRender,
+        worldShiftLeftPx: horizVirtualizationAxis.worldOffsetPx,
       } as IVirtualizedHorizontalContents;
 
     const vertContentParams = vertVirtualizationAxis?.firstIdxToRender === undefined
@@ -223,7 +231,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
         renderHeightPx: vertVirtualizationAxis.subsetRenderSizePx,
         renderShiftTopPx: vertVirtualizationAxis.offsetForRenderingIdxsOnly,
         worldHeightPx: vertVirtualizationAxis.worldRenderSizePx,
-        worldShiftTopPx: vertVirtualizationAxis.offsetForFullWorldRender,
+        worldShiftTopPx: vertVirtualizationAxis.worldOffsetPx,
       } as IVirtualizedVerticalContents;
       
     if(horizContentParams && vertContentParams){
@@ -246,14 +254,14 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     horizVirtualizationAxis?.subsetRenderSizePx,
     horizVirtualizationAxis?.offsetForRenderingIdxsOnly,
     horizVirtualizationAxis?.worldRenderSizePx,
-    horizVirtualizationAxis?.offsetForFullWorldRender,
+    horizVirtualizationAxis?.worldOffsetPx,
 
     vertVirtualizationAxis?.firstIdxToRender,
     vertVirtualizationAxis?.lastIdxToRender,
     vertVirtualizationAxis?.subsetRenderSizePx,
     vertVirtualizationAxis?.offsetForRenderingIdxsOnly,
     vertVirtualizationAxis?.worldRenderSizePx,
-    vertVirtualizationAxis?.offsetForFullWorldRender
+    vertVirtualizationAxis?.worldOffsetPx
   ]);
 
   /*const horizontalSelectedRender = useMemo(()=>{
@@ -479,16 +487,16 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
                   <div
                     className="av2-data"
                     style={{
-                      top: vertVirtualizationAxis?.offsetForFullWorldRender !== undefined
+                      top: vertVirtualizationAxis?.worldOffsetPx !== undefined
                         ? vertParams?.virtualizationStrategy === VirtualizationStrategy.ShiftOnlyFullyRendered
-                          ? -vertVirtualizationAxis.offsetForFullWorldRender
+                          ? -vertVirtualizationAxis.worldOffsetPx
                           : vertParams?.virtualizationStrategy === VirtualizationStrategy.Virtualize
                             ? vertVirtualizationAxis.offsetForRenderingIdxsOnly
                             : undefined
                         : undefined,
-                      left: horizVirtualizationAxis?.offsetForFullWorldRender !== undefined
+                      left: horizVirtualizationAxis?.worldOffsetPx !== undefined
                         ? horizParams?.virtualizationStrategy === VirtualizationStrategy.ShiftOnlyFullyRendered
-                          ? -horizVirtualizationAxis.offsetForFullWorldRender
+                          ? -horizVirtualizationAxis.worldOffsetPx
                           : horizParams?.virtualizationStrategy === VirtualizationStrategy.Virtualize
                             ? horizVirtualizationAxis.offsetForRenderingIdxsOnly
                             : undefined
@@ -512,10 +520,10 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     contentFromParent, 
     countainerBounds,
     handleWheelFn, 
-    horizVirtualizationAxis?.offsetForFullWorldRender,
+    horizVirtualizationAxis?.worldOffsetPx,
     horizVirtualizationAxis?.offsetForRenderingIdxsOnly,
     horizVirtualizationAxis?.hoveredEvent,
-    vertVirtualizationAxis?.offsetForFullWorldRender,
+    vertVirtualizationAxis?.worldOffsetPx,
     vertVirtualizationAxis?.offsetForRenderingIdxsOnly,
     vertVirtualizationAxis?.hoveredEvent,
     horizParams?.virtualizationStrategy,
@@ -547,12 +555,6 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
       { /*horizontalSelectedRender*/ }
       { /*verticalSelectedRender*/ }
       {
-        //horizParams?.role === VirtualizationRole.Controller ||
-        //vertParams?.role === VirtualizationRole.Controller
-        //  ? <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
-        //      {finalRenderedContent}
-        //    </ReactResizeSensor>
-        //  : finalRenderedContent
         <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
           {finalRenderedContent}
         </ReactResizeSensor>

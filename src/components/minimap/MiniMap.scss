@@ -1,15 +1,59 @@
 /** MiniMap.scss */
 
-.minimap-holder {
+.minimap {
   z-index: 100;
+  position: absolute;
   top: 0;
   bottom: 0;
+  left: 0;
+  right: 0;
   background-color: white;
-  border-color: #333333;
-  border-style: solid;
 
   overflow: hidden; //needed for resize handle (set as style in react)
-  //min-width: 100px; //now set in javascript code
+
+
+  .container {
+    display: grid;
+    grid-template-columns: 50px 50px 50px 50px;
+    grid-template-rows: auto;
+    grid-template-areas: 
+      "header header header header"
+      "main main . sidebar"
+      "footer footer footer footer";
+  }
+  .minimap-viewport-holder{
+    display: grid;
+    //grid-template-columns: 100%;
+    grid-template-rows: 10px auto 10px;
+    grid-template-areas: "header" "minimap" "footer";
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    .minimap-header{
+      grid-area: header;
+      font-size: 9px;
+      place-self: center;
+    }
+    .minimap-canvas-holder{
+      grid-area: minimap;
+      image-rendering: pixelated;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+    }
+    .minimap-footer{
+      grid-area: footer;
+      font-size: 9px;
+      place-self: center;
+    }
+  }
 
   .minimap-dragger{
     position: absolute;

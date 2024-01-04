@@ -1,6 +1,9 @@
 
 //
 // general
+
+import { IBounds } from "../ResizeSensorHook";
+
 //
 export enum VirtualizationStrategy {
   //fully render all rows/columns (offset = worldShiftPx)
@@ -82,10 +85,13 @@ export interface IVirtualizedMatrixContent extends
 interface IVirtualizeParamBasics {
   virtualizationId: string;     //for redux
 
-  //misc params
+  //misc params - omitted from 
   virtualizationStrategy: VirtualizationStrategy;
+
+  //params omitted from the redux simplification
   scrollbar: ScrollbarOptions;
   hoverTracker: boolean;         //default to true
+  containerBoundsUpdated?: (bounds: IBounds)=>void;
 }
 export interface IResponderVirtualizeParams extends IVirtualizeParamBasics{
   //is the caller the owner of the axis? and should this virtualization
@@ -105,9 +111,9 @@ export type IVirtualizeParams = IResponderVirtualizeParams | IControllerVirtuali
 
 //slighly simpler for redux
 export type IResponderVirtualizeReduxParams = 
-  Omit<IResponderVirtualizeParams, "scrollbar" | "hoverTracker">;
+  Omit<IResponderVirtualizeParams, "scrollbar" | "hoverTracker" | "containerBoundsUpdated">;
 export type IControllerVirtualizeReduxParams = 
-  Omit<IControllerVirtualizeParams, "scrollbar" | "hoverTracker">;
+  Omit<IControllerVirtualizeParams, "scrollbar" | "hoverTracker" | "containerBoundsUpdated">;
 export type IVirtualizeReduxParams = 
   IResponderVirtualizeReduxParams | IControllerVirtualizeReduxParams
 

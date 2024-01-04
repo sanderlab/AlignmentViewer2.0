@@ -298,8 +298,7 @@ export default function App(props: AppProps){
     return !alignment ? [] : [
       ...(!showConservationBarplot ? [] : [{
         svgId: `conservation-barplot-${alignment?.getUUID()}`,
-        dataSeriesSet: [PreconfiguredPositionalBarplots.Conservation],
-        height: 75,
+        dataSeriesSet: [PreconfiguredPositionalBarplots.Conservation]
       }] as IBarplotExposedProps[]),
 
       ...(!showEntropyGapBarplot ? [] : [{
@@ -307,16 +306,14 @@ export default function App(props: AppProps){
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.ShannonEntropy,
           PreconfiguredPositionalBarplots.Gaps,
-        ],
-        height: 75,
+        ]
       }] as IBarplotExposedProps[]),
 
       ...(!showKLDivergenceBarplot ? [] : [{
         svgId: `kullbac-leibler-divergence-barplot-${alignment?.getUUID()}`,
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.KullbacLeiblerDivergence,
-        ],
-        height: 75,
+        ]
       }] as IBarplotExposedProps[]),
     ];
   }, [
@@ -353,15 +350,7 @@ export default function App(props: AppProps){
             showLogo={showLogo}
             logoOptions={{
               svgId: logoSvgId,
-              logoType: logoPlotStyle,
-              height: 80,
-            }}
-            minimapOptions={{
-              startingWidth: 100,
-              minWidth: 100,
-              verticalHeight: "div",
-              alignHorizontal: "right",
-              resizable: "horizontal",
+              logoType: logoPlotStyle
             }}
             barplots={barplots}
           ></AlignmentViewer>
@@ -910,12 +899,15 @@ export default function App(props: AppProps){
         {renderedTooltip}
         {renderedFileDropZone}
 
-        <div className={`outside-settings-tooltip${!showSettings ? " hidden" : ""}`}
+        <div 
+          className={`outside-settings-tooltip${!showSettings  ? " hidden" : ""}`}
           onMouseDown={()=>{
-            setState({
-              ...state,
-              showSettings: false,
-            });
+            if(alignment){
+              setState({
+                ...state,
+                showSettings: false,
+              });
+            }
           }}
         />
 

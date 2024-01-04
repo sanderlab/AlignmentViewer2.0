@@ -14,6 +14,8 @@ export interface IBounds {
   height: number;
   left: number;
   top: number;
+  x: number;
+  y: number;
 }
 export interface IAlignmentMetadataProps {
   onSizeChanged(bounds: IBounds): void;

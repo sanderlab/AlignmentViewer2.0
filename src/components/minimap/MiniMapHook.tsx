@@ -1,3 +1,11 @@
+/**
+ * Minimap component - displays an alignment in a canvas, matching
+ * the provided styling. No letters. Provides a means for navigating
+ * the alignment (dragging, clicking, wheel) that are reported
+ * to the redux store for synchronization.
+ * Note: this component must be placed inside an absolute or relative
+ * element - it will then take up the available space.
+ */
 import * as React from "react";
 import "./MiniMap.scss";
 import * as PIXI from "pixi.js";
@@ -16,8 +24,8 @@ import {
 } from "../../common/MolecularStyles";
 import { generateUUIDv4, stopSafariFromBlockingWindowWheel } from "../../common/Utils";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
-import { IResponderRole, VirtualizationStrategy } from "../virtualization/VirtualizationTypes";
-import { useReduxVirtualization } from "../virtualization/VirtualizedMatrixReduxHook";
+import { IControllerRole, IResponderRole, VirtualizationRole, VirtualizationStrategy } from "../virtualization/VirtualizationTypes";
+import { VirtualizationInputParams, useReduxVirtualization } from "../virtualization/VirtualizedMatrixReduxHook";
 
 export interface IMiniMapProps {
   //don't expose these props in the AlignmentViewer full component
@@ -26,15 +34,8 @@ export interface IMiniMapProps {
   positionsToStyle: PositionsToStyle;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
 
-  //props that should be exposed in AlignmentViewer full component:
-  alignHorizontal?: "left" | "right";
-  startingWidth?: number;
-  minWidth?: number;
-  resizable?: "none" | "horizontal";
-  verticalHeight?: "div" | "window";
-
   //maintain sync with this vertical scroller
-  syncWithVerticalVirtualization: IResponderRole;
+  syncWithVerticalVirtualization?: IResponderRole;
 }
 
 export function MiniMap(props: IMiniMapProps) {
@@ -46,133 +47,181 @@ export function MiniMap(props: IMiniMapProps) {
     syncWithVerticalVirtualization,
   } = props;
 
-  //default props
-  const {
-    alignHorizontal = "20px",
-    resizable = "none",
-    startingWidth = 200,
-    minWidth = 100,
-    verticalHeight = "div"
-  } = props;
-
   //
-  //state
+  //state and ref
   //
   const [containerId] = useState<string>(generateUUIDv4()); //unique id for virtualization
   const [app, setApp] = useState<PIXI.Application<PIXI.ICanvas>>();
-  const [minimapRef, setMinimapRef] = useState<HTMLDivElement>();
   const [minimapHolderDimensions, setMinimapHolderDimensions] = useState<
-    undefined | { width: number; height: number }
+    undefined | { 
+      canvasWidthPx: number; 
+      canvasHeightPx: number, 
+      xPx: number, 
+      yPx: number 
+    }
   >(undefined);
 
-  //
-  // load virtualization for sync with main viewport. it is also possible
-  // for this to be standalone (if syncWithVerticalVirtualization === undefined)
-  //
-  //const vertVirtualizationParams = useMemo(()=>{
-  //  return yncWithVerticalVirtualization === undefined
-  //    ? {
-  //        virtualizationId: 
-  //          `y_minimap_virtualization_${alignment.getUUID()}_${containerId}`,
-  //        role: VirtualizationRole.Controller,
-  //        cellCount: alignment.getSequenceCount(),
-  //        cellSizePx: 1,
-  //      } as IControllerRole
-  //    : syncWithVerticalVirtualization;
-  //}, [alignment, syncWithVerticalVirtualization]);
+  const isStandalone = syncWithVerticalVirtualization ? false : true;
+  const scale = minimapHolderDimensions
+    ? minimapHolderDimensions.canvasWidthPx / alignment.getSequenceLength()
+    : undefined;
 
-  const vertVirtualizationParams = useMemo(()=>{
+  //
+  //virtualization - used to synchronize with viewport. also used as middleman for standalone
+  //
+  const vertVirtualizationParams: VirtualizationInputParams = useMemo(()=>{
     return {
-      ...syncWithVerticalVirtualization,
-      virtualizationStrategy: VirtualizationStrategy.Manual //not sure why this is here
-    }
-  }, [syncWithVerticalVirtualization])
+        ...(
+          syncWithVerticalVirtualization 
+            ? syncWithVerticalVirtualization
+            : { //virtualization if caller doesn't provide - for standalone use
+              virtualizationId: `minimap-${alignment.getUUID()}`,
+              role: VirtualizationRole.Controller,
+              cellCount: alignment.getSequenceCount(),
+              cellSizePx: 1
+            } as IControllerRole
+        ),
+        virtualizationStrategy: VirtualizationStrategy.Manual //not sure why this is here
+      };
+  }, [
+    alignment,
+    syncWithVerticalVirtualization
+  ]);
 
   const vertVirtualizationAxis = useReduxVirtualization(
     vertVirtualizationParams,
     containerId,
-    minimapHolderDimensions?.height
+    !minimapHolderDimensions 
+      ? undefined 
+      : minimapHolderDimensions.canvasHeightPx * scale!
   );
 
-  const viewportFullyRendersAlignment = !vertVirtualizationAxis
-    ? false
-    : vertVirtualizationAxis?.cellCount <= vertVirtualizationAxis.numIdxsToRender;
+  const minimapHolderResized = useCallback((bounds: IBounds) => {
+    if (
+      !minimapHolderDimensions ||
+      minimapHolderDimensions.canvasWidthPx !== bounds.width ||
+      minimapHolderDimensions.canvasHeightPx !== bounds.height
+    ) {
+      setMinimapHolderDimensions({
+        canvasWidthPx: bounds.width,
+        canvasHeightPx: bounds.height,
+        xPx: bounds.x,
+        yPx: bounds.y,
+      });
+    }
+  }, [
+    minimapHolderDimensions
+  ]);
 
-  //
-  //cache
-  //
-  const sequences = useMemo(()=>{
+
+  //define these functions outside callback - upsets typescript to have the
+  //question mark function in dependencies
+  const setWorldOffsetFn = vertVirtualizationAxis?.setWorldOffsetPx;
+
+  const viewportFullyRendersAlignment = !vertVirtualizationAxis
+  ? false
+  : vertVirtualizationAxis?.cellCount <= vertVirtualizationAxis.numIdxsToRender;
+
+  const sortedSequences = useMemo(()=>{
     return alignment.getSequences(sortBy).map((seq) => seq.sequence)
   }, [alignment, sortBy]);
 
-  const frameSizing = useMemo(()=>{
-    return !minimapHolderDimensions?.height || !minimapHolderDimensions?.width 
-      ? undefined : 
-      {
-        borderWidth: 1, // in pixels
-        margin: 2,      // in pixels
-        frameHeight: minimapHolderDimensions.height,
-        frameWidth: minimapHolderDimensions.width
-          ? minimapHolderDimensions.width
-          : startingWidth
-      }
-  }, [
-    minimapHolderDimensions?.height, 
-    minimapHolderDimensions?.width, 
-    startingWidth,
-  ]);
 
-  const mmOffsets = useMemo(()=>{
-    //calculate offset of the minimap and minmap dragger 
-    if (vertVirtualizationAxis?.numIdxsToRender === undefined ||
-        vertVirtualizationAxis.numIdxsToRender < 1 ||
-        !(frameSizing?.frameHeight) ||
-        !(frameSizing?.frameWidth)
-    ){
+
+  //calculate the equivalent top offset for the minimap and minimap dragger,
+  //each of which are on a different scale from the viewport 
+  // (minimap world extends above and below the minimap container)
+  // (minimap dragger world is the container)
+  //
+  // interpolate between scales [0, viewportMaxOffsetPx] and either [0, mmMaxOffsetPx] or [0, draggerMaxOffsetPx]
+  //      y = y1 + ((x – x1)/(x2 - x1) * (y2 - y1))
+  //      where: 
+  //        x1 and y1 = 0
+  //        x = viewport.worldOffsetPx
+  //        x2 = viewportMaxOffsetPx
+  //        y2 = mmMaxOffsetPx
+  //      solve for y, which equals mmWorldOffsetPx
+  //      y = 0 + ((viewport.worldOffsetPx - 0)/(viewportMaxOffsetPx - 0)) * (mmMaxOffsetPx - 0)
+  //  ax.worldOffsetPx = (baseOffsetsOnAxis.worldOffsetPx / updatedAxisMaxOffset) * axMaxOffset;
+  const interpolateEquivalentViewportTop = useCallback((props:{
+    fixedWorldHeightPx: number,
+    fixedContainerHeightPx: number,
+    fixedWorldTopOffsetPx: number,
+    targetWorldHeightPx: number, 
+    targetContainerHeightPx: number
+  })=>{
+    const {
+      fixedWorldHeightPx,
+      fixedContainerHeightPx,
+      fixedWorldTopOffsetPx,
+      targetWorldHeightPx, 
+      targetContainerHeightPx
+    } = props;
+
+    if(targetContainerHeightPx >= targetWorldHeightPx) {
+      return 0;
+    }
+    const fixedMaxOffsetPx = fixedWorldHeightPx - fixedContainerHeightPx;
+    const targetMaxOffsetPx = targetWorldHeightPx - targetContainerHeightPx;
+    return fixedWorldTopOffsetPx / fixedMaxOffsetPx * targetMaxOffsetPx;
+  }, []);
+
+  const offsets = useMemo(()=>{
+    if(!minimapHolderDimensions?.canvasWidthPx || !vertVirtualizationAxis?.numIdxsToRender || scale === undefined){
       return undefined;
     }
-    
-    //the y offset of the minimap takes into account its scrollable height as well
-    //as the fraction of sequences hidden in the viewport.
-    const scale = frameSizing.frameWidth / alignment.getSequenceLength();
-    const totalSeqCount = alignment.getSequenceCount();
+    const vpContainerHeightPx = vertVirtualizationAxis.subsetRenderSizePx;
+    const vpWorldHeightPx = vertVirtualizationAxis.worldRenderSizePx;
+    const vpWorldTopOffsetPx = vertVirtualizationAxis.worldOffsetPx;
 
-    const vpVisibleSeqCount = vertVirtualizationAxis.numIdxsToRender;
-    const vpNumSeqsHiddenAbove = vertVirtualizationAxis.firstIdxToRender;
+    //the minimap width:height ratio is 1:1, scaled so width is the width of the alignment
+    const mmWorldHeightPx = scale * alignment.getSequenceCount();
+    const mmTopOffsetPx = interpolateEquivalentViewportTop({
+      fixedWorldHeightPx: vpWorldHeightPx,
+      fixedContainerHeightPx: vpContainerHeightPx,
+      fixedWorldTopOffsetPx: vpWorldTopOffsetPx,
+      targetWorldHeightPx: mmWorldHeightPx, 
+      targetContainerHeightPx: minimapHolderDimensions.canvasHeightPx
+    });
+
+    const draggerWorldHeightPx = minimapHolderDimensions.canvasHeightPx < mmWorldHeightPx
+      ? minimapHolderDimensions.canvasHeightPx
+      : mmWorldHeightPx; //world all fits into the canvas and dragger should stop at top of world
+    const draggerHeightPx = scale * vertVirtualizationAxis.numIdxsToRender;
+    const draggerTopOffsetPx = interpolateEquivalentViewportTop({
+      fixedWorldHeightPx: vpWorldHeightPx,
+      fixedContainerHeightPx: vpContainerHeightPx,
+      fixedWorldTopOffsetPx: vpWorldTopOffsetPx,
+      targetWorldHeightPx: draggerWorldHeightPx, 
+      targetContainerHeightPx: draggerHeightPx
+    });
     
-    const mmVisibleSeqCount = (frameSizing.frameHeight / scale) > totalSeqCount 
-      ? totalSeqCount 
-      : (frameSizing.frameHeight / scale);
-    const mmVisibleProportionalToHidden = (
-      //scrollable height: total minimap height - dragger (=viewport height)
-      mmVisibleSeqCount-vpVisibleSeqCount 
-    ) * (
-      //fraction of sequences hidden above the 
-      vpNumSeqsHiddenAbove/totalSeqCount
+    const mmNumSeqsBelow = alignment.getSequenceCount() - Math.floor(
+      (mmTopOffsetPx+minimapHolderDimensions.canvasHeightPx) / scale
     );
-    const mmPreferredY = vpNumSeqsHiddenAbove - mmVisibleProportionalToHidden;
 
-    const minimapY = mmPreferredY <= 0 
-      ? 0 //out of bounds at top of mm
-      : mmPreferredY + mmVisibleSeqCount >= totalSeqCount 
-      ? totalSeqCount - mmVisibleSeqCount //out of bounds at bottom of mm
-      : mmPreferredY;
-      
     return {
-      scale: scale,
-      minimapY: minimapY, //the minimap includes sequences hidden in the viewport
-      minimapDraggerHeight: vpVisibleSeqCount,
-      minimapDraggerY: vpNumSeqsHiddenAbove - minimapY,
-      minimapPixelToWorldOffset: totalSeqCount / (mmVisibleSeqCount-vpVisibleSeqCount),
-      minimapDraggerSequenceOffset: vpNumSeqsHiddenAbove
-    };
+      mmWorldHeightPx: mmWorldHeightPx,
+      mmWorldOffsetPx: mmTopOffsetPx, //shift fully renderer mm this amount
+      mmNumSeqsAbove: Math.floor(mmTopOffsetPx / scale),
+      mmNumSeqsBelow: mmNumSeqsBelow < 0 ? 0 : mmNumSeqsBelow,
+
+      draggerOffsetPx: draggerTopOffsetPx,
+      draggerHeightPx: draggerHeightPx,
+      draggerWorldHeightPx: draggerWorldHeightPx,
+    }
   }, [
     alignment,
-    frameSizing?.frameHeight, 
-    frameSizing?.frameWidth,
+    minimapHolderDimensions?.canvasWidthPx,
+    minimapHolderDimensions?.canvasHeightPx,
     vertVirtualizationAxis?.numIdxsToRender,
-    vertVirtualizationAxis?.firstIdxToRender,
-  ]); //TODO: always changing because of mouseover stuff. move mouseover top new state?
+    vertVirtualizationAxis?.subsetRenderSizePx,
+    vertVirtualizationAxis?.worldOffsetPx,
+    vertVirtualizationAxis?.worldRenderSizePx,
+    interpolateEquivalentViewportTop,
+    scale
+  ]);
+
 
   //
   //effects
@@ -189,104 +238,83 @@ export function MiniMap(props: IMiniMapProps) {
   //
   //callbacks
   //
-  const setRefElement = useCallback((ref: HTMLDivElement) => {
-    setMinimapRef(ref);
-  }, []);
-
-  const minimapHolderResized = useCallback((bounds: IBounds) => {
-    if (
-      !minimapHolderDimensions ||
-      minimapHolderDimensions.width !== bounds.width ||
-      minimapHolderDimensions.height !== bounds.height
-    ) {
-      setMinimapHolderDimensions(!minimapRef ? undefined : {
-        width: minimapRef.clientWidth,
-        height: minimapRef.clientHeight,
-      });
-    }
-  }, [minimapHolderDimensions, minimapRef]);
-
-  //define setWorldOffsetPx outside callback - upsets typescript otherwise
-  const setWorldOffsetPx = vertVirtualizationAxis?.setWorldOffsetPx;
 
   //move center of viewport to where mouse was clicked
   const mmClicked = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (mmOffsets && setWorldOffsetPx){
-      const clickTopPx = e.pageY - e.currentTarget.getBoundingClientRect().top;
-      setWorldOffsetPx(
-        (
-          (clickTopPx / mmOffsets.scale)     //alignment row offset of the click on the minimap
-          + mmOffsets.minimapY               //add the existing offset
-          - mmOffsets.minimapDraggerHeight/2 //center the dragger / scrollbar
-        ) * vertVirtualizationAxis.cellSizePx
-      )
+    if (offsets?.draggerHeightPx && setWorldOffsetFn && scale){
+      const clickPx = e.pageY - e.currentTarget.getBoundingClientRect().top;
+      setWorldOffsetFn(((
+            clickPx //offset in minimap that was clicked
+            + offsets.mmWorldOffsetPx //add to the shifted offset
+            - (offsets.draggerHeightPx/2) //center the dragger / scrollbar --- dragger might
+          ) / scale //convert to alignment units
+        ) * vertVirtualizationAxis.cellSizePx //move main viewport
+      );
     }
   }, [
-    setWorldOffsetPx, 
-    vertVirtualizationAxis?.cellSizePx,
-    mmOffsets
+    offsets?.draggerHeightPx,
+    offsets?.mmWorldOffsetPx,
+    scale,
+    setWorldOffsetFn, 
+    vertVirtualizationAxis?.cellSizePx
   ]);
 
-
+  //handle wheel event
   const mmWheeled = useCallback((e: React.WheelEvent) => {
     if (
-      mmOffsets?.scale && setWorldOffsetPx && e.deltaY !== 0
+      scale && setWorldOffsetFn && e.deltaY !== 0
     ){
-      setWorldOffsetPx(
-        (
-          vertVirtualizationAxis.firstIdxToRender 
-          + (e.deltaY / mmOffsets.scale)
-        ) * vertVirtualizationAxis.cellSizePx
+      setWorldOffsetFn(
+        //a bit imprecise - we are just shifting the main viewport
+        //access without regard for minimap sizing other than
+        //the scale, but seems to be consistent scrolling
+        vertVirtualizationAxis.worldOffsetPx + (
+          e.deltaY 
+          * vertVirtualizationAxis.cellSizePx 
+          * scale
+        )
       );
     }
   }, [
-    mmOffsets?.scale,
-    setWorldOffsetPx,
-    vertVirtualizationAxis?.firstIdxToRender,
-    vertVirtualizationAxis?.cellSizePx
+    scale,
+    setWorldOffsetFn,
+    vertVirtualizationAxis?.cellSizePx,
+    vertVirtualizationAxis?.worldOffsetPx
   ]);
 
-  /*useEffect(()=>{ //out of sync when used in an effect. unclear why.
-    if (app && mmOffsets?.minimapY !== undefined){ 
-      app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
-      app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
-    }
-  }, [
-    app,
-    mmOffsets?.minimapY,
-    mmOffsets?.scale
-  ]);*/
+  //useEffect(()=>{ //out of sync when used in an effect. unclear why.
+  //  if (app && mmOffsets?.minimapY !== undefined){ 
+  //    app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
+  //    app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
+  //  }
+  //}, [
+  //  app,
+  //  mmOffsets?.minimapY,
+  //  mmOffsets?.scale
+  //]);
 
-  const handleHighlighterMoved = useCallback((mouseYPx: number)=>{
-    //TODO clamp
-    if (mmOffsets?.scale && setWorldOffsetPx){
-      const numIdxsToRender = vertVirtualizationAxis.numIdxsToRender;
-      const calculatedRowOffset = (
-          (mouseYPx) *// + (mmOffsets.minimapDraggerHeight/2)) * 
-          mmOffsets.minimapPixelToWorldOffset / 
-          mmOffsets.scale
-        )
-        //+ mmOffsets.minimapDraggerHeight; //center of dragger
-      const suggestedRowOffset = 
-        calculatedRowOffset < 0 
-          ? 0 
-          : calculatedRowOffset > alignment.getSequenceCount() - numIdxsToRender
-            ? alignment.getSequenceCount() - numIdxsToRender 
-            : calculatedRowOffset;
-
-      setWorldOffsetPx(
-        suggestedRowOffset * vertVirtualizationAxis.cellSizePx
+  const handleHighlighterMoved = useCallback((topYPx: number)=>{
+    if (setWorldOffsetFn && offsets?.draggerHeightPx && minimapHolderDimensions?.canvasHeightPx){
+      setWorldOffsetFn(
+        interpolateEquivalentViewportTop({
+          fixedWorldHeightPx: offsets.draggerWorldHeightPx,
+          fixedContainerHeightPx: offsets.draggerHeightPx,
+          fixedWorldTopOffsetPx: topYPx,
+          targetWorldHeightPx: vertVirtualizationAxis.worldRenderSizePx, 
+          targetContainerHeightPx: vertVirtualizationAxis.containerSizePx
+        })
       );
     }
   }, [
-    alignment,
-    mmOffsets?.minimapPixelToWorldOffset,
-    mmOffsets?.scale,
-    setWorldOffsetPx,
-    vertVirtualizationAxis?.numIdxsToRender,
-    vertVirtualizationAxis?.cellSizePx
+    interpolateEquivalentViewportTop,
+    minimapHolderDimensions?.canvasHeightPx,
+    offsets?.draggerHeightPx,
+    offsets?.draggerWorldHeightPx,
+    setWorldOffsetFn,
+    vertVirtualizationAxis?.containerSizePx,
+    vertVirtualizationAxis?.worldRenderSizePx,
   ]);
 
   //
@@ -295,7 +323,7 @@ export function MiniMap(props: IMiniMapProps) {
   const renderedCanvas = useMemo(()=>{
     return (
       <CanvasAlignmentTiled
-        sequences={sequences}
+        sequences={sortedSequences}
         consensusSequence={alignment.getConsensus().sequence}
         querySequence={alignment.getQuery().sequence}
         alignmentType={alignmentStyle.alignmentType}
@@ -303,102 +331,144 @@ export function MiniMap(props: IMiniMapProps) {
         positionsToStyle={positionsToStyle}
         residueColoring={ResidueColoring.DARK}
       />
-    )
+    );
   }, [
     alignment,
     alignmentStyle.alignmentType,
     alignmentStyle.selectedColorScheme,
     positionsToStyle,
-    sequences
+    sortedSequences
   ]);
 
   const renderedAlignment = useMemo(() => {
-    return frameSizing === undefined || !mmOffsets
-      ? undefined
-      : (
-        <div 
-          className="alignment-canvas" 
-          style={{
-            position: "absolute",
-            top: 0, bottom: 0, left: 0, right: 0
-          }}
-        >
-          <Stage
-            className="minimap-canvas"
-            width={frameSizing.frameWidth}
-            height={frameSizing.frameHeight}
-            raf={false}
-            renderOnComponentChange={true}
-            onMount={setApp}
-            onClick={mmClicked}
-            onWheel={mmWheeled}
-            options={{ 
-              antialias: true, 
-              backgroundAlpha: 0
-            }}
-            style={{ //might not be needed
-              imageRendering: "pixelated",
-            }}
-          > 
-            {renderedCanvas}
-          </Stage>
-
-          {viewportFullyRendersAlignment || !mmOffsets || !minimapRef
-          ? undefined 
-          : <MinimapDragger
-              fillColor={'#000000'}
-              baselineOpacity={0.4}
-              mouseoverOpacity={0.3}
-              draggingOpacity={0.2}
-              onWheel={mmWheeled}
-              highlighterHeightPx={ 
-                //since we render the minimap as single pixels the mapping is the same
-                mmOffsets.minimapDraggerHeight * mmOffsets.scale
-              }
-              highlighterYPx={
-                mmOffsets.minimapDraggerY * mmOffsets.scale
-              }
-              highlighterMoved={handleHighlighterMoved}
-              mainMinimapContainerY={minimapRef.getBoundingClientRect().y}
-            />}
+    return (
+        <div className="minimap-viewport-holder">
+          <div className="minimap-header">
+            {!offsets ? undefined : 
+              `${offsets.mmNumSeqsAbove.toLocaleString()} hidden`
+            }
           </div>
+          <div className="minimap-canvas-holder">
+            <ReactResizeSensor onSizeChanged={minimapHolderResized}>
+              {
+                !minimapHolderDimensions ? undefined : 
+                  <Stage
+                    width={minimapHolderDimensions.canvasWidthPx}
+                    height={minimapHolderDimensions.canvasHeightPx}
+                    raf={false}
+                    renderOnComponentChange={true}
+                    onMount={setApp}
+                    onClick={mmClicked}
+                    onWheel={mmWheeled}
+                    options={{ 
+                      antialias: true, 
+                      backgroundAlpha: 0
+                    }}
+                  > 
+                    {renderedCanvas}
+                  </Stage>
+              }
+              {
+                !minimapHolderDimensions || 
+                !offsets || 
+                viewportFullyRendersAlignment ||
+                offsets.mmWorldHeightPx < minimapHolderDimensions?.canvasHeightPx
+                  ? undefined 
+                  : <MinimapDragger
+                      fillColor={'#000000'}
+                      baselineOpacity={0.4}
+                      mouseoverOpacity={0.3}
+                      draggingOpacity={0.2}
+                      onWheel={mmWheeled}
+                      highlighterHeightPx={ 
+                        //since we render the minimap as single pixels the mapping is the same
+                        offsets.draggerHeightPx
+                      }
+                      highlighterYPx={
+                        offsets.draggerOffsetPx
+                      }
+                      highlighterMoved={handleHighlighterMoved}
+                      mainMinimapContainerY={minimapHolderDimensions.yPx}
+                    />
+              }   
+            </ReactResizeSensor>
+          </div>
+          <div className="minimap-footer">
+            {!offsets ? undefined : 
+              `${offsets.mmNumSeqsBelow.toLocaleString()} hidden`
+            }
+          </div>
+        </div>
     )
-  }, [
-    frameSizing, 
+  }, [ 
     handleHighlighterMoved,
-    minimapRef,
     mmClicked,
-    mmOffsets,
+    offsets,
     mmWheeled,
+    minimapHolderResized,
     renderedCanvas,
-    viewportFullyRendersAlignment
+    viewportFullyRendersAlignment,
+    minimapHolderDimensions,
   ]);
 
-  if (app && mmOffsets?.minimapY !== undefined){  
+  //
+  //update the viewport in standalone mode - very important 
+  //
+  //functions with quesiton marks must be defined outside the dependencies
+  //otherwise typescript complains
+  const setCellHeightFn = vertVirtualizationAxis?.updateCellSizePx;
+  const setContainerHeightFn = vertVirtualizationAxis?.updateContainerSizePx;
+  useEffect(()=>{
+    //update viewport height as needed as also
+    if(isStandalone && 
+       setContainerHeightFn && 
+       setCellHeightFn && 
+       minimapHolderDimensions?.canvasHeightPx && 
+       offsets?.mmWorldHeightPx &&
+       scale){
+
+      //update the height
+      setCellHeightFn(scale);
+
+      //dragger - height is container height
+      setContainerHeightFn(
+        minimapHolderDimensions.canvasHeightPx 
+          / (scale * alignment.getSequenceCount())
+          * minimapHolderDimensions.canvasHeightPx
+      )
+    }
+  }, [
+    alignment,
+    isStandalone,
+    minimapHolderDimensions?.canvasHeightPx,
+    offsets?.mmWorldHeightPx,
+    scale,
+    setCellHeightFn,
+    setContainerHeightFn,
+    setWorldOffsetFn,
+  ]);
+
+
+  //scale and position the minimap
+  if (
+    app?.stage?.position && 
+    app.stage.scale &&
+    offsets && scale
+  ){ 
     //feels like this should be in an effect, but doesn't seem to work - it
     //is out of sync for some reason. 
-    app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
-    app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
+    app.stage.position.set(0, -offsets.mmWorldOffsetPx);
+    app.stage.scale.set(scale, scale);
   }
 
   return (
     <div
-      ref={setRefElement}
-      className="minimap-holder"
+      className="minimap"
       style={{
-        ...(alignHorizontal === "left" ? { left: 0 } : { right: 0 }),
-        position: verticalHeight === "div" ? "absolute" : "fixed",
-        width: !frameSizing ? startingWidth : frameSizing.frameWidth,
-        borderWidth: !frameSizing ? 0 : frameSizing.borderWidth,
-        margin: !frameSizing ? 0 : frameSizing.margin,
-        resize: resizable ? resizable : "none",
-        direction: alignHorizontal === "left" ? "ltr" : "rtl",
-        minWidth: minWidth
+        //borderWidth: !frameSizing ? 0 : frameSizing.borderWidth,
       }}
     >
-      <ReactResizeSensor onSizeChanged={minimapHolderResized}>
-        { renderedAlignment }
-      </ReactResizeSensor>
+      { renderedAlignment }
     </div>
   );
 }
@@ -423,7 +493,7 @@ interface IMinimapDraggerProps {
 
   mainMinimapContainerY: number;
 
-  highlighterMoved: (middleHighlighterYPx: number) => void;
+  highlighterMoved: (topHighlighterPx: number) => void;
 
   //passthrough wheel event - otherwise wheeling minimap stops in safari 
   //when dragger passes under mouse
@@ -442,11 +512,10 @@ export function MinimapDragger(props: IMinimapDraggerProps){
     draggingOpacity,
     onWheel
   } = props;  
-
   const [dragging, setDragging] = useState<boolean>(false);
   const [mouseover, setMouseover] = useState<boolean>(false);
   const [dragStartFraction, setDragStartFraction] = useState<number>(0);
-
+  
   /*
    *
    *
@@ -461,7 +530,9 @@ export function MinimapDragger(props: IMinimapDraggerProps){
     e.preventDefault();
     if (dragging) {
       highlighterMoved(
-        e.pageY - mainMinimapContainerY - (highlighterHeightPx * dragStartFraction)
+        e.pageY 
+        - mainMinimapContainerY 
+        - (highlighterHeightPx * dragStartFraction)
       );
     }
   }, [

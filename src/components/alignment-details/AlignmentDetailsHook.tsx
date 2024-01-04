@@ -198,7 +198,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       return sequences[seqIdx];
     }, []);
 
-    if(app){
+    if(app?.stage?.position && app.stage.scale){
       const xPos = worldShiftLeftPx ? -worldShiftLeftPx : 0;
       const yPos = worldShiftTopPx ? -worldShiftTopPx : 0;
       //move and scale the background "squares" of the alignment around based on

@@ -1,5 +1,5 @@
 import "./AlignmentViewer.scss";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
 import {
@@ -8,7 +8,7 @@ import {
   ISequenceLogoProps,
 } from "./SequenceLogoHook";
 
-import { IMiniMapProps, MiniMap } from "./minimap/MiniMapHook";
+import { MiniMap } from "./minimap/MiniMapHook";
 import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
@@ -32,6 +32,7 @@ import {
   IResponderRole, 
   VirtualizationRole
 } from "./virtualization/VirtualizationTypes";
+import { AlignmentViewerLayout, IAdjustableWidth, IFixedWidth } from "./layout/AlignmentViewerLayoutHook";
 
 
 //
@@ -52,7 +53,7 @@ export type IAlignmentViewerProps = {
 
 export type IBarplotExposedProps = Pick<
   IPositionalBarplotProps,
-  "svgId" | "dataSeriesSet" | "tooltipPlacement" | "height"
+  "svgId" | "dataSeriesSet" | "tooltipPlacement"
 >;
 
 //
@@ -69,26 +70,25 @@ const defaultProps = {
   showQuery: true as boolean,
   showRuler: true as boolean,
 
+  metadataSizing: {
+    type: "adjustable-width",
+    startingWidth: 150,
+    minWidth: 100,
+    maxWidth: 400
+  } as IAdjustableWidth | IFixedWidth,
+
+  minimapSizing: {
+    type: "adjustable-width",
+    startingWidth: 100,
+    minWidth: 75,
+    maxWidth: 300
+  } as IAdjustableWidth | IFixedWidth,
+
   logoOptions: {
-    logoType: LOGO_TYPES.LETTERS,
-    height: 100,
-    tooltipPlacement: undefined,
+    logoType: LOGO_TYPES.LETTERS
   } as Pick<
     ISequenceLogoProps, 
-    "svgId" | "tooltipPlacement" | "logoType" | "height"
-  >,
-
-  minimapOptions: {
-    alignHorizontal: "right",
-    startingWidth: 100,
-    minWidth: 100,
-    resizable: "horizontal",
-    verticalHeight: "div",
-  } as Partial<
-    Pick<
-      IMiniMapProps,
-      "alignHorizontal" | "startingWidth" | "minWidth" | "resizable" | "verticalHeight"
-    >
+    "svgId" | "tooltipPlacement" | "logoType"
   >,
 
   //array of individual barplots. Each barplot can contain multiple
@@ -101,8 +101,7 @@ const defaultProps = {
         PreconfiguredPositionalBarplots.ShannonEntropy,
         PreconfiguredPositionalBarplots.Gaps,
       ],
-      tooltipPlacement: undefined,
-      height: 100,
+      tooltipPlacement: undefined
     },
   ] as IBarplotExposedProps[],
 };
@@ -122,7 +121,8 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     style,
     logoOptions,
     mainViewportVisibleChanged,
-    minimapOptions,
+    metadataSizing,
+    minimapSizing,
     positionsToStyle,
     residueColoring,
     showAnnotations,
@@ -137,11 +137,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     ...defaultProps,
     ...props
   };
-
-  const MIN_WIDTH = 150;
-  const MAX_WIDTH = 500;
-
-  const verticalPaddingAroundContent = 2; // in px
 
   const fontSize = zoomLevel;
   const annotationFontSize = zoomLevel + 4;
@@ -194,33 +189,20 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   //
   // state
   //
-  const [mouseHoveringContent, setMouseHoveringContent] = useState<boolean>(false);
-  const [annotationResizeBarHovered, setAnnotationResizeBarHovered] = useState<boolean>(false);
-  const [annotationResizeDragging, setAnnotationResizeDragging] = useState<boolean>(false);
+  const [
+    mouseHoveringContent, 
+    setMouseHoveringContent
+  ] = useState<boolean>(false);
 
-  //
-  // css
-  //
-  const classes = ["alignment-viewer"];
-  if (!showAnnotations) classes.push("annotation-closed");
-  if (annotationResizeDragging) classes.push("annotations-being-resized");
-  if (annotationResizeBarHovered) classes.push("annotation-resize-hovered");
 
-  //custom callback that enables us to call function (draggerMoved) only
-  //after the state has been set.
-  const mouseLastXPx = useRef<number|undefined>();
-  const annotationWidth = useRef<number>(220);
-  const oneDraggerRef = useRef<HTMLDivElement | null>(null);
+  //events
+  const handleMouseHovering = useCallback(()=>{
+    setMouseHoveringContent(true); 
+  }, []);
 
-  const getCorrectedAnnotationWidth = useCallback((
-    proposedWith: number
-  ) => {
-    return proposedWith < MIN_WIDTH 
-      ? MIN_WIDTH 
-      : proposedWith > MAX_WIDTH
-        ? MAX_WIDTH
-        : proposedWith;
-  }, [MIN_WIDTH, MAX_WIDTH]);
+  const handleMouseStoppedHovering = useCallback(()=>{
+    setMouseHoveringContent(false); 
+  }, []);
 
   //
   // cache
@@ -238,165 +220,31 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     )
     .map((iseq) => iseq.id)
   }, [alignment, sortBy]);
-
-  const singleQuerySequenceArray = useMemo(()=>{
-    return [alignment.getQuery().sequence]
-  }, [alignment]);
-
-  const singleConsensusSequenceArray = useMemo(()=>{
-    return [alignment.getConsensus().sequence]
-  }, [alignment]);
-
-  const handleMouseHovering = useCallback(()=>{
-    setMouseHoveringContent(true); 
-  }, []);
-
-  const handleMouseStoppedHovering = useCallback(()=>{
-    setMouseHoveringContent(false); 
-  }, []);
+  
 
   //
-  // resize dragging - TODO: need to move this into its own component
+  // renders
   //
-  const handleAnnotationResizeBarMouseenter = useCallback(()=>{
-    setAnnotationResizeBarHovered(true);
-  }, []);
-  const handleAnnotationResizeBarMouseleave = useCallback(()=>{
-    setAnnotationResizeBarHovered(false);
-  }, []);
 
-  const startAnnotationResizeDragging = useCallback((
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  //general event listeners
+  const attachEventListeners = useCallback((
+    content: React.JSX.Element, className?: string
   )=>{
-    e.stopPropagation();
-    e.preventDefault();
-    setAnnotationResizeDragging(true);
-    mouseLastXPx.current=e.pageX;
-  }, []);
-
-  const endAnnotationResizeDragging = useCallback((
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setAnnotationResizeDragging(false);
-    mouseLastXPx.current=undefined;
-  }, []);
-
-  const annotationResizeDragged = useCallback((
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (annotationResizeDragging && 
-        mouseLastXPx.current !== undefined){
-      const delta = e.pageX - mouseLastXPx.current;
-      mouseLastXPx.current = e.pageX < MIN_WIDTH 
-        ? MIN_WIDTH 
-        : e.pageX > MAX_WIDTH
-          ? MAX_WIDTH 
-          : e.pageX;
-
-      const proposedNewWidth = annotationWidth.current + delta;
-      annotationWidth.current = getCorrectedAnnotationWidth(
-        proposedNewWidth
-      );
-
-      //Directly mutate DOM. All other attempted methods - setting state variables, using 
-      //useStateCallback - fail due to sync issues with state changes happening after the
-      //mousevents fire too quickly.
-      var annotationElements = document.querySelectorAll('.av2-title-or-annotation');
-      for(let i = 0; i < annotationElements.length; i++) {
-        (annotationElements[i] as HTMLElement).style['flexBasis'] = 
-          getCorrectedAnnotationWidth(annotationWidth.current)+'px';
-      }
-    }
-  }, [
-    annotationResizeDragging,
-    getCorrectedAnnotationWidth,
-    MIN_WIDTH, MAX_WIDTH
-  ]);
-
-  //
-  // render functions
-  //
-
-  //Render a single row in the alignment viewer. This consists
-  //of a title or annotation and the content.
-  const renderWidget = useCallback((params: {
-    className: string,
-    titleOrAnnotation: string | JSX.Element,
-    content: JSX.Element | null,
-    contentHeightPx?: number, //height of the content
-    noBottomMarginOnTitle?: boolean, 
-    key?: string,
-  })=>{
-    const {
-      className,
-      titleOrAnnotation,
-      content,
-      contentHeightPx,
-      key,
-      noBottomMarginOnTitle
-    } = params;
-
-    const holderHeight = contentHeightPx 
-      ? contentHeightPx+(2*verticalPaddingAroundContent) 
-      : undefined;
-
-    //kind of a hack, but content doesn't center well so we add padding to the title 
-    //to keep the title centered with the conten. However, this doesn't work for the 
-    //metadata/annotation block, hence a "noBottomMarginOnTitle" flag.
-    const marginBottom = noBottomMarginOnTitle ? 0 : verticalPaddingAroundContent*2;
-
     return (
-      <div className={`av2-widget ${className}`} key={key} style={{
-        height: holderHeight
-      }}>
-        <div
-          className="av2-title-or-annotation"
-          style={{ 
-            fontSize: annotationFontSize,
-            flexBasis: `${getCorrectedAnnotationWidth(annotationWidth.current)}px`,
-            marginBottom: `${marginBottom}px`
-          }}
-        >
-          {titleOrAnnotation}
-        </div>
-        <div 
-          style={{
-            display: showAnnotations ? "block" : "none"
-          }}
-          ref={oneDraggerRef}
-          className="av2-metadata-resize-separator"
-          onMouseDown={startAnnotationResizeDragging}
-          onMouseEnter={handleAnnotationResizeBarMouseenter}
-          onMouseLeave={handleAnnotationResizeBarMouseleave}/>
-        <div 
-          className="av2-content-holder" //a flex div, which doesn't deal well with padding/margin, 
-          onMouseEnter={handleMouseHovering}
-          onMouseLeave={handleMouseStoppedHovering}>
-          <div className="av2-content">
-            {content}
-          </div>
-        </div>
-        <div className="av2-close-metadata-option" onMouseEnter={()=>{console.log('MOUSE ENTER');}}></div>
+      <div className={className}
+        onMouseEnter={handleMouseHovering}
+        onMouseLeave={handleMouseStoppedHovering}>
+        {content}
       </div>
     );
   }, [
-    annotationFontSize, 
-    getCorrectedAnnotationWidth,
-    handleAnnotationResizeBarMouseenter,
-    handleAnnotationResizeBarMouseleave,
     handleMouseHovering,
-    handleMouseStoppedHovering,
-    verticalPaddingAroundContent, 
-    showAnnotations,
-    startAnnotationResizeDragging
+    handleMouseStoppedHovering
   ]);
 
+  //logos
   const renderedSequenceLogo = useMemo(() => {
-    return (
+    return attachEventListeners(
       <SequenceLogo
         svgId={logoOptions.svgId}
         alignment={alignment}
@@ -405,7 +253,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         glyphWidth={residueWidth}
         logoType={logoOptions.logoType}
         tooltipPlacement={logoOptions.tooltipPlacement}
-        height={logoOptions.height}
         horizontalVirtualization={xViewportResponderVirtualization}
       />
     );
@@ -415,199 +262,138 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     positionsToStyle,
     residueWidth,
     xViewportResponderVirtualization,
-    style
-  ]);
-  
-  const renderedMinimap = useMemo(() => {
-    return (
-      alignment &&
-      style && (
-        <div
-          className="minimap"
-          style={{ display: showMinimap ? "flex" : "none" }}
-        >
-          {
-            <MiniMap
-              alignment={alignment}
-              alignmentStyle={style}
-              positionsToStyle={positionsToStyle}
-              sortBy={sortBy}
-              //exposed by prop to instantiator
-              alignHorizontal={minimapOptions.alignHorizontal}
-              resizable={minimapOptions.resizable}
-              startingWidth={minimapOptions.startingWidth}
-              minWidth={minimapOptions.minWidth}
-              verticalHeight={minimapOptions.verticalHeight}
-              syncWithVerticalVirtualization={
-                yViewportResponderVirtualization
-              }
-            />
-          }
-        </div>
-      )
-    );
-  }, [
-    alignment,
-    minimapOptions, 
-    positionsToStyle, 
-    showMinimap, 
-    sortBy,
     style,
-    yViewportResponderVirtualization
+    attachEventListeners
   ]);
 
+  //barplots
   const renderBarplot = useCallback((
     barplotProps: IBarplotExposedProps
   ) => {
-    return (
+    return attachEventListeners(
       <PositionalBarplot
         svgId={barplotProps.svgId}
         alignment={alignment}
         tooltipPlacement={barplotProps.tooltipPlacement}
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={residueWidth}
-        height={barplotProps.height}
         horizontalVirtualization={xViewportResponderVirtualization}
       ></PositionalBarplot>
     );
   }, [
     alignment,
     residueWidth, 
+    xViewportResponderVirtualization,
+    attachEventListeners
+  ]);
+
+  //positionaxis
+  const renderedPositionAxis = useMemo(()=>{
+    return attachEventListeners(
+      <PositionalAxis
+        alignmentUUID={alignment.getUUID()}
+        horizVirtualization={xViewportResponderVirtualization}
+        positions={[...Array(alignment.getSequenceLength()).keys()]}
+        fontSize={fontSize}
+        residueWidth={residueWidth}
+      />,
+      "position-box"
+    )
+  }, [
+    attachEventListeners, 
+    alignment,
+    fontSize, 
+    residueWidth,
     xViewportResponderVirtualization
+  ]);
+
+  //helper as we use this for both query and consensus
+  const renderSingleSequence = useCallback((sequence: string)=>{
+    return attachEventListeners(
+      <AlignmentDetails
+        alignmentUUID={alignment.getUUID()}
+        horizVirtualization={xViewportResponderVirtualization}
+        vertVirtualization={"None"}
+        sequences={[sequence]}
+        consensusSequence={
+          alignment.getConsensus().sequence
+        }
+        querySequence={
+          alignment.getQuery().sequence
+        }
+        alignmentStyle={style}
+        positionsToStyle={positionsToStyle}
+        residueColoring={residueColoring}
+        fontSize={fontSize}
+        residueHeight={residueHeight}
+        residueWidth={residueWidth}
+        horizontalScrollbar={ScrollbarOptions.NeverOn}
+      />
+    );
+  }, [
+    alignment,
+    attachEventListeners,
+    fontSize, 
+    positionsToStyle,
+    residueColoring,
+    residueHeight,
+    residueWidth,
+    style,
+    xViewportResponderVirtualization
+  ]);
+
+  //consensus
+  const renderedConsensusSeq = useMemo(()=>{
+    return renderSingleSequence(alignment.getConsensus().sequence);
+  }, [
+    alignment,
+    renderSingleSequence
+  ]);
+
+  //query
+  const renderedQuerySeq = useMemo(()=>{
+    return renderSingleSequence(alignment.getQuery().sequence);
+  }, [
+    alignment,
+    renderSingleSequence
+  ]);
+
+  //minimap
+  const renderedMinimap = useMemo(()=>{
+    return (
+      <MiniMap
+        alignment={alignment}
+        alignmentStyle={style}
+        positionsToStyle={positionsToStyle}
+        sortBy={sortBy}
+        syncWithVerticalVirtualization={
+          yViewportResponderVirtualization
+        }
+      />
+    );
+  }, [
+    alignment, 
+    style,
+    positionsToStyle,
+    sortBy,
+    yViewportResponderVirtualization
   ]);
 
   //
   // final render
   //
   return (
-    <div 
-      className={classes.join(" ")} 
-      key={alignmentUUID}
-    > 
-      <div 
-        className="full-screen-annotation-resize-dragger"
-        style={{
-          display: !annotationResizeDragging ? "none" : "block"
-        }}
-        onMouseMove={annotationResizeDragged}
-        onMouseUp={endAnnotationResizeDragging}
-        onMouseOut={endAnnotationResizeDragging}
-        onMouseLeave={endAnnotationResizeDragging}
-      />
-      <Provider store={reduxStore}>
-          
-        { renderedMinimap }
+    <Provider store={reduxStore}>
+      <AlignmentViewerLayout
 
-        {
-          //<div id="column_mouseover"></div>
-        }
+        showMetadata={showAnnotations}
+        rulerConsensusQueryHeightPx={residueHeight}
 
-        {!barplots || barplots.length < 1
-          ? null
-          : barplots.map((barplot, idx) =>
-              renderWidget({
-                className: "av2-barplot-render",
-                titleOrAnnotation: barplot.dataSeriesSet.map(
-                  (series) => series.name
-                ).join(" / ") + ":",
-                content: renderBarplot(barplot),
-                contentHeightPx: barplot.height,
-                key: `${idx}-${barplot.dataSeriesSet.map(
-                    (dataseries) => dataseries.id
-                  ).join("|")}`
-              })
-            )}
+        metadataSizing={metadataSizing}
+        minimapSizing={minimapSizing}
 
-        {!showLogo || !logoOptions
-          ? null
-          : renderWidget({
-              className: "av2-sequence-logo-render",
-              titleOrAnnotation: "Logo:",
-              content: renderedSequenceLogo,
-              contentHeightPx: logoOptions && logoOptions.height
-                ? logoOptions.height
-                : defaultProps.logoOptions.height,
-            })}
-
-        {!showConsensus
-          ? null
-          : renderWidget({
-              className: "av2-consensus-seq-render",
-              titleOrAnnotation: "Consensus:",
-              content:
-                <AlignmentDetails
-                  alignmentUUID={alignmentUUID}
-                  horizVirtualization={xViewportResponderVirtualization}
-                  vertVirtualization={"None"}
-                  sequences={singleConsensusSequenceArray}
-                  consensusSequence={
-                    alignment.getConsensus().sequence
-                  }
-                  querySequence={
-                    alignment.getQuery().sequence
-                  }
-                  alignmentStyle={style}
-                  positionsToStyle={positionsToStyle}
-                  residueColoring={residueColoring}
-                  fontSize={fontSize}
-                  residueHeight={residueHeight}
-                  residueWidth={residueWidth}
-                  horizontalScrollbar={ScrollbarOptions.NeverOn}
-                />,
-              contentHeightPx: residueHeight,
-            })}
-
-        {!showQuery
-          ? null
-          : renderWidget({
-              className: "av2-query-seq-render",
-              titleOrAnnotation: "Query:",
-              content:
-                <AlignmentDetails
-                  alignmentUUID={alignmentUUID}
-                  //horizVirtualization={xViewportControllerVirtualization}
-                  horizVirtualization={xViewportResponderVirtualization}
-                  vertVirtualization={"None"}
-                  sequences={singleQuerySequenceArray}
-                  consensusSequence={
-                    alignment.getConsensus().sequence
-                  }
-                  querySequence={
-                    alignment.getQuery().sequence
-                  }
-                  alignmentStyle={style}
-                  positionsToStyle={positionsToStyle}
-                  residueColoring={residueColoring}
-                  fontSize={fontSize}
-                  residueHeight={residueHeight}
-                  residueWidth={residueWidth}
-                  horizontalScrollbar={ScrollbarOptions.NeverOn}
-                />,
-              contentHeightPx: residueHeight,
-            })}
-
-        {!showRuler
-          ? null
-          : renderWidget({
-              className: "av2-position-indicator-render",
-              titleOrAnnotation: "Position:",
-              content:
-                <div className="position-box">
-                  <PositionalAxis
-                    alignmentUUID={alignmentUUID}
-                    horizVirtualization={xViewportResponderVirtualization}
-                    positions={[...Array(alignment.getSequenceLength()).keys()]}
-                    fontSize={fontSize}
-                    residueWidth={residueWidth}
-                  />
-                </div>,
-              contentHeightPx: residueHeight,
-            })}
-
-        {renderWidget({
-          className: "av2-alignment-details-render",
-          noBottomMarginOnTitle:true,
-          titleOrAnnotation: 
+        alignmentDetails={{
+          metadata: (
             <AlignmentTextualMetadata
               alignmentUUID={alignmentUUID}
               vertVirtualization={yViewportResponderVirtualization}
@@ -618,10 +404,11 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
               tabFontSize={annotationFontSize}
               letterHeight={residueHeight}
               letterWidth={residueWidth}
-            />,
-          content:
+            />
+          ),
+          content: attachEventListeners(
             <AlignmentDetails
-              alignmentUUID={alignmentUUID}
+              alignmentUUID={alignment.getUUID()}
               vertVirtualization={yViewportControllerVirtualization}
               horizVirtualization={xViewportControllerVirtualization}
               sequences={sequences}
@@ -647,8 +434,43 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
                 }
               }}
             ></AlignmentDetails>
-        })}
-      </Provider>
-    </div>
+          )
+        }}
+
+        consensus={!showConsensus ? undefined : {
+          metadata: "Consensus",
+          content: renderedConsensusSeq
+        }}
+
+        query={!showQuery ? undefined : {
+          metadata: "Query",
+          content: renderedQuerySeq
+        }}
+
+        positionalAxis={!showRuler ? undefined : {
+          metadata: "Position",
+          content: renderedPositionAxis
+        }}
+
+        barplots={!barplots || barplots.length < 1
+          ? []
+          : barplots.map((barplot) => {
+            return {
+              metadata: barplot.dataSeriesSet.map(
+                (series) => series.name
+              ).join(" / "),
+              content: renderBarplot(barplot)
+            }
+          })
+        }
+
+        logoPlot={!showLogo ? undefined : {
+          metadata: "Logo",
+          content: renderedSequenceLogo,
+        }}
+
+        minimapPlot={!showMinimap ? undefined : renderedMinimap}
+      /> 
+    </Provider>
   );
 }

@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
 import "./PositionalBarplot.scss";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
 import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixViewerHook";
-import { IControllerRole, IResponderRole, ScrollbarOptions, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
+import { IControllerRole, IResponderRole, IVirtualizeParams, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
+import { IBounds } from "./ResizeSensorHook";
 
 export interface IPositionalBarplotDataSeries {
   id: string; //must be unique for each series
@@ -27,15 +28,12 @@ export interface IPositionalBarplotProps {
   //props that should be exposed in AlignmentViewer:
   dataSeriesSet: ArrayOneOrMore<IPositionalBarplotDataSeries>;
 
-  //height of the svg
-  height: number;
-
   //tooltip props
   tooltipPlacement?: tooltipPlacement;
   tooltipOffset?: number;
 
   //for the virtualization .. directly decomposed to VirtualizedHorizontalViewer 
-  horizontalVirtualization: IControllerRole | IResponderRole;
+  horizontalVirtualization?: IControllerRole | IResponderRole;
 
   //for the virtualization
   hoverTracker?: boolean;
@@ -230,7 +228,6 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     tooltipPlacement = "top",
     tooltipOffset = 8, //distance that the arrow will be from the hovered bar
     horizontalVirtualization,
-    height,
     hoverTracker = true
   } = props;
 
@@ -253,6 +250,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   const [
     calculatedTooltipOffset, setCalculatedTooltipOffset
   ] = useState<number>(0);
+  const [height, setHeight] = useState<number>(0);
 
   //
   // callbacks
@@ -622,35 +620,57 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     svgId
   ]);
 
+  //some cache and helper functions
+  const containerBoundsUpdated = useCallback((bounds: IBounds)=>{
+    setHeight(bounds.height);
+  }, []);
+
+  const getCachedBarplot = useCallback(()=>{
+    return cachedBarplot;
+  }, [cachedBarplot])
+
+  const horizParamsCache: IVirtualizeParams = useMemo(()=>{
+    const barplotIds = dataSeriesSet.map(bp=>bp.id).join("-");
+    return {
+      ...(
+        horizontalVirtualization
+          ? horizontalVirtualization
+          : {//virtualization if caller doesn't provide (for standalone use - needs testing)
+            virtualizationId: `bp-${barplotIds}-${alignment.getUUID()}`,
+            role: VirtualizationRole.Controller,
+            cellCount: alignment.getSequenceLength(),
+            cellSizePx: positionWidth
+          }
+      ),
+      virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
+      scrollbar: ScrollbarOptions.NeverOn,
+      hoverTracker: hoverTracker,
+      containerBoundsUpdated: containerBoundsUpdated
+    }
+  }, [
+    alignment,
+    containerBoundsUpdated,
+    dataSeriesSet,
+    horizontalVirtualization,
+    hoverTracker,
+    positionWidth
+  ]);
+
   //
   //
   // render
   //
   //
-  return !alignment || !horizontalVirtualization ? undefined : (
-    <div className="barplot">
-      <VirtualizedHorizontalViewer
-        getContentForColumns={() => {
-          return (
-            <div
-              style={{
-                position:"absolute",
-                width: alignment.getSequenceLength() * positionWidth
-              }}
-            >
-              {cachedBarplot}
-            </div>
-          );
-        }}
-        horizontalParams={{
-          ...horizontalVirtualization,
-          virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
-          scrollbar: ScrollbarOptions.NeverOn,
-          hoverTracker: hoverTracker
-        }}
-      />
-      {renderedTooltip}
-    </div>
-  );
+  return !alignment
+    ? undefined 
+    : (
+      <div className="barplot">
+        <VirtualizedHorizontalViewer
+          getContentForColumns={getCachedBarplot}
+          horizontalParams={horizParamsCache}
+        />
+        {renderedTooltip}
+      </div>
+    );
 
 }

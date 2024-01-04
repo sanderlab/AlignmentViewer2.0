@@ -2,9 +2,10 @@
  * Sequence logo hook.
  * Inspired / derived from https://github.com/weng-lab/logojs-package
  *  (but simpler)
+ * Fills the available space
  */
-import React, { useCallback, useMemo, useRef, useState } from "react";
 import "./SequenceLogo.scss";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { GlyphFactory, LogoFonts } from "../common/SequenceLogoGlyphs";
@@ -23,10 +24,12 @@ import {
 import { 
   IControllerRole, 
   IResponderRole, 
+  IVirtualizeParams, 
   ScrollbarOptions,
+  VirtualizationRole,
   VirtualizationStrategy 
 } from "./virtualization/VirtualizationTypes";
-
+import { IBounds } from "./ResizeSensorHook";
 
 export enum LOGO_TYPES {
   LETTERS = "Letter Stack",
@@ -57,15 +60,12 @@ export interface ISequenceLogoProps {
   logoType?: LOGO_TYPES; //letters or bars
   font?: LogoFonts;
 
-  //height of the svg
-  height?: number;
-
   //tooltip
   tooltipPlacement?: tooltipPlacement;
   tooltipOffset?: number;
 
   //for the virtualization .. directly decomposed to VirtualizedHorizontalViewer 
-  horizontalVirtualization: IControllerRole | IResponderRole;
+  horizontalVirtualization?: IControllerRole | IResponderRole;
 
   //for the virtualization 
   hoverTracker?: boolean;
@@ -82,7 +82,6 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     tooltipPlacement = "left-start",
     tooltipOffset = 8, //distance that the arrow will be from the hoverd letter stack
     logoType = LOGO_TYPES.LETTERS,
-    height = 100,
     font = LogoFonts.DEFAULT,
     horizontalVirtualization,
     hoverTracker = true
@@ -93,6 +92,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
   const [
     calculatedTooltipOffset, setCalculatedTooltipOffset
   ] = useState<number>(0);
+  const [height, setHeight] = useState<number>(0);
 
   /**
    * Munge letter count data that was calculated during alignment creation
@@ -390,6 +390,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
               color: ${defaultColor};
               fill: ${defaultColor};
             }
+            rect{
+              color: ${defaultColor};
+              fill: ${defaultColor};
+            }
           `}</style>
         )}
         {positionsCache}
@@ -434,27 +438,48 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     style.selectedColorScheme.className
   ]);
 
+  const containerBoundsUpdated = useCallback((bounds: IBounds)=>{
+    setHeight(bounds.height);
+  }, []);
+
+  const contentCache = useCallback(()=>{
+    //RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET. Quick on
+    //sequences of reasonable length - need to check for longer sequences. It adds
+    //~20 x length of sequences dom elements, which could add up, but is probably
+    //fine
+    return fullLogoRendered;
+  }, [fullLogoRendered])
+
+  const paramsCache: IVirtualizeParams = useMemo(()=>{
+    return {
+      ...(
+        horizontalVirtualization
+          ? horizontalVirtualization
+          : {//virtualization if caller doesn't provide (for standalone use - needs testing)
+            virtualizationId: `logo-${alignment.getUUID()}`,
+            role: VirtualizationRole.Controller,
+            cellCount: alignment.getSequenceLength(),
+            cellSizePx: glyphWidth
+          }
+      ),
+      virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
+      scrollbar: ScrollbarOptions.NeverOn,
+      hoverTracker: hoverTracker,
+      containerBoundsUpdated: containerBoundsUpdated
+    };
+  }, [
+    alignment,
+    containerBoundsUpdated,
+    glyphWidth, 
+    horizontalVirtualization,
+    hoverTracker
+  ]);
+  
   //OPTION 2: VIRTUALIZATION
   return (
-    !horizontalVirtualization 
-      ? fullLogoRendered
-      : (
-        <VirtualizedHorizontalViewer
-          getContentForColumns={() => {
-            
-            //RENDER ENTIRE CACHED IMAGE AND JUST ADJUST LEFT OFFSET. Quick on
-            //sequences of reasonable length - need to check for longer sequences. It adds
-            //~20 x length of sequences dom elements, which could add up, but is probably
-            //fine
-            return fullLogoRendered;
-          }}
-          horizontalParams={{
-            ...horizontalVirtualization,
-            virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
-            scrollbar: ScrollbarOptions.NeverOn,
-            hoverTracker: hoverTracker
-          }}
-        />
-      )
+    <VirtualizedHorizontalViewer
+      getContentForColumns={contentCache}
+      horizontalParams={paramsCache}
+    />
   );
 }

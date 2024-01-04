@@ -1,0 +1,67 @@
+/** AlignmentViewerLayout.scss */
+
+.full-screen-resize-dragger{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  background-color: white;
+  z-index: 1800;
+  cursor: col-resize;
+}
+
+.alignment-viewer-2{
+  position: absolute;
+  display: grid;
+  align-items: center;
+
+  .content{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  .metadata-title{
+    position: relative;
+    text-align: right;
+    font-weight: bold;
+    font-size: 14px; 
+  }
+  .minimap-content{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  //resizers
+  .horizontal-resizer,
+  .vertical-resizer{
+    background-color: #f2f2f2;
+    cursor: ew-resize;
+  }
+  .horizontal-resizer:hover,
+  .vertical-resizer:hover{
+    background-color: #0099ff;
+    border-left-color: #0099ff;
+    border-right-color: #0099ff;
+    opacity: 0.2;
+  }
+  .horizontal-resizer.resizing,
+  .vertical-resizer.resizing{
+    background-color: #0099ff;
+    border-left-color: #0099ff;
+    border-right-color: #0099ff;
+  }
+
+  .horizontal-resizer{
+    height: 100%;
+  }
+  .vertical-resizer{
+    width: 100%;
+  }
+}
