@@ -24,6 +24,7 @@ import {
 import { 
   IControllerRole, 
   IResponderRole, 
+  IVirtualizeParamBasics, 
   IVirtualizeParams, 
   ScrollbarOptions,
   VirtualizationRole,
@@ -68,7 +69,7 @@ export interface ISequenceLogoProps {
   horizontalVirtualization?: IControllerRole | IResponderRole;
 
   //for the virtualization 
-  hoverTracker?: boolean;
+  hoverTracker?: IVirtualizeParamBasics["hoverTracker"];
 }
 
 
@@ -84,7 +85,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     logoType = LOGO_TYPES.LETTERS,
     font = LogoFonts.DEFAULT,
     horizontalVirtualization,
-    hoverTracker = true
+    hoverTracker = "end"
   } = props;
 
   const tooltipRef = useRef<TooltipRefProps>(null);

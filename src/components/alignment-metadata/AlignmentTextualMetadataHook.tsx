@@ -63,20 +63,22 @@ export function AlignmentTextualMetadata(
   //
   //load virtualizations - either from props or auto generate. or don't virtualize
   //
+  const seqLength = textForEachSeq[0].length;
   const vertVirtualization = useMemo(()=>{
     return props.vertVirtualization === "Automatic"
       ? {
           virtualizationId: 
             `y_auto_generated_metadata_virtualization_${alignmentUUID}_${containerId}`,
           role: VirtualizationRole.Controller,
-          cellCount: textForEachSeq[0].length,
+          cellCount: seqLength,
           cellSizePx: letterHeight,
         } as IControllerRole
       : props.vertVirtualization;
   }, [
     alignmentUUID, 
-    props.vertVirtualization, 
-    textForEachSeq[0].length, 
+    containerId,
+    seqLength,
+    props.vertVirtualization,
     letterHeight
   ]); 
 
@@ -90,7 +92,13 @@ export function AlignmentTextualMetadata(
           cellSizePx: letterWidth
         } as IControllerRole
       : props.genenameHorizVirtualization;
-  }, []);
+  }, [
+    alignmentUUID,
+    containerId, 
+    letterWidth,
+    maxTextLength,
+    props.genenameHorizVirtualization
+  ]);
 
   const annotationHorizVirtualization = props.annotationHorizVirtualization === "Automatic"
     ? {
@@ -218,13 +226,13 @@ export function AlignmentTextualMetadata(
             ...genenameHorizVirtualization,
             scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
             virtualizationStrategy: VirtualizationStrategy.Virtualize,
-            hoverTracker: false
+            hoverTracker: undefined
           }}
           verticalParams={{
             ...vertVirtualization,
             scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
             virtualizationStrategy: VirtualizationStrategy.Virtualize,
-            hoverTracker: true
+            hoverTracker: "both"
           }}
           getMatrixContent={renderGenenames}
         />
@@ -243,13 +251,13 @@ export function AlignmentTextualMetadata(
               ...annotationHorizVirtualization,
               virtualizationStrategy: VirtualizationStrategy.Virtualize,
               scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
-              hoverTracker: false
+              hoverTracker: undefined
             }}
             verticalParams={{
               ...vertVirtualization,
               virtualizationStrategy: VirtualizationStrategy.Virtualize,
               scrollbar: ScrollbarOptions.OnHoverWhenOverflowed,
-              hoverTracker: false
+              hoverTracker: "both"
             }}
             getMatrixContent={(params)=>{
               return (

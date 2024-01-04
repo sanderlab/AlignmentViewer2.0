@@ -4,7 +4,7 @@
 import "./PositionalAxis.scss";
 import React, { useCallback, useMemo, useState } from "react";
 import { generateUUIDv4 } from "../common/Utils";
-import { IControllerRole, IResponderRole, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
+import { IControllerRole, IResponderRole, IVirtualizeParamBasics, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
 import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 
 
@@ -47,12 +47,14 @@ export function PositionalAxis(props: {
   fontSize: number;
   positions: number[];
   residueWidth: number;
+  hoverTracker?: IVirtualizeParamBasics["hoverTracker"]
 }) {
   const {
     alignmentUUID,
     fontSize,
     positions,
     residueWidth,
+    hoverTracker = "end"
   } = props;
 
   const maxLength = Math.max(...positions) + 1; // positions is index based so add 1
@@ -132,7 +134,7 @@ export function PositionalAxis(props: {
           ...horizVirtualization,
           scrollbar: ScrollbarOptions.NeverOn,
           virtualizationStrategy: VirtualizationStrategy.ShiftOnlyFullyRendered,
-          hoverTracker: true
+          hoverTracker: hoverTracker
         }}
         getContentForColumns={getContent}
      />

@@ -82,7 +82,7 @@ export interface IVirtualizedMatrixContent extends
 //
 // Interfaces passed to VirtualizedMatrix components
 //
-interface IVirtualizeParamBasics {
+export interface IVirtualizeParamBasics {
   virtualizationId: string;     //for redux
 
   //misc params - omitted from 
@@ -90,7 +90,7 @@ interface IVirtualizeParamBasics {
 
   //params omitted from the redux simplification
   scrollbar: ScrollbarOptions;
-  hoverTracker: boolean;         //default to true
+  hoverTracker: undefined | "start" | "end" | "both"; //start=left or top, end = right or bottom
   containerBoundsUpdated?: (bounds: IBounds)=>void;
 }
 export interface IResponderVirtualizeParams extends IVirtualizeParamBasics{

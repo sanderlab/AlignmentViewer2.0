@@ -70,6 +70,9 @@ const defaultProps = {
   showQuery: true as boolean,
   showRuler: true as boolean,
 
+  barplotsHeightPx: 75,
+  logoHeightPx: 100,
+
   metadataSizing: {
     type: "adjustable-width",
     startingWidth: 150,
@@ -123,6 +126,8 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     mainViewportVisibleChanged,
     metadataSizing,
     minimapSizing,
+    barplotsHeightPx,
+    logoHeightPx,
     positionsToStyle,
     residueColoring,
     showAnnotations,
@@ -385,12 +390,14 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   return (
     <Provider store={reduxStore}>
       <AlignmentViewerLayout
-
         showMetadata={showAnnotations}
         rulerConsensusQueryHeightPx={residueHeight}
 
         metadataSizing={metadataSizing}
         minimapSizing={minimapSizing}
+
+        barplotsHeightPx={barplotsHeightPx}
+        logoHeightPx={logoHeightPx}
 
         alignmentDetails={{
           metadata: (

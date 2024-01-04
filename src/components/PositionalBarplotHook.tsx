@@ -4,7 +4,7 @@ import { Tooltip, TooltipRefProps } from 'react-tooltip';
 import { Alignment } from "../common/Alignment";
 import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
 import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixViewerHook";
-import { IControllerRole, IResponderRole, IVirtualizeParams, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
+import { IControllerRole, IResponderRole, IVirtualizeParamBasics, IVirtualizeParams, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
 import { IBounds } from "./ResizeSensorHook";
 
 export interface IPositionalBarplotDataSeries {
@@ -36,7 +36,7 @@ export interface IPositionalBarplotProps {
   horizontalVirtualization?: IControllerRole | IResponderRole;
 
   //for the virtualization
-  hoverTracker?: boolean;
+  hoverTracker?: IVirtualizeParamBasics["hoverTracker"];
 }
 
 interface ISingleBarDetails {
@@ -228,7 +228,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     tooltipPlacement = "top",
     tooltipOffset = 8, //distance that the arrow will be from the hovered bar
     horizontalVirtualization,
-    hoverTracker = true
+    hoverTracker = "end"
   } = props;
 
   //

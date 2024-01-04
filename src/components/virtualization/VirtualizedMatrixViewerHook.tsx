@@ -1,7 +1,7 @@
 /**
  * Base react hook for a virtual text viewer.
  */
-import "./VirtualizedMatrixViewer.scss";
+import styles from "./VirtualizedMatrixViewer.scss";
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import * as PIXI from "pixi.js";
 
@@ -428,7 +428,65 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     setRowHovered
   ]);
 
+  const renderedHoverContent = useMemo(()=>{
+    if(!countainerBounds) { return undefined; }
+    const hoverTrackerSize = +styles.hoverTrackerSize; //needs to also be managed in css
+
+    return (
+      <>
+        {!vertVirtualizationAxis?.hoveredEvent ? undefined : 
+          <>
+            {vertParams?.hoverTracker !== "start" && vertParams?.hoverTracker !== "both" ? undefined :
+              <div className="hover-tracker-y triangle-right" style={{
+                left: countainerBounds.left - hoverTrackerSize,
+                top: countainerBounds.top
+                    + vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
+                    - (hoverTrackerSize/2), //half the height
+            }}/>}
+
+            {vertParams?.hoverTracker !== "end" && vertParams?.hoverTracker !== "both" ? undefined :
+              <div className="hover-tracker-y triangle-left" style={{
+                left: countainerBounds.left + countainerBounds.width,
+                top: countainerBounds.top
+                    + vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
+                    - (hoverTrackerSize/2), //half the height
+              }}/>}
+          </>
+        }
+
+
+        {!horizVirtualizationAxis?.hoveredEvent ? undefined : 
+          <>
+            {horizParams?.hoverTracker !== "start" && horizParams?.hoverTracker !== "both" ? undefined :
+              <div className="hover-tracker-x triangle-down" style={{
+                top: countainerBounds.top - hoverTrackerSize,
+                left: countainerBounds.left
+                      + horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
+                      - (hoverTrackerSize/2), // 1/2 the width
+            }}/>}
+
+            {horizParams?.hoverTracker !== "end" && horizParams?.hoverTracker !== "both" ? undefined :
+              <div className="hover-tracker-x triangle-up" style={{
+                top: countainerBounds.top + countainerBounds.height,
+                left: countainerBounds.left
+                      + horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
+                      - (hoverTrackerSize/2), // 1/2 the width
+              }}/>}
+          </>
+        }
+      </>
+    );
+  }, [
+    countainerBounds,
+    horizParams?.hoverTracker,
+    horizVirtualizationAxis?.hoveredEvent,
+    vertParams?.hoverTracker,
+    vertVirtualizationAxis?.hoveredEvent,
+  ]);
+
+
   const finalRenderedContent = useMemo(()=>{
+
     return (
       <>
         <div className="av2-virtualized-matrix" ref={ref}>
@@ -444,45 +502,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
                   onMouseMove={handleMousemoveFn}
                   onWheel={handleWheelFn}
                 >
-                  {
-                    <>
-                      <div className="hover-tracker-y" style={
-                        !vertVirtualizationAxis?.hoveredEvent || !countainerBounds || !vertParams?.hoverTracker
-                          ? {display: "none"}
-                          : {
-                              position: "fixed",
-                              zIndex: 1000,
-
-                              left: countainerBounds?.left-2.5, //1/2 the width
-                              top: countainerBounds?.top +
-                                   vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
-                                   - 2.5, // 1/2 the height
-                              width:5, height:5,
-                              borderRadius: "50%",
-                              backgroundColor:"red"
-                            }
-                        }
-                      ></div>
-
-                      <div className="hover-tracker-x" style={
-                        !horizVirtualizationAxis?.hoveredEvent || !countainerBounds || !horizParams?.hoverTracker
-                          ? {display: "none"} 
-                          : {
-                              position: "fixed",
-                              zIndex: 1000,
-                    
-                              top: countainerBounds?.top-2.5, //1/2 the height
-                              left: countainerBounds?.left +
-                                    horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
-                                    - 2.5, // 1/2 the width
-                              width:5, height:5,
-                              borderRadius: "50%",
-                              backgroundColor:"red"
-                            }
-                        }
-                      ></div>
-                    </>
-                  }
+                  {renderedHoverContent}
 
                   <div
                     className="av2-data"
@@ -518,22 +538,18 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   }, [
     reduxInitialized,
     contentFromParent, 
-    countainerBounds,
     handleWheelFn, 
     horizVirtualizationAxis?.worldOffsetPx,
     horizVirtualizationAxis?.offsetForRenderingIdxsOnly,
-    horizVirtualizationAxis?.hoveredEvent,
     vertVirtualizationAxis?.worldOffsetPx,
     vertVirtualizationAxis?.offsetForRenderingIdxsOnly,
-    vertVirtualizationAxis?.hoveredEvent,
     horizParams?.virtualizationStrategy,
     vertParams?.virtualizationStrategy,
-    horizParams?.hoverTracker,
-    vertParams?.hoverTracker,
     horizontalScrollbarRender, 
     verticalScrollbarRender,
     handleMousemoveFn,
-    handleMouseoutFn
+    handleMouseoutFn,
+    renderedHoverContent,
   ]);
 
   //

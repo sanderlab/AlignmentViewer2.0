@@ -20,6 +20,7 @@ import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
 import { 
   IControllerRole, 
   IResponderRole, 
+  IVirtualizeParamBasics, 
   IVirtualizeParams, 
   IVirtualizedMatrixContent, 
   ScrollbarOptions, 
@@ -58,8 +59,8 @@ export interface IAlignmentDetailsProps {
   vertVirtualization: IControllerRole | IResponderRole | "Automatic" | "None";
   verticalScrollbar?: ScrollbarOptions;
   horizontalScrollbar?: ScrollbarOptions;
-  verticalHoverTracker?: boolean;
-  horizontalHoverTracker?: boolean;
+  verticalHoverTracker?: IVirtualizeParamBasics["hoverTracker"];
+  horizontalHoverTracker?: IVirtualizeParamBasics["hoverTracker"];
 }
 
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
@@ -77,8 +78,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     fontSize,
     verticalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
     horizontalScrollbar = ScrollbarOptions.OnHoverWhenOverflowed,
-    verticalHoverTracker = true,
-    horizontalHoverTracker = true,
+    verticalHoverTracker = "both",
+    horizontalHoverTracker = "end",
     matrixRendered
   } = props;
 
