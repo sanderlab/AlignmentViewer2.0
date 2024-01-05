@@ -1,5 +1,5 @@
 import "./AlignmentViewer.scss";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
 import {
@@ -33,6 +33,7 @@ import {
   VirtualizationRole
 } from "./virtualization/VirtualizationTypes";
 import { AlignmentViewerLayout, IAdjustableWidth, IFixedWidth } from "./layout/AlignmentViewerLayoutHook";
+import { SequenceSearch } from "./search/SequenceSearchHook";
 
 
 //
@@ -43,6 +44,7 @@ export type IAlignmentViewerProps = {
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   positionsToStyle: PositionsToStyle;
   residueColoring: ResidueColoring;
+  triggerShowSearch?: React.MutableRefObject<(() => void) | undefined>;
   mainViewportVisibleChanged?: (props: {
     seqIdxStart: number,
     seqIdxEnd: number,
@@ -60,6 +62,8 @@ export type IBarplotExposedProps = Pick<
 // DEFAULT PROPS
 //
 const defaultProps = {
+  disableSearch: false,
+
   zoomLevel: 13 as number,
   sortBy: SequenceSorter.INPUT as SequenceSorter,
 
@@ -123,6 +127,10 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     barplots,
     style,
     logoOptions,
+
+    disableSearch,
+    triggerShowSearch,
+
     mainViewportVisibleChanged,
     metadataSizing,
     minimapSizing,
@@ -144,10 +152,66 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   };
 
   const fontSize = zoomLevel;
-  const annotationFontSize = zoomLevel + 4;
+  const annotationFontSize = zoomLevel + 3;
   const residueWidth = getAlignmentFontDetails(fontSize).width;
   const residueHeight = getAlignmentFontDetails(fontSize).height;
   
+  
+  //
+  // search - listen for key events
+  //
+  const [cmdPressed, setCmdPressed] = useState<boolean>(false);
+  const [showSearch, setShowSearch] = useState<boolean>(false);
+  const showSearchFn = useCallback(()=>{
+    setShowSearch(true);
+  }, [])
+  React.useEffect(() => {
+    if(triggerShowSearch){
+      triggerShowSearch.current = showSearchFn;
+    }
+  }, [showSearchFn, triggerShowSearch]);
+
+  const keyDownFn = useCallback((e: KeyboardEvent)=>{
+    if(e){
+      if ((e.ctrlKey || cmdPressed) && e.key === "f") {
+        e.preventDefault();
+        setShowSearch(true);
+        setCmdPressed(false);
+      }
+      if(e.key === "Meta"){
+        e.preventDefault();
+        setCmdPressed(true);
+      }
+    }
+  }, [cmdPressed]);
+
+  const keyUpFn = useCallback((e: KeyboardEvent)=>{
+    if (e && (e.key === "Meta")) {
+      e.preventDefault();
+      setCmdPressed(false);
+    }
+  }, []);
+
+  useEffect(()=>{
+    window.removeEventListener("keydown", keyDownFn);
+    window.removeEventListener("keyup", keyUpFn);
+
+    if(!disableSearch){
+      window.addEventListener("keydown", keyDownFn);
+      window.addEventListener("keyup", keyUpFn);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", keyDownFn);
+      window.removeEventListener("keyup", keyUpFn);
+    }
+  }, [
+    disableSearch, 
+    keyDownFn,
+    keyUpFn
+  ]);
+
+
   //
   //virtualization 
   //
@@ -365,7 +429,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   //minimap
   const renderedMinimap = useMemo(()=>{
-    return (
+    return !showMinimap ? undefined : (
       <MiniMap
         alignment={alignment}
         alignmentStyle={style}
@@ -377,6 +441,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       />
     );
   }, [
+    showMinimap,
     alignment, 
     style,
     positionsToStyle,
@@ -389,6 +454,18 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   //
   return (
     <Provider store={reduxStore}>
+      {!alignment || disableSearch || !showSearch ? undefined : 
+        <div style={{display: !showSearch ? "none" : undefined}}>
+          <SequenceSearch
+            closePressed={()=>{setShowSearch(false);}}
+            sortedSequences={sequences}
+            sortedSequenceIds={sequenceIds}
+            style={style}
+            residueColoring={residueColoring}
+            positionsToStyle={positionsToStyle}
+          />
+        </div>
+      }
       <AlignmentViewerLayout
         showMetadata={showAnnotations}
         rulerConsensusQueryHeightPx={residueHeight}

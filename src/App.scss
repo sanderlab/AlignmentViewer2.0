@@ -30,7 +30,6 @@ body {
 
   .app-header {
     padding: 0;
-    height: 50px;
     position: relative;
 
     display: flex; // make us of Flexbox
@@ -40,12 +39,11 @@ body {
       height: 30px;
       width: 100%;
       padding-top: 8px;
+      padding-bottom: 16px;
       padding-left: 8px;
       padding-right: 8px;
       font-size: 11px;
-      //z-index: 1000;
       background-color: white;
-      //position:relative;
 
       .settings-header {
         display: flex;
@@ -55,11 +53,9 @@ body {
         justify-content: space-between;
         padding-bottom: 8px;
         border-bottom: solid 1px #e6e6e6;
-        //margin: 8px 0;
 
         h2 {
           margin: 0;
-          //display: inline-block;
           order: 1;
           flex-grow: 1;
           font-size: 2em;
@@ -79,17 +75,25 @@ body {
           }
         }
 
+        a, button {
+          padding: 0px 2px;
+          order: 7;
+          font-size: 0;
+          margin: 0;
+          border: 0;
+        }
         a.github-link {
           order: 3;
           font-size: 0;
         }
         button.download {
           order: 4;
-          font-size: 0;
         }
-        button {
+        button.search-button {
           order: 5;
-          font-size: 0;
+        }
+        button.settings-toggle{
+          order: 6;
         }
       }
     }

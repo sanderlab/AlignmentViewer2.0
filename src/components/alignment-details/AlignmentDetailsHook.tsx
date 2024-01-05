@@ -4,7 +4,7 @@
 import "./AlignmentDetails.scss";
 import React, { useCallback, useMemo, useState } from "react";
 import * as PIXI from "pixi.js";
-import {  Stage } from "@pixi/react";
+import { Stage } from "@pixi/react";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -217,7 +217,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
 
     return (
       <div className="av2-viewport">
-        <Stage
+        <Stage 
           className={
             ["stage", ...(
               residueColoring === ResidueColoring.NO_BACKGROUND
@@ -255,6 +255,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           lineHeight={residueHeight}
           verticalOffset={renderShiftTopPx}
           horizontalOffset={renderShiftLeftPx}
+          horizontalWorldOffset={worldShiftLeftPx}
         ></AlignmentDetailsLetters>
       </div>
     );
@@ -349,6 +350,7 @@ export function AlignmentDetailsLetters(props: {
   lineHeight: number;
   verticalOffset?: number;
   horizontalOffset?: number;
+  horizontalWorldOffset?: number;
 }) {
   const {
     sequencesInViewport,
@@ -362,6 +364,7 @@ export function AlignmentDetailsLetters(props: {
     lineHeight,
     verticalOffset,
     horizontalOffset,
+    horizontalWorldOffset
   } = props;
 
   //each sequence style will be rendered as a single separate div.
@@ -474,39 +477,50 @@ export function AlignmentDetailsLetters(props: {
   ]);
 
   return (
-    <div
-      className="sequence-text-holder"
-      style={{
-        top: verticalOffset,
-        left: horizontalOffset,
-      }}
-    >
+    <>
       <div
-        className="letters-viewport"
-        style={{ 
-          fontSize: fontSize, 
-          lineHeight: lineHeight + "px" 
+        className="sequence-text-holder"
+        style={{
+          top: verticalOffset,
+          left: horizontalOffset,
         }}
       >
-        {
-          //output each color separately
-        }
-        {individualColors}
-
-        {
-          // add a hidden interaction element that contains all the displayed sequences
-          // so users can copy paste
-        }
-        <div className={"hidden-residues-for-copy-paste"}>
-          {sequencesInViewport.map((seqStr, idx) => {
-            return (
-              <React.Fragment key={idx + seqStr}>
-                {seqStr} <br />
-              </React.Fragment>
-            );
-          })}
+        <div
+          className="letters-viewport"
+          style={{ 
+            fontSize: fontSize, 
+            lineHeight: lineHeight + "px" 
+          }}
+        >
+          {
+            //output each color separately
+          }
+          {individualColors}
         </div>
       </div>
-    </div>
+
+      {
+        // add a hidden interaction element that contains all the displayed sequences
+        // so users can copy paste
+      }
+      <div 
+        className={"hidden-residues-for-copy-paste"} 
+        style={{ 
+          top: verticalOffset,
+          left: horizontalWorldOffset 
+            ? -1 * horizontalWorldOffset
+            : undefined,
+          fontSize: fontSize, 
+          lineHeight: lineHeight + "px"
+        }}>
+        {sequencesInViewport.map((seqStr, idx) => {
+          return (
+            <React.Fragment key={idx + seqStr}>
+              {seqStr} <br />
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </>
   );
 }

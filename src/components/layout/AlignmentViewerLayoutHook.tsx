@@ -1,6 +1,7 @@
 import "./AlignmentViewerLayout.scss"
 import React, { useCallback, useMemo, useState } from "react";
 import { useResizeGrid } from "./ResizeGridHook";
+import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 
 interface IMetadataAndContent{
   metadata: string | React.JSX.Element,
@@ -130,6 +131,17 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     minimapWidth, setMinimapWidth
   ] = useState<number>(minimapStartingWidth);
 
+  const [
+    currentGridDimensions, setCurrentGridDimensions
+  ] = useState<IBounds>();
+
+  //
+  // calculate current sizing for dragging
+  //
+  const resizeSensor = useCallback((bounds: IBounds)=>{
+    setCurrentGridDimensions(bounds);
+  }, []);
+
   //
   //render a single row worth of info - metadata and content, or for the
   //main viewport, content and content
@@ -179,14 +191,16 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //METADATA Resizing
   //
   const metadataBarResized = useCallback((newBarClientX: number)=>{
-    if(metadataSizing.type==="fixed-width") return; //shouldn't happen
+    if(metadataSizing.type==="fixed-width" ||
+       currentGridDimensions?.left === undefined) return; //shouldn't happen
 
     //relate metadata width to offset of resizer
     const newProposedWidth = (
       newBarClientX - 
-      (resizeBarSizePx/2) -   //center of resize element
-      gapBetweenColumnsAndRowsPx -            //extra gap size between resizer and metadata
-      gapViewportLeftPx //gap between edge of browser and entire grid
+      (resizeBarSizePx/2) -             //center of resize element
+      gapBetweenColumnsAndRowsPx -      //extra gap size between resizer and metadata
+      currentGridDimensions.left -     //actual offset of grid
+      gapViewportLeftPx                 //gap between edge of browser and entire grid
     );
 
     setMetadataWidth(
@@ -197,6 +211,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           : newProposedWidth
     );
   }, [
+    currentGridDimensions?.left,
     metadataSizing,
     resizeBarSizePx,
     gapBetweenColumnsAndRowsPx,
@@ -213,19 +228,15 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //MINIMAP Resizing
   //
   const minimapBarResized = useCallback((newBarClientX: number)=>{
-    if(minimapSizing.type==="fixed-width") return; //shouldn't happen
-
-    //relate metadata width to offset of resizer
-    const { 
-      innerWidth: windowWidth 
-    } = window;
+    if(minimapSizing.type==="fixed-width" || 
+       currentGridDimensions?.right === undefined) return; //shouldn't happen
 
     const newProposedWidth = (
-      windowWidth - 
-      newBarClientX -        //on the right side of the screen so remove
-      (resizeBarSizePx/2) -    //center of resize element
-      gapBetweenColumnsAndRowsPx -             //size between 
-      gapViewportRightPx //gap between edge of browser and entire grid
+      currentGridDimensions.right -  //minimap is on the right side of the viewport
+      newBarClientX -                //on the right side of the screen so remove
+      (resizeBarSizePx/2) -          //center of resize element
+      gapBetweenColumnsAndRowsPx -   //size between 
+      gapViewportRightPx             //gap between edge of browser and entire grid
     );
 
     setMinimapWidth(
@@ -236,6 +247,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           : newProposedWidth
     );
   }, [
+    currentGridDimensions?.right,
     minimapSizing,
     resizeBarSizePx,
     gapBetweenColumnsAndRowsPx,
@@ -246,7 +258,6 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     resizeDirection: "horizontal",
     draggerMoved: minimapBarResized
   });
-
 
   //
   //get the grid template areas string
@@ -347,112 +358,113 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           ? undefined 
           : minimapResizer.draggerElement
       }
+      <ReactResizeSensor onSizeChanged={resizeSensor}>
+        <div className="alignment-viewer-2" style={{
+          top: `${gapViewportTopPx}px`,
+          bottom: `${gapViewportBottomPx}px`,
+          left: `${gapViewportLeftPx}px`,
+          right: `${gapViewportRightPx}px`,
+          gap: `${gapBetweenColumnsAndRowsPx}px`,
+          gridTemplateColumns: gridTemplateColumns,
+          gridTemplateRows: `
+            ${barplots.map(bp => `${barplotsHeightPx}px`).join("\n")}
+            ${logoPlot ? `${logoHeightPx}px` : ""} 
+            ${consensus ? `${rulerConsensusQueryHeightPx}px` : ""} 
+            ${query ? `${rulerConsensusQueryHeightPx}px` : ""} 
+            ${positionalAxis ? `${rulerConsensusQueryHeightPx}px` : ""}
+            auto
+          `,
+          gridTemplateAreas: gridTemplateAreas
+        }}>
 
-      <div className="alignment-viewer-2" style={{
-        top: `${gapViewportTopPx}px`,
-        bottom: `${gapViewportBottomPx}px`,
-        left: `${gapViewportLeftPx}px`,
-        right: `${gapViewportRightPx}px`,
-        gap: `${gapBetweenColumnsAndRowsPx}px`,
-        gridTemplateColumns: gridTemplateColumns,
-        gridTemplateRows: `
-          ${barplots.map(bp => `${barplotsHeightPx}px`).join("\n")}
-          ${logoPlot ? `${logoHeightPx}px` : ""} 
-          ${consensus ? `${rulerConsensusQueryHeightPx}px` : ""} 
-          ${query ? `${rulerConsensusQueryHeightPx}px` : ""} 
-          ${positionalAxis ? `${rulerConsensusQueryHeightPx}px` : ""}
-          auto
-        `,
-        gridTemplateAreas: gridTemplateAreas
-      }}>
+          { 
+            //
+            //primary area w/o minimap 
+            //
+          }
 
-        { 
-          //
-          //primary area w/o minimap 
-          //
-        }
+          { //barplots
+            barplots.map((bp, idx) => {
+              return renderWidget({
+                key: `bp${idx}`,
+                metadataAndContent: bp,
+                metadataGridArea: `barplot-${idx}-metadata`,
+                contentGridArea: `barplot-${idx}`,
+              });
+            })
+          }
 
-        { //barplots
-          barplots.map((bp, idx) => {
-            return renderWidget({
-              key: `bp${idx}`,
-              metadataAndContent: bp,
-              metadataGridArea: `barplot-${idx}-metadata`,
-              contentGridArea: `barplot-${idx}`,
-            });
-          })
-        }
+          { //logo
+            renderWidget({
+              key: `logo`,
+              metadataAndContent: logoPlot,
+              metadataGridArea: "logo-metadata",
+              contentGridArea: "logo",
+            })
+          }
 
-        { //logo
-          renderWidget({
-            key: `logo`,
-            metadataAndContent: logoPlot,
-            metadataGridArea: "logo-metadata",
-            contentGridArea: "logo",
-          })
-        }
+          { //consensus
+            renderWidget({
+              key: `c`,
+              metadataAndContent: consensus,
+              metadataGridArea: "consensus-metadata",
+              contentGridArea: "consensus",
+            })
+          }
 
-        { //consensus
-          renderWidget({
-            key: `c`,
-            metadataAndContent: consensus,
-            metadataGridArea: "consensus-metadata",
-            contentGridArea: "consensus",
-          })
-        }
-
-        { //consensus
-          renderWidget({
-            key: `q`,
-            metadataAndContent: query,
-            metadataGridArea: "query-metadata",
-            contentGridArea: "query",
-          })
-        }
+          { //consensus
+            renderWidget({
+              key: `q`,
+              metadataAndContent: query,
+              metadataGridArea: "query-metadata",
+              contentGridArea: "query",
+            })
+          }
 
 
-        { //positional axis
-          renderWidget({
-            key: `ruler`,
-            metadataAndContent: positionalAxis,
-            metadataGridArea: "position-axis-metadata",
-            contentGridArea: "position-axis",
-          })
-        }
+          { //positional axis
+            renderWidget({
+              key: `ruler`,
+              metadataAndContent: positionalAxis,
+              metadataGridArea: "position-axis-metadata",
+              contentGridArea: "position-axis",
+            })
+          }
 
-        { //main viewport
-          renderWidget({
-            key: `main`,
-            metadataAndContent: alignmentDetails,
-            metadataGridArea: "ids-and-annotations",
-            contentGridArea: "main-viewport",
-            metadataClassname: "content"
-          })
-        }
+          { //main viewport
+            renderWidget({
+              key: `main`,
+              metadataAndContent: alignmentDetails,
+              metadataGridArea: "ids-and-annotations",
+              contentGridArea: "main-viewport",
+              metadataClassname: "content"
+            })
+          }
 
-        {
-          // minimap 
-          !showMinimap
-            ? undefined 
-            : <div className="minimap-content" style={{gridArea: "minimap"}}>{minimapPlot}</div>
-        }
+          {
+            // minimap 
+            !showMinimap
+              ? undefined 
+              : <div className="minimap-content" style={{gridArea: "minimap"}}>{minimapPlot}</div>
+          }
 
-        {
-          //minimap resizing
-          !showMinimap || minimapSizing.type !== "adjustable-width"
-            ? undefined
-            : minimapResizer.resizeSeparator
-        }
+          {
+            //minimap resizing
+            !showMinimap || minimapSizing.type !== "adjustable-width"
+              ? undefined
+              : minimapResizer.resizeSeparator
+          }
 
-        {
-          // metadata 
-          !showMetadata || metadataSizing.type !== "adjustable-width"
-            ? undefined 
-            : (
-              metadataResizer.resizeSeparator
-            )
-        }
-      </div>
+          {
+            // metadata 
+            !showMetadata || metadataSizing.type !== "adjustable-width"
+              ? undefined 
+              : (
+                metadataResizer.resizeSeparator
+              )
+          }
+        </div>
+      </ReactResizeSensor>
     </>
   );
 }

@@ -53,14 +53,18 @@
       user-select: none;
       pointer-events: none;
     }
-    .hidden-residues-for-copy-paste {
-      position: absolute;
-      overflow-x: hidden;
-      overflow-y: hidden;
-      top: 0;
-      left: 0;
-      color: rgba(0, 0, 0, 0);
-      pointer-events: all;
-    }
+  }
+  .hidden-residues-for-copy-paste {
+    position: absolute;
+    font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
+      monospace;
+    white-space: nowrap;
+    
+    overflow-x: hidden;
+    overflow-y: hidden;
+    top: 0;
+    left: 0;
+    color: rgba(0, 0, 0, 0);
+    pointer-events: all;
   }
 }

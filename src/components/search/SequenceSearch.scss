@@ -1,0 +1,95 @@
+/** SequenceSearch.scss */
+
+.background-search-box{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  opacity: 0.75;
+  z-index: 10000;
+}
+
+.search-box-grid{
+  position: absolute;
+  top: 0;
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  display: grid;
+  grid-template-columns: 150px auto 150px;
+  grid-template-rows: 1fr;
+  grid-template-areas: ". search-area .";
+
+  .search-box-contents{
+    position: relative;
+    background-color: white;
+    border: solid 1px black;
+    grid-area: search-area;
+    border-radius: 10px;
+    overflow: hidden;
+
+    display: grid;
+    grid-template-columns: 5px 9fr 5px;
+    grid-template-rows: 10px 20px 20px 1fr 5px;
+    grid-template-areas: 
+      ". . ."
+      ". search-bar ."
+      ". search-bar-results-separator ."
+      ". search-results ."
+      ". . ."
+    ;
+
+    .search-bar{
+      grid-area: search-bar;
+      justify-self: stretch;
+      align-self: start;
+      display: grid;
+      grid-template-columns: 1fr 3fr 2fr;
+      grid-template-rows: 100%;
+      grid-template-areas: 
+        "search-input-label search-input matches";
+      
+      font-size: 12px;
+
+      label{
+        grid-area: search-input-label;
+        align-self: center;
+        justify-self: end;
+      }
+      input{
+        grid-area: search-input;
+        width: 100%;
+      }
+      span{
+        grid-area: matches;
+        align-self: center;
+        justify-self: center;
+      }
+    }
+
+    .search-bar-results-separator{
+      grid-area: search-bar-results-separator;
+      margin-top: 10px;
+      border-top: solid 2px #c2c2c2;
+    }
+    .search-results{
+      grid-area: search-results;
+      overflow: scroll;
+      position: relative;
+    }
+    button.button-link.close{
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 0;
+      background: none !important;
+      border: none;
+      color: #069;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+}

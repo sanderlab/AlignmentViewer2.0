@@ -83,6 +83,8 @@ interface URLInputs extends ObjectURLInputs, BooleanURLInputs, NumberURLInputs {
 
 
 export default function App(props: AppProps){
+  const triggerShowSearch = React.useRef<() => void | undefined>();
+
   const urlInputs: URLInputs = useMemo(()=>{
     return {
       //objects
@@ -333,6 +335,7 @@ export default function App(props: AppProps){
             style={style}
             residueColoring={residueColoring}
             positionsToStyle={positionsToStyle}
+            triggerShowSearch={triggerShowSearch}
             mainViewportVisibleChanged={(newIdxs)=>{
               if(!shallowEqual(state.mainViewportVisibleIdxs, newIdxs)){
                 //setTimeout(() => {
@@ -932,14 +935,13 @@ export default function App(props: AppProps){
                     alt="Alignment Viewer 2.0 GitHub Repo"
                     width="16"
                     height="16"
-                    src={`${process.env.PUBLIC_URL}/GitHub-Mark-32px.png`}
+                    src={`${process.env.PUBLIC_URL}/github-mark.svg`}
                   /> 
                 </a>
     
                 <button
                   className={`download button-link${!alignment ? " hide" : ""}`}
                   type="button"
-                  style={{ margin: 0, border: "none" }}
                   title="Download Full Viewport"
                   onClick={()=>{
                     if (alignment){
@@ -991,15 +993,32 @@ export default function App(props: AppProps){
                     alt="Download Alignment" 
                     width="16"
                     height="16"
-                    src={`${process.env.PUBLIC_URL}/download_32px.png`}
+                    src={`${process.env.PUBLIC_URL}/download.svg`}
+                  />
+                </button>
+                
+                <button
+                  id="search-button"
+                  className="search-button button-link"
+                  type="button"
+                  title="Show Search"
+                  onClick={() => {
+                    if(triggerShowSearch.current) triggerShowSearch.current();
+                  }}
+                >
+                  <img
+                    alt="Show Search"
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/search.svg`}
                   />
                 </button>
 
                 <button
                   id="settings-toggle-button"
-                  className={`button-link`}//${showSettings ? " hide" : ""}`}
+                  className="button-link settings-toggle"
                   type="button"
-                  style={{ padding: 0, margin: 0, border: "none" }}
+                  style={{ paddingRight: 0 }}
                   title={showSettings ? "Hide Settings" : "Show Settings"}
                   onClick={()=>{
                     setState({
@@ -1012,7 +1031,7 @@ export default function App(props: AppProps){
                     alt="Show Settings Box"
                     width="16"
                     height="16"
-                    src={`${process.env.PUBLIC_URL}/settings_32px.png`}
+                    src={`${process.env.PUBLIC_URL}/settings.svg`}
                   />
                 </button>
               </div> 

@@ -191,7 +191,10 @@ export function AlignmentTextualMetadata(
               )].join(" ")
             }
             style={{ fontSize: tabFontSize }}
-            onClick={()=>{ setSelectedTabIdx("id") }}>
+            onClick={(e)=>{ 
+              setSelectedTabIdx("id"); 
+              e.preventDefault(); 
+            }}>
             id
           </button>
         </div>
@@ -204,7 +207,10 @@ export function AlignmentTextualMetadata(
               )].join(" ")
             }
             style={{ fontSize: tabFontSize }}
-            onClick={()=>{ setSelectedTabIdx("annotations") }}>
+            onClick={(e)=>{ 
+              setSelectedTabIdx("annotations"); 
+              e.preventDefault(); 
+            }}>
             annotations
           </button>
         </div>

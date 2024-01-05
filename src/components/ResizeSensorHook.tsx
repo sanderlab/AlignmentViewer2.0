@@ -13,6 +13,7 @@ export interface IBounds {
   width: number;
   height: number;
   left: number;
+  right: number;
   top: number;
   x: number;
   y: number;
