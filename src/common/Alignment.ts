@@ -15,6 +15,94 @@ export interface ISequence {
   sequence: string;
 }
 
+//private functions
+const countCharacterCodes = (
+  sequences: string[], 
+  maxSequenceLength: number
+) => {
+  // aggregate stats for each position and globally including
+  // the number of times each amino acid occurs
+  // ** this loop takes the bulk of the initialization time
+  let allUniqueCharCodes: { [charCode: number]: boolean } = {};
+
+  //COLLECT ALL CHARACTER CODES. Work in character code space as this 
+  //is much faster. Convert character codes back to letters at the end.
+  for(
+    let seqIdx = 0, seqsLen = sequences.length; 
+    seqIdx < seqsLen; 
+    seqIdx++
+  ){
+    const seqStr = sequences[seqIdx];
+    //for speed use char codes: https://stackoverflow.com/questions/4434076
+    for (
+      let positionIdx = 0, seqLen = seqStr.length;
+      positionIdx < seqLen;
+      positionIdx++
+    ) {
+      const charCode = seqStr.charCodeAt(positionIdx);
+
+      //note: checking whether key already exists is slower (I tested)
+      //by about 33% (i.e., 300ms vs 200ms on 10X beta lactamase)
+      allUniqueCharCodes[charCode] = true;
+    }
+  }
+
+  //INITIALIZE a character code version of positional letter counts
+  //that each contain all possible charCodes in the alignment, initialized
+  //to a count of zero.
+  const positionalCharCodeCounts = new Map<
+    number,
+    { [charCode: string]: number }
+  >();
+  for (let i = 0; i < maxSequenceLength; i++) {
+    positionalCharCodeCounts.set(
+      i,
+      Object.keys(allUniqueCharCodes).reduce((acc, charCode) => {
+        acc[charCode] = 0;
+        return acc;
+      }, {} as { [charCode: string]: number })
+    );
+  }
+
+  //INITIALIZE a character code version of global letter counts
+  const globalCharCodeCounts: { [charCode: string]: number } = {};
+  Object.keys(allUniqueCharCodes).forEach((charCode) => {
+    globalCharCodeCounts[charCode] = 0;
+  });
+
+  //empirically fill in character code counts from the sequences
+  for (
+    let seqIdx = 0, seqsLen = sequences.length;
+    seqIdx < seqsLen;
+    seqIdx++
+  ) {
+    const seqStr = sequences[seqIdx];
+    for (
+      let positionIdx = 0, len = seqStr.length;
+      positionIdx < len;
+      positionIdx++
+    ) {
+      const charCode = seqStr.charCodeAt(positionIdx);
+      globalCharCodeCounts[charCode] += 1;
+      positionalCharCodeCounts.get(positionIdx)![charCode] += 1;
+    }
+  };
+
+  const allUniqueLetters = Object.keys(allUniqueCharCodes).map((
+    charCodeStr: string
+  )=>{
+    return String.fromCharCode( parseInt(charCodeStr) );
+  });
+
+  return {
+    allUniqueLetters: allUniqueLetters,
+    globalCharCodeCounts: globalCharCodeCounts,
+    positionalCharCodeCounts: positionalCharCodeCounts
+  };
+}
+
+
+
 /**
  * Alignment
  * This class represents a multiple sequence alignment. During initialization,
@@ -82,7 +170,8 @@ export class Alignment {
   public constructor(
     name: string,
     sequencesAsInput: ISequence[],
-    removeDuplicateSequences: boolean
+    removeDuplicateSequences: boolean,
+    supressParseTime?: boolean
   ) {
     this.uuid = generateUUIDv4();
     this.name = name;
@@ -125,82 +214,37 @@ export class Alignment {
     this.querySequence = finalInputSequences[0];
     this.predictedNT = true;
 
-    // aggregate stats for each position and globally including
-    // the number of time each amino acid occurs
-    // ** this loop takes the bulk of the initialization time
-
-    let allUniqueCharCodes: { [charCode: string]: boolean } = {};
-    let sequenceLengths: { [length: string]: boolean } = {};
 
     start = new Date();
 
-    //Parse everything. Work in character code space as this is much faster.
-    //Convert character codes back to letters at the end.
-    finalInputSequences.forEach((seq) => {
-      const seqStr = seq.sequence;
+    //first check that all sequence lengths are the same
+    let sequenceLengths: { [length: string]: boolean } = {};
+    for(
+      let seqIdx = 0, seqsLen = finalInputSequences.length; 
+      seqIdx < seqsLen; 
+      seqIdx++
+    ){
+      const seqStr = finalInputSequences[seqIdx].sequence;
       sequenceLengths[seqStr.length] = true;
-
-      //for speed use char codes: https://stackoverflow.com/questions/4434076
-      for (
-        let positionIdx = 0, len = seqStr.length;
-        positionIdx < len;
-        positionIdx++
-      ) {
-        const charCode = seqStr.charCodeAt(positionIdx);
-
-        //note: checking whether key already exists is slower (I tested)
-        //by about 33% (i.e., 300ms vs 200ms on 10X beta lactamase)
-        allUniqueCharCodes[charCode] = true;
-      }
-    });
-
-    //check whether all sequence lenghts were equal
+    }
     if (Object.keys(sequenceLengths).length > 1) {
       throw Error(
         "Alignment sequences must all be the same length, but multiple sequence lengths were observed: " +
           Object.keys(sequenceLengths).join(", ")
       );
     }
-
     //all sequences are the same length
     this.maxSequenceLength = parseInt(Object.keys(sequenceLengths)[0]);
 
-    //initialize a character code version of positional letter counts
-    //that each contain all possible charCodes in the alignment, initialized
-    //to a count of zero.
-    const positionalCharCodeCounts = new Map<
-      number,
-      { [charCode: string]: number }
-    >();
-    for (let i = 0; i < this.maxSequenceLength; i++) {
-      positionalCharCodeCounts.set(
-        i,
-        Object.keys(allUniqueCharCodes).reduce((acc, charCode) => {
-          acc[charCode] = 0;
-          return acc;
-        }, {} as { [charCode: string]: number })
-      );
-    }
-
-    //initialize a character code version of global letter counts
-    const globalCharCodeCounts: { [charCode: string]: number } = {};
-    Object.keys(allUniqueCharCodes).forEach((charCode) => {
-      globalCharCodeCounts[charCode] = 0;
-    });
-
-    //empirically fill in character code counts from the sequences
-    finalInputSequences.forEach((seq) => {
-      const seqStr = seq.sequence;
-      for (
-        let positionIdx = 0, len = seqStr.length;
-        positionIdx < len;
-        positionIdx++
-      ) {
-        const charCode = seqStr.charCodeAt(positionIdx);
-        globalCharCodeCounts[charCode] += 1;
-        positionalCharCodeCounts.get(positionIdx)![charCode] += 1;
-      }
-    });
+    //iterate all sequences and gather and count unique characters
+    const {
+      allUniqueLetters,
+      globalCharCodeCounts,
+      positionalCharCodeCounts,
+    } = countCharacterCodes(
+      finalInputSequences.map(iseq=>iseq.sequence),
+      this.maxSequenceLength
+    );
 
     //convert the character codes in globalCharCodeCounts to letters
     this.positionalLetterCounts = Array.from(positionalCharCodeCounts).reduce(
@@ -241,33 +285,28 @@ export class Alignment {
 
     //predict whether a sequence is nt or aa - if no characters are
     //outside the Nucleotide codes, then call nt, otherwise aa.
-    this.predictedNT = Object.keys(allUniqueCharCodes).find((charCodeStr) => {
-      const charCode = parseInt(charCodeStr);
-      const isLowerAlpha = charCode > 96 && charCode < 123;
-      const isUpperAlpha = charCode > 64 && charCode < 91;
+    this.predictedNT = allUniqueLetters.find((letter) => {
+      const isLowerAlpha = letter.match(/[a-z]/);
+      const isUpperAlpha = letter.match(/[A-Z]/);
       if (isUpperAlpha || isLowerAlpha) {
         return (
-          Nucleotide.fromSingleLetterCode(String.fromCharCode(charCode)) ===
-          Nucleotide.UNKNOWN
+          Nucleotide.fromSingleLetterCode(letter) === Nucleotide.UNKNOWN
         );
       }
       return false;
-    })
-      ? false
-      : true;
+    }) ? false : true;
 
     //extract all the upper letter characters
-    this.allUpperAlphaLettersInAlignmentSorted = Object.keys(
-      allUniqueCharCodes
-    ).reduce((acc, charCodeStr) => {
-      const charCode = parseInt(charCodeStr);
-      if (charCode > 64 && charCode < 91) {
+    this.allUpperAlphaLettersInAlignmentSorted = allUniqueLetters.reduce((
+      acc, letter
+    ) => {
+      if(letter.match(/[A-Z]/)){
         acc.push(
-          String.fromCharCode(charCode) as UpperCaseLetters
+          letter as UpperCaseLetters
         );
       }
       return acc;
-    }, [] as UpperCaseLetters[]);
+    }, [] as UpperCaseLetters[]).sort();
 
     //extract consensus
     this.consensus = {
@@ -307,11 +346,13 @@ export class Alignment {
         .join(""),
     };
 
-    console.log(
-      "done parsing alignment. took " +
-        (new Date().getTime() - start.getTime()) +
-        "ms"
-    );
+    if(!supressParseTime){
+      console.log(
+        "done parsing alignment. took " +
+          (new Date().getTime() - start.getTime()) +
+          "ms"
+      );
+    }
   }
 
   /**
@@ -515,8 +556,10 @@ export class Alignment {
     return this.querySequence;
   }
 
-
-  static getMSAColors = (
+  // quick lookup of colors for all letters at each position, i.e.:
+  //   const val = getSequenceColors(...)
+  //   const color = val[posIdx][letter];
+  static getPositionalLetterColors = (
     sequences: string[],
     querySequence: string,
     consensusSequence: string,
@@ -524,73 +567,165 @@ export class Alignment {
     positionsToStyle: PositionsToStyle,
     residueColoring: ResidueColoring,
     colorScheme: IColorScheme
-  ): {
-    letter: string,
-    backgroundColor: ICombinedColor,
-    letterColor: ICombinedColor
-  }[][] => {
+  ) =>{
+    if(sequences.length < 1){
+      return {};
+    }
+
+    //iterate all sequences and gather and count unique characters
+    const {
+      allUniqueLetters
+    } = countCharacterCodes(
+      sequences,
+      sequences[0].length
+    );
+    
     const moleculeClass = alignmentType === AlignmentTypes.AMINOACID 
       ? AminoAcid 
       : Nucleotide;
-
-    const letterToColor = moleculeClass.list().reduce((acc, mol)=>{
-      const letter = mol.singleLetterCode;
-      const letterColoring = moleculeClass.fromSingleLetterCode(
-          letter
-        ).colors.get(
-          colorScheme
-        )!.get(
-          residueColoring
-        )!;
-      acc[letter] = {
-        letter: letter,
-        backgroundColor: letterColoring.backgroundColor,
-        letterColor: letterColoring.letterColor
-      }
-      return acc;
-    }, {} as {
-      [letter: string]: ReturnType<typeof Alignment.getMSAColors>[number][number]
-    });
-
     const UNKNOWN_COLORS = moleculeClass.UNKNOWN.colors.get(
         colorScheme
       )!.get(
         residueColoring
       )!;
 
-    return sequences.map((seq) => {
-      return seq.split("").map((letter, posIdx)=>{
-        const unknownLetterColor = {
-          ...UNKNOWN_COLORS,
-          letter: letter
-        };
-        const letterColor = letterToColor[letter]
-          ? letterToColor[letter]
-          : unknownLetterColor;
+    const toReturn = {} as { [posIdx: number]: { 
+      [letter: string]: {
+        letter: string,
+        backgroundColor: ICombinedColor,
+        letterColor: ICombinedColor
+      }
+    }};
 
-        //if all positions are colored, return the colors immeditally
-        if (positionsToStyle===PositionsToStyle.ALL) return letterColor;
-        
-        //only some positions are styled, figure out if this is one of
-        //them otherwise return default
-        return positionsToStyle === PositionsToStyle.QUERY
-          ? querySequence[posIdx] === letter
-            ? letterColor 
-            : unknownLetterColor
-          : positionsToStyle === PositionsToStyle.QUERY_DIFF
-            ? querySequence[posIdx] !== letter
-              ? letterColor
-              : unknownLetterColor
-            : positionsToStyle === PositionsToStyle.CONSENSUS
-              ? consensusSequence[posIdx] === letter
-                ? letterColor
-                : unknownLetterColor
-              : consensusSequence[posIdx] !== letter
-                ? letterColor
-                : unknownLetterColor
-      });
-    });
+    for(
+      var posIdx = 0, seqLen = sequences[0].length;
+      posIdx < seqLen;
+      posIdx++
+    ){
+      const letterColorsForPosition: { 
+        [letter: string]: {
+          letter: string,
+          backgroundColor: ICombinedColor,
+          letterColor: ICombinedColor
+        }
+      } = {};
+
+      for(
+        var lettersIdx = 0, lettersLen = allUniqueLetters.length;
+        lettersIdx < lettersLen;
+        lettersIdx++
+      ){
+        const letter = allUniqueLetters[lettersIdx];
+        const colorIfStyled = moleculeClass.fromSingleLetterCode(letter).colors.get(
+          colorScheme
+        )!.get(
+          residueColoring
+        )!;
+
+        const finalColor = (positionsToStyle===PositionsToStyle.ALL)
+          ? colorIfStyled
+          : positionsToStyle === PositionsToStyle.QUERY
+            ? querySequence[posIdx] === letter
+              ? colorIfStyled
+              : UNKNOWN_COLORS
+            : positionsToStyle === PositionsToStyle.QUERY_DIFF
+              ? querySequence[posIdx] !== letter
+                ? colorIfStyled
+                : UNKNOWN_COLORS
+              : positionsToStyle === PositionsToStyle.CONSENSUS
+                ? consensusSequence[posIdx] === letter
+                  ? colorIfStyled
+                  : UNKNOWN_COLORS
+                : consensusSequence[posIdx] !== letter
+                  ? colorIfStyled
+                  : UNKNOWN_COLORS;
+
+        letterColorsForPosition[letter] = {
+          letter: letter,
+          ...finalColor
+        };
+      }
+      toReturn[posIdx] = letterColorsForPosition;
+    }
+    return toReturn;
   }
+
+  //this has memory bloat. better to calculate when needed and so done above
+  //commented out, but left for posterity.
+  //static getMSAColors = (
+  //  sequences: string[],
+  //  querySequence: string,
+  //  consensusSequence: string,
+  //  alignmentType: AlignmentTypes,
+  //  positionsToStyle: PositionsToStyle,
+  //  residueColoring: ResidueColoring,
+  //  colorScheme: IColorScheme
+  //): {
+  //  letter: string,
+  //  backgroundColor: ICombinedColor,
+  //  letterColor: ICombinedColor
+  //}[][] => {
+  //  const moleculeClass = alignmentType === AlignmentTypes.AMINOACID 
+  //    ? AminoAcid 
+  //    : Nucleotide;
+  //  const letterToColor = moleculeClass.list().reduce((acc, mol)=>{
+  //    const letter = mol.singleLetterCode;
+  //    const letterColoring = moleculeClass.fromSingleLetterCode(
+  //        letter
+  //      ).colors.get(
+  //        colorScheme
+  //      )!.get(
+  //        residueColoring
+  //      )!;
+  //    acc[letter] = {
+  //      letter: letter,
+  //      backgroundColor: letterColoring.backgroundColor,
+  //      letterColor: letterColoring.letterColor
+  //    }
+  //    return acc;
+  //  }, {} as {
+  //    [letter: string]: ReturnType<typeof Alignment.getMSAColors>[number][number]
+  //  });
+//
+  //  const UNKNOWN_COLORS = moleculeClass.UNKNOWN.colors.get(
+  //      colorScheme
+  //    )!.get(
+  //      residueColoring
+  //    )!;
+//
+  //  return sequences.map((seq) => {
+  //    return seq.split("").map((letter, posIdx)=>{
+  //      const unknownLetterColor = {
+  //        ...UNKNOWN_COLORS,
+  //        letter: letter
+  //      };
+  //      const letterColor = letterToColor[letter]
+  //        ? letterToColor[letter]
+  //        : unknownLetterColor;
+//
+  //      //if all positions are colored, return the colors immeditally
+  //      if (positionsToStyle===PositionsToStyle.ALL) return letterColor;
+  //      
+  //      //only some positions are styled, figure out if this is one of
+  //      //them otherwise return default
+  //      return positionsToStyle === PositionsToStyle.QUERY
+  //        ? querySequence[posIdx] === letter
+  //          ? letterColor 
+  //          : unknownLetterColor
+  //        : positionsToStyle === PositionsToStyle.QUERY_DIFF
+  //          ? querySequence[posIdx] !== letter
+  //            ? letterColor
+  //            : unknownLetterColor
+  //          : positionsToStyle === PositionsToStyle.CONSENSUS
+  //            ? consensusSequence[posIdx] === letter
+  //              ? letterColor
+  //              : unknownLetterColor
+  //            : consensusSequence[posIdx] !== letter
+  //              ? letterColor
+  //              : unknownLetterColor
+  //    });
+  //  });
+  //}
   
   /**
    * Set the query sequence

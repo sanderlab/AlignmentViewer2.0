@@ -380,7 +380,7 @@ export function AlignmentDetailsLetters(props: {
   //with each letter color as key and each value is an array of
   //with each entry 
   const letterColorToLocations = useMemo(()=>{
-    const msaColors = Alignment.getMSAColors(
+    const msaColors2 = Alignment.getPositionalLetterColors(
       slicedSequences,
       querySequence,
       consensusSequence,
@@ -390,42 +390,34 @@ export function AlignmentDetailsLetters(props: {
       alignmentStyle.selectedColorScheme
     );
 
-    return msaColors.reduce((acc, seqColorArr, seqIdx)=>{
-      seqColorArr.forEach((letterColor, posIdx) => {
-        if(!acc[letterColor.letterColor.hexString]){
-          acc[letterColor.letterColor.hexString] = {};
-        }
-        if(!acc[letterColor.letterColor.hexString][seqIdx]){
-          acc[letterColor.letterColor.hexString][seqIdx] = [];
-        }
-        acc[letterColor.letterColor.hexString][seqIdx].push(posIdx);
-      });
-      return acc;
-    }, {} as {[letterColor: string]: { [seqId: number]: number[] }});
+    const toReturn = {} as {
+      [letterColor: string]: { 
+        [seqIdx: number]: number[] 
+    }};
 
-
-    /*return slicedSequences.reduce((colorsAcc, seqStr, seqIdx)=>{
-      for (let positionIdx=0, n = seqStr.length; positionIdx < n; ++positionIdx){
-        const letter = seqStr[positionIdx];
-        const color = getLetterColor(
-          letter,
-          positionIdx,
-          consensusSequence,
-          querySequence,
-          alignmentStyle,
-          positionsToStyle,
-          residueColoring
-        );
-        if (!colorsAcc[color.hexString]) {
-          colorsAcc[color.hexString] = {};
+    for(
+      let seqIdx = 0, lenSeqs = slicedSequences.length;
+      seqIdx < lenSeqs;
+      seqIdx++
+    ){
+      const seq = slicedSequences[seqIdx];
+      for(      
+        let posIdx = 0, numPos = seq.length;
+        posIdx < numPos;
+        posIdx++
+      ){
+        const letter = seq[posIdx];
+        const letterColorAtPos = msaColors2[posIdx][letter];
+        if(!toReturn[letterColorAtPos.letterColor.hexString]){
+          toReturn[letterColorAtPos.letterColor.hexString] = {};
         }
-        if (!colorsAcc[color.hexString][seqIdx]) {
-          colorsAcc[color.hexString][seqIdx] = [];
+        if(!toReturn[letterColorAtPos.letterColor.hexString][seqIdx]){
+          toReturn[letterColorAtPos.letterColor.hexString][seqIdx] = [];
         }
-        colorsAcc[color.hexString][seqIdx].push(positionIdx);
+        toReturn[letterColorAtPos.letterColor.hexString][seqIdx].push(posIdx)
       }
-      return colorsAcc;
-    }, {} as {[letterColor: string]: { [seqId: number]: number[] }})*/
+    }
+    return toReturn;
   }, [
     slicedSequences, //changes too frequently. what is that about?
     alignmentStyle, 

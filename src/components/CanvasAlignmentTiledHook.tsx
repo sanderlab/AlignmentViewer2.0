@@ -62,8 +62,8 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
   const fullWidth = sequences.length > 0 ? sequences[0].length : 0;
   const fullHeight = sequences.length;
 
-  const msaColors = useMemo(()=>{
-    return Alignment.getMSAColors(
+  const positionalLetterColors = useMemo(()=>{
+    return Alignment.getPositionalLetterColors(
       sequences,
       querySequence,
       consensusSequence,
@@ -92,11 +92,11 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
 
     for (let seqIdx = 0; seqIdx < tileCanvas.height; seqIdx++) {
       for (let letterIdx = 0; letterIdx < tileCanvas.width; letterIdx++) {
-        const colorScheme = msaColors[
-            seqIdx + offsets.seqY
-          ][
-            letterIdx + offsets.letterX
-          ].backgroundColor.rgb;
+        const seq = sequences[seqIdx + offsets.seqY];
+        const posIdx = letterIdx + offsets.letterX;
+        const letter = seq[posIdx]
+        const colorScheme = positionalLetterColors[posIdx][letter].backgroundColor.rgb;
+        
         tileImageData.data[imageDataIdx] = colorScheme.red;
         tileImageData.data[imageDataIdx + 1] = colorScheme.green;
         tileImageData.data[imageDataIdx + 2] = colorScheme.blue;
@@ -106,7 +106,10 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
       }
     }
     tileCanvasContext.putImageData(tileImageData, 0, 0);
-  }, [msaColors]);
+  }, [
+    positionalLetterColors,
+    sequences
+  ]);
 
   const generateCanvasForTile = useCallback((
     tileXNumber: number,
@@ -155,8 +158,8 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
   }, [colorCanvasWithSequences])
 
   const tiledImages = useMemo((): ITiledImages => {
-    const targetTileWidth = Math.min(500, fullWidth);
-    const targetTileHeight = Math.min(500, fullHeight);
+    const targetTileWidth = Math.min(1000, 1000);
+    const targetTileHeight = Math.min(1000, 1000);
 
     const toreturn = {
       targetTileWidth: targetTileWidth,

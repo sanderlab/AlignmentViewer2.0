@@ -69,15 +69,16 @@ export function SequenceSearch(props: {
   const handleSearchChange = useCallback((
     e?: React.ChangeEvent<HTMLInputElement>
   )=>{
+    const minSearchStringSize = 3;
     const searchStr = e?.target.value 
       ? e?.target.value 
-      : lastSearchString
+      : lastSearchString && lastSearchString.length >= minSearchStringSize
         ? lastSearchString
         : "";
     setLastSearchString(searchStr);
     const lowerSearchStr = searchStr.toLowerCase();
     const results: ISearchResults[] = [];
-    if(searchStr.length >= 3) {
+    if(searchStr.length >= minSearchStringSize) {
       for(var i = 0; i < lowerOrderedSequences.length; i++){
         if(lowerOrderedSequences[i].indexOf(lowerSearchStr) !== -1 ||
            lowerOrderedSequenceIds[i].indexOf(lowerSearchStr) !== -1){
@@ -91,7 +92,10 @@ export function SequenceSearch(props: {
       }
     }
     const alignment = new Alignment(
-      "search results alignment", results, false
+      "search results alignment", 
+      results, 
+      false,   //keep duplicates
+      true     //supress start time
     )
     setSearchResults(alignment);
   }, [
@@ -173,9 +177,11 @@ export function SequenceSearch(props: {
             <label htmlFor="search-input">Search:</label>
             <input type="text" id="search-input" onChange={handleSearchChange} autoFocus={true}/>
             { !searchResults ? undefined : 
-              <span className="search-results-count">{
-                `${searchResults?.getSequenceCount().toLocaleString()} matches (of 
+              <span className="search-results-count">
+              { lastSearchString && lastSearchString.length > 2
+                ? `${searchResults?.getSequenceCount().toLocaleString()} matches (of 
                   ${sortedSequences.length.toLocaleString()})`
+                : "enter at 2 or more characters to begin searching"
               }
               </span>
             }
