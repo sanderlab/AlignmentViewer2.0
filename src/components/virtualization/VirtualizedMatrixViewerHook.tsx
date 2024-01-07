@@ -99,19 +99,19 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
 
   //state
   const [mouseHovering, setMouseHovering] = useState<boolean>(false);
-  const [countainerBounds, setCountainerBounds] = useState<IBounds | undefined>(undefined);
+  const [containerBounds, setCountainerBounds] = useState<IBounds | undefined>(undefined);
   const [containerUniqueId] = useState<string>(generateUUIDv4());
 
   //virtualization initialization
   const horizVirtualizationAxis = useReduxVirtualization(
     horizParams,
     containerUniqueId,
-    countainerBounds?.width
+    containerBounds?.width
   );
   const vertVirtualizationAxis = useReduxVirtualization(
     vertParams,
     containerUniqueId,
-    countainerBounds?.height
+    containerBounds?.height
   );
 
   //
@@ -429,25 +429,24 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   ]);
 
   const renderedHoverContent = useMemo(()=>{
-    if(!countainerBounds) { return undefined; }
+    if(!containerBounds) { return undefined; }
     const hoverTrackerSize = +styles.hoverTrackerSize; //needs to also be managed in css
-
     return (
       <>
         {!vertVirtualizationAxis?.hoveredEvent ? undefined : 
           <>
             {vertParams?.hoverTracker !== "start" && vertParams?.hoverTracker !== "both" ? undefined :
               <div className="hover-tracker-y triangle-right" style={{
-                left: countainerBounds.left - hoverTrackerSize,
-                top: countainerBounds.top
+                left: containerBounds.getLiveLeft() - hoverTrackerSize,
+                top: containerBounds.getLiveTop()
                     + vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
                     - (hoverTrackerSize/2), //half the height
             }}/>}
 
             {vertParams?.hoverTracker !== "end" && vertParams?.hoverTracker !== "both" ? undefined :
               <div className="hover-tracker-y triangle-left" style={{
-                left: countainerBounds.left + countainerBounds.width,
-                top: countainerBounds.top
+                left: containerBounds.getLiveLeft() + containerBounds.width,
+                top: containerBounds.getLiveTop()
                     + vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
                     - (hoverTrackerSize/2), //half the height
               }}/>}
@@ -459,16 +458,16 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
           <>
             {horizParams?.hoverTracker !== "start" && horizParams?.hoverTracker !== "both" ? undefined :
               <div className="hover-tracker-x triangle-down" style={{
-                top: countainerBounds.top - hoverTrackerSize,
-                left: countainerBounds.left
+                top: containerBounds.getLiveTop() - hoverTrackerSize,
+                left: containerBounds.getLiveLeft()
                       + horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
                       - (hoverTrackerSize/2), // 1/2 the width
             }}/>}
 
             {horizParams?.hoverTracker !== "end" && horizParams?.hoverTracker !== "both" ? undefined :
               <div className="hover-tracker-x triangle-up" style={{
-                top: countainerBounds.top + countainerBounds.height,
-                left: countainerBounds.left
+                top: containerBounds.getLiveTop() + containerBounds.height,
+                left: containerBounds.getLiveLeft()
                       + horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx
                       - (hoverTrackerSize/2), // 1/2 the width
               }}/>}
@@ -477,7 +476,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
       </>
     );
   }, [
-    countainerBounds,
+    containerBounds,
     horizParams?.hoverTracker,
     horizVirtualizationAxis?.hoveredEvent,
     vertParams?.hoverTracker,
@@ -490,7 +489,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     return (
       <>
         <div className="av2-virtualized-matrix" ref={ref}>
-          { !reduxInitialized || !ref
+          { !reduxInitialized || !ref //TODO: one area where we reinitialize stage
               ? undefined 
               : (
                 // simple way of enabling wheel scrolling and monitoring of
@@ -560,7 +559,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   //
   //
   return (
-    <div
+    <div className="virtualized-matrix-viewer"
       onMouseEnter={() => {
         setMouseHovering(true);
       }}

@@ -68,7 +68,7 @@ export function useResizeGrid(props: IResizeGridProps) {
   ]);
   
   return {
-    draggerElement: 
+    draggerFullScreenElement: 
       <div 
         className="full-screen-resize-dragger"
         style={{

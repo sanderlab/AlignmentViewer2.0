@@ -21,12 +21,17 @@ export interface IAdjustableWidth{
 
 export type IAlignmentViewerLayoutProps = {
   alignmentDetails: IMetadataAndContent,
-  barplots: IMetadataAndContent[],      //empty means no barplots
-  consensus?: IMetadataAndContent,      //undefined hides
-  query?: IMetadataAndContent,          //undefined hides
-  positionalAxis?: IMetadataAndContent, //undefined hides
-  logoPlot?: IMetadataAndContent,       //undefined hides
-  minimapPlot?: React.JSX.Element,      //undefined hides
+  consensus?: IMetadataAndContent,
+  query?: IMetadataAndContent,
+  positionalAxis?: IMetadataAndContent,
+  logoPlot?: IMetadataAndContent,
+  minimapPlot?: React.JSX.Element,
+
+  showConsensus: boolean,
+  showQuery: boolean,
+  showPositionalAxis: boolean,
+  showLogoPlot: boolean,
+  showMinimap: boolean,
 
   //misc
   rulerConsensusQueryHeightPx: number;
@@ -35,6 +40,8 @@ export type IAlignmentViewerLayoutProps = {
 } & Partial<typeof defaultProps>;
 
 const defaultProps = {
+  barplots: [] as IMetadataAndContent[], //undefined or length === 0 means no barplots
+
   //misc
   showMetadata: true,
 
@@ -73,13 +80,19 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
 
   const {
     //elements
+    barplots,
+    logoPlot,
     alignmentDetails,
     consensus,
     query,
     positionalAxis,
-    barplots,
-    logoPlot,
     minimapPlot,
+
+    showConsensus,
+    showQuery,
+    showPositionalAxis,
+    showLogoPlot,
+    showMinimap,
 
     //misc
     showMetadata,
@@ -107,8 +120,6 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   const {
     titleFontSize = rulerConsensusQueryHeightPx - 2
   } = props;
-
-  const showMinimap = minimapPlot !== undefined;
 
   const metadataStartingWidth = !showMetadata 
     ? 100 //won't be shown though so doesn't matter what is here
@@ -151,6 +162,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     metadataAndContent: IMetadataAndContent | undefined;
     metadataGridArea: string;
     contentGridArea: string;
+    forceHide?: boolean;
     metadataClassname?: string;
     contentClassname?: string;
   })=>{
@@ -159,6 +171,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
       metadataAndContent,
       metadataGridArea,
       contentGridArea,
+      forceHide = false,
       metadataClassname = "metadata-title",
       contentClassname = "content"
     } = props;
@@ -167,17 +180,23 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
       ? undefined 
       : (//empty tag doesn't support key, so need to use fragment
         <React.Fragment key={key}>
-          {!showMetadata ? undefined : (
-            <div className={`${metadataClassname}`} style={{
+          <div 
+            className={`${metadataClassname}`} 
+            style={{
               gridArea: metadataGridArea,
-              fontSize: titleFontSize
+              fontSize: titleFontSize,
+              display: !showMetadata || forceHide ? "none" : undefined
             }}>
-              {typeof metadataAndContent.metadata === "string"
-                ? `${metadataAndContent.metadata}:`
-                : metadataAndContent.metadata}
-            </div>
-          )}
-          <div className={contentClassname} style={{gridArea: contentGridArea}}>
+            {typeof metadataAndContent.metadata === "string"
+              ? `${metadataAndContent.metadata}:`
+              : metadataAndContent.metadata}
+          </div>
+          <div 
+            className={contentClassname} 
+            style={{
+              gridArea: contentGridArea,
+              display: forceHide ? "none" : undefined
+            }}>
             {metadataAndContent.content}
           </div>
         </React.Fragment>
@@ -191,15 +210,14 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //METADATA Resizing
   //
   const metadataBarResized = useCallback((newBarClientX: number)=>{
-    if(metadataSizing.type==="fixed-width" ||
-       currentGridDimensions?.left === undefined) return; //shouldn't happen
+    if(metadataSizing.type==="fixed-width" || !currentGridDimensions) return; //shouldn't happen
 
     //relate metadata width to offset of resizer
     const newProposedWidth = (
       newBarClientX - 
       (resizeBarSizePx/2) -             //center of resize element
       gapBetweenColumnsAndRowsPx -      //extra gap size between resizer and metadata
-      currentGridDimensions.left -     //actual offset of grid
+      currentGridDimensions.getLiveLeft() -     //actual offset of grid
       gapViewportLeftPx                 //gap between edge of browser and entire grid
     );
 
@@ -211,7 +229,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           : newProposedWidth
     );
   }, [
-    currentGridDimensions?.left,
+    currentGridDimensions,
     metadataSizing,
     resizeBarSizePx,
     gapBetweenColumnsAndRowsPx,
@@ -228,11 +246,10 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //MINIMAP Resizing
   //
   const minimapBarResized = useCallback((newBarClientX: number)=>{
-    if(minimapSizing.type==="fixed-width" || 
-       currentGridDimensions?.right === undefined) return; //shouldn't happen
+    if(minimapSizing.type==="fixed-width" || !currentGridDimensions) return; //shouldn't happen
 
     const newProposedWidth = (
-      currentGridDimensions.right -  //minimap is on the right side of the viewport
+      currentGridDimensions.getLiveRight() -  //minimap is on the right side of the viewport
       newBarClientX -                //on the right side of the screen so remove
       (resizeBarSizePx/2) -          //center of resize element
       gapBetweenColumnsAndRowsPx -   //size between 
@@ -247,7 +264,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           : newProposedWidth
     );
   }, [
-    currentGridDimensions?.right,
+    currentGridDimensions,
     minimapSizing,
     resizeBarSizePx,
     gapBetweenColumnsAndRowsPx,
@@ -288,19 +305,19 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
         );
       }),
 
-      ...!logoPlot 
+      ...!showLogoPlot 
         ? [] 
         : [accountForMetadataAndMinimap("logo-metadata", "logo")],
 
-      ...!consensus 
+      ...!showConsensus 
         ? []
         : [accountForMetadataAndMinimap("consensus-metadata", "consensus")],
 
-      ...!query 
+      ...!showQuery 
         ? []
         : [accountForMetadataAndMinimap("query-metadata", "query")],
 
-      ...!positionalAxis 
+      ...!showPositionalAxis 
         ? []
         : [accountForMetadataAndMinimap("position-axis-metadata", "position-axis")],
       
@@ -312,10 +329,10 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     showMetadata, 
     showMinimap,
     barplots,
-    consensus,
-    logoPlot,
-    positionalAxis,
-    query
+    showConsensus,
+    showLogoPlot,
+    showPositionalAxis,
+    showQuery,
   ]);
 
   const gridTemplateColumns = useMemo(()=>{
@@ -351,12 +368,12 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
       {
         !showMetadata 
           ? undefined 
-          : metadataResizer.draggerElement
+          : metadataResizer.draggerFullScreenElement
       }
       {
         !showMinimap 
           ? undefined 
-          : minimapResizer.draggerElement
+          : minimapResizer.draggerFullScreenElement
       }
       <ReactResizeSensor onSizeChanged={resizeSensor}>
         <div className="alignment-viewer-2" style={{
@@ -368,10 +385,10 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           gridTemplateColumns: gridTemplateColumns,
           gridTemplateRows: `
             ${barplots.map(bp => `${barplotsHeightPx}px`).join("\n")}
-            ${logoPlot ? `${logoHeightPx}px` : ""} 
-            ${consensus ? `${rulerConsensusQueryHeightPx}px` : ""} 
-            ${query ? `${rulerConsensusQueryHeightPx}px` : ""} 
-            ${positionalAxis ? `${rulerConsensusQueryHeightPx}px` : ""}
+            ${showLogoPlot ? `${logoHeightPx}px` : ""} 
+            ${showConsensus ? `${rulerConsensusQueryHeightPx}px` : ""} 
+            ${showQuery ? `${rulerConsensusQueryHeightPx}px` : ""} 
+            ${showPositionalAxis ? `${rulerConsensusQueryHeightPx}px` : ""}
             auto
           `,
           gridTemplateAreas: gridTemplateAreas
@@ -400,6 +417,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
               metadataAndContent: logoPlot,
               metadataGridArea: "logo-metadata",
               contentGridArea: "logo",
+              forceHide: !showLogoPlot
             })
           }
 
@@ -409,6 +427,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
               metadataAndContent: consensus,
               metadataGridArea: "consensus-metadata",
               contentGridArea: "consensus",
+              forceHide: !showConsensus
             })
           }
 
@@ -418,6 +437,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
               metadataAndContent: query,
               metadataGridArea: "query-metadata",
               contentGridArea: "query",
+              forceHide: !showQuery
             })
           }
 
@@ -428,6 +448,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
               metadataAndContent: positionalAxis,
               metadataGridArea: "position-axis-metadata",
               contentGridArea: "position-axis",
+              forceHide: !showPositionalAxis
             })
           }
 
@@ -443,9 +464,14 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
 
           {
             // minimap 
-            !showMinimap
-              ? undefined 
-              : <div className="minimap-content" style={{gridArea: "minimap"}}>{minimapPlot}</div>
+            <div 
+              className="minimap-content" 
+              style={{
+                gridArea: "minimap", 
+                display: !showMinimap ? "none" : undefined
+              }}>
+              {minimapPlot}
+            </div>
           }
 
           {

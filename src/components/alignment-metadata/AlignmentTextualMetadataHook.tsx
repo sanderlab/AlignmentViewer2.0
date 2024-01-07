@@ -63,7 +63,7 @@ export function AlignmentTextualMetadata(
   //
   //load virtualizations - either from props or auto generate. or don't virtualize
   //
-  const seqLength = textForEachSeq[0].length;
+  const seqLength = textForEachSeq.length < 1 ? 0 : textForEachSeq[0].length; //empty alignment
   const vertVirtualization = useMemo(()=>{
     return props.vertVirtualization === "Automatic"
       ? {

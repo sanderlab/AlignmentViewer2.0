@@ -49,14 +49,14 @@ export function VirtualVerticalScrollbar(props: IVirtualScrollbarProps) {
     //         spacing that the scrollbar consumes.
     if (
       !scrollbarAreaProportions ||
-      scrollbarAreaProportions.clientTop !== bounds.top ||
+      scrollbarAreaProportions.clientTop !== bounds.getLiveTop() ||
       scrollbarAreaProportions.scrollareaBoundsHeight !== bounds.height
     ) {
       setScrollbarAreaProportions({
         //if there is also a horizontal scrollbar, stop scrollbar right above horizontal scrollbar
         draggerHolderHeight: bounds.height - horizontalScrollbarHeight, 
         scrollareaBoundsHeight: bounds.height,
-        clientTop: bounds.top,
+        clientTop: bounds.getLiveTop(),
       });
     }
   }, [scrollbarAreaProportions, horizontalScrollbarHeight]);

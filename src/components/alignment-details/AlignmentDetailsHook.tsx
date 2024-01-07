@@ -212,8 +212,9 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       }
     }
 
+    const seqLength = !seqsSliced[0] ? 0 : seqsSliced[0].length;
     const finalHeight = renderHeightPx ? renderHeightPx : residueHeight * seqsSliced.length;
-    const finalWidth = renderWidthPx ? renderWidthPx : residueWidth * seqsSliced[0].length;
+    const finalWidth = renderWidthPx ? renderWidthPx : residueWidth * seqLength;
 
     return (
       <div className="av2-viewport">

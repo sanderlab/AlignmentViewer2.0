@@ -56,8 +56,7 @@ export function MiniMap(props: IMiniMapProps) {
     undefined | { 
       canvasWidthPx: number; 
       canvasHeightPx: number, 
-      xPx: number, 
-      yPx: number 
+      getYPx: ()=>number 
     }
   >(undefined);
 
@@ -105,8 +104,7 @@ export function MiniMap(props: IMiniMapProps) {
       setMinimapHolderDimensions({
         canvasWidthPx: bounds.width,
         canvasHeightPx: bounds.height,
-        xPx: bounds.x,
-        yPx: bounds.y,
+        getYPx: bounds.getLiveTop,
       });
     }
   }, [
@@ -388,7 +386,7 @@ export function MiniMap(props: IMiniMapProps) {
                         offsets.draggerOffsetPx
                       }
                       highlighterMoved={handleHighlighterMoved}
-                      mainMinimapContainerY={minimapHolderDimensions.yPx}
+                      mainMinimapContainerY={minimapHolderDimensions.getYPx()}
                     />
               }   
             </ReactResizeSensor>

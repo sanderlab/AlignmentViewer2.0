@@ -12,11 +12,15 @@ import { ResizeSensor } from "css-element-queries";
 export interface IBounds {
   width: number;
   height: number;
-  left: number;
-  right: number;
-  top: number;
-  x: number;
-  y: number;
+
+  //the resize sensor does not detect position changes, only width/height
+  //changes. The positional info can be stale if the size doesn't change
+  //but the position does (e.g., hover tracking after a barplot/logo etc is 
+  //removed) - so query position when the user wants it and try to make
+  //clear that the sensor isn't detecting position changes..
+  getLiveLeft: ()=>number;
+  getLiveRight: ()=>number;
+  getLiveTop: ()=>number;
 }
 export interface IAlignmentMetadataProps {
   onSizeChanged(bounds: IBounds): void;
@@ -49,13 +53,27 @@ export function ReactResizeSensor(props: IAlignmentMetadataProps) {
         const rect = node.getBoundingClientRect() as DOMRect;
         if (
           !lastBounds.current ||
-          lastBounds.current.left !== rect.left ||
-          lastBounds.current.top !== rect.top ||
+          //lastBounds.current.left !== rect.left ||
+          //lastBounds.current.right !== rect.right ||
+          //lastBounds.current.top !== rect.top ||
           lastBounds.current.width !== rect.width ||
           lastBounds.current.height !== rect.height
         ) {
           lastBounds.current = rect;
-          onSizeChanged(rect);
+          onSizeChanged({
+            width: rect.width,
+            height: rect.height,
+            getLiveLeft: ()=>{ 
+              return hiddenMeasuringDivRef.current!.getBoundingClientRect().left;
+            },
+            getLiveRight: ()=>{ 
+              return hiddenMeasuringDivRef.current!.getBoundingClientRect().width + 
+                     hiddenMeasuringDivRef.current!.getBoundingClientRect().left;
+            },
+            getLiveTop: ()=>{ 
+              return hiddenMeasuringDivRef.current!.getBoundingClientRect().top;
+            }
+          });
         }
       });
     }
@@ -75,7 +93,7 @@ export function ReactResizeSensor(props: IAlignmentMetadataProps) {
    */
   return (
     <>
-      <div ref={resizeSensorRefCallback} className="resize-sensor"></div>
+      <div ref={resizeSensorRefCallback} className="resize-sensor-holder"></div>
       {children}
     </>
   );

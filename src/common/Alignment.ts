@@ -211,7 +211,9 @@ export class Alignment {
 
     //reset sequences as input in case duplicates have been removed
     const finalInputSequences = this.sequences.get(SequenceSorter.INPUT)!;
-    this.querySequence = finalInputSequences[0];
+    this.querySequence = finalInputSequences[0]
+      ? finalInputSequences[0]
+      : { id: "query", sequence: "" }; //empty alignment
     this.predictedNT = true;
 
 
@@ -235,6 +237,7 @@ export class Alignment {
     }
     //all sequences are the same length
     this.maxSequenceLength = parseInt(Object.keys(sequenceLengths)[0]);
+    this.maxSequenceLength = !this.maxSequenceLength ? 0 : this.maxSequenceLength;
 
     //iterate all sequences and gather and count unique characters
     const {

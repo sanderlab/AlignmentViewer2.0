@@ -429,7 +429,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   //minimap
   const renderedMinimap = useMemo(()=>{
-    return !showMinimap ? undefined : (
+    return ( //!showMinimap ? undefined : //don't use undefined - issues with too many webgel contets 
       <MiniMap
         alignment={alignment}
         alignmentStyle={style}
@@ -441,7 +441,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       />
     );
   }, [
-    showMinimap,
     alignment, 
     style,
     positionsToStyle,
@@ -454,7 +453,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   //
   return (
     <Provider store={reduxStore}>
-      {!alignment || disableSearch || !showSearch ? undefined : 
+      {!alignment || disableSearch ? undefined : 
         <div style={{display: !showSearch ? "none" : undefined}}>
           <SequenceSearch
             closePressed={()=>{setShowSearch(false);}}
@@ -468,6 +467,12 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       }
       <AlignmentViewerLayout
         showMetadata={showAnnotations}
+        showPositionalAxis={showRuler}
+        showLogoPlot={showLogo}
+        showQuery={showQuery}
+        showConsensus={showConsensus}
+        showMinimap={showMinimap}
+
         rulerConsensusQueryHeightPx={residueHeight}
 
         metadataSizing={metadataSizing}
@@ -521,17 +526,17 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           )
         }}
 
-        consensus={!showConsensus ? undefined : {
+        consensus={{
           metadata: "Consensus",
           content: renderedConsensusSeq
         }}
 
-        query={!showQuery ? undefined : {
+        query={{
           metadata: "Query",
           content: renderedQuerySeq
         }}
 
-        positionalAxis={!showRuler ? undefined : {
+        positionalAxis={{
           metadata: "Position",
           content: renderedPositionAxis
         }}
@@ -548,12 +553,12 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           })
         }
 
-        logoPlot={!showLogo ? undefined : {
+        logoPlot={{
           metadata: "Logo",
           content: renderedSequenceLogo,
         }}
 
-        minimapPlot={!showMinimap ? undefined : renderedMinimap}
+        minimapPlot={renderedMinimap}
       /> 
     </Provider>
   );

@@ -48,12 +48,12 @@ export function VirtualHorizontalScrollbar(props: IVirtualScrollbarProps) {
     //         spacing that the scrollbar consumes.
     if (
       !scrollbarHolderProportions ||
-      scrollbarHolderProportions.left !== bounds.left ||
+      scrollbarHolderProportions.left !== bounds.getLiveLeft() ||
       scrollbarHolderProportions.width !== bounds.width
     ) {
       setScrollbarHolderProportions({
         width: bounds.width - verticalScrollbarWidth,
-        left: bounds.left,
+        left: bounds.getLiveLeft(),
       });
     }
   }, [scrollbarHolderProportions, verticalScrollbarWidth]);

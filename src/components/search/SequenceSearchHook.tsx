@@ -5,10 +5,9 @@ import "./SequenceSearch.scss";
 import { AminoAcidAlignmentStyle, NucleotideAlignmentStyle, PositionsToStyle, ResidueColoring } from "../../common/MolecularStyles";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alignment } from "../../common/Alignment";
-import { AlignmentViewer } from "../AlignmentViewerHook";
+import { AlignmentViewer, IBarplotExposedProps } from "../AlignmentViewerHook";
 import { IFixedWidth } from "../layout/AlignmentViewerLayoutHook";
 import { PreconfiguredPositionalBarplots } from "../PositionalBarplotHook";
-import { generateUUIDv4 } from "../../common/Utils";
 
 interface ISearchResults {
   alignmentIdx: number;
@@ -37,6 +36,8 @@ export function SequenceSearch(props: {
     positionsToStyle,
     residueColoring
   } = props;
+
+  const MIN_SEARCH_STRING_SIZE = 3;
 
   //const maxResultsToShow = 100;
 
@@ -69,16 +70,15 @@ export function SequenceSearch(props: {
   const handleSearchChange = useCallback((
     e?: React.ChangeEvent<HTMLInputElement>
   )=>{
-    const minSearchStringSize = 3;
     const searchStr = e?.target.value 
       ? e?.target.value 
-      : lastSearchString && lastSearchString.length >= minSearchStringSize
+      : lastSearchString && lastSearchString.length >= MIN_SEARCH_STRING_SIZE
         ? lastSearchString
         : "";
     setLastSearchString(searchStr);
     const lowerSearchStr = searchStr.toLowerCase();
     const results: ISearchResults[] = [];
-    if(searchStr.length >= minSearchStringSize) {
+    if(searchStr.length >= MIN_SEARCH_STRING_SIZE) {
       for(var i = 0; i < lowerOrderedSequences.length; i++){
         if(lowerOrderedSequences[i].indexOf(lowerSearchStr) !== -1 ||
            lowerOrderedSequenceIds[i].indexOf(lowerSearchStr) !== -1){
@@ -96,7 +96,7 @@ export function SequenceSearch(props: {
       results, 
       false,   //keep duplicates
       true     //supress start time
-    )
+    );
     setSearchResults(alignment);
   }, [
     sortedSequenceIds,
@@ -118,6 +118,7 @@ export function SequenceSearch(props: {
     residueColoring
   ]);
   
+  /*
   const avCache = useMemo(()=>{
     return !searchResults || searchResults.getSequenceCount() < 1 ? undefined : (
       <AlignmentViewer 
@@ -147,8 +148,24 @@ export function SequenceSearch(props: {
     style, 
     positionsToStyle,
     residueColoring
-  ]);
+  ]);*/
 
+  const barplotsCache = useMemo(()=>{
+    return [{
+      svgId: `search-conservation`,
+      dataSeriesSet: [
+        PreconfiguredPositionalBarplots.Conservation
+      ],
+      tooltipPlacement: undefined
+    }] as IBarplotExposedProps[];
+  }, []);
+
+  const metadataSizingCache = useMemo(()=>{
+    return {
+      type: "fixed-width",
+      width: 100
+    } as IFixedWidth
+  }, []);
 
   //
   // render
@@ -181,15 +198,28 @@ export function SequenceSearch(props: {
               { lastSearchString && lastSearchString.length > 2
                 ? `${searchResults?.getSequenceCount().toLocaleString()} matches (of 
                   ${sortedSequences.length.toLocaleString()})`
-                : "enter at 2 or more characters to begin searching"
+                : `enter ${MIN_SEARCH_STRING_SIZE}+ characters search`
               }
               </span>
             }
           </div>
           <div className="search-bar-results-separator"/>
           <div className="search-results">
-            <div style={{display: !searchResults ? "none" : undefined}}>
-              {avCache}
+            <div style={{display: !searchResults || searchResults.getSequenceCount() < 1 ? "none" : undefined}}>
+              { !searchResults ? undefined :
+                <AlignmentViewer 
+                  alignment={searchResults}
+                  style={style} 
+                  positionsToStyle={positionsToStyle} 
+                  residueColoring={residueColoring}
+                  barplots={barplotsCache}
+                  disableSearch={true}
+                  zoomLevel={8}
+                  showQuery={false}
+                  showAnnotations={true}
+                  showMinimap={false}
+                  metadataSizing={metadataSizingCache}/>
+              }
             </div>
           </div>
 
