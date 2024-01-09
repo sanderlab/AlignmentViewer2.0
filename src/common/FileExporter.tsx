@@ -868,49 +868,7 @@ const getFullViewportSvgString = (props: {
           backgroundColor: string;
           letterColor: string
         }[]);
-
-
-        /*const colorArr = lettersAtPosition.reduce((acc, letter) => {
-          const letterColor = letterToColors[letter];
-
-          if(
-            showElementsWithUnknownColors ||
-            letterColor !== letterToColors[moleculeClass.UNKNOWN.singleLetterCode]
-          ){
-            acc.push(
-              (positionsToStyle === PositionsToStyle.QUERY && letter === querySeq[posIdx]) ||
-              (positionsToStyle === PositionsToStyle.QUERY_DIFF && letter !== querySeq[posIdx]) ||
-              (positionsToStyle === PositionsToStyle.CONSENSUS && letter === consensusSeq[posIdx]) ||
-              (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && letter !== consensusSeq[posIdx])
-                ? letterColor
-            )
-          }
-          if(
-            (positionsToStyle === PositionsToStyle.QUERY && letter === querySeq[posIdx]) ||
-            (positionsToStyle === PositionsToStyle.QUERY_DIFF && letter !== querySeq[posIdx]) ||
-            (positionsToStyle === PositionsToStyle.CONSENSUS && letter === consensusSeq[posIdx]) ||
-            (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && letter !== consensusSeq[posIdx])
-          ){
-            acc.push( letterToColors[letter] );
-          }
-          else if(
-            showElementsWithUnknownColors ||
-            
-          ){
-            acc.push(
-              { 
-                ...letterToColors[moleculeClass.UNKNOWN.singleLetterCode],
-                letter: letter //set the letter to be correct with the unknown style
-              }
-            )
-          }
-          return acc;
-        }, [] as {
-          letter: string;
-          backgroundColor: string;
-          letterColor: string
-        }[]);*/
-
+        
         return colorArr.map(colors=>{
           return getLetterDef(
             getIdForLetter(colors.letter, posIdx), 
