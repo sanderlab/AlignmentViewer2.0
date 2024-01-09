@@ -385,13 +385,13 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         }}
         xmlns="http://www.w3.org/2000/svg"
       >
-        {!defaultColor ? undefined : (
+        {!defaultColor ? undefined : ( //defaults
           <style type="text/css">{`
-            path{
+            .av2-sequence-logo path{
               color: ${defaultColor};
               fill: ${defaultColor};
             }
-            rect{
+            .av2-sequence-logo rect{
               color: ${defaultColor};
               fill: ${defaultColor};
             }
