@@ -643,12 +643,18 @@ const getFullViewportSvgString = (props: {
     ? AminoAcid 
     : Nucleotide;
   
+  const exportedPlusQueryConsSeqs = [
+    ...(!includeQuery ? [] : [alignment.getQuery()]),
+    ...(!includeConsensus ? [] : [alignment.getConsensus()]),
+    ...(exportedSeqs)
+  ];
+
   //Collect all unique letters being exported
   const allLettersInExport = [...new Set( //only take unique set
     [ //make sure to include unknown - this is what is exported for unknown letters,
       //lower case letters, and letters outside positions to style.
       moleculeClass.UNKNOWN.singleLetterCode,
-      ...exportedSeqs.map((seq)=>{
+      ...exportedPlusQueryConsSeqs.map((seq)=>{
         return seq.sequence.split("");
       }).join("")
     ])
@@ -656,11 +662,11 @@ const getFullViewportSvgString = (props: {
 
   //Collect unique letters being exported at each position 
   const posidxLetters = new Map<number, string[]>();
-  for(let posIdx=0; posIdx < exportedSeqs[0].sequence.length; posIdx++){
+  for(let posIdx=0; posIdx < exportedPlusQueryConsSeqs[0].sequence.length; posIdx++){
     posidxLetters.set(
       posIdx, 
       [...new Set( //only take unique set
-        exportedSeqs.reduce((acc, seq) => {
+        exportedPlusQueryConsSeqs.reduce((acc, seq) => {
           acc.push(seq.sequence[posIdx]);
           return acc;
         }, [] as string[])
@@ -824,17 +830,87 @@ const getFullViewportSvgString = (props: {
         //option 2: colors are based on position (i.e., same as or different than query/consensus)
         const querySeq = alignment.getQuery().sequence;
         const consensusSeq = alignment.getConsensus().sequence;
-        const colorArr = lettersAtPosition.map(letter => {
-          return (positionsToStyle === PositionsToStyle.QUERY && letter === querySeq[posIdx]) ||
-                  (positionsToStyle === PositionsToStyle.QUERY_DIFF && letter !== querySeq[posIdx]) ||
-                  (positionsToStyle === PositionsToStyle.CONSENSUS && letter === consensusSeq[posIdx]) ||
-                  (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && letter !== consensusSeq[posIdx])
-                  ? letterToColors[letter]
-                  : { 
-                      ...letterToColors[moleculeClass.UNKNOWN.singleLetterCode],
-                      letter: letter //set the letter to be correct with the unknown style
-                    };
-        });
+        const colorArr = lettersAtPosition.reduce((acc, letter) => {
+          const letterColor = letterToColors[letter];
+          const letterAtPosMatchesStyle = (
+            (positionsToStyle === PositionsToStyle.QUERY && letter === querySeq[posIdx]) ||
+            (positionsToStyle === PositionsToStyle.QUERY_DIFF && letter !== querySeq[posIdx]) ||
+            (positionsToStyle === PositionsToStyle.CONSENSUS && letter === consensusSeq[posIdx]) ||
+            (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && letter !== consensusSeq[posIdx])
+          );
+
+          if(true === true){
+            //if (showElementsWithUnknownColors){ 
+            //this is tricky to get right - we really want this only to be for the MSA
+            //and not for for query/consensus, but that means retooling the query/consensus
+            //rendering, i.e., not using the "use" elements. Also, we probably don't want to
+            //do this when positionsToStyle === PositionsToStyle.ALL. Removing flag for now
+            if(letterAtPosMatchesStyle) acc.push(letterColor);
+            else{
+              acc.push(
+                { 
+                  ...letterToColors[moleculeClass.UNKNOWN.singleLetterCode],
+                  letter: letter //set the letter to be correct with the unknown style
+                }
+              )
+            }
+          }
+          else if(
+            letterAtPosMatchesStyle && 
+            letterColor.backgroundColor !== 
+              letterToColors[moleculeClass.UNKNOWN.singleLetterCode].backgroundColor
+          ) {
+            acc.push(letterColor);
+          }
+          return acc;
+        }, [] as {
+          letter: string;
+          backgroundColor: string;
+          letterColor: string
+        }[]);
+
+
+        /*const colorArr = lettersAtPosition.reduce((acc, letter) => {
+          const letterColor = letterToColors[letter];
+
+          if(
+            showElementsWithUnknownColors ||
+            letterColor !== letterToColors[moleculeClass.UNKNOWN.singleLetterCode]
+          ){
+            acc.push(
+              (positionsToStyle === PositionsToStyle.QUERY && letter === querySeq[posIdx]) ||
+              (positionsToStyle === PositionsToStyle.QUERY_DIFF && letter !== querySeq[posIdx]) ||
+              (positionsToStyle === PositionsToStyle.CONSENSUS && letter === consensusSeq[posIdx]) ||
+              (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && letter !== consensusSeq[posIdx])
+                ? letterColor
+            )
+          }
+          if(
+            (positionsToStyle === PositionsToStyle.QUERY && letter === querySeq[posIdx]) ||
+            (positionsToStyle === PositionsToStyle.QUERY_DIFF && letter !== querySeq[posIdx]) ||
+            (positionsToStyle === PositionsToStyle.CONSENSUS && letter === consensusSeq[posIdx]) ||
+            (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && letter !== consensusSeq[posIdx])
+          ){
+            acc.push( letterToColors[letter] );
+          }
+          else if(
+            showElementsWithUnknownColors ||
+            
+          ){
+            acc.push(
+              { 
+                ...letterToColors[moleculeClass.UNKNOWN.singleLetterCode],
+                letter: letter //set the letter to be correct with the unknown style
+              }
+            )
+          }
+          return acc;
+        }, [] as {
+          letter: string;
+          backgroundColor: string;
+          letterColor: string
+        }[]);*/
+
         return colorArr.map(colors=>{
           return getLetterDef(
             getIdForLetter(colors.letter, posIdx), 
