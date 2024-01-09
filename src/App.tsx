@@ -11,6 +11,7 @@ import {
 } from "./common/Utils";
 import { 
   AlignmentViewer, 
+  AlignmentViewerType, 
   IBarplotExposedProps
 } from "./components/AlignmentViewerHook";
 import {
@@ -331,6 +332,8 @@ export default function App(props: AppProps){
       : (
         <div className="app-content">
           <AlignmentViewer
+            whichViewer={AlignmentViewerType.PrimaryViewer}
+            
             alignment={alignment}
             style={style}
             residueColoring={residueColoring}
@@ -1052,7 +1055,6 @@ export default function App(props: AppProps){
     state,
     style
   ]);
-
 
   return (
     <>

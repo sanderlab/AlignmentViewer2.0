@@ -6,13 +6,10 @@
  * Note: this component must be placed inside an absolute or relative
  * element - it will then take up the available space.
  */
-import * as React from "react";
 import "./MiniMap.scss";
+import * as React from "react";
 import * as PIXI from "pixi.js";
 import { useEffect, useCallback, useState, useMemo } from "react";
-import { Stage } from "@pixi/react";
-
-import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
 
 import { Alignment } from "../../common/Alignment";
 import { SequenceSorter } from "../../common/AlignmentSorter";
@@ -26,8 +23,11 @@ import { generateUUIDv4, stopSafariFromBlockingWindowWheel } from "../../common/
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 import { IControllerRole, IResponderRole, VirtualizationRole, VirtualizationStrategy } from "../virtualization/VirtualizationTypes";
 import { VirtualizationInputParams, useReduxVirtualization } from "../virtualization/VirtualizedMatrixReduxHook";
+import { useAlignmentTiles } from "../CanvasAlignmentTiledHook";
 
 export interface IMiniMapProps {
+  webGlApp: PIXI.Application<HTMLCanvasElement>;
+
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
   sortBy: SequenceSorter;
@@ -40,6 +40,7 @@ export interface IMiniMapProps {
 
 export function MiniMap(props: IMiniMapProps) {
   const {
+    webGlApp,
     alignment,
     sortBy,
     alignmentStyle,
@@ -48,10 +49,9 @@ export function MiniMap(props: IMiniMapProps) {
   } = props;
 
   //
-  //state and ref
+  //state
   //
   const [containerId] = useState<string>(generateUUIDv4()); //unique id for virtualization
-  const [app, setApp] = useState<PIXI.Application<PIXI.ICanvas>>();
   const [minimapHolderDimensions, setMinimapHolderDimensions] = useState<
     undefined | { 
       canvasWidthPx: number; 
@@ -59,11 +59,11 @@ export function MiniMap(props: IMiniMapProps) {
       getYPx: ()=>number 
     }
   >(undefined);
-
   const isStandalone = syncWithVerticalVirtualization ? false : true;
   const scale = minimapHolderDimensions
     ? minimapHolderDimensions.canvasWidthPx / alignment.getSequenceLength()
     : undefined;
+  const [canvasHolderDiv, setCanvasHolderDiv] = useState<HTMLDivElement|undefined>();
 
   //
   //virtualization - used to synchronize with viewport. also used as middleman for standalone
@@ -262,37 +262,30 @@ export function MiniMap(props: IMiniMapProps) {
   //handle wheel event
   const mmWheeled = useCallback((e: React.WheelEvent) => {
     if (
-      scale && setWorldOffsetFn && e.deltaY !== 0
+      scale && 
+      setWorldOffsetFn && 
+      e.deltaY !== 0 && 
+      offsets?.draggerWorldHeightPx !== undefined
     ){
       setWorldOffsetFn(
-        //a bit imprecise - we are just shifting the main viewport
-        //access without regard for minimap sizing other than
-        //the scale, but seems to be consistent scrolling
-        vertVirtualizationAxis.worldOffsetPx + (
+        vertVirtualizationAxis.worldOffsetPx 
+        + (((
           e.deltaY 
-          * vertVirtualizationAxis.cellSizePx 
-          * scale
+            / offsets.draggerWorldHeightPx //fraction of world height
+          ) * vertVirtualizationAxis.worldRenderSizePx) //make relative to world
+          / 10 //arbitrary slowdown
         )
       );
     }
   }, [
     scale,
     setWorldOffsetFn,
-    vertVirtualizationAxis?.cellSizePx,
-    vertVirtualizationAxis?.worldOffsetPx
+    offsets?.draggerWorldHeightPx,
+    vertVirtualizationAxis?.worldOffsetPx,
+    vertVirtualizationAxis?.worldRenderSizePx
   ]);
 
-  //useEffect(()=>{ //out of sync when used in an effect. unclear why.
-  //  if (app && mmOffsets?.minimapY !== undefined){ 
-  //    app.stage.position.set(0, -mmOffsets.minimapY * mmOffsets.scale);
-  //    app.stage.scale.set(mmOffsets.scale, mmOffsets.scale);
-  //  }
-  //}, [
-  //  app,
-  //  mmOffsets?.minimapY,
-  //  mmOffsets?.scale
-  //]);
-
+  //highlighter was dragged by the user
   const handleHighlighterMoved = useCallback((topYPx: number)=>{
     if (setWorldOffsetFn && offsets?.draggerHeightPx && minimapHolderDimensions?.canvasHeightPx){
       setWorldOffsetFn(
@@ -316,97 +309,196 @@ export function MiniMap(props: IMiniMapProps) {
   ]);
 
   //
-  //rendering
+  // deal with pixijs directly:
+  //   - mount
+  //   - update with sizing changes
+  //   - update with scale and position changes
+  //   - update with alignment changes
   //
-  const renderedCanvas = useMemo(()=>{
-    return (
-      <CanvasAlignmentTiled
-        sequences={sortedSequences}
-        consensusSequence={alignment.getConsensus().sequence}
-        querySequence={alignment.getQuery().sequence}
-        alignmentType={alignmentStyle.alignmentType}
-        colorScheme={alignmentStyle.selectedColorScheme}
-        positionsToStyle={positionsToStyle}
-        residueColoring={ResidueColoring.DARK}
-      />
-    );
+
+  //mount - maybe switch to callback? unclear what happens if webGlApp changed
+  const handleCanvasHolderMounted = useCallback((
+    div: HTMLDivElement
+  ) => {
+    //first mount
+    setCanvasHolderDiv(div);
+    webGlApp.stage.removeChildren();
+    if(div){ 
+      div.appendChild(webGlApp.view);
+    }
   }, [
-    alignment,
-    alignmentStyle.alignmentType,
-    alignmentStyle.selectedColorScheme,
-    positionsToStyle,
-    sortedSequences
+    webGlApp
+  ]);
+
+  //sizing changed
+  useEffect(()=>{
+    if(canvasHolderDiv){
+      const boundingBox = canvasHolderDiv.getBoundingClientRect();
+      webGlApp.renderer.resize(
+        boundingBox.width, boundingBox.height
+      );
+      webGlApp.render();
+    }
+  }, [
+    webGlApp,
+    canvasHolderDiv,
+    minimapHolderDimensions?.canvasHeightPx,
+    minimapHolderDimensions?.canvasWidthPx,
+  ]);
+
+  //scale / offset changed
+  useEffect(()=>{
+    if(canvasHolderDiv && offsets?.mmWorldOffsetPx !== undefined){
+      webGlApp.stage.position.set(0, -offsets.mmWorldOffsetPx);
+      webGlApp.stage.scale.set(scale, scale);
+      webGlApp.render();
+    }
+  }, [
+    webGlApp,
+    canvasHolderDiv,
+    scale,
+    offsets?.mmWorldOffsetPx
+  ]);
+
+  const alignmentSprites = useAlignmentTiles({
+    sequences: sortedSequences,
+    consensusSequence: alignment.getConsensus().sequence,
+    querySequence: alignment.getQuery().sequence,
+    alignmentType: alignmentStyle.alignmentType,
+    positionsToStyle: positionsToStyle,
+    colorScheme: alignmentStyle.selectedColorScheme,
+    residueColoring: ResidueColoring.DARK
+  });
+
+  //alignment or visualization params changed
+  useEffect(()=>{
+    if(canvasHolderDiv){
+      webGlApp.stage.removeChildren();
+      alignmentSprites.forEach((s)=>{
+        webGlApp.stage.addChild(s);
+      });
+      //initial rendering is full then is downsized
+      //uncommenting below will fix it, but not sure about performance issues
+      //as it will be set on
+      webGlApp.stage.scale.set(scale, scale); 
+      webGlApp.render();
+    }
+  }, [
+    alignmentSprites,
+    canvasHolderDiv,
+    scale,
+    webGlApp
+  ]);
+
+
+  //
+  //memoized stuff
+  //
+  const renderedMinimapHeaderFooter = useMemo(()=>{
+    return [
+      offsets?.mmNumSeqsAbove === undefined
+        ? undefined
+        : (
+          <div className="minimap-header">
+            {`${offsets.mmNumSeqsAbove.toLocaleString()} hidden`}
+          </div>
+        ),
+      offsets?.mmNumSeqsBelow === undefined
+        ? undefined
+        : (
+          <div className="minimap-footer">
+            {`${offsets.mmNumSeqsBelow.toLocaleString()} hidden`}
+          </div>
+        )
+    ]
+  }, [
+    offsets?.mmNumSeqsAbove,
+    offsets?.mmNumSeqsBelow
+  ]);
+
+  const renderedMinimapCanvasHolder = useMemo(()=>{
+    return (
+      <div 
+        className="minimap-canvas-holder" 
+        ref={handleCanvasHolderMounted}>
+      </div>
+    )
+  }, [
+    handleCanvasHolderMounted,
+  ]);
+
+  const renderedMinimapCanvasInteraction = useMemo(()=>{
+    return (
+      <div 
+        className="minimap-interaction" 
+        onClick={mmClicked}
+        onWheel={mmWheeled}>
+      </div>
+    )
+  }, [
+    mmClicked,
+    mmWheeled
+  ]);
+
+
+
+  const mainContainerYOffset = minimapHolderDimensions?.getYPx();
+  const renderedDragger = useMemo(()=>{
+    return (
+      viewportFullyRendersAlignment ||
+      !offsets?.draggerHeightPx || 
+      mainContainerYOffset === undefined
+    )
+      ? undefined 
+      : <MinimapDragger
+          fillColor={'#000000'}
+          baselineOpacity={0.4}
+          mouseoverOpacity={0.3}
+          draggingOpacity={0.2}
+          onWheel={mmWheeled}
+          highlighterHeightPx={ 
+            //since we render the minimap as single pixels the mapping is the same
+            offsets.draggerHeightPx
+          }
+          highlighterYPx={
+            offsets.draggerOffsetPx
+          }
+          highlighterMoved={handleHighlighterMoved}
+          mainMinimapContainerY={mainContainerYOffset}
+        />
+  }, [
+    handleHighlighterMoved,
+    mmWheeled,
+    offsets?.draggerHeightPx,
+    offsets?.draggerOffsetPx,
+    viewportFullyRendersAlignment,
+    mainContainerYOffset
   ]);
 
   const renderedAlignment = useMemo(() => {
     return (
-        <div className="minimap-viewport-holder">
-          <div className="minimap-header">
-            {!offsets ? undefined : 
-              `${offsets.mmNumSeqsAbove.toLocaleString()} hidden`
-            }
-          </div>
-          <div className="minimap-canvas-holder">
-            <ReactResizeSensor onSizeChanged={minimapHolderResized}>
-              {
-                !minimapHolderDimensions ? undefined : 
-                  <Stage
-                    width={minimapHolderDimensions.canvasWidthPx}
-                    height={minimapHolderDimensions.canvasHeightPx}
-                    raf={false}
-                    renderOnComponentChange={true}
-                    onMount={setApp}
-                    onClick={mmClicked}
-                    onWheel={mmWheeled}
-                    options={{ 
-                      antialias: true, 
-                      backgroundAlpha: 0
-                    }}
-                  > 
-                    {renderedCanvas}
-                  </Stage>
-              }
-              {
-                !minimapHolderDimensions || 
-                !offsets || 
-                viewportFullyRendersAlignment ||
-                offsets.mmWorldHeightPx < minimapHolderDimensions?.canvasHeightPx
-                  ? undefined 
-                  : <MinimapDragger
-                      fillColor={'#000000'}
-                      baselineOpacity={0.4}
-                      mouseoverOpacity={0.3}
-                      draggingOpacity={0.2}
-                      onWheel={mmWheeled}
-                      highlighterHeightPx={ 
-                        //since we render the minimap as single pixels the mapping is the same
-                        offsets.draggerHeightPx
-                      }
-                      highlighterYPx={
-                        offsets.draggerOffsetPx
-                      }
-                      highlighterMoved={handleHighlighterMoved}
-                      mainMinimapContainerY={minimapHolderDimensions.getYPx()}
-                    />
-              }   
-            </ReactResizeSensor>
-          </div>
-          <div className="minimap-footer">
-            {!offsets ? undefined : 
-              `${offsets.mmNumSeqsBelow.toLocaleString()} hidden`
-            }
-          </div>
+      <div className="minimap">
+
+        { renderedMinimapHeaderFooter[0] }
+
+        <div className="minimap-app-holder">
+          <ReactResizeSensor onSizeChanged={minimapHolderResized}>
+            { renderedMinimapCanvasHolder }
+            { renderedMinimapCanvasInteraction }
+            { renderedDragger }
+          </ReactResizeSensor>
         </div>
+
+        { renderedMinimapHeaderFooter[1] }
+
+      </div>
     )
   }, [ 
-    handleHighlighterMoved,
-    mmClicked,
-    offsets,
-    mmWheeled,
+    renderedMinimapCanvasInteraction,
+    renderedMinimapHeaderFooter,
+    renderedMinimapCanvasHolder,
+    renderedDragger,
     minimapHolderResized,
-    renderedCanvas,
-    viewportFullyRendersAlignment,
-    minimapHolderDimensions,
   ]);
 
   //
@@ -446,29 +538,7 @@ export function MiniMap(props: IMiniMapProps) {
     setWorldOffsetFn,
   ]);
 
-
-  //scale and position the minimap
-  if (
-    app?.stage?.position && 
-    app.stage.scale &&
-    offsets && scale
-  ){ 
-    //feels like this should be in an effect, but doesn't seem to work - it
-    //is out of sync for some reason. 
-    app.stage.position.set(0, -offsets.mmWorldOffsetPx);
-    app.stage.scale.set(scale, scale);
-  }
-
-  return (
-    <div
-      className="minimap"
-      style={{
-        //borderWidth: !frameSizing ? 0 : frameSizing.borderWidth,
-      }}
-    >
-      { renderedAlignment }
-    </div>
-  );
+  return renderedAlignment;
 }
 
 

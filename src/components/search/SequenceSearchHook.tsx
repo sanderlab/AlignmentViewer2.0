@@ -5,7 +5,7 @@ import "./SequenceSearch.scss";
 import { AminoAcidAlignmentStyle, NucleotideAlignmentStyle, PositionsToStyle, ResidueColoring } from "../../common/MolecularStyles";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alignment } from "../../common/Alignment";
-import { AlignmentViewer, IBarplotExposedProps } from "../AlignmentViewerHook";
+import { AlignmentViewer, AlignmentViewerType, IBarplotExposedProps } from "../AlignmentViewerHook";
 import { IFixedWidth } from "../layout/AlignmentViewerLayoutHook";
 import { PreconfiguredPositionalBarplots } from "../PositionalBarplotHook";
 
@@ -214,11 +214,12 @@ export function SequenceSearch(props: {
                   residueColoring={residueColoring}
                   barplots={barplotsCache}
                   disableSearch={true}
-                  zoomLevel={8}
+                  zoomLevel={6}
                   showQuery={false}
                   showAnnotations={true}
-                  showMinimap={false}
-                  metadataSizing={metadataSizingCache}/>
+                  showMinimap={true}
+                  metadataSizing={metadataSizingCache}
+                  whichViewer={AlignmentViewerType.SearchViewer}/>
               }
             </div>
           </div>

@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useResizeGrid } from "./ResizeGridHook";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 
-interface IMetadataAndContent{
+export interface IMetadataAndContent{
   metadata: string | React.JSX.Element,
   content: React.JSX.Element
 }

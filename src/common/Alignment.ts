@@ -88,14 +88,14 @@ const countCharacterCodes = (
     }
   };
 
-  const allUniqueLetters = Object.keys(allUniqueCharCodes).map((
+  const allUniqueChars = Object.keys(allUniqueCharCodes).map((
     charCodeStr: string
   )=>{
     return String.fromCharCode( parseInt(charCodeStr) );
   });
 
   return {
-    allUniqueLetters: allUniqueLetters,
+    allUniqueChars: allUniqueChars,
     globalCharCodeCounts: globalCharCodeCounts,
     positionalCharCodeCounts: positionalCharCodeCounts
   };
@@ -241,7 +241,7 @@ export class Alignment {
 
     //iterate all sequences and gather and count unique characters
     const {
-      allUniqueLetters,
+      allUniqueChars,
       globalCharCodeCounts,
       positionalCharCodeCounts,
     } = countCharacterCodes(
@@ -288,7 +288,7 @@ export class Alignment {
 
     //predict whether a sequence is nt or aa - if no characters are
     //outside the Nucleotide codes, then call nt, otherwise aa.
-    this.predictedNT = allUniqueLetters.find((letter) => {
+    this.predictedNT = allUniqueChars.find((letter) => {
       const isLowerAlpha = letter.match(/[a-z]/);
       const isUpperAlpha = letter.match(/[A-Z]/);
       if (isUpperAlpha || isLowerAlpha) {
@@ -300,7 +300,7 @@ export class Alignment {
     }) ? false : true;
 
     //extract all the upper letter characters
-    this.allUpperAlphaLettersInAlignmentSorted = allUniqueLetters.reduce((
+    this.allUpperAlphaLettersInAlignmentSorted = allUniqueChars.reduce((
       acc, letter
     ) => {
       if(letter.match(/[A-Z]/)){
@@ -562,6 +562,10 @@ export class Alignment {
   // quick lookup of colors for all letters at each position, i.e.:
   //   const val = getSequenceColors(...)
   //   const color = val[posIdx][letter];
+  //TODO: maybe put this into the alignment itself to cache and speed things up, then
+  //      again maybe it isn't necessary. Speed test? Would require retooling the
+  //      canvas alignment and alignment details hooks to no longer allow arbitrary
+  //      sequences.
   static getPositionalLetterColors = (
     sequences: string[],
     querySequence: string,
@@ -577,7 +581,7 @@ export class Alignment {
 
     //iterate all sequences and gather and count unique characters
     const {
-      allUniqueLetters
+      allUniqueChars
     } = countCharacterCodes(
       sequences,
       sequences[0].length
@@ -614,11 +618,11 @@ export class Alignment {
       } = {};
 
       for(
-        var lettersIdx = 0, lettersLen = allUniqueLetters.length;
+        var lettersIdx = 0, lettersLen = allUniqueChars.length;
         lettersIdx < lettersLen;
         lettersIdx++
       ){
-        const letter = allUniqueLetters[lettersIdx];
+        const letter = allUniqueChars[lettersIdx];
         const colorIfStyled = moleculeClass.fromSingleLetterCode(letter).colors.get(
           colorScheme
         )!.get(

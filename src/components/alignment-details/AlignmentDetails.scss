@@ -7,7 +7,7 @@
   height: 0;
 }
 
-.av2-viewport canvas.stage.hidden {
+.av2-viewport .canvas-holder.hidden canvas {
   display: none;
 }
 
@@ -19,12 +19,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  
-  .testing{
-    position: absolute;
-  }
 
-  canvas.stage {
+  canvas {
     position: absolute;
     image-rendering: optimizeSpeed;
     image-rendering: -moz-crisp-edges;

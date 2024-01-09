@@ -2,9 +2,8 @@
  * Hooks for pure webgl alignment details.
  */
 import "./AlignmentDetails.scss";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as PIXI from "pixi.js";
-import { Stage } from "@pixi/react";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -16,7 +15,6 @@ import {
   VirtualizedMatrixViewer, 
   VirtualizedVerticalViewer 
 } from "../virtualization/VirtualizedMatrixViewerHook";
-import { CanvasAlignmentTiled } from "../CanvasAlignmentTiledHook";
 import { 
   IControllerRole, 
   IResponderRole, 
@@ -29,9 +27,12 @@ import {
 } from "../virtualization/VirtualizationTypes";
 import { generateUUIDv4, startEndIdxToArray } from "../../common/Utils";
 import { Alignment } from "../../common/Alignment";
+import { useAlignmentTiles } from "../CanvasAlignmentTiledHook";
 
 
 export interface IAlignmentDetailsProps {
+  webGlApp: PIXI.Application<HTMLCanvasElement>;
+
   alignmentUUID: string;
   sequences: string[];
   consensusSequence: string;
@@ -66,6 +67,8 @@ export interface IAlignmentDetailsProps {
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //props
   const {
+    webGlApp,
+
     alignmentUUID,
     sequences,
     consensusSequence,
@@ -82,6 +85,8 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     horizontalHoverTracker = "end",
     matrixRendered
   } = props;
+
+  const [canvasHolderDiv, setCanvasHolderDiv] = useState<HTMLDivElement|undefined>();
 
   //user can either supply a virtualization, set it to be automatically created, or turn it off
   //completely. Initialize here based on user request.
@@ -129,11 +134,6 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
   ]);
 
   //
-  //state
-  //
-  const [app, setApp] = useState<PIXI.Application<PIXI.ICanvas>>();
-
-  //
   // useCallbacks
   //
   const sliceSequences = useCallback((
@@ -152,6 +152,58 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     }
     return toReturn;
   }, []);
+
+  //
+  // deal with pixijs directly:
+  //   - mount
+  //   - update with sizing changes
+  //   - update with scale and position changes
+  //   - update with alignment changes
+  //
+  //mount - unclear what happens if webGlApp changed. hmm
+  const handleCanvasHolderMounted = useCallback((
+    div: HTMLDivElement
+  ) => {
+    //first mount
+    setCanvasHolderDiv(div);
+    webGlApp.stage.removeChildren();
+    if(div) div.appendChild(webGlApp.view);
+  }, [
+    webGlApp
+  ]);
+
+  const alignmentSprites = useAlignmentTiles({
+    sequences: sequences,
+    consensusSequence: consensusSequence,
+    querySequence: querySequence,
+    alignmentType: alignmentStyle.alignmentType,
+    positionsToStyle: positionsToStyle,
+    colorScheme: alignmentStyle.selectedColorScheme,
+    residueColoring: residueColoring
+  });
+  //console.log('alignmentSprites:', alignmentSprites);
+
+  //alignment or visualization params changed
+  useEffect(()=>{
+    if(canvasHolderDiv){
+      webGlApp.stage.removeChildren();
+      alignmentSprites.forEach((s)=>{
+        webGlApp.stage.addChild(s);
+      });
+      //initial rendering is full then is downsized
+      //uncommenting below will fix it, but not sure about performance issues
+      //as it will be set on
+      webGlApp.stage.scale.set(residueWidth, residueHeight); 
+      webGlApp.render();
+    }
+  }, [
+    alignmentSprites,
+    canvasHolderDiv,
+    residueHeight,
+    residueWidth,
+    webGlApp,
+  ]);
+  
 
   const renderMatrixContent = useCallback(({
     firstColIdxToRender, lastColIdxToRender,
@@ -199,51 +251,40 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       return sequences[seqIdx];
     }, []);
 
-    if(app?.stage?.position && app.stage.scale){
-      const xPos = worldShiftLeftPx ? -worldShiftLeftPx : 0;
-      const yPos = worldShiftTopPx ? -worldShiftTopPx : 0;
-      //move and scale the background "squares" of the alignment around based on
-      //the scroll amount and residue sizing
-      if(app.stage.position.x !== xPos || app.stage.position.y !== yPos){
-        app.stage.position.set(xPos, yPos);
-      }
-      if(app.stage.scale.x !== residueWidth || app.stage.scale.y !== residueHeight){
-        app.stage.scale.set(residueWidth, residueHeight);
-      }
-    }
+    const xPos = worldShiftLeftPx ? -worldShiftLeftPx : 0;
+    const yPos = worldShiftTopPx ? -worldShiftTopPx : 0;
 
     const seqLength = !seqsSliced[0] ? 0 : seqsSliced[0].length;
     const finalHeight = renderHeightPx ? renderHeightPx : residueHeight * seqsSliced.length;
     const finalWidth = renderWidthPx ? renderWidthPx : residueWidth * seqLength;
 
+    //move and scale the background "squares" of the alignment around based on
+    //the scroll amount and residue sizing
+    let rerender = false;
+    if(webGlApp.stage.position.x !== xPos || webGlApp.stage.position.y !== yPos){
+      rerender = true;
+      webGlApp.stage.position.set(xPos, yPos);
+    }
+    if(webGlApp.stage.scale.x !== residueWidth || webGlApp.stage.scale.y !== residueHeight){
+      rerender = true;
+      webGlApp.stage.scale.set(residueWidth, residueHeight);
+    }
+    if(webGlApp.renderer.width !== finalWidth || webGlApp.renderer.height !== finalHeight){
+      rerender = true;
+      webGlApp.renderer.resize(finalWidth, finalHeight);
+    }
+    if(rerender){
+      webGlApp.render();
+    }
+
     return (
       <div className="av2-viewport">
-        <Stage 
+        <div 
           className={
-            ["stage", ...(
-              residueColoring === ResidueColoring.NO_BACKGROUND
-                ? ["hidden"]
-                : []
-            )].join(" ")
+            `canvas-holder${residueColoring === ResidueColoring.NO_BACKGROUND ? "hidden" : ""}`
           }
-          width={finalWidth}
-          height={finalHeight}
-          raf={false}
-          renderOnComponentChange={true}
-          onMount={setApp}
-          options={{ antialias: false, backgroundAlpha: 0 }}
-        >
-          <CanvasAlignmentTiled
-            sequences={sequences}
-            consensusSequence={consensusSequence}
-            querySequence={querySequence}
-            alignmentType={alignmentStyle.alignmentType}
-            colorScheme={alignmentStyle.selectedColorScheme}
-            positionsToStyle={positionsToStyle}
-            residueColoring={residueColoring}
-          />
-        </Stage>
-        
+          ref={handleCanvasHolderMounted}></div>
+
         <AlignmentDetailsLetters
           sequencesInViewport={fullSequencesInViewport}
           slicedSequences={seqsSliced}
@@ -258,21 +299,23 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
           horizontalOffset={renderShiftLeftPx}
           horizontalWorldOffset={worldShiftLeftPx}
         ></AlignmentDetailsLetters>
+
       </div>
     );
   }, [
     alignmentStyle,
-    positionsToStyle,
-    residueColoring,
     consensusSequence,
-    matrixRendered,
     fontSize,
+    handleCanvasHolderMounted,
+    matrixRendered,
+    positionsToStyle,
     querySequence,
+    residueColoring,
     residueHeight,
     residueWidth,
     sequences,
     sliceSequences,
-    app
+    webGlApp,
   ]);
 
   const horizontalParams: IVirtualizeParams | undefined = useMemo(()=>{
@@ -328,6 +371,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
               getContentForRows={renderMatrixContent}
             ></VirtualizedVerticalViewer>
           : <div>initializing...</div> //TODO: create a getInitializationContent function
+    
   );
 }
 
@@ -381,7 +425,7 @@ export function AlignmentDetailsLetters(props: {
   //with each letter color as key and each value is an array of
   //with each entry 
   const letterColorToLocations = useMemo(()=>{
-    const msaColors2 = Alignment.getPositionalLetterColors(
+    const msaColors = Alignment.getPositionalLetterColors(
       slicedSequences,
       querySequence,
       consensusSequence,
@@ -408,7 +452,7 @@ export function AlignmentDetailsLetters(props: {
         posIdx++
       ){
         const letter = seq[posIdx];
-        const letterColorAtPos = msaColors2[posIdx][letter];
+        const letterColorAtPos = msaColors[posIdx][letter];
         if(!toReturn[letterColorAtPos.letterColor.hexString]){
           toReturn[letterColorAtPos.letterColor.hexString] = {};
         }

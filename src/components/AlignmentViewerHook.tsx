@@ -32,9 +32,14 @@ import {
   IResponderRole, 
   VirtualizationRole
 } from "./virtualization/VirtualizationTypes";
-import { AlignmentViewerLayout, IAdjustableWidth, IFixedWidth } from "./layout/AlignmentViewerLayoutHook";
+import { AlignmentViewerLayout, IAdjustableWidth, IFixedWidth, IMetadataAndContent } from "./layout/AlignmentViewerLayoutHook";
 import { SequenceSearch } from "./search/SequenceSearchHook";
+import { WebGlContexts, getWebGlContext } from "../common/WebGlContextFactory";
 
+export enum AlignmentViewerType {
+  PrimaryViewer = "PrimaryViewer",
+  SearchViewer = "SearchViewer"
+}
 
 //
 // TYPES / INTERFACES
@@ -44,6 +49,7 @@ export type IAlignmentViewerProps = {
   style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   positionsToStyle: PositionsToStyle;
   residueColoring: ResidueColoring;
+  whichViewer: AlignmentViewerType;
   triggerShowSearch?: React.MutableRefObject<(() => void) | undefined>;
   mainViewportVisibleChanged?: (props: {
     seqIdxStart: number,
@@ -51,6 +57,7 @@ export type IAlignmentViewerProps = {
     posIdxStart: number,
     posIdxEnd: number
   }) => void;
+
 } & Partial<Readonly<typeof defaultProps>>;
 
 export type IBarplotExposedProps = Pick<
@@ -123,6 +130,8 @@ const defaultProps = {
 export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   const {
+    whichViewer,
+
     alignment,
     barplots,
     style,
@@ -377,9 +386,22 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   ]);
 
   //helper as we use this for both query and consensus
-  const renderSingleSequence = useCallback((sequence: string)=>{
+  const renderSingleSequence = useCallback((
+    sequence: string,
+    sequenceType: "consensus" | "query"
+  )=>{
     return attachEventListeners(
       <AlignmentDetails
+        webGlApp={
+          whichViewer === AlignmentViewerType.PrimaryViewer 
+            ? sequenceType === 'query'
+              ? getWebGlContext(WebGlContexts.PrimaryQuerySeq)
+              : getWebGlContext(WebGlContexts.PrimaryConsensusSeq)
+            : sequenceType === 'query'
+              ? getWebGlContext(WebGlContexts.SearchQuerySeq)
+              : getWebGlContext(WebGlContexts.SearchConsensusSeq)
+        }
+
         alignmentUUID={alignment.getUUID()}
         horizVirtualization={xViewportResponderVirtualization}
         vertVirtualization={"None"}
@@ -408,28 +430,41 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     residueHeight,
     residueWidth,
     style,
+    whichViewer,
     xViewportResponderVirtualization
   ]);
 
   //consensus
-  const renderedConsensusSeq = useMemo(()=>{
-    return renderSingleSequence(alignment.getConsensus().sequence);
+  const renderedConsensusSeq: IMetadataAndContent | undefined = useMemo(()=>{
+    return !showConsensus ? undefined : {
+      metadata: "Consensus",
+      content: renderSingleSequence(
+        alignment.getConsensus().sequence, "consensus"
+      )
+    };
   }, [
     alignment,
-    renderSingleSequence
+    renderSingleSequence,
+    showConsensus
   ]);
 
   //query
-  const renderedQuerySeq = useMemo(()=>{
-    return renderSingleSequence(alignment.getQuery().sequence);
+  const renderedQuerySeq: IMetadataAndContent | undefined = useMemo(()=>{
+    return !showQuery ? undefined : {
+      metadata: "Query",
+      content: renderSingleSequence(
+        alignment.getQuery().sequence, "query"
+      )
+    }
   }, [
     alignment,
-    renderSingleSequence
+    renderSingleSequence,
+    showQuery
   ]);
 
   //minimap
   const renderedMinimap = useMemo(()=>{
-    return ( //!showMinimap ? undefined : //don't use undefined - issues with too many webgel contets 
+    return ( !showMinimap ? undefined :
       <MiniMap
         alignment={alignment}
         alignmentStyle={style}
@@ -438,13 +473,20 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         syncWithVerticalVirtualization={
           yViewportResponderVirtualization
         }
+        webGlApp={
+          whichViewer === AlignmentViewerType.PrimaryViewer
+            ? getWebGlContext(WebGlContexts.PrimaryMinimap)
+            : getWebGlContext(WebGlContexts.SearchMinimap)
+        }
       />
     );
   }, [
     alignment, 
     style,
     positionsToStyle,
+    showMinimap,
     sortBy,
+    whichViewer,
     yViewportResponderVirtualization
   ]);
 
@@ -497,6 +539,11 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           ),
           content: attachEventListeners(
             <AlignmentDetails
+              webGlApp={
+                whichViewer === AlignmentViewerType.PrimaryViewer
+                  ? getWebGlContext(WebGlContexts.PrimaryViewport)
+                  : getWebGlContext(WebGlContexts.SearchViewport)
+              }
               alignmentUUID={alignment.getUUID()}
               vertVirtualization={yViewportControllerVirtualization}
               horizVirtualization={xViewportControllerVirtualization}
@@ -526,15 +573,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           )
         }}
 
-        consensus={{
-          metadata: "Consensus",
-          content: renderedConsensusSeq
-        }}
+        consensus={renderedConsensusSeq}
 
-        query={{
-          metadata: "Query",
-          content: renderedQuerySeq
-        }}
+        query={renderedQuerySeq}
 
         positionalAxis={{
           metadata: "Position",

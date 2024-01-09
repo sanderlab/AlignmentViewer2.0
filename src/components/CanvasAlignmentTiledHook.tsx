@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from "react";
-import { Sprite } from "@pixi/react";
+import { useCallback, useMemo } from "react";
+import * as PIXI from 'pixi.js';
 
 import {
   PositionsToStyle,
@@ -7,7 +7,6 @@ import {
   IColorScheme,
   ResidueColoring,
 } from "../common/MolecularStyles";
-import { generateUUIDv4 } from "../common/Utils";
 import { Alignment } from "../common/Alignment";
 
 interface ISingleTile {
@@ -38,13 +37,13 @@ export interface ICanvasAlignmentTiledProps {
   positionsToStyle: PositionsToStyle;
   colorScheme: IColorScheme;
   residueColoring: ResidueColoring;
+
   scale?: { x: number; y: number };
   translateX?: number;
   translateY?: number;
 }
 
-export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
-
+export const useAlignmentTiles = (props: ICanvasAlignmentTiledProps) => {
   const {
     sequences,
     consensusSequence,
@@ -218,53 +217,20 @@ export const CanvasAlignmentTiled = (props: ICanvasAlignmentTiledProps) => {
     generateCanvasForTile
   ]);
 
-  const renderedAlignment = useMemo(()=>{
-    return (
-      <>
-        {tiledImages.tiles.map((tile) => (
-          <Sprite
-            source={tile.image}
-            x={
-              tile.pixelX * (scale ? scale.x : 1) + (translateX ? translateX : 0)
-            }
-            y={
-              tile.pixelY * (scale ? scale.y : 1) + (translateY ? translateY : 0)
-            }
-            scale={scale ? [scale.x, scale.y] : [1, 1]}
-            key={`${tile.tileX}_
-                  ${tile.tileY}_
-                  ${colorScheme.commonName}_
-                  ${positionsToStyle.key}_
-                  ${alignmentType.key}_
-                  ${residueColoring.key}_
-                  ${scale}_
-                  ${translateY}_
-                  ${translateX}_
-                  ${
-                    //outputting all sequences leads to huge memory usage!
-                    //outputting ids may cause duplicates if changes sequences
-                    //TODO: modify to return same value based on seq - but shorter. unclear how.
-                    //   maybe "uuid-by-string" library (https://www.npmjs.com/package/uuid-by-string?
-                    //   or add uuid to ISequence an output here (probably not as one could
-                    //   presumably cut up sequences before, e.g., if we don't output
-                    //   complete sequences, but only viewport sequences, in the future?
-                    generateUUIDv4() //sequences.map((seq, idx) => idx).join("")
-                  }`}
-            roundPixels={true}
-          ></Sprite>
-        ))}
-      </>
-    )
+  const sprites = useMemo(()=>{
+    return tiledImages.tiles.map((tile)=>{
+      const s = PIXI.Sprite.from(tile.image, { scaleMode: PIXI.SCALE_MODES.NEAREST });
+      s.x = tile.pixelX * (scale ? scale.x : 1) + (translateX ? translateX : 0);
+      s.y = tile.pixelY * (scale ? scale.y : 1) + (translateY ? translateY : 0);
+      s.scale = scale ? {x:scale.x, y:scale.y}: {x:1, y:1};
+      s.roundPixels = true;
+      return s;
+    });
   }, [
-    alignmentType.key, 
-    colorScheme.commonName, 
-    positionsToStyle.key,
-    residueColoring.key,
     scale, 
     tiledImages, 
     translateX,
     translateY
   ]);
-
-  return renderedAlignment;
+  return sprites;
 }
