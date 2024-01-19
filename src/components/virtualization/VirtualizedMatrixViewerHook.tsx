@@ -481,12 +481,49 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     vertVirtualizationAxis?.hoveredEvent,
   ]);
 
+  const bottomShadowValue = useMemo(()=>{
+
+    const leftShadow = !horizVirtualizationAxis?.worldOffsetPx 
+      ? undefined : "17px 0 16px -16px rgba(0, 0, 0, 0.4) inset";
+    const topShadow = !vertVirtualizationAxis?.worldOffsetPx 
+      ? undefined : "0 17px 16px -16px rgba(0, 0, 0, 0.4) inset";
+    const bottomShadow = (
+      !vertVirtualizationAxis?.worldRenderSizePx ||
+      vertVirtualizationAxis.worldRenderSizePx <=
+        vertVirtualizationAxis.worldOffsetPx + vertVirtualizationAxis.containerSizePx
+    ) ? undefined : "0 -17px 16px -16px rgba(0, 0, 0, 0.4) inset";
+
+    const rightShadow = (
+      !horizVirtualizationAxis?.worldRenderSizePx ||
+      horizVirtualizationAxis.worldRenderSizePx <=
+        horizVirtualizationAxis.worldOffsetPx + horizVirtualizationAxis.containerSizePx
+    ) ? undefined : "-17px 0 16px -16px rgba(0, 0, 0, 0.4) inset";
+
+    return [leftShadow, topShadow, bottomShadow, rightShadow].reduce((acc, s) => {
+      if(s) acc.push(s);
+      return acc;
+    }, [] as string[]).join(",");
+  }, [
+    horizVirtualizationAxis?.worldOffsetPx,
+    horizVirtualizationAxis?.worldRenderSizePx,
+    horizVirtualizationAxis?.containerSizePx,
+    vertVirtualizationAxis?.worldOffsetPx,
+    vertVirtualizationAxis?.worldRenderSizePx,
+    vertVirtualizationAxis?.containerSizePx,
+  ]);
+
 
   const finalRenderedContent = useMemo(()=>{
-
+    
     return (
       <>
         <div className="av2-virtualized-matrix" ref={ref}>
+          <div 
+            className="scrolled-indicator"
+            style={{
+              boxShadow: bottomShadowValue
+            }}
+          ></div>
           { !reduxInitialized || !ref //TODO: one area where we reinitialize stage
               ? undefined 
               : (

@@ -5,21 +5,23 @@ $hoverTrackerSize: 5;
 $hoverTrackerSizePx: #{$hoverTrackerSize}px;
 $hoverTrackerSizeHalfPx: #{math.div($hoverTrackerSize, 2)}px;
 
+
 .av2-virtualized-matrix {
   overflow-x: hidden;
   overflow-y: hidden;
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
+
+  .scrolled-indicator{
+    position: absolute;
+    inset: 0;
+    z-index: 1001;
+    pointer-events: none;
+  }
 
   .av2-wheel-scroller{
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    inset: 0;
     cursor: default;
 
     .hover-tracker-y,
@@ -61,14 +63,11 @@ $hoverTrackerSizeHalfPx: #{math.div($hoverTrackerSize, 2)}px;
   .av2-data {
     position: absolute;
     //pointer-events: none;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    inset: 0;
   }
 }
 
 
 :export{
   hoverTrackerSize: $hoverTrackerSize;
-} 
+}

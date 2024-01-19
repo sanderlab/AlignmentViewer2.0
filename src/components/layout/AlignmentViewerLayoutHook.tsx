@@ -176,7 +176,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
             style={{
               gridArea: metadataGridArea,
               fontSize: titleFontSize,
-              display: !showMetadata || forceHide ? "none" : undefined
+              display: !showMetadata || forceHide ? "none" : undefined,
             }}>
             {typeof metadataAndContent.metadata === "string"
               ? `${metadataAndContent.metadata}:`

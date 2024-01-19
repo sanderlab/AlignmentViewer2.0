@@ -1,4 +1,3 @@
-import "./AlignmentViewer.scss";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
