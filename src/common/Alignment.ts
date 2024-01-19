@@ -20,6 +20,7 @@ const countCharacterCodes = (
   sequences: string[], 
   maxSequenceLength: number
 ) => {
+
   // aggregate stats for each position and globally including
   // the number of times each amino acid occurs
   // ** this loop takes the bulk of the initialization time
@@ -46,6 +47,12 @@ const countCharacterCodes = (
       allUniqueCharCodes[charCode] = true;
     }
   }
+
+  const allUniqueChars = Object.keys(allUniqueCharCodes).map((
+    charCodeStr: string
+  )=>{
+    return String.fromCharCode( parseInt(charCodeStr) );
+  });
 
   //INITIALIZE a character code version of positional letter counts
   //that each contain all possible charCodes in the alignment, initialized
@@ -88,12 +95,6 @@ const countCharacterCodes = (
     }
   };
 
-  const allUniqueChars = Object.keys(allUniqueCharCodes).map((
-    charCodeStr: string
-  )=>{
-    return String.fromCharCode( parseInt(charCodeStr) );
-  });
-
   return {
     allUniqueChars: allUniqueChars,
     globalCharCodeCounts: globalCharCodeCounts,
@@ -120,13 +121,14 @@ export class Alignment {
   private predictedNT: boolean;
   private numberDuplicateSequencesInAlignment: number;
   private numberRemovedDuplicateSequences: number;
-  private sequences: Map<SequenceSorter, ISequence[]>;
+  private sortedSequencesCache: Map<SequenceSorter, ISequence[]>;
   private maxSequenceLength: number;
   private querySequence: ISequence;
   private positionalLetterCounts: Map<number, { [letter: string]: number }>;
   private globalAlphaLetterCounts: { [letter: string]: number };
   private allUpperAlphaLettersInAlignmentSorted: UpperCaseLetters[];
   private consensus: ISequence;
+  private allRepresentedCharacters: string[];
 
   /**
    * Normalize all values in an object that contains all counts such that
@@ -167,15 +169,24 @@ export class Alignment {
    * @param removeDuplicateSequences remove all duplicate sequences. the retained
    *                                 sequence will be the first in order
    */
-  public constructor(
+  public constructor(props: {
     name: string,
     sequencesAsInput: ISequence[],
     removeDuplicateSequences: boolean,
-    supressParseTime?: boolean
-  ) {
+    supressParseTime?: boolean,
+    overrideQuery?: ISequence
+  }) {
+    const {
+      name,
+      sequencesAsInput,
+      removeDuplicateSequences,
+      supressParseTime,
+      overrideQuery
+    } = props;
+
     this.uuid = generateUUIDv4();
     this.name = name;
-    this.sequences = new Map<SequenceSorter, ISequence[]>();
+    this.sortedSequencesCache = new Map<SequenceSorter, ISequence[]>();
 
     //
     //remove duplicates, pull out query, generate statistics, generate
@@ -202,18 +213,20 @@ export class Alignment {
     if (removeDuplicateSequences) {
       this.numberDuplicateSequencesInAlignment = 0;
       this.numberRemovedDuplicateSequences = numberDuplicateSequences;
-      this.sequences.set(SequenceSorter.INPUT, sequencesWithoutDuplicates);
+      this.sortedSequencesCache.set(SequenceSorter.INPUT, sequencesWithoutDuplicates);
     } else {
       this.numberDuplicateSequencesInAlignment = numberDuplicateSequences;
       this.numberRemovedDuplicateSequences = 0;
-      this.sequences.set(SequenceSorter.INPUT, sequencesAsInput);
+      this.sortedSequencesCache.set(SequenceSorter.INPUT, sequencesAsInput);
     }
 
     //reset sequences as input in case duplicates have been removed
-    const finalInputSequences = this.sequences.get(SequenceSorter.INPUT)!;
-    this.querySequence = finalInputSequences[0]
-      ? finalInputSequences[0]
-      : { id: "query", sequence: "" }; //empty alignment
+    const finalInputSequences = this.sortedSequencesCache.get(SequenceSorter.INPUT)!;
+    this.querySequence = overrideQuery
+      ? overrideQuery
+      : finalInputSequences[0]
+        ? {...finalInputSequences[0]}    //copy of the first sequence
+        : { id: "query", sequence: "" }; //empty alignment
     this.predictedNT = true;
 
 
@@ -242,14 +255,25 @@ export class Alignment {
     //iterate all sequences and gather and count unique characters
     const {
       allUniqueChars,
-      globalCharCodeCounts,
-      positionalCharCodeCounts,
+      globalCharCodeCounts, //doesn't include any overridden query
+      positionalCharCodeCounts, //doesn't include any overridden query
     } = countCharacterCodes(
       finalInputSequences.map(iseq=>iseq.sequence),
       this.maxSequenceLength
     );
 
+    //set property and add any overridden query chars to the list.
+    this.allRepresentedCharacters = !overrideQuery  
+      ? allUniqueChars 
+      : overrideQuery.sequence.split("").reduce((acc, char) => {
+        if(acc.indexOf(char) === -1){
+          acc = acc + char;
+        }
+        return acc;
+      }, allUniqueChars.join("")).split("");
+
     //convert the character codes in globalCharCodeCounts to letters
+    //note: doesn't take into account overridden query (if there is one)
     this.positionalLetterCounts = Array.from(positionalCharCodeCounts).reduce(
       (acc, [positionIdx, positionalCharCodeCounts]) => {
         acc.set(
@@ -274,6 +298,7 @@ export class Alignment {
     );
 
     //convert the character codes in globalCharCodeCounts to letters
+    //note: doesn't take into account overridden query (if there is one)
     this.globalAlphaLetterCounts = Object.keys(globalCharCodeCounts).reduce(
       (arr, charCodeStr) => {
         if (globalCharCodeCounts[charCodeStr]) {
@@ -356,6 +381,14 @@ export class Alignment {
           "ms"
       );
     }
+  }
+
+  /**
+   * Returns a list of all of the characters that are used in the alignment.
+   * NOTE: also includes characters from any overridden query.
+   */
+  getAllRepresentedCharacters(){
+    return this.allRepresentedCharacters;
   }
 
   /**
@@ -481,7 +514,7 @@ export class Alignment {
    * @returns the number of sequences
    */
   getSequenceCount(): number {
-    return this.sequences.get(SequenceSorter.INPUT)!.length;
+    return this.sortedSequencesCache.get(SequenceSorter.INPUT)!.length;
   }
 
   /**
@@ -492,7 +525,6 @@ export class Alignment {
    *                     in the resulting counts
    * @returns a Map whose keys are position (ordered) and values are a dictionary
    *          with [key = letter (e.g., amino acid code)] and [value = # occurrences].
-   * TODO: Test parameter use cases.
    */
   getPositionalLetterCounts(normalize?: boolean, validLetters?: string[]) {
     if (normalize || validLetters) {
@@ -532,15 +564,15 @@ export class Alignment {
     forceReSort = forceReSort ? forceReSort : false;
     if (
       sortBy !== SequenceSorter.INPUT &&
-      (!this.sequences.has(sortBy) || forceReSort)
+      (!this.sortedSequencesCache.has(sortBy) || forceReSort)
     ) {
       //cache not yet populated for this sort option
-      this.sequences.set(
+      this.sortedSequencesCache.set(
         sortBy,
-        sortBy.sortFn(this.sequences.get(SequenceSorter.INPUT)!, this)
+        sortBy.sortFn(this.sortedSequencesCache.get(SequenceSorter.INPUT)!, this)
       );
     }
-    return this.sequences.get(sortBy)!;
+    return this.sortedSequencesCache.get(sortBy)!;
   }
 
   /**
@@ -559,6 +591,53 @@ export class Alignment {
     return this.querySequence;
   }
 
+
+  /**
+   * Set the query sequence
+   * @param newQuery The new query sequence. Must already exist in the alignment.
+   * @throws an error if the query sequence does not yet exist in the alignment
+   *
+   * UPDATE: adding the query really requires a reparsing of all the data as some
+   * of the properties like "allRepresentedCharacters" are no longer correct - e.g.,
+   * especially if the alignment is super short as in search results.
+   * REMOVING for now. If you add back in, make sure to reparse or figure out which
+   * properies need resetting.
+   */
+  /*setQuerySequence(newQuery: ISequence) {
+    if(newQuery.sequence.length !== this.getSequenceLength()){
+      throw Error([
+          `Invalid query sequence - length of new query (${newQuery.sequence.length}) !==`,
+          `length of sequences in alignemnt (${this.getSequenceLength()})`
+        ].join(" ")
+      )
+    }
+
+    //check if already in the alignment. 
+    // UPDATE: doesn't matter - allow query sequence to be new and not in alignment. This
+    //         is important for the search screen where we want to show the query, but not
+    //         have it in the alignment.
+    //const queryInAlignment = this.getSequences().find((seq) => {
+    //  if (seq === newQuery) return true;
+    //  return false;
+    //});
+    this.querySequence = newQuery;
+
+    //rather than resort everything right now, just remove all the cache that is
+    //dependent on the query
+    const newSortedSequencesCache = new Map<SequenceSorter, ISequence[]>();
+    for (const [sorter, seqs] of this.sortedSequencesCache) {
+      if(
+        sorter === SequenceSorter.INPUT || 
+        sorter === SequenceSorter.BLOSUM62_SCORE_CONSENSUS || 
+        sorter === SequenceSorter.HAMMING_DIST_CONSENSUS
+      ){
+        newSortedSequencesCache.set(sorter, seqs);
+      }
+    }
+    this.sortedSequencesCache = newSortedSequencesCache;
+  }*/
+
+
   // quick lookup of colors for all letters at each position, i.e.:
   //   const val = getSequenceColors(...)
   //   const color = val[posIdx][letter];
@@ -566,7 +645,12 @@ export class Alignment {
   //      again maybe it isn't necessary. Speed test? Would require retooling the
   //      canvas alignment and alignment details hooks to no longer allow arbitrary
   //      sequences.
+  //slow with large alignments - webworker?
   static getPositionalLetterColors = (
+    //precomputed from alignment .. can and will often be larger than is
+    //available in "sequences", but this can be expensive
+    allPossibleChars: string[],
+
     sequences: string[],
     querySequence: string,
     consensusSequence: string,
@@ -579,14 +663,7 @@ export class Alignment {
       return {};
     }
 
-    //iterate all sequences and gather and count unique characters
-    const {
-      allUniqueChars
-    } = countCharacterCodes(
-      sequences,
-      sequences[0].length
-    );
-    
+    //iterate all sequences and count unique characters
     const moleculeClass = alignmentType === AlignmentTypes.AMINOACID 
       ? AminoAcid 
       : Nucleotide;
@@ -618,11 +695,11 @@ export class Alignment {
       } = {};
 
       for(
-        var lettersIdx = 0, lettersLen = allUniqueChars.length;
+        var lettersIdx = 0, lettersLen = allPossibleChars.length;
         lettersIdx < lettersLen;
         lettersIdx++
       ){
-        const letter = allUniqueChars[lettersIdx];
+        const letter = allPossibleChars[lettersIdx];
         const colorIfStyled = moleculeClass.fromSingleLetterCode(letter).colors.get(
           colorScheme
         )!.get(
@@ -631,21 +708,12 @@ export class Alignment {
 
         const finalColor = (positionsToStyle===PositionsToStyle.ALL)
           ? colorIfStyled
-          : positionsToStyle === PositionsToStyle.QUERY
-            ? querySequence[posIdx] === letter
-              ? colorIfStyled
-              : UNKNOWN_COLORS
-            : positionsToStyle === PositionsToStyle.QUERY_DIFF
-              ? querySequence[posIdx] !== letter
-                ? colorIfStyled
-                : UNKNOWN_COLORS
-              : positionsToStyle === PositionsToStyle.CONSENSUS
-                ? consensusSequence[posIdx] === letter
-                  ? colorIfStyled
-                  : UNKNOWN_COLORS
-                : consensusSequence[posIdx] !== letter
-                  ? colorIfStyled
-                  : UNKNOWN_COLORS;
+          : (positionsToStyle === PositionsToStyle.QUERY && querySequence[posIdx] === letter) ||
+            (positionsToStyle === PositionsToStyle.QUERY_DIFF && querySequence[posIdx] !== letter) ||
+            (positionsToStyle === PositionsToStyle.CONSENSUS && consensusSequence[posIdx] === letter) ||
+            (positionsToStyle === PositionsToStyle.CONSENSUS_DIFF && consensusSequence[posIdx] !== letter)
+            ? colorIfStyled
+            : UNKNOWN_COLORS
 
         letterColorsForPosition[letter] = {
           letter: letter,
@@ -656,115 +724,4 @@ export class Alignment {
     }
     return toReturn;
   }
-
-  //this has memory bloat. better to calculate when needed and so done above
-  //commented out, but left for posterity.
-  //static getMSAColors = (
-  //  sequences: string[],
-  //  querySequence: string,
-  //  consensusSequence: string,
-  //  alignmentType: AlignmentTypes,
-  //  positionsToStyle: PositionsToStyle,
-  //  residueColoring: ResidueColoring,
-  //  colorScheme: IColorScheme
-  //): {
-  //  letter: string,
-  //  backgroundColor: ICombinedColor,
-  //  letterColor: ICombinedColor
-  //}[][] => {
-  //  const moleculeClass = alignmentType === AlignmentTypes.AMINOACID 
-  //    ? AminoAcid 
-  //    : Nucleotide;
-  //  const letterToColor = moleculeClass.list().reduce((acc, mol)=>{
-  //    const letter = mol.singleLetterCode;
-  //    const letterColoring = moleculeClass.fromSingleLetterCode(
-  //        letter
-  //      ).colors.get(
-  //        colorScheme
-  //      )!.get(
-  //        residueColoring
-  //      )!;
-  //    acc[letter] = {
-  //      letter: letter,
-  //      backgroundColor: letterColoring.backgroundColor,
-  //      letterColor: letterColoring.letterColor
-  //    }
-  //    return acc;
-  //  }, {} as {
-  //    [letter: string]: ReturnType<typeof Alignment.getMSAColors>[number][number]
-  //  });
-//
-  //  const UNKNOWN_COLORS = moleculeClass.UNKNOWN.colors.get(
-  //      colorScheme
-  //    )!.get(
-  //      residueColoring
-  //    )!;
-//
-  //  return sequences.map((seq) => {
-  //    return seq.split("").map((letter, posIdx)=>{
-  //      const unknownLetterColor = {
-  //        ...UNKNOWN_COLORS,
-  //        letter: letter
-  //      };
-  //      const letterColor = letterToColor[letter]
-  //        ? letterToColor[letter]
-  //        : unknownLetterColor;
-//
-  //      //if all positions are colored, return the colors immeditally
-  //      if (positionsToStyle===PositionsToStyle.ALL) return letterColor;
-  //      
-  //      //only some positions are styled, figure out if this is one of
-  //      //them otherwise return default
-  //      return positionsToStyle === PositionsToStyle.QUERY
-  //        ? querySequence[posIdx] === letter
-  //          ? letterColor 
-  //          : unknownLetterColor
-  //        : positionsToStyle === PositionsToStyle.QUERY_DIFF
-  //          ? querySequence[posIdx] !== letter
-  //            ? letterColor
-  //            : unknownLetterColor
-  //          : positionsToStyle === PositionsToStyle.CONSENSUS
-  //            ? consensusSequence[posIdx] === letter
-  //              ? letterColor
-  //              : unknownLetterColor
-  //            : consensusSequence[posIdx] !== letter
-  //              ? letterColor
-  //              : unknownLetterColor
-  //    });
-  //  });
-  //}
-  
-  /**
-   * Set the query sequence
-   * @param newQuery The new query sequence. Must already exist in the alignment.
-   * @throws an error if the query sequence does not yet exist in the alignment
-   *
-   * IMPORTANT: Requires re-sorting
-   */
-  /*setQuerySequence(newQuery: ISequence) {
-    const queryInAlignment = this.getSequences().find((seq) => {
-      if (seq === newQuery) {
-        return true;
-      }
-      return false;
-    });
-    if (queryInAlignment !== undefined) {
-      this.querySequence = newQuery;
-
-      //the resort could be really slow ... need to rethink.
-      SequenceSorter.list.forEach((sortOption) => {
-        //updated cached sorted sequences
-        if (sortOption.isQuerySequenceDependent) {
-          this.getSequences(sortOption, true);
-        }
-      });
-      this.sequences.forEach(
-        (sequences: ISequence[], sortBy: SequenceSorter) => {
-          this.getSequences(sortBy, true); // force re-sorting, which updates cache
-        }
-      );
-    } else {
-      throw Error("query sequence does not exist in alignment");
-    }
-  }*/
 }

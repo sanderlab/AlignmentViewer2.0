@@ -14,39 +14,55 @@ import { useEffect, useCallback, useState, useMemo } from "react";
 import { Alignment } from "../../common/Alignment";
 import { SequenceSorter } from "../../common/AlignmentSorter";
 import {
-  AminoAcidAlignmentStyle,
-  NucleotideAlignmentStyle,
+  AlignmentTypes,
+  IColorScheme,
   PositionsToStyle,
   ResidueColoring
 } from "../../common/MolecularStyles";
-import { generateUUIDv4, stopSafariFromBlockingWindowWheel } from "../../common/Utils";
+import { generateUUIDv4 } from "../../common/Utils";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 import { IControllerRole, IResponderRole, VirtualizationRole, VirtualizationStrategy } from "../virtualization/VirtualizationTypes";
 import { VirtualizationInputParams, useReduxVirtualization } from "../virtualization/VirtualizedMatrixReduxHook";
-import { useAlignmentTiles } from "../CanvasAlignmentTiledHook";
+import { ISearchMatchDetails } from "../search/SequenceSearchHook";
+import { MSABlocks } from "../msa-blocks-and-letters/MSABlocks";
+import { 
+  IExposedStandaloneWebglFunctions,
+  IExposedPairedWebglFunctions,
+  IExposedCanvasFunctions,
+  createMSABlockGenerator
+} from "../msa-blocks-and-letters/MSABlockGenerator";
 
 export interface IMiniMapProps {
-  webGlApp: PIXI.Application<HTMLCanvasElement>;
+  highlightPositionalMatches?: ISearchMatchDetails;
+  canvasGenerator: IExposedStandaloneWebglFunctions |
+                   IExposedPairedWebglFunctions |
+                   IExposedCanvasFunctions; //acquire from MSABlockGenerator.ts
 
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
   sortBy: SequenceSorter;
   positionsToStyle: PositionsToStyle;
-  alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
+  alignmentType: AlignmentTypes;
+  colorScheme: IColorScheme;
 
   //maintain sync with this vertical scroller
   syncWithVerticalVirtualization?: IResponderRole;
 }
 
+//const blockgenerator = createMSABlockGenerator("canvas");
+
 export function MiniMap(props: IMiniMapProps) {
   const {
-    webGlApp,
+    canvasGenerator,
+    highlightPositionalMatches,
     alignment,
     sortBy,
-    alignmentStyle,
+    alignmentType,
+    colorScheme,
     positionsToStyle,
     syncWithVerticalVirtualization,
   } = props;
+  //const canvasGenerator = blockgenerator; 
 
   //
   //state
@@ -63,7 +79,6 @@ export function MiniMap(props: IMiniMapProps) {
   const scale = minimapHolderDimensions
     ? minimapHolderDimensions.canvasWidthPx / alignment.getSequenceLength()
     : undefined;
-  const [canvasHolderDiv, setCanvasHolderDiv] = useState<HTMLDivElement|undefined>();
 
   //
   //virtualization - used to synchronize with viewport. also used as middleman for standalone
@@ -119,12 +134,6 @@ export function MiniMap(props: IMiniMapProps) {
   const viewportFullyRendersAlignment = !vertVirtualizationAxis
   ? false
   : vertVirtualizationAxis?.cellCount <= vertVirtualizationAxis.numIdxsToRender;
-
-  const sortedSequences = useMemo(()=>{
-    return alignment.getSequences(sortBy).map((seq) => seq.sequence)
-  }, [alignment, sortBy]);
-
-
 
   //calculate the equivalent top offset for the minimap and minimap dragger,
   //each of which are on a different scale from the viewport 
@@ -230,7 +239,7 @@ export function MiniMap(props: IMiniMapProps) {
 
     //fix safari-specific bug - this function will tell the window to stop
     //blocking scroll events on the "minimap-canvas" class
-    stopSafariFromBlockingWindowWheel("minimap-canvas");
+    //stopSafariFromBlockingWindowWheel("minimap-canvas");
   }, []);
 
   //
@@ -315,82 +324,14 @@ export function MiniMap(props: IMiniMapProps) {
   //   - update with scale and position changes
   //   - update with alignment changes
   //
+  //const handleCanvasLoadingChange = useCallback((loading: boolean)=>{
+  //  if(loading && canvasElement){
+  //    const bb = canvasElement.getBoundingClientRect();
+  //    canvasElement.getContext("2d")?.clearRect(0, 0, bb.width, bb.height);
+  //  }
+  //}, [canvasElement]);
 
-  //mount - maybe switch to callback? unclear what happens if webGlApp changed
-  const handleCanvasHolderMounted = useCallback((
-    div: HTMLDivElement
-  ) => {
-    //first mount
-    setCanvasHolderDiv(div);
-    webGlApp.stage.removeChildren();
-    if(div){ 
-      div.appendChild(webGlApp.view);
-    }
-  }, [
-    webGlApp
-  ]);
-
-  //sizing changed
-  useEffect(()=>{
-    if(canvasHolderDiv){
-      const boundingBox = canvasHolderDiv.getBoundingClientRect();
-      webGlApp.renderer.resize(
-        boundingBox.width, boundingBox.height
-      );
-      webGlApp.render();
-    }
-  }, [
-    webGlApp,
-    canvasHolderDiv,
-    minimapHolderDimensions?.canvasHeightPx,
-    minimapHolderDimensions?.canvasWidthPx,
-  ]);
-
-  //scale / offset changed
-  useEffect(()=>{
-    if(canvasHolderDiv && offsets?.mmWorldOffsetPx !== undefined){
-      webGlApp.stage.position.set(0, -offsets.mmWorldOffsetPx);
-      webGlApp.stage.scale.set(scale, scale);
-      webGlApp.render();
-    }
-  }, [
-    webGlApp,
-    canvasHolderDiv,
-    scale,
-    offsets?.mmWorldOffsetPx
-  ]);
-
-  const alignmentSprites = useAlignmentTiles({
-    sequences: sortedSequences,
-    consensusSequence: alignment.getConsensus().sequence,
-    querySequence: alignment.getQuery().sequence,
-    alignmentType: alignmentStyle.alignmentType,
-    positionsToStyle: positionsToStyle,
-    colorScheme: alignmentStyle.selectedColorScheme,
-    residueColoring: ResidueColoring.DARK
-  });
-
-  //alignment or visualization params changed
-  useEffect(()=>{
-    if(canvasHolderDiv){
-      webGlApp.stage.removeChildren();
-      alignmentSprites.forEach((s)=>{
-        webGlApp.stage.addChild(s);
-      });
-      //initial rendering is full then is downsized
-      //uncommenting below will fix it, but not sure about performance issues
-      //as it will be set on
-      webGlApp.stage.scale.set(scale, scale); 
-      webGlApp.render();
-    }
-  }, [
-    alignmentSprites,
-    canvasHolderDiv,
-    scale,
-    webGlApp
-  ]);
-
-
+  
   //
   //memoized stuff
   //
@@ -416,15 +357,48 @@ export function MiniMap(props: IMiniMapProps) {
     offsets?.mmNumSeqsBelow
   ]);
 
+  const sequences = useMemo(()=>{
+    return alignment.getSequences(sortBy).map(s=>s.sequence);
+  }, [alignment, sortBy]);
+
   const renderedMinimapCanvasHolder = useMemo(()=>{
-    return (
-      <div 
-        className="minimap-canvas-holder" 
-        ref={handleCanvasHolderMounted}>
+    return offsets?.mmWorldOffsetPx === undefined || !scale ? undefined : (
+      <div className="minimap-canvas-holder">
+        <MSABlocks
+          canvasGenerator={canvasGenerator}
+          showLoadingIndicator={true}
+          isMinimap={true}
+          sequenceSet={"alignment"}
+          sequences={sequences}
+          querySequence={alignment.getQuery().sequence}
+          consensusSequence={alignment.getConsensus().sequence}
+          allCharsInAlignment={alignment.getAllRepresentedCharacters()}
+          alignmentType={alignmentType}
+          colorScheme={colorScheme}
+          residueColoring={ResidueColoring.DARK}
+          highlightPositionalMatches={highlightPositionalMatches}
+          positionsToStyle={positionsToStyle}
+          width={scale*alignment.getSequenceLength()}
+          height={scale*alignment.getSequenceCount()}
+          scaleX={scale}
+          scaleY={scale}
+          positionX={0}
+          positionY={
+            -offsets.mmWorldOffsetPx// / scale
+          }
+         />
       </div>
     )
   }, [
-    handleCanvasHolderMounted,
+    alignment,
+    alignmentType,
+    canvasGenerator,
+    colorScheme,
+    positionsToStyle,
+    highlightPositionalMatches,
+    offsets?.mmWorldOffsetPx,
+    scale,
+    sequences
   ]);
 
   const renderedMinimapCanvasInteraction = useMemo(()=>{

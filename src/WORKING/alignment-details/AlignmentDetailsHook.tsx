@@ -3,7 +3,6 @@
  */
 import "./AlignmentDetails.scss";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import * as PIXI from "pixi.js";
 import {
   AminoAcidAlignmentStyle,
   NucleotideAlignmentStyle,
@@ -26,20 +25,23 @@ import {
   VirtualizationStrategy 
 } from "../virtualization/VirtualizationTypes";
 import { generateUUIDv4, startEndIdxToArray } from "../../common/Utils";
-import { Alignment } from "../../common/Alignment";
-import { useAlignmentTiles } from "../CanvasAlignmentTiledHook";
+import { Alignment, ISequence } from "../../common/Alignment";
+import { ISearchMatchDetails } from "../search/SequenceSearchHook";
+import { AlignmentViewerType } from "../AlignmentViewerHook";
+import { useAlignmentCanvas } from "../AlignmentCanvasHook";
+import { SequenceSorter } from "../../common/AlignmentSorter";
 
 
 export interface IAlignmentDetailsProps {
-  webGlApp: PIXI.Application<HTMLCanvasElement>;
+  viewerType: AlignmentViewerType;
+  sequenceSet: "query" | "consensus" | "alignment";
 
-  alignmentUUID: string;
-  sequences: string[];
-  consensusSequence: string;
-  querySequence: string;
+  alignment: Alignment,
+  sortBy: SequenceSorter;
   alignmentStyle: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
   positionsToStyle: PositionsToStyle;
   residueColoring: ResidueColoring;
+  highlightPositionalMatches?: ISearchMatchDetails;
   residueHeight: number;
   residueWidth: number;
   fontSize: number;
@@ -67,13 +69,13 @@ export interface IAlignmentDetailsProps {
 export function AlignmentDetails(props: IAlignmentDetailsProps) {
   //props
   const {
-    webGlApp,
+    viewerType,
+    sequenceSet,
 
-    alignmentUUID,
-    sequences,
-    consensusSequence,
-    querySequence,
+    alignment,
+    sortBy,
     alignmentStyle,
+    highlightPositionalMatches,
     positionsToStyle,
     residueColoring,
     residueHeight,
@@ -86,7 +88,16 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
     matrixRendered
   } = props;
 
-  const [canvasHolderDiv, setCanvasHolderDiv] = useState<HTMLDivElement|undefined>();
+  const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement>();
+  const [canvasSizing, setCanvasSizing] = useState<{
+    positionX: number;
+    positionY: number;
+    width: number;
+    height: number;
+    scaleX: number;
+    scaleY: number;
+  }>();
+
 
   //user can either supply a virtualization, set it to be automatically created, or turn it off
   //completely. Initialize here based on user request.
@@ -97,19 +108,18 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       : props.horizVirtualization === "Automatic"
         ? {
             virtualizationId: 
-              `x_auto_generated_alignmentdetails_virtualization_${alignmentUUID}_${containerId}`,
-            axisId: `x_auto_generated_alignmentdetails_axis_${alignmentUUID}_${containerId}`,
+              `x_auto_generated_alignmentdetails_virtualization_${alignment.getUUID()}_${containerId}`,
+            axisId: `x_auto_generated_alignmentdetails_axis_${alignment.getUUID()}_${containerId}`,
             role: VirtualizationRole.Controller,
-            cellCount: sequences[0].length,
+            cellCount: alignment.getSequenceLength(),
             cellSizePx: residueWidth,
           } as IControllerRole
         : props.horizVirtualization;
   }, [
-    alignmentUUID,
+    alignment,
     containerId,
     props.horizVirtualization,
     residueWidth,
-    sequences,
   ]);
 
   const vertVirtualization = useMemo(()=>{
@@ -118,26 +128,25 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       : props.vertVirtualization === "Automatic"
         ? {
             virtualizationId: 
-              `y_auto_generated_alignmentdetails_virtualization_${alignmentUUID}_${containerId}`,
-            axisId: `y_auto_generated_alignmentdetails_axis_${alignmentUUID}_${containerId}`,
+              `y_auto_generated_alignmentdetails_virtualization_${alignment.getUUID()}_${containerId}`,
+            axisId: `y_auto_generated_alignmentdetails_axis_${alignment.getUUID()}_${containerId}`,
             role: VirtualizationRole.Controller,
-            cellCount: sequences.length,
+            cellCount: alignment.getSequenceCount(),
             cellSizePx: residueHeight
           } as IControllerRole
         : props.vertVirtualization;
   }, [
-    alignmentUUID,
+    alignment,
     containerId,
     props.vertVirtualization,
-    residueHeight,
-    sequences
+    residueHeight
   ]);
 
   //
   // useCallbacks
   //
   const sliceSequences = useCallback((
-    sequencesToSlice: string[],
+    sequencesToSlice: ISequence[],
     firstRowIdx: number, lastRowIdx: number,
     firstColIdx: number, lastColIdx: number
   )=>{
@@ -146,64 +155,78 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       const seq = sequencesToSlice[seqIdx];
       const slicedSeq = [];
       for(let posIdx = firstColIdx; posIdx <= lastColIdx; posIdx++){
-        slicedSeq.push(seq[posIdx]);
+        slicedSeq.push(seq.sequence[posIdx]);
       }
       toReturn.push(slicedSeq.join(""));
     }
     return toReturn;
   }, []);
 
-  //
-  // deal with pixijs directly:
-  //   - mount
-  //   - update with sizing changes
-  //   - update with scale and position changes
-  //   - update with alignment changes
-  //
-  //mount - unclear what happens if webGlApp changed. hmm
-  const handleCanvasHolderMounted = useCallback((
-    div: HTMLDivElement
-  ) => {
-    //first mount
-    setCanvasHolderDiv(div);
-    webGlApp.stage.removeChildren();
-    if(div) div.appendChild(webGlApp.view);
-  }, [
-    webGlApp
-  ]);
+  /**
+   * Handle canvas updates
+   */
+  const handleCanvasLoadingChange = useCallback((loading: boolean)=>{
+    if(loading && canvasElement){
+      const bb = canvasElement.getBoundingClientRect();
+      //canvasElement.getContext("2d")?.clearRect(0, 0, bb.width, bb.height);
+    }
+  }, [canvasElement]);
 
-  const alignmentSprites = useAlignmentTiles({
-    sequences: sequences,
-    consensusSequence: consensusSequence,
-    querySequence: querySequence,
+  const alignmentCanvas = useAlignmentCanvas({
+    viewerType: viewerType, 
+    alignment: alignment, 
+    sortBy: sortBy,
     alignmentType: alignmentStyle.alignmentType,
     positionsToStyle: positionsToStyle,
     colorScheme: alignmentStyle.selectedColorScheme,
-    residueColoring: residueColoring
+    highlightPositionalMatches: highlightPositionalMatches,
+    loadingStateChanged: handleCanvasLoadingChange
   });
-  //console.log('alignmentSprites:', alignmentSprites);
 
-  //alignment or visualization params changed
-  useEffect(()=>{
-    if(canvasHolderDiv){
-      webGlApp.stage.removeChildren();
-      alignmentSprites.forEach((s)=>{
-        webGlApp.stage.addChild(s);
-      });
-      //initial rendering is full then is downsized
-      //uncommenting below will fix it, but not sure about performance issues
-      //as it will be set on
-      webGlApp.stage.scale.set(residueWidth, residueHeight); 
-      webGlApp.render();
+  /*useEffect(()=>{
+    if(canvasElement && 
+       alignmentCanvas &&
+       canvasSizing?.height !== undefined){
+      alignmentCanvas.drawIntoCanvas({
+        visibleCanvas: canvasElement,
+        sequenceSet: sequenceSet,
+        width: canvasSizing.width,
+        height: canvasSizing.height,
+        scaleX: canvasSizing.scaleX,
+        scaleY: canvasSizing.scaleY,
+        positionX: canvasSizing.positionX,
+        positionY: canvasSizing.positionY
+      })
     }
   }, [
-    alignmentSprites,
-    canvasHolderDiv,
-    residueHeight,
-    residueWidth,
-    webGlApp,
+    alignmentCanvas,
+    canvasElement,
+    canvasSizing?.width,
+    canvasSizing?.height,
+    canvasSizing?.scaleX,
+    canvasSizing?.scaleY,
+    canvasSizing?.positionX,
+    canvasSizing?.positionY,
+    sequenceSet
+  ]);*/
+  const handleCanvasMounted = useCallback((canvas: HTMLCanvasElement) => {
+    //do this in a function rather than a ref in order to react to changes
+    setCanvasElement(canvas); 
+  }, []);
+
+
+  const sequences = useMemo(()=>{
+    return sequenceSet === "alignment"
+      ? alignment.getSequences(sortBy)
+        : sequenceSet === "query"
+          ? [alignment.getQuery()]
+          : [alignment.getConsensus()];
+  }, [
+    alignment,
+    sequenceSet,
+    sortBy,
   ]);
-  
+
 
   const renderMatrixContent = useCallback(({
     firstColIdxToRender, lastColIdxToRender,
@@ -241,51 +264,60 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       firstColIdxToRender, lastColIdxToRender
     );
     const querySliced = sliceSequences(
-      [querySequence], 0, 0, firstColIdxToRender, lastColIdxToRender
+      [alignment.getQuery()], 0, 0, firstColIdxToRender, lastColIdxToRender
     )[0];
     const consensusSliced = sliceSequences(
-      [consensusSequence], 0, 0, firstColIdxToRender, lastColIdxToRender
+      [alignment.getConsensus()], 0, 0, firstColIdxToRender, lastColIdxToRender
     )[0];
     const fullSequencesInViewport = startEndIdxToArray(
-      firstRowIdxToRender, lastRowIdxToRender).map((seqIdx) => {
-      return sequences[seqIdx];
+      firstRowIdxToRender, lastRowIdxToRender
+    ).map((seqIdx) => {
+      return sequences[seqIdx].sequence;
     }, []);
 
-    const xPos = worldShiftLeftPx ? -worldShiftLeftPx : 0;
-    const yPos = worldShiftTopPx ? -worldShiftTopPx : 0;
-
     const seqLength = !seqsSliced[0] ? 0 : seqsSliced[0].length;
-    const finalHeight = renderHeightPx ? renderHeightPx : residueHeight * seqsSliced.length;
-    const finalWidth = renderWidthPx ? renderWidthPx : residueWidth * seqLength;
+    if(alignmentCanvas && canvasElement){
+      alignmentCanvas.drawIntoCanvas({
+        visibleCanvas: canvasElement,
+        sequenceSet: sequenceSet,
+        width: (renderWidthPx ? renderWidthPx : residueWidth * seqLength),
+        height: (renderHeightPx ? renderHeightPx : residueHeight * seqsSliced.length),
+        scaleX: residueWidth,
+        scaleY: residueHeight,
+        positionX: worldShiftLeftPx ? -worldShiftLeftPx : 0,
+        positionY: worldShiftTopPx ? -worldShiftTopPx : 0,
+      })
+    }
+    console.log('WIDTH 1: '+(renderWidthPx ? renderWidthPx : residueWidth * seqLength));
+    /*
+    setCanvasSizing({
+      positionX: worldShiftLeftPx ? -worldShiftLeftPx : 0,
+      positionY: worldShiftTopPx ? -worldShiftTopPx : 0,
+      width: (renderWidthPx ? renderWidthPx : residueWidth * seqLength),// - residueWidth/2,
+      height: (renderHeightPx ? renderHeightPx : residueHeight * seqsSliced.length),// - residueHeight,
+      scaleX: residueWidth,
+      scaleY: residueHeight
+    });*/
 
-    //move and scale the background "squares" of the alignment around based on
-    //the scroll amount and residue sizing
-    let rerender = false;
-    if(webGlApp.stage.position.x !== xPos || webGlApp.stage.position.y !== yPos){
-      rerender = true;
-      webGlApp.stage.position.set(xPos, yPos);
-    }
-    if(webGlApp.stage.scale.x !== residueWidth || webGlApp.stage.scale.y !== residueHeight){
-      rerender = true;
-      webGlApp.stage.scale.set(residueWidth, residueHeight);
-    }
-    if(webGlApp.renderer.width !== finalWidth || webGlApp.renderer.height !== finalHeight){
-      rerender = true;
-      webGlApp.renderer.resize(finalWidth, finalHeight);
-    }
-    if(rerender){
-      webGlApp.render();
-    }
+    const classNames = ["canvas-holder"];
+    if(residueColoring === ResidueColoring.NO_BACKGROUND) classNames.push("hidden");
 
     return (
       <div className="av2-viewport">
-        <div 
-          className={
-            `canvas-holder${residueColoring === ResidueColoring.NO_BACKGROUND ? "hidden" : ""}`
-          }
-          ref={handleCanvasHolderMounted}></div>
-
+        <div className={classNames.join(" ")} style={{
+          opacity: residueColoring === ResidueColoring.LIGHT 
+            ? alignmentStyle.selectedColorScheme.backgroundAlpha
+            : 1
+        }}>
+          <canvas 
+            ref={handleCanvasMounted} 
+            width={canvasSizing?.width} 
+            height={canvasSizing?.height}
+            />
+        </div>
+        
         <AlignmentDetailsLetters
+          allCharactersInAlignment={alignment.getAllRepresentedCharacters()}
           sequencesInViewport={fullSequencesInViewport}
           slicedSequences={seqsSliced}
           consensusSequence={consensusSliced}
@@ -303,19 +335,22 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
       </div>
     );
   }, [
+    alignmentCanvas, 
+    canvasElement, 
+    sequenceSet,
+    alignment,
+    sequences,
     alignmentStyle,
-    consensusSequence,
     fontSize,
-    handleCanvasHolderMounted,
+    handleCanvasMounted,
     matrixRendered,
     positionsToStyle,
-    querySequence,
     residueColoring,
     residueHeight,
     residueWidth,
-    sequences,
     sliceSequences,
-    webGlApp,
+    canvasSizing?.height,
+    canvasSizing?.width
   ]);
 
   const horizontalParams: IVirtualizeParams | undefined = useMemo(()=>{
@@ -384,6 +419,7 @@ export function AlignmentDetails(props: IAlignmentDetailsProps) {
  * @param props
  */
 export function AlignmentDetailsLetters(props: {
+  allCharactersInAlignment: string[];
   sequencesInViewport: string[];
   slicedSequences: string[];
   consensusSequence: string;
@@ -398,6 +434,7 @@ export function AlignmentDetailsLetters(props: {
   horizontalWorldOffset?: number;
 }) {
   const {
+    allCharactersInAlignment,
     sequencesInViewport,
     slicedSequences,
     consensusSequence,
@@ -426,6 +463,7 @@ export function AlignmentDetailsLetters(props: {
   //with each entry 
   const letterColorToLocations = useMemo(()=>{
     const msaColors = Alignment.getPositionalLetterColors(
+      allCharactersInAlignment,
       slicedSequences,
       querySequence,
       consensusSequence,
@@ -464,6 +502,7 @@ export function AlignmentDetailsLetters(props: {
     }
     return toReturn;
   }, [
+    allCharactersInAlignment,
     slicedSequences, //changes too frequently. what is that about?
     alignmentStyle, 
     positionsToStyle,

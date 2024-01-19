@@ -90,7 +90,7 @@ export class AminoAcid implements IAminoAcid {
 
   static fromSingleLetterCode(singleLetterCode: string): IAminoAcid {
     if (singleLetterCode in this.bySingleLetterCode) {
-      return AminoAcid.bySingleLetterCode[singleLetterCode];
+      return this.bySingleLetterCode[singleLetterCode];
     }
     return AminoAcid.UNKNOWN;
   }
@@ -189,7 +189,7 @@ export class Nucleotide implements INucleotide {
 
   static fromSingleLetterCode(singleLetterCode: string): Nucleotide {
     if (singleLetterCode in this.bySingleLetterCode) {
-      return Nucleotide.bySingleLetterCode[singleLetterCode];
+      return this.bySingleLetterCode[singleLetterCode];
     }
     return Nucleotide.UNKNOWN;
   }

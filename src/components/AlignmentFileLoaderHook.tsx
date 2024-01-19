@@ -264,7 +264,7 @@ export const AlignmentFileDrop = (props: {
       id="av2-fileloader-fullpage-id"
       className="av2-fileloader-fullpage"
       style={{
-        display: isVisible ? "block" : "none",
+        display: isVisible ? "grid" : "none",
       }}
       onDragLeave={(e)=>{
         if (!e.relatedTarget){

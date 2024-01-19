@@ -1,4 +1,4 @@
-/** WebGLAlignmentComponent.scss */
+/** MSABlocksAndLetters.scss */
 
 // make scrollbar transparent on query and consensus sequences
 .query-alignment-details .av2-viewport::-webkit-scrollbar,
@@ -15,20 +15,21 @@
   overflow-x: hidden;
   overflow-y: hidden;
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  canvas {
+  inset: 0;
+  
+  .canvas-holder{
     position: absolute;
-    image-rendering: optimizeSpeed;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: optimize-contrast;
-    image-rendering: pixelated;
-    -ms-interpolation-mode: nearest-neighbor;
+    inset: 0;
+    canvas {
+      image-rendering: optimizeSpeed;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: optimize-contrast;
+      image-rendering: pixelated;
+      -ms-interpolation-mode: nearest-neighbor;
+    }
   }
+
 
   .sequence-text-holder {
     position: absolute;

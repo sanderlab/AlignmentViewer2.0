@@ -301,7 +301,8 @@ export default function App(props: AppProps){
     return !alignment ? [] : [
       ...(!showConservationBarplot ? [] : [{
         svgId: `conservation-barplot-${alignment?.getUUID()}`,
-        dataSeriesSet: [PreconfiguredPositionalBarplots.Conservation]
+        dataSeriesSet: [PreconfiguredPositionalBarplots.Conservation],
+        heightPx: 75
       }] as IBarplotExposedProps[]),
 
       ...(!showEntropyGapBarplot ? [] : [{
@@ -309,14 +310,16 @@ export default function App(props: AppProps){
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.ShannonEntropy,
           PreconfiguredPositionalBarplots.Gaps,
-        ]
+        ],
+        heightPx: 75
       }] as IBarplotExposedProps[]),
 
       ...(!showKLDivergenceBarplot ? [] : [{
         svgId: `kullbac-leibler-divergence-barplot-${alignment?.getUUID()}`,
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.KullbacLeiblerDivergence,
-        ]
+        ],
+        heightPx: 75
       }] as IBarplotExposedProps[]),
     ];
   }, [
@@ -341,16 +344,18 @@ export default function App(props: AppProps){
             triggerShowSearch={triggerShowSearch}
             mainViewportVisibleChanged={(newIdxs)=>{
               if(!shallowEqual(state.mainViewportVisibleIdxs, newIdxs)){
-                //setTimeout(() => {
-                  setState({
-                    ...state,
-                    mainViewportVisibleIdxs: newIdxs
-                  })
-                //});
+                setState({
+                  ...state,
+                  mainViewportVisibleIdxs: newIdxs
+                })
               }
             }}
             zoomLevel={zoomLevel}
             sortBy={sortBy}
+            disableSearch={false}
+            disableSearchKeyboardShortcut={false}
+            showQuery={true}
+            showConsensus={true}
             showMinimap={showMiniMap}
             showAnnotations={showAnnotations}
             showLogo={showLogo}
@@ -671,13 +676,6 @@ export default function App(props: AppProps){
         fileSelectorLabelText={"Upload Alignment File:"}
         exampleFiles={[
           {
-            labelText: "Testasdf",
-            fileURL:
-              process.env.PUBLIC_URL +
-              "/TESTING.a2m",
-            fileName: "TESTING.a2m",
-          },
-          {
             labelText: "β-lactamase",
             fileURL:
               process.env.PUBLIC_URL +
@@ -950,6 +948,7 @@ export default function App(props: AppProps){
                     if (alignment){
                       downloadFullViewportSVG({
                         alignment: alignment,
+                        sortBy: sortBy,
                         alignmentType: style.alignmentType, 
                         colorScheme:  style.selectedColorScheme,
                         positionsToStyle: positionsToStyle, 
@@ -1045,6 +1044,7 @@ export default function App(props: AppProps){
     );
   }, [
     alignment,
+    sortBy,
     barplots,
     positionsToStyle, 
     renderedFileDropZone,
@@ -1058,6 +1058,90 @@ export default function App(props: AppProps){
 
   return (
     <>
+      <div className={`fullscreen-loading-indicator ${loading ? "" : "hidden"}`}>
+
+        <div className="loader" />
+        {
+          //spinners from https://github.com/n3r4zzurr0/svg-spinners
+        }
+        {
+          //<svg xmlns="http://www.w3.org/2000/svg" style={{margin: "auto", background: "#fff", display: "block"}} width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+          //  <g transform="translate(20 20)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#e15b64">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.4s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(50 20)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f47e60">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.3s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(80 20)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f8b26a">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.2s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(20 50)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f47e60">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.3s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(50 50)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f8b26a">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.2s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(80 50)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#abbd81">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.1s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(20 80)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f8b26a">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.2s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(50 80)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#abbd81">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.1s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(80 80)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#849b87">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="0s"></animateTransform>
+          //    </rect></g>
+          //  </svg>
+        }
+        {
+          //<div className="spinner1">
+          //<div className="circleHolder">
+          //  <div className="circle1 spinner_b2T7z"/>
+          //</div>
+          //<div className="circleHolder">
+          //  <div className="circle2 spinner_b2T7z spinner_YRVVz"/>
+          //</div>
+          //<div className="circleHolder">
+          //  <div className="circle3 spinner_b2T7z spinner_c9oYz"/>
+          //</div>
+          //</div>
+        }
+        {
+          //<svg width="96" height="96" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          //  <circle className="spinner_b2T7" cx="4" cy="12" r="3"/>
+          //  <circle className="spinner_b2T7 spinner_YRVV" cx="12" cy="12" r="3"/>
+          //  <circle className="spinner_b2T7 spinner_c9oY" cx="20" cy="12" r="3"/>
+          //</svg>
+        }
+        {
+          //<svg 
+          //  width="96" 
+          //  height="96" 
+          //  viewBox="0 0 24 24"
+          //  xmlns="http://www.w3.org/2000/svg">
+          //  <rect className="spinner_zWVm" x="1" y="1" width="7.33" height="7.33"/>
+          //  <rect className="spinner_gfyD" x="8.33" y="1" width="7.33" height="7.33"/>
+          //  <rect className="spinner_T5JJ" x="1" y="8.33" width="7.33" height="7.33"/>
+          //  <rect className="spinner_E3Wz" x="15.66" y="1" width="7.33" height="7.33"/>
+          //  <rect className="spinner_g2vs" x="8.33" y="8.33" width="7.33" height="7.33"/>
+          //  <rect className="spinner_ctYB" x="1" y="15.66" width="7.33" height="7.33"/>
+          //  <rect className="spinner_BDNj" x="15.66" y="8.33" width="7.33" height="7.33"/>
+          //  <rect className="spinner_rCw3" x="8.33" y="15.66" width="7.33" height="7.33"/>
+          //  <rect className="spinner_Rszm" x="15.66" y="15.66" width="7.33" height="7.33"/>
+          //</svg>
+        }
+      </div>
       {renderedSettingsBox}
       {renderedAlignment}
     </>

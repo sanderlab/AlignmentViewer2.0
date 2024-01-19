@@ -34,7 +34,11 @@ export class FastaAlignment extends Alignment {
       }
     }
     try {
-      return new FastaAlignment(fileName, sequences, removeDuplicateSequences);
+      return new FastaAlignment({
+        name: fileName, 
+        sequencesAsInput: sequences, 
+        removeDuplicateSequences: removeDuplicateSequences
+      });
     } catch (e) {
       throw getParseError("Fasta", (e as Error).message);
     }

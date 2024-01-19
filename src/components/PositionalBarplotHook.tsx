@@ -6,6 +6,7 @@ import { mapGroupBy, ArrayOneOrMore, generateUUIDv4 } from "../common/Utils";
 import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixViewerHook";
 import { IControllerRole, IResponderRole, IVirtualizeParamBasics, IVirtualizeParams, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
 import { IBounds } from "./ResizeSensorHook";
+import { ISearchMatchDetails } from "./search/SequenceSearchHook";
 
 export interface IPositionalBarplotDataSeries {
   id: string; //must be unique for each series
@@ -16,12 +17,16 @@ export interface IPositionalBarplotDataSeries {
     fixYMax?(alignment: Alignment): number; //defaults to data max
     //fixYMin?: number; //defaults to data min
   };
-  getBars(alignment: Alignment): ISingleBarDetails[];
+  getBars(
+    alignment: Alignment,
+    searchDetails?: ISearchMatchDetails
+  ): ISingleBarDetails[];
 }
 
 export interface IPositionalBarplotProps {
   //don't expose these props in AlignmentViewer
   svgId: string; //used for exporting
+  searchDetails?: ISearchMatchDetails;
   alignment: Alignment;
   positionWidth: number;
 
@@ -37,22 +42,25 @@ export interface IPositionalBarplotProps {
 
   //for the virtualization
   hoverTracker?: IVirtualizeParamBasics["hoverTracker"];
+
+  //height
+  heightPx: number;
 }
 
-interface ISingleBarDetails {
+export interface ISingleBarDetails {
   height: number | undefined;
   tooltipValueText?: string;
 }
-interface ISingleBarDetailsFull extends ISingleBarDetails {
+export interface ISingleBarDetailsFull extends ISingleBarDetails {
   normalizedHeight: number | undefined;
   position: number;
   dataSeriesSet: IPositionalBarplotDataSeries;
 }
 interface IPreconfiguredBarplots {
-  ShannonEntropy: IPositionalBarplotDataSeries,
-  Conservation: IPositionalBarplotDataSeries,
-  KullbacLeiblerDivergence: IPositionalBarplotDataSeries,
-  Gaps: IPositionalBarplotDataSeries,
+  ShannonEntropy: IPositionalBarplotDataSeries;
+  Conservation: IPositionalBarplotDataSeries;
+  KullbacLeiblerDivergence: IPositionalBarplotDataSeries;
+  Gaps: IPositionalBarplotDataSeries;
 }
 
 
@@ -129,7 +137,7 @@ export const PreconfiguredPositionalBarplots: IPreconfiguredBarplots = {
       const ymax = PreconfiguredPositionalBarplots.ShannonEntropy.plotOptions!
         .fixYMax!(al);
       const entropyBars = PreconfiguredPositionalBarplots.ShannonEntropy.getBars(
-        al
+        al, undefined
       );
       return entropyBars.map((entropyBar) => {
         return {
@@ -223,6 +231,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   const {
     svgId,
     alignment,
+    searchDetails,
     positionWidth,
     dataSeriesSet,
     tooltipPlacement = "top",
@@ -303,7 +312,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     let allBars = [] as ISingleBarDetailsFull[];
     dataSeriesSet.forEach((ds) => {
       allBars = allBars.concat(
-        ds.getBars(alignment).map((bar, idx) => {
+        ds.getBars(alignment, searchDetails).map((bar, idx) => {
           return {
             ...bar,
             position: idx,
@@ -346,7 +355,8 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   }, [
     alignment, 
     dataSeriesSet, 
-    normalizeBarHeights, 
+    normalizeBarHeights,
+    searchDetails, 
     svgId
   ])
 
@@ -546,7 +556,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
               (numDataSeries === 1 ? 0.9 : 1 / numDataSeries) * POSITION_VIEWBOX_WIDTH;
             const firstBarOffset =
               (numDataSeries === 1 ? pos + 0.05 : pos) * POSITION_VIEWBOX_WIDTH;
-            console.log();
+              
             return allBarsHeightsAtPosition.length < 1 ? null : (
               <g
                 transform={`translate(${firstBarOffset},0)`}

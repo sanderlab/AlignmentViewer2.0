@@ -15,6 +15,6 @@ export * from "./components/AlignmentViewerHook.js";
 export * from "./components/PositionalBarplotHook.js"
 export * from "./components/SequenceLogoHook.js";
 
-export * from "./components/alignment-details/AlignmentDetailsHook.js";
+export * from "./components/msa-blocks-and-letters/MSABlocksAndLetters.js";
 
 export * from "./components/minimap/MiniMapHook";

@@ -172,7 +172,16 @@ export class PositionsToStyle {
     styles.styPosConsensusDiffClass
   );
 
-  static list = [
+  //only for search screen
+  static readonly SEARCH_RESULTS_ONLY = new PositionsToStyle(
+    "search-results",
+    "Search Results",
+    //logoplot is the only visualization that uses the class, so style "all" aa/nt
+    //on the logoplot on the search screen.
+    styles.styPosAllClass 
+  );
+
+  static list = [ //don't include search as we are using it separately
     PositionsToStyle.ALL,
     PositionsToStyle.QUERY,
     PositionsToStyle.QUERY_DIFF,

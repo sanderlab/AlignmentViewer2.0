@@ -16,6 +16,7 @@ import {
 } from "./MolecularStyles";
 import { AminoAcid, Nucleotide } from "./Residues";
 import { startEndIdxToArray } from "./Utils";
+import { SequenceSorter } from "./AlignmentSorter";
 
 const CLASSNAME_MSA_TEXT = "msa";
 const CLASSNAME_POSITIONAL_AXIS_TEXT = "posaxis";
@@ -524,6 +525,7 @@ const getStylesheet = () => {
  */
 const getFullViewportSvgString = (props: {
   alignment: Alignment, 
+  sortBy: SequenceSorter,
   alignmentType: AlignmentTypes, 
   positionsToStyle: PositionsToStyle, 
   residueColoring: ResidueColoring, 
@@ -550,6 +552,7 @@ const getFullViewportSvgString = (props: {
 
   const {
     alignment, 
+    sortBy,
     alignmentType, 
     colorScheme,
     positionsToStyle, 
@@ -578,7 +581,7 @@ const getFullViewportSvgString = (props: {
       ? 99 
       : alignment.getSequenceCount()-1;
 
-  const seqs = alignment.getSequences();
+  const seqs = alignment.getSequences(sortBy);
   const exportedSeqs = startEndIdxToArray(startSeqIdx, endSeqIdx).map(
     seqIdx => seqs[seqIdx]
   );

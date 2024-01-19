@@ -208,6 +208,8 @@ export function getAlignmentFontDetails(fontSize: number) {
  * It throws errors in the console chrome - hence the sniffing for safari..
  * I don't think it has any effect in firefox.
  */
+
+/*
 const validCSSScrollClasses: string[] = [];
 var isChrome =
   /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
@@ -232,6 +234,7 @@ export function stopSafariFromBlockingWindowWheel(cssClass: string) {
     validCSSScrollClasses.push(cssClass);
   }
 }
+*/
 
 /**
  * URL Parsing and Local Storage management  

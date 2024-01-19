@@ -6,10 +6,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import * as PIXI from "pixi.js";
 
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
-import {
-  generateUUIDv4,
-  stopSafariFromBlockingWindowWheel,
-} from "../../common/Utils";
+import { generateUUIDv4 } from "../../common/Utils";
 import { VirtualVerticalScrollbar } from "./VirtualVerticalScrollbarHook";
 import { VirtualHorizontalScrollbar } from "./VirtualHorizontalScrollbarHook";
 import {
@@ -152,8 +149,9 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
 
     //fix safari-specific bug - this function will tell the window to stop
     //blocking scroll events on the "single-sequence-text" class
-    stopSafariFromBlockingWindowWheel("av2-virtualized-matrix");
-    stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
+    //stopSafariFromBlockingWindowWheel("av2-virtualized-matrix");
+    //stopSafariFromBlockingWindowWheel("av2-wheel-scroller");
+    //stopSafariFromBlockingWindowWheel("hidden-residues-for-copy-paste");
   }, []);
 
   //set row and column height in pixels

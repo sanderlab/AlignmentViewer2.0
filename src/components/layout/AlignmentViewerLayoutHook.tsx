@@ -5,7 +5,8 @@ import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 
 export interface IMetadataAndContent{
   metadata: string | React.JSX.Element,
-  content: React.JSX.Element
+  content: React.JSX.Element,
+  heightPx: number
 }
 
 export interface IFixedWidth{
@@ -20,7 +21,7 @@ export interface IAdjustableWidth{
 }
 
 export type IAlignmentViewerLayoutProps = {
-  alignmentDetails: IMetadataAndContent,
+  alignmentDetails: Pick<IMetadataAndContent, "metadata" | "content">,
   consensus?: IMetadataAndContent,
   query?: IMetadataAndContent,
   positionalAxis?: IMetadataAndContent,
@@ -34,8 +35,7 @@ export type IAlignmentViewerLayoutProps = {
   showMinimap: boolean,
 
   //misc
-  rulerConsensusQueryHeightPx: number;
-  titleFontSize?: number;
+  titleFontSize: number;
 
 } & Partial<typeof defaultProps>;
 
@@ -53,8 +53,6 @@ const defaultProps = {
   gapViewportRightPx: 6,
 
   //element sizing
-  barplotsHeightPx: 50,
-  logoHeightPx: 100,
   resizeBarSizePx: 4, //width of resize bar (or height if we implement later)
   metadataSizing: {
     type: "adjustable-width", 
@@ -97,11 +95,6 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     //misc
     showMetadata,
 
-    //element heights
-    rulerConsensusQueryHeightPx,
-    barplotsHeightPx,
-    logoHeightPx,
-
     //layout sizing
     metadataSizing,
     minimapSizing,
@@ -112,14 +105,12 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     gapViewportBottomPx,
     gapViewportLeftPx,
     gapViewportRightPx,
+
+    titleFontSize
   } = {
     ...defaultProps,
     ...props
   };
-
-  const {
-    titleFontSize = rulerConsensusQueryHeightPx - 2
-  } = props;
 
   const metadataStartingWidth = !showMetadata 
     ? 100 //won't be shown though so doesn't matter what is here
@@ -159,7 +150,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //
   const renderWidget = useCallback((props: {
     key: string;
-    metadataAndContent: IMetadataAndContent | undefined;
+    metadataAndContent: IMetadataAndContent | typeof alignmentDetails | undefined;
     metadataGridArea: string;
     contentGridArea: string;
     forceHide?: boolean;
@@ -384,11 +375,11 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           gap: `${gapBetweenColumnsAndRowsPx}px`,
           gridTemplateColumns: gridTemplateColumns,
           gridTemplateRows: `
-            ${barplots.map(bp => `${barplotsHeightPx}px`).join("\n")}
-            ${showLogoPlot ? `${logoHeightPx}px` : ""} 
-            ${showConsensus ? `${rulerConsensusQueryHeightPx}px` : ""} 
-            ${showQuery ? `${rulerConsensusQueryHeightPx}px` : ""} 
-            ${showPositionalAxis ? `${rulerConsensusQueryHeightPx}px` : ""}
+            ${barplots.map(bp => `${bp.heightPx}px`).join("\n")}
+            ${showLogoPlot && logoPlot ? `${logoPlot.heightPx}px` : ""} 
+            ${showConsensus && consensus ? `${consensus.heightPx}px` : ""} 
+            ${showQuery && query ? `${query.heightPx}px` : ""} 
+            ${showPositionalAxis && positionalAxis ? `${positionalAxis.heightPx}px` : ""}
             auto
           `,
           gridTemplateAreas: gridTemplateAreas

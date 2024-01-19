@@ -9,7 +9,6 @@ import {
 } from "./SequenceLogoHook";
 
 import { MiniMap } from "./minimap/MiniMapHook";
-import { AlignmentDetails } from "./alignment-details/AlignmentDetailsHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter } from "../common/AlignmentSorter";
@@ -32,9 +31,16 @@ import {
   IResponderRole, 
   VirtualizationRole
 } from "./virtualization/VirtualizationTypes";
-import { AlignmentViewerLayout, IAdjustableWidth, IFixedWidth, IMetadataAndContent } from "./layout/AlignmentViewerLayoutHook";
-import { SequenceSearch } from "./search/SequenceSearchHook";
-import { WebGlContexts, getWebGlContext } from "../common/WebGlContextFactory";
+import { 
+  AlignmentViewerLayout, 
+  IAdjustableWidth, 
+  IFixedWidth, 
+  IMetadataAndContent 
+} from "./layout/AlignmentViewerLayoutHook";
+import { ISearchMatchDetails, SequenceSearch } from "./search/SequenceSearchHook";
+import { useListenForSearchKeypresses } from "./search/SearchKeysListenerHook";
+import { MSABlocksAndLetters } from "./msa-blocks-and-letters/MSABlocksAndLetters";
+import { getCachedCanvasGenerators } from "./msa-blocks-and-letters/MSABlockGenerator";
 
 export enum AlignmentViewerType {
   PrimaryViewer = "PrimaryViewer",
@@ -50,6 +56,7 @@ export type IAlignmentViewerProps = {
   positionsToStyle: PositionsToStyle;
   residueColoring: ResidueColoring;
   whichViewer: AlignmentViewerType;
+  highlightPositionalMatches?: ISearchMatchDetails;
   triggerShowSearch?: React.MutableRefObject<(() => void) | undefined>;
   mainViewportVisibleChanged?: (props: {
     seqIdxStart: number,
@@ -62,7 +69,7 @@ export type IAlignmentViewerProps = {
 
 export type IBarplotExposedProps = Pick<
   IPositionalBarplotProps,
-  "svgId" | "dataSeriesSet" | "tooltipPlacement"
+  "svgId" | "dataSeriesSet" | "tooltipPlacement" | "heightPx"
 >;
 
 //
@@ -70,6 +77,8 @@ export type IBarplotExposedProps = Pick<
 //
 const defaultProps = {
   disableSearch: false,
+  disableSearchKeyboardShortcut: false,
+  canvasGenerators: getCachedCanvasGenerators("primary"),
 
   zoomLevel: 13 as number,
   sortBy: SequenceSorter.INPUT as SequenceSorter,
@@ -81,7 +90,6 @@ const defaultProps = {
   showQuery: true as boolean,
   showRuler: true as boolean,
 
-  barplotsHeightPx: 75,
   logoHeightPx: 100,
 
   metadataSizing: {
@@ -95,7 +103,7 @@ const defaultProps = {
     type: "adjustable-width",
     startingWidth: 100,
     minWidth: 75,
-    maxWidth: 300
+    maxWidth: 600
   } as IAdjustableWidth | IFixedWidth,
 
   logoOptions: {
@@ -115,11 +123,11 @@ const defaultProps = {
         PreconfiguredPositionalBarplots.ShannonEntropy,
         PreconfiguredPositionalBarplots.Gaps,
       ],
-      tooltipPlacement: undefined
+      tooltipPlacement: undefined,
+      heightPx: 75
     },
   ] as IBarplotExposedProps[],
 };
-
 
 
 /**
@@ -130,21 +138,23 @@ const defaultProps = {
 export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   const {
+    canvasGenerators,
+    highlightPositionalMatches,
     whichViewer,
 
     alignment,
     barplots,
     style,
     logoOptions,
+    logoHeightPx,
 
     disableSearch,
+    disableSearchKeyboardShortcut,
     triggerShowSearch,
 
     mainViewportVisibleChanged,
     metadataSizing,
     minimapSizing,
-    barplotsHeightPx,
-    logoHeightPx,
     positionsToStyle,
     residueColoring,
     showAnnotations,
@@ -164,62 +174,26 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   const annotationFontSize = zoomLevel + 3;
   const residueWidth = getAlignmentFontDetails(fontSize).width;
   const residueHeight = getAlignmentFontDetails(fontSize).height;
+  const singleLineHeight = residueHeight;
   
   
   //
   // search - listen for key events
   //
-  const [cmdPressed, setCmdPressed] = useState<boolean>(false);
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const showSearchFn = useCallback(()=>{
     setShowSearch(true);
   }, [])
-  React.useEffect(() => {
+  useEffect(() => {
     if(triggerShowSearch){
       triggerShowSearch.current = showSearchFn;
     }
   }, [showSearchFn, triggerShowSearch]);
 
-  const keyDownFn = useCallback((e: KeyboardEvent)=>{
-    if(e){
-      if ((e.ctrlKey || cmdPressed) && e.key === "f") {
-        e.preventDefault();
-        setShowSearch(true);
-        setCmdPressed(false);
-      }
-      if(e.key === "Meta"){
-        e.preventDefault();
-        setCmdPressed(true);
-      }
-    }
-  }, [cmdPressed]);
-
-  const keyUpFn = useCallback((e: KeyboardEvent)=>{
-    if (e && (e.key === "Meta")) {
-      e.preventDefault();
-      setCmdPressed(false);
-    }
-  }, []);
-
-  useEffect(()=>{
-    window.removeEventListener("keydown", keyDownFn);
-    window.removeEventListener("keyup", keyUpFn);
-
-    if(!disableSearch){
-      window.addEventListener("keydown", keyDownFn);
-      window.addEventListener("keyup", keyUpFn);
-    }
-
-    return () => {
-      window.removeEventListener("keydown", keyDownFn);
-      window.removeEventListener("keyup", keyUpFn);
-    }
-  }, [
-    disableSearch, 
-    keyDownFn,
-    keyUpFn
-  ]);
-
+  useListenForSearchKeypresses({
+    disableSearch: disableSearchKeyboardShortcut,
+    searchDialogRequested: showSearchFn
+  });
 
   //
   //virtualization 
@@ -352,17 +326,20 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       <PositionalBarplot
         svgId={barplotProps.svgId}
         alignment={alignment}
+        searchDetails={highlightPositionalMatches}
         tooltipPlacement={barplotProps.tooltipPlacement}
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={residueWidth}
         horizontalVirtualization={xViewportResponderVirtualization}
+        heightPx={barplotProps.heightPx}
       ></PositionalBarplot>
     );
   }, [
     alignment,
+    attachEventListeners,
+    highlightPositionalMatches,
     residueWidth, 
     xViewportResponderVirtualization,
-    attachEventListeners
   ]);
 
   //positionaxis
@@ -387,32 +364,24 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   //helper as we use this for both query and consensus
   const renderSingleSequence = useCallback((
-    sequence: string,
     sequenceType: "consensus" | "query"
   )=>{
     return attachEventListeners(
-      <AlignmentDetails
-        webGlApp={
-          whichViewer === AlignmentViewerType.PrimaryViewer 
-            ? sequenceType === 'query'
-              ? getWebGlContext(WebGlContexts.PrimaryQuerySeq)
-              : getWebGlContext(WebGlContexts.PrimaryConsensusSeq)
-            : sequenceType === 'query'
-              ? getWebGlContext(WebGlContexts.SearchQuerySeq)
-              : getWebGlContext(WebGlContexts.SearchConsensusSeq)
+      <MSABlocksAndLetters
+        canvasGenerator={
+          sequenceType === "consensus" 
+            ? canvasGenerators.consensusApp
+            : canvasGenerators.queryApp
         }
+        sequenceSet={sequenceType}
 
-        alignmentUUID={alignment.getUUID()}
+        alignment={alignment}
+        sortBy={sortBy}
         horizVirtualization={xViewportResponderVirtualization}
         vertVirtualization={"None"}
-        sequences={[sequence]}
-        consensusSequence={
-          alignment.getConsensus().sequence
-        }
-        querySequence={
-          alignment.getQuery().sequence
-        }
-        alignmentStyle={style}
+        highlightPositionalMatches={highlightPositionalMatches}
+        alignmentType={style.alignmentType}
+        colorScheme={style.selectedColorScheme}
         positionsToStyle={positionsToStyle}
         residueColoring={residueColoring}
         fontSize={fontSize}
@@ -424,13 +393,16 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   }, [
     alignment,
     attachEventListeners,
+    canvasGenerators.consensusApp,
+    canvasGenerators.queryApp,
+    sortBy,
     fontSize, 
+    highlightPositionalMatches,
     positionsToStyle,
     residueColoring,
     residueHeight,
     residueWidth,
     style,
-    whichViewer,
     xViewportResponderVirtualization
   ]);
 
@@ -438,57 +410,58 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   const renderedConsensusSeq: IMetadataAndContent | undefined = useMemo(()=>{
     return !showConsensus ? undefined : {
       metadata: "Consensus",
-      content: renderSingleSequence(
-        alignment.getConsensus().sequence, "consensus"
-      )
+      content: renderSingleSequence("consensus"),
+      heightPx: singleLineHeight
     };
   }, [
-    alignment,
     renderSingleSequence,
-    showConsensus
+    showConsensus,
+    singleLineHeight
   ]);
 
   //query
   const renderedQuerySeq: IMetadataAndContent | undefined = useMemo(()=>{
     return !showQuery ? undefined : {
       metadata: "Query",
-      content: renderSingleSequence(
-        alignment.getQuery().sequence, "query"
-      )
+      content: renderSingleSequence("query"),
+      heightPx: singleLineHeight
     }
   }, [
-    alignment,
     renderSingleSequence,
-    showQuery
+    showQuery,
+    singleLineHeight
   ]);
 
   //minimap
   const renderedMinimap = useMemo(()=>{
     return ( !showMinimap ? undefined :
       <MiniMap
+        canvasGenerator={canvasGenerators.minimapApp}
         alignment={alignment}
-        alignmentStyle={style}
+        alignmentType={style.alignmentType}
+        colorScheme={style.selectedColorScheme}
         positionsToStyle={positionsToStyle}
+        highlightPositionalMatches={highlightPositionalMatches}
         sortBy={sortBy}
         syncWithVerticalVirtualization={
           yViewportResponderVirtualization
-        }
-        webGlApp={
-          whichViewer === AlignmentViewerType.PrimaryViewer
-            ? getWebGlContext(WebGlContexts.PrimaryMinimap)
-            : getWebGlContext(WebGlContexts.SearchMinimap)
         }
       />
     );
   }, [
     alignment, 
+    canvasGenerators.minimapApp,
+    highlightPositionalMatches,
     style,
     positionsToStyle,
     showMinimap,
     sortBy,
-    whichViewer,
     yViewportResponderVirtualization
   ]);
+
+  const closeSearch = useCallback(()=>{
+    setShowSearch(false);
+  }, []);
 
   //
   // final render
@@ -498,7 +471,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       {!alignment || disableSearch ? undefined : 
         <div style={{display: !showSearch ? "none" : undefined}}>
           <SequenceSearch
-            closePressed={()=>{setShowSearch(false);}}
+            searchVisible={showSearch}
+            closePressed={closeSearch}
+            mainAlignmentQuerySequence={alignment.getQuery()}
             sortedSequences={sequences}
             sortedSequenceIds={sequenceIds}
             style={style}
@@ -515,13 +490,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         showConsensus={showConsensus}
         showMinimap={showMinimap}
 
-        rulerConsensusQueryHeightPx={residueHeight}
-
         metadataSizing={metadataSizing}
         minimapSizing={minimapSizing}
-
-        barplotsHeightPx={barplotsHeightPx}
-        logoHeightPx={logoHeightPx}
+        titleFontSize={annotationFontSize}
 
         alignmentDetails={{
           metadata: (
@@ -538,19 +509,18 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
             />
           ),
           content: attachEventListeners(
-            <AlignmentDetails
-              webGlApp={
-                whichViewer === AlignmentViewerType.PrimaryViewer
-                  ? getWebGlContext(WebGlContexts.PrimaryViewport)
-                  : getWebGlContext(WebGlContexts.SearchViewport)
+            <MSABlocksAndLetters
+              canvasGenerator={
+                canvasGenerators.primaryViewportApp
               }
-              alignmentUUID={alignment.getUUID()}
+              sequenceSet={"alignment"}
+              alignment={alignment}
+              sortBy={sortBy}
               vertVirtualization={yViewportControllerVirtualization}
               horizVirtualization={xViewportControllerVirtualization}
-              sequences={sequences}
-              consensusSequence={alignment.getConsensus().sequence}
-              querySequence={alignment.getQuery().sequence}
-              alignmentStyle={style}
+              highlightPositionalMatches={highlightPositionalMatches}
+              alignmentType={style.alignmentType}
+              colorScheme={style.selectedColorScheme}
               positionsToStyle={positionsToStyle}
               residueColoring={residueColoring}
               fontSize={fontSize}
@@ -569,7 +539,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
                   mainViewportVisibleChanged(props)
                 }
               }}
-            ></AlignmentDetails>
+            ></MSABlocksAndLetters>
           )
         }}
 
@@ -579,7 +549,8 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
         positionalAxis={{
           metadata: "Position",
-          content: renderedPositionAxis
+          content: renderedPositionAxis,
+          heightPx: singleLineHeight
         }}
 
         barplots={!barplots || barplots.length < 1
@@ -589,7 +560,8 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
               metadata: barplot.dataSeriesSet.map(
                 (series) => series.name
               ).join(" / "),
-              content: renderBarplot(barplot)
+              content: renderBarplot(barplot),
+              heightPx: barplot.heightPx
             }
           })
         }
@@ -597,6 +569,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         logoPlot={{
           metadata: "Logo",
           content: renderedSequenceLogo,
+          heightPx: logoHeightPx
         }}
 
         minimapPlot={renderedMinimap}

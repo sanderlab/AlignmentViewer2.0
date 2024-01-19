@@ -51,14 +51,14 @@ export interface IStockholmAlignmentMetadata {
 export class StockholmAlignment extends Alignment {
   private metadata: IStockholmAlignmentMetadata;
 
-  public constructor(
+  public constructor(props: {
     name: string,
     sequencesAsInput: ISequence[],
     metadata: IStockholmAlignmentMetadata,
     removeDuplicateSequences: boolean
-  ) {
-    super(name, sequencesAsInput, removeDuplicateSequences);
-    this.metadata = metadata;
+  }) {
+    super(props);
+    this.metadata = props.metadata;
   }
 
   /**
@@ -167,12 +167,12 @@ export class StockholmAlignment extends Alignment {
       });
 
     try {
-      return new StockholmAlignment(
-        fileName,
-        sequences,
-        metadata,
-        removeDuplicateSequences
-      );
+      return new StockholmAlignment({
+        name: fileName,
+        sequencesAsInput: sequences,
+        metadata: metadata,
+        removeDuplicateSequences: removeDuplicateSequences
+      });
     } catch (e) {
       throw getParseError("Stockholm", (e as Error).message);
     }
