@@ -35,6 +35,7 @@ export class LogoFonts  {
 
   static list = [
     LogoFonts.HELVETICA,
+    LogoFonts.HELVETICA_BOLD,
     LogoFonts.ROBOTO_MONO_MEDIUM,
   ];
 

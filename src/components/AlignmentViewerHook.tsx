@@ -3,20 +3,25 @@ import { Provider } from "react-redux";
 import { PositionalAxis } from "./PositionalAxisHook";
 import {
   SequenceLogo,
-  LOGO_TYPES,
   ISequenceLogoProps,
+  LogoType,
 } from "./SequenceLogoHook";
 
 import { MiniMap } from "./minimap/MiniMapHook";
 import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
-import { SequenceSorter } from "../common/AlignmentSorter";
+import { SequenceSorter, SequenceSorterInstance } from "../common/AlignmentSorter";
 import { reduxStore } from "../redux/ReduxStore";
 import {
-  AminoAcidAlignmentStyle,
-  NucleotideAlignmentStyle,
-  PositionsToStyle,
-  ResidueColoring
+  AlignmentTypes,
+  AminoAcidAlignmentTypeInstance,
+  AminoAcidColorSchemes,
+  AminoacidColorSchemeInstance,
+  NucleotideAlignmentTypeInstance,
+  NucleotideColorSchemeInstance,
+  NucleotideColorSchemes,
+  PositionsToStyleInstance,
+  ResidueColoringInstance
 } from "../common/MolecularStyles";
 import { generateUUIDv4, getAlignmentFontDetails } from "../common/Utils";
 import { 
@@ -41,20 +46,15 @@ import { useListenForSearchKeypresses } from "./search/SearchKeysListenerHook";
 import { MSABlocksAndLetters } from "./msa-blocks-and-letters/MSABlocksAndLetters";
 import { getCachedCanvasGenerators } from "./msa-blocks-and-letters/MSABlockGenerator";
 
-export enum AlignmentViewerType {
-  PrimaryViewer = "PrimaryViewer",
-  SearchViewer = "SearchViewer"
-}
 
 //
 // TYPES / INTERFACES
 //
 export type IAlignmentViewerProps = {
   alignment: Alignment;
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  positionsToStyle: PositionsToStyle;
-  residueColoring: ResidueColoring;
-  whichViewer: AlignmentViewerType;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  positionsToStyle: PositionsToStyleInstance;
+  residueColoring: ResidueColoringInstance;
   highlightPositionalMatches?: ISearchMatchDetails;
   triggerShowSearch?: React.MutableRefObject<(() => void) | undefined>;
   mainViewportVisibleChanged?: (props: {
@@ -63,13 +63,14 @@ export type IAlignmentViewerProps = {
     posIdxStart: number,
     posIdxEnd: number
   }) => void;
-
 } & Partial<Readonly<typeof defaultProps>>;
+
 
 export type IBarplotExposedProps = Pick<
   IPositionalBarplotProps,
   "svgId" | "dataSeriesSet" | "tooltipPlacement" | "heightPx"
 >;
+
 
 //
 // DEFAULT PROPS
@@ -80,7 +81,9 @@ const defaultProps = {
   canvasGenerators: getCachedCanvasGenerators("primary"),
 
   zoomLevel: 13 as number,
-  sortBy: SequenceSorter.INPUT as SequenceSorter,
+  sortBy: SequenceSorter.INPUT as SequenceSorterInstance,
+  aaColorScheme: AminoAcidColorSchemes.list[0] as AminoacidColorSchemeInstance,
+  ntColorScheme: NucleotideColorSchemes.list[0] as NucleotideColorSchemeInstance,
 
   showAnnotations: true as boolean,
   showConsensus: true as boolean,
@@ -106,7 +109,7 @@ const defaultProps = {
   } as IAdjustableWidth | IFixedWidth,
 
   logoOptions: {
-    logoType: LOGO_TYPES.LETTERS
+    logoType: LogoType.LETTERS
   } as Pick<
     ISequenceLogoProps, 
     "svgId" | "tooltipPlacement" | "logoType"
@@ -135,15 +138,15 @@ const defaultProps = {
  * @returns 
  */
 export function AlignmentViewer(props: IAlignmentViewerProps) {
-
   const {
     canvasGenerators,
     highlightPositionalMatches,
-    whichViewer,
 
     alignment,
+    alignmentType,
+    aaColorScheme,
+    ntColorScheme,
     barplots,
-    style,
     logoOptions,
     logoHeightPx,
 
@@ -162,12 +165,30 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     showMinimap,
     showQuery,
     showRuler,
-    sortBy,
     zoomLevel,
   } = {
     ...defaultProps,
     ...props
   };
+
+  //error check color scheme and sort are congruant with passed alignment type
+  //if not, reset.
+  let {sortBy} = {
+    ...defaultProps,
+    ...props
+  }
+  if(
+    (alignmentType === AlignmentTypes.AMINOACID && 
+     !SequenceSorter.ALL_AMINO_ACID_SORTERS.includes(sortBy)) ||
+    (alignmentType === AlignmentTypes.NUCLEOTIDE &&
+     !SequenceSorter.ALL_NUCLEOTIDE_SORTERS.includes(sortBy))
+  ){
+    console.error(
+      `Misconfiguration - invalid sortBy (${sortBy.description}) passed to AlignmentViewer for
+       alignmentType "${alignmentType.description}". Setting to input sort order.`
+    );
+    sortBy = SequenceSorter.INPUT;
+  }
 
   const fontSize = zoomLevel;
   const annotationFontSize = zoomLevel + 3;
@@ -299,7 +320,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       <SequenceLogo
         svgId={logoOptions.svgId}
         alignment={alignment}
-        style={style}
+        alignmentType={alignmentType}
+        aaColorScheme={aaColorScheme}
+        ntColorScheme={ntColorScheme}
         positionsToStyle={positionsToStyle}
         glyphWidth={residueWidth}
         logoType={logoOptions.logoType}
@@ -313,7 +336,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     positionsToStyle,
     residueWidth,
     xViewportResponderVirtualization,
-    style,
+    alignmentType,
+    aaColorScheme,
+    ntColorScheme,
     attachEventListeners
   ]);
 
@@ -379,8 +404,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         horizVirtualization={xViewportResponderVirtualization}
         vertVirtualization={"None"}
         highlightPositionalMatches={highlightPositionalMatches}
-        alignmentType={style.alignmentType}
-        colorScheme={style.selectedColorScheme}
+        alignmentType={alignmentType}
+        aaColorScheme={aaColorScheme}
+        ntColorScheme={ntColorScheme}
         positionsToStyle={positionsToStyle}
         residueColoring={residueColoring}
         fontSize={fontSize}
@@ -401,7 +427,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     residueColoring,
     residueHeight,
     residueWidth,
-    style,
+    alignmentType,
+    aaColorScheme,
+    ntColorScheme,
     xViewportResponderVirtualization
   ]);
 
@@ -437,8 +465,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
       <MiniMap
         canvasGenerator={canvasGenerators.minimapApp}
         alignment={alignment}
-        alignmentType={style.alignmentType}
-        colorScheme={style.selectedColorScheme}
+        alignmentType={alignmentType}
+        aaColorScheme={aaColorScheme}
+        ntColorScheme={ntColorScheme}
         positionsToStyle={positionsToStyle}
         highlightPositionalMatches={highlightPositionalMatches}
         sortBy={sortBy}
@@ -451,7 +480,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     alignment, 
     canvasGenerators.minimapApp,
     highlightPositionalMatches,
-    style,
+    alignmentType,
+    aaColorScheme,
+    ntColorScheme,
     positionsToStyle,
     showMinimap,
     sortBy,
@@ -475,7 +506,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
             mainAlignmentQuerySequence={alignment.getQuery()}
             sortedSequences={sequences}
             sortedSequenceIds={sequenceIds}
-            style={style}
+            alignmentType={alignmentType}
+            aaColorScheme={aaColorScheme}
+            ntColorScheme={ntColorScheme}
             residueColoring={residueColoring}
             positionsToStyle={positionsToStyle}
           />
@@ -518,8 +551,9 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
               vertVirtualization={yViewportControllerVirtualization}
               horizVirtualization={xViewportControllerVirtualization}
               highlightPositionalMatches={highlightPositionalMatches}
-              alignmentType={style.alignmentType}
-              colorScheme={style.selectedColorScheme}
+              alignmentType={alignmentType}
+              aaColorScheme={aaColorScheme}
+              ntColorScheme={ntColorScheme}
               positionsToStyle={positionsToStyle}
               residueColoring={residueColoring}
               fontSize={fontSize}
@@ -557,7 +591,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
           : barplots.map((barplot) => {
             return {
               metadata: barplot.dataSeriesSet.map(
-                (series) => series.name
+                (series) => series.description
               ).join(" / "),
               content: renderBarplot(barplot),
               heightPx: barplot.heightPx

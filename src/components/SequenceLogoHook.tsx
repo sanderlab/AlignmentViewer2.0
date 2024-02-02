@@ -12,10 +12,14 @@ import { GlyphFactory, LogoFonts } from "../common/SequenceLogoGlyphs";
 import {
   getLetterClassNames,
   AlignmentTypes,
-  AminoAcidAlignmentStyle,
-  NucleotideAlignmentStyle,
-  PositionsToStyle,
   ResidueColoring,
+  PositionsToStyleInstance,
+  AminoacidColorSchemeInstance,
+  NucleotideColorSchemeInstance,
+  AminoAcidColorSchemes,
+  NucleotideColorSchemes,
+  AminoAcidAlignmentTypeInstance,
+  NucleotideAlignmentTypeInstance,
 } from "../common/MolecularStyles";
 import { AminoAcid, Nucleotide } from "../common/Residues";
 import {
@@ -31,11 +35,7 @@ import {
   VirtualizationStrategy 
 } from "./virtualization/VirtualizationTypes";
 import { IBounds } from "./ResizeSensorHook";
-
-export enum LOGO_TYPES {
-  LETTERS = "Letter Stack",
-  BARS = "Bar Plot",
-}
+import { IListOfPropObjects, IPropObjectInstanceInList } from "../common/GlobalEnumObject";
 
 interface ILetterWithClasses {
   letter: AvailableGlyphs;
@@ -54,11 +54,13 @@ export interface ISequenceLogoProps {
   svgId: string;
   alignment: Alignment;
   glyphWidth: number;
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  positionsToStyle: PositionsToStyle;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
+  positionsToStyle: PositionsToStyleInstance;
 
   //props that should be exposed in AlignmentViewer:
-  logoType?: LOGO_TYPES; //letters or bars
+  logoType?: LogoTypeInstance; //letters or bars
   font?: LogoFonts;
 
   //tooltip
@@ -72,21 +74,42 @@ export interface ISequenceLogoProps {
   hoverTracker?: IVirtualizeParamBasics["hoverTracker"];
 }
 
+export interface LogoTypeInstance extends IPropObjectInstanceInList{}
+export const LogoType = (() => {
+  const propList = {
+    LETTERS: {
+      key: "letter-stack",
+      description: "Letter Stack"
+    } satisfies LogoTypeInstance,
+    BARS: {
+      key: "stacked-bars",
+      description: "Stacked Bar Plot"
+    } satisfies LogoTypeInstance,
+  };
+  return {
+    ...propList,
+    ...IListOfPropObjects<LogoTypeInstance>(Object.values(propList))
+  };
+})();
 
 export function SequenceLogo(props: ISequenceLogoProps) {
   const {
     svgId,
     alignment,
     glyphWidth,
-    style,
+    alignmentType,
+    aaColorScheme = AminoAcidColorSchemes.list[0],
+    ntColorScheme = NucleotideColorSchemes.list[0],
     positionsToStyle,
     tooltipPlacement = "left-start",
     tooltipOffset = 8, //distance that the arrow will be from the hoverd letter stack
-    logoType = LOGO_TYPES.LETTERS,
+    logoType = LogoType.LETTERS,
     font = LogoFonts.DEFAULT,
     horizontalVirtualization,
     hoverTracker = "end"
   } = props;
+  const colorScheme = alignmentType === AlignmentTypes.AMINOACID
+    ? aaColorScheme : ntColorScheme;
 
   const tooltipRef = useRef<TooltipRefProps>(null);
   const tooltipClosingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -104,7 +127,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const lettersSorted = alignment.getAllUpperAlphaLettersInAlignmentSorted();
 
     const moleculeClass =
-      style.alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
+      alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
 
     //note: removes invalid letters, but letterCount (value) isn't sorted
     const plc = alignment.getPositionalLetterCounts(false, lettersSorted);
@@ -136,7 +159,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
           .sort((a, b) => (a.frequency > b.frequency ? 1 : -1));
       }
     );
-  }, [alignment, style.alignmentType]);
+  }, [alignment, alignmentType]);
 
   /**
    * Generate the svg elements for a single position, i.e., column
@@ -151,7 +174,7 @@ export function SequenceLogo(props: ISequenceLogoProps) {
         dy = dy - freq.frequency * 100;
         const xscale = 0.009; // invariant scaling, not exact, but works.
 
-        if (logoType === LOGO_TYPES.BARS) {
+        if (logoType === LogoType.BARS) {
           return (
             <rect
               width="100"
@@ -363,10 +386,10 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     const totalWidth = sequenceLength * glyphWidth;
 
     const moleculeClass =
-      style.alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
+      alignmentType === AlignmentTypes.AMINOACID ? AminoAcid : Nucleotide;
 
     const defaultColor = moleculeClass.UNKNOWN.colors.get(
-        style.selectedColorScheme
+        colorScheme
       )?.get(
         ResidueColoring.NO_BACKGROUND
       )?.letterColor.hexString;
@@ -405,16 +428,16 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     glyphWidth,
     height,
     positionsCache,
-    style.alignmentType,
-    style.selectedColorScheme,
+    alignmentType,
+    colorScheme,
     svgId
   ]);
 
   const fullLogoRendered = useMemo(()=>{
     const classNames = [
       "sequence-logo-holder",
-      style.alignmentType.className,
-      style.selectedColorScheme.className,
+      alignmentType.className,
+      colorScheme.className,
       positionsToStyle.className
     ];
 
@@ -435,8 +458,8 @@ export function SequenceLogo(props: ISequenceLogoProps) {
     positionsToStyle,
     renderedSvg, 
     renderedTooltip, 
-    style.alignmentType.className, 
-    style.selectedColorScheme.className
+    alignmentType.className, 
+    colorScheme.className
   ]);
 
   const containerBoundsUpdated = useCallback((bounds: IBounds)=>{

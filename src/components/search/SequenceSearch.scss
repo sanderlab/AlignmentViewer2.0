@@ -2,13 +2,14 @@
 
 .background-behind-search-box{
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: gray;
-  opacity: 0.75;
+  inset: 0;
+  background-color: white;
   z-index: 10000;
+  
+  transition: opacity 200ms ease-in, visibility 200ms ease-in;
+  transition: opacity 200ms ease-out, visibility 200msms ease-out;
+  opacity: 0.75;
+  visibility: visible;
 }
 
 .search-box-grid{
@@ -26,9 +27,9 @@
   .search-box-contents{
     position: relative;
     background-color: white;
-    border: solid 1px black;
     grid-area: search-area;
     border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     overflow: hidden;
 
     display: grid;

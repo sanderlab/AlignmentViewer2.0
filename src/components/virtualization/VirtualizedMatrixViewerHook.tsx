@@ -570,6 +570,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
       </>
     )
   }, [
+    bottomShadowValue,
     reduxInitialized,
     contentFromParent, 
     handleWheelFn, 

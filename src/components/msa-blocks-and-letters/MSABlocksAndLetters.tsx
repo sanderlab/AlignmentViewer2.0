@@ -4,10 +4,14 @@
 import "./MSABlocksAndLetters.scss"
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  ResidueColoring,
-  PositionsToStyle,
-  AlignmentTypes,
-  IColorScheme,
+  AminoAcidAlignmentTypeInstance,
+  AminoAcidColorSchemes,
+  AminoacidColorSchemeInstance,
+  NucleotideAlignmentTypeInstance,
+  NucleotideColorSchemeInstance,
+  NucleotideColorSchemes,
+  PositionsToStyleInstance,
+  ResidueColoringInstance,
 } from "../../common/MolecularStyles";
 import { 
   VirtualizedHorizontalViewer, 
@@ -27,14 +31,13 @@ import {
 import { generateUUIDv4, startEndIdxToArray } from "../../common/Utils";
 import { Alignment } from "../../common/Alignment";
 import { ISearchMatchDetails } from "../search/SequenceSearchHook";
-import { SequenceSorter } from "../../common/AlignmentSorter";
+import { SequenceSorterInstance } from "../../common/AlignmentSorter";
 import { MSABlocks } from "./MSABlocks";
 import { MSALetters } from "./MSALetters";
 import { 
   IExposedPairedWebglFunctions, 
   IExposedStandaloneWebglFunctions,
   IExposedCanvasFunctions,
-  createMSABlockGenerator,
  } from "./MSABlockGenerator";
 
 
@@ -45,12 +48,13 @@ export type MSABlocksAndLettersProps = {
   
   sequenceSet: "query" | "consensus" | "alignment";
 
-  alignment: Alignment,
-  alignmentType: AlignmentTypes,
-  colorScheme: IColorScheme,
-  sortBy: SequenceSorter;
-  positionsToStyle: PositionsToStyle;
-  residueColoring: ResidueColoring;
+  alignment: Alignment;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
+  sortBy: SequenceSorterInstance;
+  positionsToStyle: PositionsToStyleInstance;
+  residueColoring: ResidueColoringInstance;
 
   highlightPositionalMatches?: ISearchMatchDetails;
 
@@ -86,7 +90,8 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
 
     alignment,
     alignmentType,
-    colorScheme,
+    aaColorScheme = AminoAcidColorSchemes.list[0],
+    ntColorScheme = NucleotideColorSchemes.list[0],
     highlightPositionalMatches,
     positionsToStyle,
     residueColoring,
@@ -169,6 +174,8 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
    * Handle canvas updates
    */
   const sequences = useMemo(()=>{
+    //NOTE - any additional changes to sequences (like sorting) must be propogated 
+    //as keys for MSAblocks 
     return sequenceSet === "alignment"
       ? alignment.getSequences(sortBy).map(s=>s.sequence)
         : sequenceSet === "consensus"
@@ -242,8 +249,11 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
           querySequence={alignment.getQuery().sequence}
           consensusSequence={alignment.getConsensus().sequence}
           
+          sortByKey={sortBy.key}
+          
           alignmentType={alignmentType}
-          colorScheme={colorScheme}
+          aaColorScheme={aaColorScheme}
+          ntColorScheme={ntColorScheme}
           residueColoring={residueColoring}
           positionsToStyle={positionsToStyle}
           highlightPositionalMatches={highlightPositionalMatches}
@@ -263,7 +273,8 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
           consensusSequence={consensusSliced}
           querySequence={querySliced}
           alignmentType={alignmentType}
-          colorScheme={colorScheme}
+          aaColorScheme={aaColorScheme}
+          ntColorScheme={ntColorScheme}
           positionsToStyle={positionsToStyle}
           residueColoring={residueColoring}
           fontSize={fontSize}
@@ -281,7 +292,8 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
     sequenceSet,
     alignment,
     alignmentType,
-    colorScheme,
+    aaColorScheme,
+    ntColorScheme,
     sequences,
     fontSize,
     matrixRendered,
@@ -289,6 +301,7 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
     residueColoring,
     residueHeight,
     residueWidth,
+    sortBy,
     sliceSequences
   ]);
 

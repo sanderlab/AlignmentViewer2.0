@@ -3,10 +3,12 @@
  */
 import React, { useMemo } from "react";
 import {
-  ResidueColoring,
-  PositionsToStyle,
-  AlignmentTypes,
-  IColorScheme,
+  AminoAcidAlignmentTypeInstance,
+  AminoacidColorSchemeInstance,
+  NucleotideAlignmentTypeInstance,
+  NucleotideColorSchemeInstance,
+  PositionsToStyleInstance,
+  ResidueColoringInstance,
 } from "../../common/MolecularStyles";
 import { Alignment } from "../../common/Alignment";
 
@@ -25,10 +27,11 @@ export function MSALetters(props: {
   consensusSequence: string;
   querySequence: string;
 
-  alignmentType: AlignmentTypes;
-  colorScheme: IColorScheme;
-  positionsToStyle: PositionsToStyle,
-  residueColoring: ResidueColoring,
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
+  positionsToStyle: PositionsToStyleInstance;
+  residueColoring: ResidueColoringInstance;
 
   fontSize: number;
   lineHeight: number;
@@ -44,7 +47,8 @@ export function MSALetters(props: {
     querySequence,
 
     alignmentType,
-    colorScheme,
+    aaColorScheme,
+    ntColorScheme,
     positionsToStyle,
     residueColoring,
 
@@ -68,16 +72,17 @@ export function MSALetters(props: {
   //with each letter color as key and each value is an array of
   //with each entry 
   const letterColorToLocations = useMemo(()=>{
-    const msaColors = Alignment.getPositionalLetterColors(
-      allCharactersInAlignment,
-      slicedSequences,
-      querySequence,
-      consensusSequence,
-      alignmentType,
-      positionsToStyle,
-      residueColoring,
-      colorScheme
-    );
+    const msaColors = Alignment.getPositionalLetterColors({
+      allPossibleChars: allCharactersInAlignment,
+      sequences: slicedSequences,
+      querySequence: querySequence,
+      consensusSequence: consensusSequence,
+      alignmentType: alignmentType,
+      positionsToStyle: positionsToStyle,
+      residueColoring: residueColoring,
+      aaColorScheme: aaColorScheme,
+      ntColorScheme: ntColorScheme,
+    });
 
     const toReturn = {} as {
       [letterColor: string]: { 
@@ -111,7 +116,8 @@ export function MSALetters(props: {
     allCharactersInAlignment,
     slicedSequences, //changes too frequently. what is that about?
     alignmentType,
-    colorScheme, 
+    aaColorScheme, 
+    ntColorScheme, 
     positionsToStyle,
     residueColoring,
     consensusSequence, 

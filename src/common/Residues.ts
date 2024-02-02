@@ -1,9 +1,11 @@
 import { stringToColor } from "./Utils";
 import {
-  ALL_AMINOACID_COLORSCHEMES,
-  ALL_NUCLEOTIDE_COLORSCHEMES,
-  IColorScheme,
+  AminoAcidColorSchemes,
+  AminoacidColorSchemeInstance,
+  NucleotideColorSchemeInstance,
+  NucleotideColorSchemes,
   ResidueColoring,
+  ResidueColoringInstance,
 } from "./MolecularStyles";
 
 export interface ICombinedColor {
@@ -16,12 +18,12 @@ export interface ICombinedColor {
 }
 
 
-type IColoringToLetterAndBackgroundColor = Map<ResidueColoring, {
+type IColoringToLetterAndBackgroundColor = Map<ResidueColoringInstance, {
   letterColor: ICombinedColor;
   backgroundColor: ICombinedColor;
 }>;
 type ISingleResidueColor = Map<
-  IColorScheme, 
+  AminoacidColorSchemeInstance | NucleotideColorSchemeInstance, 
   IColoringToLetterAndBackgroundColor
 >;
 
@@ -110,7 +112,7 @@ export class AminoAcid implements IAminoAcid {
     this.singleLetterCode = singleLetterCode;
     this.threeLetterCode = threeLetterCode;
     this.fullName = fullName;
-    this.colors = ALL_AMINOACID_COLORSCHEMES.reduce((acc, cs) => {
+    this.colors = AminoAcidColorSchemes.list.reduce((acc, cs) => {
       const themesMap = new Map() as IColoringToLetterAndBackgroundColor;
       //todo update sass to be more consistant with how we use this
       //i.e., we should be able to loop ResidueColoring.list to
@@ -199,7 +201,7 @@ export class Nucleotide implements INucleotide {
   ) {
     this.singleLetterCode = singleLetterCode;
     this.fullName = fullName;
-    this.colors = ALL_NUCLEOTIDE_COLORSCHEMES.reduce((acc, cs) => {
+    this.colors = NucleotideColorSchemes.list.reduce((acc, cs) => {
       const themesMap = new Map() as IColoringToLetterAndBackgroundColor;
       themesMap.set(ResidueColoring.LIGHT, {
         letterColor: stringToColor(

@@ -1,13 +1,17 @@
 import { generateUUIDv4 } from "./Utils";
 import { AminoAcid, ICombinedColor, Nucleotide } from "./Residues";
-import { SequenceSorter } from "./AlignmentSorter";
+import { SequenceSorter, SequenceSorterInstance } from "./AlignmentSorter";
 import {
   AlignmentTypes,
-  AminoAcidAlignmentStyle,
-  IColorScheme,
-  NucleotideAlignmentStyle,
+  AminoAcidAlignmentTypeInstance,
+  AminoAcidColorSchemes,
+  AminoacidColorSchemeInstance,
+  NucleotideAlignmentTypeInstance,
+  NucleotideColorSchemeInstance,
+  NucleotideColorSchemes,
   PositionsToStyle,
-  ResidueColoring,
+  PositionsToStyleInstance,
+  ResidueColoringInstance,
 } from "./MolecularStyles";
 
 export interface ISequence {
@@ -121,7 +125,7 @@ export class Alignment {
   private predictedNT: boolean;
   private numberDuplicateSequencesInAlignment: number;
   private numberRemovedDuplicateSequences: number;
-  private sortedSequencesCache: Map<SequenceSorter, ISequence[]>;
+  private sortedSequencesCache: Map<SequenceSorterInstance, ISequence[]>;
   private maxSequenceLength: number;
   private querySequence: ISequence;
   private positionalLetterCounts: Map<number, { [letter: string]: number }>;
@@ -186,7 +190,7 @@ export class Alignment {
 
     this.uuid = generateUUIDv4();
     this.name = name;
-    this.sortedSequencesCache = new Map<SequenceSorter, ISequence[]>();
+    this.sortedSequencesCache = new Map<SequenceSorterInstance, ISequence[]>();
 
     //
     //remove duplicates, pull out query, generate statistics, generate
@@ -410,7 +414,7 @@ export class Alignment {
    * Is this alignment predicted to be nucleotides?
    * @returns true if it is predicted to be nucleotide sequences.
    */
-  getPredictedType(): AlignmentTypes {
+  getPredictedType(): AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance {
     return this.predictedNT
       ? AlignmentTypes.NUCLEOTIDE
       : AlignmentTypes.AMINOACID;
@@ -419,11 +423,16 @@ export class Alignment {
   /**
    * Returns a default nucleotide or amino acid style for this alignment,
    * predicted from the sequence itself.
-   */
+   
   getDefaultStyle(): AminoAcidAlignmentStyle | NucleotideAlignmentStyle {
     return this.predictedNT
       ? new NucleotideAlignmentStyle()
       : new AminoAcidAlignmentStyle();
+  }*/
+  getDefaultColorScheme(): AminoacidColorSchemeInstance | NucleotideColorSchemeInstance {
+    return this.predictedNT
+      ? NucleotideColorSchemes.list[0]
+      : AminoAcidColorSchemes.list[0];
   }
 
   /**
@@ -559,7 +568,7 @@ export class Alignment {
    *                    than possibly cached)
    * @returns all sequences in this alignment
    */
-  getSequences(sortBy?: SequenceSorter, forceReSort?: boolean): ISequence[] {
+  getSequences(sortBy?: SequenceSorterInstance, forceReSort?: boolean): ISequence[] {
     sortBy = sortBy ? sortBy : SequenceSorter.INPUT;
     forceReSort = forceReSort ? forceReSort : false;
     if (
@@ -646,19 +655,35 @@ export class Alignment {
   //      canvas alignment and alignment details hooks to no longer allow arbitrary
   //      sequences.
   //slow with large alignments - webworker?
-  static getPositionalLetterColors = (
+  static getPositionalLetterColors = (props: {
     //precomputed from alignment .. can and will often be larger than is
     //available in "sequences", but this can be expensive
-    allPossibleChars: string[],
+    allPossibleChars: string[];
 
-    sequences: string[],
-    querySequence: string,
-    consensusSequence: string,
-    alignmentType: AlignmentTypes,
-    positionsToStyle: PositionsToStyle,
-    residueColoring: ResidueColoring,
-    colorScheme: IColorScheme
-  ) =>{
+    sequences: string[];
+    querySequence: string;
+    consensusSequence: string;
+    alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+    positionsToStyle: PositionsToStyleInstance;
+    residueColoring: ResidueColoringInstance;
+    aaColorScheme?: AminoacidColorSchemeInstance;
+    ntColorScheme?: NucleotideColorSchemeInstance;
+  }) =>{
+    const {
+      allPossibleChars,
+      sequences,
+      querySequence,
+      consensusSequence,
+      alignmentType,
+      positionsToStyle,
+      residueColoring,
+      aaColorScheme = AminoAcidColorSchemes.list[0],
+      ntColorScheme = NucleotideColorSchemes.list[0]
+    } = props;
+
+    const colorScheme = alignmentType === AlignmentTypes.AMINOACID
+      ? aaColorScheme : ntColorScheme;
+
     if(sequences.length < 1){
       return {};
     }

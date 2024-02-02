@@ -1,10 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import {
-  PositionsToStyle,
-  AlignmentTypes,
-  IColorScheme,
+  AminoacidColorSchemeInstance,
+  NucleotideColorSchemeInstance,
   ResidueColoring,
+  PositionsToStyleInstance,
+  ResidueColoringInstance,
+  AminoAcidAlignmentTypeInstance,
+  NucleotideAlignmentTypeInstance,
+  AminoAcidColorSchemes,
+  NucleotideColorSchemes,
+  AlignmentTypes,
 } from "../../common/MolecularStyles";
 import { Alignment } from "../../common/Alignment";
 import { ICanvasAlignmentTiledProps } from "../../webworkers/MSAGenerationWorker";
@@ -30,12 +36,16 @@ export interface MSABlocksProps {
   querySequence: string;
   allCharsInAlignment: string[];
 
+  //needed to force reinitialization
+  sortByKey: string;
+
   //visualization options
-  alignmentType: AlignmentTypes;
-  positionsToStyle: PositionsToStyle;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
+  positionsToStyle: PositionsToStyleInstance;
   highlightPositionalMatches?: ISearchMatchDetails;
-  colorScheme: IColorScheme;
-  residueColoring: ResidueColoring;
+  residueColoring: ResidueColoringInstance;
 
   //passed through from virtualized matrix or minimap
   width: number;
@@ -58,10 +68,13 @@ export const MSABlocks = (props: MSABlocksProps) => {
     querySequence,
     allCharsInAlignment,
 
+    sortByKey,
+
     alignmentType,
     positionsToStyle,
     highlightPositionalMatches,
-    colorScheme,
+    aaColorScheme = AminoAcidColorSchemes.list[0],
+    ntColorScheme = NucleotideColorSchemes.list[0],
     residueColoring,
 
     width,
@@ -71,6 +84,7 @@ export const MSABlocks = (props: MSABlocksProps) => {
     positionX,
     positionY,
   } = props;
+
 
   const residueColoringToDraw = residueColoring;///ResidueColoring.DARK; //maybe not for search? red highlight is washed out.
 
@@ -102,7 +116,10 @@ export const MSABlocks = (props: MSABlocksProps) => {
       alignmentType.key,
       positionsToStyle.key,
       residueColoringToDraw.key,
-      colorScheme.commonName,
+      alignmentType === AlignmentTypes.AMINOACID 
+        ? aaColorScheme.commonName 
+        : ntColorScheme.commonName,
+      sortByKey,
       
       !highlightPositionalMatches?.searchString
         ? ""
@@ -114,7 +131,7 @@ export const MSABlocks = (props: MSABlocksProps) => {
         ].join("")
     ].join("");
   }, [
-    alignmentType.key,
+    alignmentType,
     consensusSequence,
     highlightPositionalMatches?.searchString,
     highlightPositionalMatches?.highlightColor.red,
@@ -123,8 +140,10 @@ export const MSABlocks = (props: MSABlocksProps) => {
     positionsToStyle.key,
     querySequence,
     residueColoringToDraw.key,
+    sortByKey,
     sequences,
-    colorScheme.commonName,
+    aaColorScheme.commonName,
+    ntColorScheme.commonName
   ]);
 
   //
@@ -176,22 +195,24 @@ export const MSABlocks = (props: MSABlocksProps) => {
 
   //colors for the current alignment
   const positionalLetterColors = useMemo(()=>{
-    const toreturn = Alignment.getPositionalLetterColors(
-      allCharsInAlignment,
-      sequences,
-      querySequence,
-      consensusSequence,
-      alignmentType,
-      positionsToStyle,
-      residueColoringToDraw,
-      colorScheme
-    );
+    const toreturn = Alignment.getPositionalLetterColors({
+      allPossibleChars: allCharsInAlignment,
+      sequences: sequences,
+      querySequence: querySequence,
+      consensusSequence: consensusSequence,
+      alignmentType: alignmentType,
+      positionsToStyle: positionsToStyle,
+      residueColoring: residueColoringToDraw,
+      aaColorScheme: aaColorScheme,
+      ntColorScheme: ntColorScheme
+    });
     return toreturn;
   }, [
     allCharsInAlignment,
     alignmentType,
     consensusSequence,
-    colorScheme,
+    aaColorScheme,
+    ntColorScheme,
     positionsToStyle,
     querySequence,
     residueColoringToDraw,

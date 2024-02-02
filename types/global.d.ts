@@ -31,3 +31,7 @@ type tooltipPlacement =
   "left" | "left-start" | "left-end";
 
 type NonNullable<T> = T extends null | undefined ? never : T;
+
+type Entries<T> = {
+  [K in keyof T]: [K, T[K]]
+}[keyof T][];

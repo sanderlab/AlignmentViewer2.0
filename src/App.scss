@@ -37,7 +37,7 @@ body {
     inset: 0;
     background-color: white;
     opacity: 0.8;
-    z-index: 1001;
+    z-index: 1005;
     display: grid;
     place-items: center;
     
@@ -246,53 +246,6 @@ body {
     flex: 1;
   }
 }
-
-.outside-settings-tooltip{
-  position: fixed;
-  z-index: 900;
-  top:0;
-  bottom: 0;
-  left:0;
-  right:0;
-  background-color: white;
-
-  transition: opacity 200ms ease-in, visibility 200ms ease-in;
-  transition: opacity 200ms ease-out, visibility 200msms ease-out;
-  opacity: 0.75;
-  visibility: visible;
-}
-.outside-settings-tooltip.hidden{
-  //display: none;
-  opacity: 0;
-  visibility: hidden;
-}
-
-.react-tooltip{
-  z-index: 1600;
-
-  .settings-content {
-    pointer-events: all;
-
-    label strong {
-      width: 225px;
-      display: inline-block;
-    }
-    label select,
-    label .zoom-level {
-      width: 225px;
-      display: inline-block;
-    }
-
-    .examples button.button-link {
-      border: 1px solid transparent;
-    }
-
-    .load-error {
-      color: red;
-    }
-  }
-}
-
 
 button.button-link {
   background: none !important;

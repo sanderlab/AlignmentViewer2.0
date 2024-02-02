@@ -24,6 +24,7 @@
     "src/components/layout",
     "src/components/minimap",
     "src/components/search",
+    "src/components/settings",
     "src/components/virtualization",
     "src/components",
     "src/common",

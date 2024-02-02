@@ -17,7 +17,7 @@ import {
  *
  *
  */
-import { alignmentVirtualizationsSlice } from './Reducers'
+import { alignmentVirtualizationsSlice } from './VirtualizationReducers'
 export const reduxStore = configureStore({
   reducer: {
     virtualizations: alignmentVirtualizationsSlice.reducer,

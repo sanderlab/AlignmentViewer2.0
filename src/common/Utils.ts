@@ -240,7 +240,7 @@ export function stopSafariFromBlockingWindowWheel(cssClass: string) {
  * URL Parsing and Local Storage management  
  */
 //inspired by https://pierrehedkvist.com/posts/react-state-url
-export class UrlLocalstorageInputManager<T>{
+/*export class UrlLocalstorageInputManager<T>{
   private static initialized: boolean = false;
   public initialValue: T;
   public onChange: (newValue: T) => void;
@@ -330,3 +330,4 @@ export class UrlLocalstorageNumberInputManager extends UrlLocalstorageInputManag
     );
   }
 }
+*/

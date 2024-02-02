@@ -12,11 +12,15 @@ import * as PIXI from "pixi.js";
 import { useEffect, useCallback, useState, useMemo } from "react";
 
 import { Alignment } from "../../common/Alignment";
-import { SequenceSorter } from "../../common/AlignmentSorter";
+import { SequenceSorterInstance } from "../../common/AlignmentSorter";
 import {
-  AlignmentTypes,
-  IColorScheme,
-  PositionsToStyle,
+  AminoAcidAlignmentTypeInstance,
+  AminoAcidColorSchemes,
+  AminoacidColorSchemeInstance,
+  NucleotideAlignmentTypeInstance,
+  NucleotideColorSchemeInstance,
+  NucleotideColorSchemes,
+  PositionsToStyleInstance,
   ResidueColoring
 } from "../../common/MolecularStyles";
 import { generateUUIDv4 } from "../../common/Utils";
@@ -29,7 +33,6 @@ import {
   IExposedStandaloneWebglFunctions,
   IExposedPairedWebglFunctions,
   IExposedCanvasFunctions,
-  createMSABlockGenerator
 } from "../msa-blocks-and-letters/MSABlockGenerator";
 
 export interface IMiniMapProps {
@@ -40,10 +43,11 @@ export interface IMiniMapProps {
 
   //don't expose these props in the AlignmentViewer full component
   alignment: Alignment;
-  sortBy: SequenceSorter;
-  positionsToStyle: PositionsToStyle;
-  alignmentType: AlignmentTypes;
-  colorScheme: IColorScheme;
+  sortBy: SequenceSorterInstance;
+  positionsToStyle: PositionsToStyleInstance;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
 
   //maintain sync with this vertical scroller
   syncWithVerticalVirtualization?: IResponderRole;
@@ -58,7 +62,8 @@ export function MiniMap(props: IMiniMapProps) {
     alignment,
     sortBy,
     alignmentType,
-    colorScheme,
+    aaColorScheme = AminoAcidColorSchemes.list[0],
+    ntColorScheme = NucleotideColorSchemes.list[0],
     positionsToStyle,
     syncWithVerticalVirtualization,
   } = props;
@@ -358,6 +363,8 @@ export function MiniMap(props: IMiniMapProps) {
   ]);
 
   const sequences = useMemo(()=>{
+    //NOTE - any additional changes to sequences (like sorting) must be propogated as
+    //keys for MSAblocks
     return alignment.getSequences(sortBy).map(s=>s.sequence);
   }, [alignment, sortBy]);
 
@@ -370,11 +377,13 @@ export function MiniMap(props: IMiniMapProps) {
           isMinimap={true}
           sequenceSet={"alignment"}
           sequences={sequences}
+          sortByKey={sortBy.key}
           querySequence={alignment.getQuery().sequence}
           consensusSequence={alignment.getConsensus().sequence}
           allCharsInAlignment={alignment.getAllRepresentedCharacters()}
           alignmentType={alignmentType}
-          colorScheme={colorScheme}
+          aaColorScheme={aaColorScheme}
+          ntColorScheme={ntColorScheme}
           residueColoring={ResidueColoring.DARK}
           highlightPositionalMatches={highlightPositionalMatches}
           positionsToStyle={positionsToStyle}
@@ -393,12 +402,14 @@ export function MiniMap(props: IMiniMapProps) {
     alignment,
     alignmentType,
     canvasGenerator,
-    colorScheme,
+    aaColorScheme,
+    ntColorScheme,
     positionsToStyle,
     highlightPositionalMatches,
     offsets?.mmWorldOffsetPx,
     scale,
-    sequences
+    sequences,
+    sortBy.key
   ]);
 
   const renderedMinimapCanvasInteraction = useMemo(()=>{

@@ -4,13 +4,19 @@
 import "./SequenceSearch.scss";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { 
-  AminoAcidAlignmentStyle,
-  NucleotideAlignmentStyle, 
+  AlignmentTypes,
+  AminoAcidAlignmentTypeInstance,
+  AminoAcidColorSchemes,
+  AminoacidColorSchemeInstance,
+  NucleotideAlignmentTypeInstance,
+  NucleotideColorSchemeInstance, 
+  NucleotideColorSchemes, 
   PositionsToStyle, 
-  ResidueColoring 
+  PositionsToStyleInstance, 
+  ResidueColoringInstance
 } from "../../common/MolecularStyles";
 import { Alignment, ISequence } from "../../common/Alignment";
-import { AlignmentViewer, AlignmentViewerType, IBarplotExposedProps } from "../AlignmentViewerHook";
+import { AlignmentViewer, IBarplotExposedProps } from "../AlignmentViewerHook";
 import { IAdjustableWidth } from "../layout/AlignmentViewerLayoutHook";
 import { ISingleBarDetails, PreconfiguredPositionalBarplots } from "../PositionalBarplotHook";
 import { getCachedCanvasGenerators } from "../msa-blocks-and-letters/MSABlockGenerator";
@@ -35,9 +41,11 @@ export function SequenceSearch(props: {
   sortedSequences: string[];
   sortedSequenceIds: string[];
 
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle;
-  positionsToStyle: PositionsToStyle;
-  residueColoring: ResidueColoring;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
+  positionsToStyle: PositionsToStyleInstance;
+  residueColoring: ResidueColoringInstance;
 }) {
   const {
     searchVisible = true,
@@ -46,10 +54,16 @@ export function SequenceSearch(props: {
     sortedSequences,
     sortedSequenceIds,
 
-    style,
+    alignmentType,
+    aaColorScheme = AminoAcidColorSchemes.list[0],
+    ntColorScheme = NucleotideColorSchemes.list[0],
+
     positionsToStyle,
     residueColoring
   } = props;
+
+  const colorScheme = alignmentType === AlignmentTypes.AMINOACID
+    ? aaColorScheme : ntColorScheme;
 
   const MIN_SEARCH_STRING_SIZE = 3;
 
@@ -187,10 +201,11 @@ export function SequenceSearch(props: {
   useEffect(()=>{
     handleSearchChange();
   }, [
+    alignmentType,
+    colorScheme,
     handleSearchChange,
     sortedSequences,
     sortedSequenceIds,
-    style,
     positionsToStyle,
     residueColoring
   ]);
@@ -315,7 +330,9 @@ export function SequenceSearch(props: {
                 <AlignmentViewer 
                   alignment={searchResults.alignment}
                   canvasGenerators={getCachedCanvasGenerators("search")}
-                  style={style} 
+                  alignmentType={alignmentType}
+                  aaColorScheme={aaColorScheme}
+                  ntColorScheme={ntColorScheme}
                   positionsToStyle={
                     positionStyling === "as-primary-viewport"
                       ? positionsToStyle
@@ -332,8 +349,7 @@ export function SequenceSearch(props: {
                   showConsensus={true}
                   showAnnotations={true}
                   showMinimap={true}
-                  metadataSizing={metadataSizingCache}
-                  whichViewer={AlignmentViewerType.SearchViewer}/>
+                  metadataSizing={metadataSizingCache}/>
               }
             </div>
           </div>

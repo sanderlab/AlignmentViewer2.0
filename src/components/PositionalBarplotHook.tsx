@@ -7,10 +7,11 @@ import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixV
 import { IControllerRole, IResponderRole, IVirtualizeParamBasics, IVirtualizeParams, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
 import { IBounds } from "./ResizeSensorHook";
 import { ISearchMatchDetails } from "./search/SequenceSearchHook";
+import { IListOfPropObjects } from "../common/GlobalEnumObject";
 
 export interface IPositionalBarplotDataSeries {
-  id: string; //must be unique for each series
-  name: string;
+  key: string; //must be unique for each series
+  description: string;
   cssClass: string;
   color?: string;
   plotOptions?: {
@@ -56,28 +57,16 @@ export interface ISingleBarDetailsFull extends ISingleBarDetails {
   position: number;
   dataSeriesSet: IPositionalBarplotDataSeries;
 }
-interface IPreconfiguredBarplots {
-  ShannonEntropy: IPositionalBarplotDataSeries;
-  Conservation: IPositionalBarplotDataSeries;
-  KullbacLeiblerDivergence: IPositionalBarplotDataSeries;
-  Gaps: IPositionalBarplotDataSeries;
-}
-
 
 //
 // EXPORT SOME BARPLOTS
 //
-export const PreconfiguredPositionalBarplots: IPreconfiguredBarplots = {
-  /**
-   * ShannonEntropy barplot
-   * Plot the shannon entropy at each position -sum(p * log p)
-   *   - p is the fraction of each upper case letter at the position
-   *   - ymax is set to the maximum entropy, which is an equal number
-   *     of all upper case letters in the alignment.
-   */
-  ShannonEntropy: {
-    id: "entropy",
-    name: "Entropy",
+export const PreconfiguredPositionalBarplots = (() => {
+
+  //define shannonEntropy first as it is referenced by conservation barplot
+  const shannonEntropy = {
+    key: "entropy",
+    description: "Entropy",
     cssClass: "barplot-shannon-entropy",
     color: "#000000",
     plotOptions: {
@@ -116,114 +105,130 @@ export const PreconfiguredPositionalBarplots: IPreconfiguredBarplots = {
       }
       return toReturn;
     }
-  },
+  }
 
-  /**
-   * Conservation barplot
-   * Plot the positional conservation defined as 1 - shannon entropy
-   */
-  Conservation: {
-    id: "conservation",
-    name: "Conservation",
-    cssClass: "barplot-conservation",
-    color: "#414141",
-    plotOptions: {
-      fixYMax: (al: Alignment) => {
-        return PreconfiguredPositionalBarplots.ShannonEntropy.plotOptions!
-          .fixYMax!(al);
+
+  //list all preconfigured barplots
+  const propList = {
+    /**
+     * ShannonEntropy barplot
+     * Plot the shannon entropy at each position -sum(p * log p)
+     *   - p is the fraction of each upper case letter at the position
+     *   - ymax is set to the maximum entropy, which is an equal number
+     *     of all upper case letters in the alignment.
+     */
+    ShannonEntropy: shannonEntropy,
+
+    /**
+     * Conservation barplot
+     * Plot the positional conservation defined as 1 - shannon entropy
+     */
+    Conservation: {
+      key: "conservation",
+      description: "Conservation",
+      cssClass: "barplot-conservation",
+      color: "#414141",
+      plotOptions: {
+        fixYMax: (al: Alignment) => {
+          return shannonEntropy.plotOptions!
+            .fixYMax!(al);
+        },
       },
-    },
-    getBars: (al: Alignment) => {
-      const ymax = PreconfiguredPositionalBarplots.ShannonEntropy.plotOptions!
-        .fixYMax!(al);
-      const entropyBars = PreconfiguredPositionalBarplots.ShannonEntropy.getBars(
-        al, undefined
-      );
-      return entropyBars.map((entropyBar) => {
-        return {
-          ...entropyBar,
-          height:
-            entropyBar.height === undefined
-              ? undefined
-              : ymax - entropyBar.height,
-        };
-      });
-    }
-  },
-
-  /**
-   * KullbacLeiblerDivergence
-   * Plot the Kullback-Leibler (KL) divergence for individual columns in the alignment
-   *        S = sum(pk * log(pk / qk)
-   *   also see scipy docs:
-   *     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html
-   *
-   * No maximum is explicitly set (so it because the max value)
-   */
-  KullbacLeiblerDivergence: {
-    id: "kullback-leibler-divergence",
-    name: "KL Divergence",
-    cssClass: "barplot-kullback-leibler-divergence",
-    color: "darkred",
-    getBars: (al: Alignment) => {
-      const allLetters = al.getAllUpperAlphaLettersInAlignmentSorted();
-      const pk = al.getPositionalLetterCounts(true, allLetters);
-      const qk = al.getGlobalAlphaLetterCounts(true, allLetters);
-
-      const toReturn: ISingleBarDetails[] = [];
-      const maxSeqLength = al.getSequenceLength();
-      for (let i = 0; i < maxSeqLength; i++) {
-        const positionsPk = pk.get(i);
-        if (!positionsPk || Object.keys(positionsPk).length === 0) {
-          toReturn.push({ height: undefined });
-        } else {
-          toReturn.push({
-            height: allLetters.reduce((acc, letter) => {
-              if (letter in positionsPk) {
-                acc +=
-                  positionsPk[letter] *
-                  Math.log(positionsPk[letter] / qk[letter]);
-              }
-              return acc;
-            }, 0),
-          });
-        }
-      }
-      return toReturn;
-    },
-  },
-
-  /**
-   * Gaps
-   * Plot the number of gaps at each position. The y max is set to
-   * the total length of the alignment and not the largest number of
-   * gaps.
-   */
-  Gaps: {
-    id: "gaps",
-    name: "Gaps",
-    cssClass: "barplot-gaps",
-    color: "#b7b7b7",
-    plotOptions: {
-      fixYMax: (al: Alignment) => al.getSequenceCount(),
-    },
-    getBars: (al: Alignment) => {
-      const toReturn: ISingleBarDetails[] = [];
-      const maxSeqLength = al.getSequenceLength();
-      for (let i = 0; i < maxSeqLength; i++) {
-        const gapCount = al.getGapCountAtColumn(i);
-        toReturn.push({
-          height: gapCount,
-          tooltipValueText: `${(
-            (gapCount / al.getSequenceCount()) *
-            100
-          ).toFixed(1)}% (${gapCount})`,
+      getBars: (al: Alignment) => {
+        const ymax = shannonEntropy.plotOptions!
+          .fixYMax!(al);
+        const entropyBars = shannonEntropy.getBars(al);
+        return entropyBars.map((entropyBar) => {
+          return {
+            ...entropyBar,
+            height:
+              entropyBar.height === undefined
+                ? undefined
+                : ymax - entropyBar.height,
+          };
         });
       }
-      return toReturn;
     },
+
+    /**
+     * KullbacLeiblerDivergence
+     * Plot the Kullback-Leibler (KL) divergence for individual columns in the alignment
+     *        S = sum(pk * log(pk / qk)
+     *   also see scipy docs:
+     *     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html
+     *
+     * No maximum is explicitly set (so it because the max value)
+     */
+    KullbacLeiblerDivergence: {
+      key: "kullback-leibler-divergence",
+      description: "KL Divergence",
+      cssClass: "barplot-kullback-leibler-divergence",
+      color: "darkred",
+      getBars: (al: Alignment) => {
+        const allLetters = al.getAllUpperAlphaLettersInAlignmentSorted();
+        const pk = al.getPositionalLetterCounts(true, allLetters);
+        const qk = al.getGlobalAlphaLetterCounts(true, allLetters);
+
+        const toReturn: ISingleBarDetails[] = [];
+        const maxSeqLength = al.getSequenceLength();
+        for (let i = 0; i < maxSeqLength; i++) {
+          const positionsPk = pk.get(i);
+          if (!positionsPk || Object.keys(positionsPk).length === 0) {
+            toReturn.push({ height: undefined });
+          } else {
+            toReturn.push({
+              height: allLetters.reduce((acc, letter) => {
+                if (letter in positionsPk) {
+                  acc +=
+                    positionsPk[letter] *
+                    Math.log(positionsPk[letter] / qk[letter]);
+                }
+                return acc;
+              }, 0),
+            });
+          }
+        }
+        return toReturn;
+      },
+    },
+
+    /**
+     * Gaps
+     * Plot the number of gaps at each position. The y max is set to
+     * the total length of the alignment and not the largest number of
+     * gaps.
+     */
+    Gaps: {
+      key: "gaps",
+      description: "Gaps",
+      cssClass: "barplot-gaps",
+      color: "#b7b7b7",
+      plotOptions: {
+        fixYMax: (al: Alignment) => al.getSequenceCount(),
+      },
+      getBars: (al: Alignment) => {
+        const toReturn: ISingleBarDetails[] = [];
+        const maxSeqLength = al.getSequenceLength();
+        for (let i = 0; i < maxSeqLength; i++) {
+          const gapCount = al.getGapCountAtColumn(i);
+          toReturn.push({
+            height: gapCount,
+            tooltipValueText: `${(
+              (gapCount / al.getSequenceCount()) *
+              100
+            ).toFixed(1)}% (${gapCount})`,
+          });
+        }
+        return toReturn;
+      },
+    }
   }
-}
+
+  return {
+    ...propList,
+    ...IListOfPropObjects<IPositionalBarplotDataSeries>(Object.values(propList))
+  };
+})();
 
 
 
@@ -326,8 +331,8 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
     //normalize bars group by group
     const normalizedBars = Object.values(
         allBars.reduce((acc, bar)=>{
-          acc[bar.dataSeriesSet.id] = acc[bar.dataSeriesSet.id] 
-            ? [...acc[bar.dataSeriesSet.id], bar] : [bar];
+          acc[bar.dataSeriesSet.key] = acc[bar.dataSeriesSet.key] 
+            ? [...acc[bar.dataSeriesSet.key], bar] : [bar];
           return acc;
         }, {} as {[seriesId: string]: ISingleBarDetailsFull[]})    
       )
@@ -411,7 +416,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
           return (
             <div
               className={`dataseries-line ${bar.dataSeriesSet.cssClass}`}
-              key={bar.dataSeriesSet.id}
+              key={bar.dataSeriesSet.key}
             >
               <span
                 className="legend-square"
@@ -422,7 +427,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
                 }}
               ></span>
               <span className="legend-text">
-                {bar.dataSeriesSet.name}:{" "}
+                {bar.dataSeriesSet.description}:{" "}
                 {bar.tooltipValueText
                   ? bar.tooltipValueText
                   : bar.height !== undefined
@@ -583,7 +588,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
                         })`}
                         width={barWidth}
                         height={bar.normalizedHeight}
-                        key={`${bar.position}_${bar.dataSeriesSet.id}`}
+                        key={`${bar.position}_${bar.dataSeriesSet.key}`}
                       />
                     );
                   }
@@ -640,7 +645,7 @@ export function PositionalBarplot(props: IPositionalBarplotProps){
   }, [cachedBarplot])
 
   const horizParamsCache: IVirtualizeParams = useMemo(()=>{
-    const barplotIds = dataSeriesSet.map(bp=>bp.id).join("-");
+    const barplotIds = dataSeriesSet.map(bp=>bp.key).join("-");
     return {
       ...(
         horizontalVirtualization

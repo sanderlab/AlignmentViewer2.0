@@ -13,7 +13,7 @@ import {
   setContainerSize as reduxSetContainerSize,
   setWorldOffset as reduxSetWorldOffset,
   setHoveredOffset as reduxSetHoveredOffset
-} from "../../redux/Reducers";
+} from "../../redux/VirtualizationReducers";
 import { 
   IControllerVirtualizeReduxParams,
   IResponderVirtualizeReduxParams,

@@ -4,43 +4,35 @@ import { Alignment } from "../common/Alignment";
 import { AlignmentLoader, AlignmentLoadError } from "../common/AlignmentLoader";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export interface IExampleFileProps {
+
+interface IFileLoaderBasics {
+  id: string;
+  removeDuplicateSeqs: boolean;
+
+  onAlignmentLoaded: (alignment: Alignment) => void; //loading ended
+  onAlignmenLoadError: (e: AlignmentLoadError) => void; //loading error
+  onFileLoadStart: () => void; //notify on begin loading
+}
+
+export interface IExampleFileProps extends IFileLoaderBasics {
   labelText: string;
   fileURL: string;
   fileName: string;
 }
 
-export interface IAlignmentLoaderProps {
-  fileSelectorLabelText: string;
-
-  removeDuplicateSeqs: boolean;
-  setRemoveDuplicateSeqs: (newValue: boolean) => void;
-
-  onAlignmentLoaded: (alignment: Alignment) => void; //loading ended
-  onAlignmenLoadError: (e: AlignmentLoadError) => void; //loading error
-
-  exampleFiles?: IExampleFileProps[];
-  onFileLoadStart?: () => void; //notify on begin loading
-}
+export interface IAlignmentLoaderProps extends IFileLoaderBasics {}
 
 
 export function AlignmentFileLoader(props: IAlignmentLoaderProps) {
-  
   const {
-    exampleFiles,
+    id,
     onAlignmentLoaded,
     onFileLoadStart,
     onAlignmenLoadError,
     removeDuplicateSeqs,
-    setRemoveDuplicateSeqs
-  } = props;
-
-  const {
-    fileSelectorLabelText = "Upload"
   } = props;
 
   const fileInput  = useRef<HTMLInputElement>(null)
-
 
   //
   //useCallback methods
@@ -82,94 +74,56 @@ export function AlignmentFileLoader(props: IAlignmentLoaderProps) {
     onFileLoadStart,
     removeDuplicateSeqs
   ]);
+  
+  return (
+    <div className="file-upload-input">
+      <input
+        id={id}
+        type="file"
+        className="av2-hidden-file-input"
+        ref={fileInput}
+        onChange={handleFileUploadInputChange}
+      />
+      <button type="button" onClick={handleLinkClick}>
+        Choose File
+      </button>
+    </div>
+  );
+}
 
-  //
-  //render methods - useCallback
-  //
-  const renderFileUpload = useCallback(() => {
-    return (
-      <label>
-        <strong>{fileSelectorLabelText}</strong>
-        <input
-          type="file"
-          className="av2-hidden-file-input"
-          ref={fileInput}
-          onChange={handleFileUploadInputChange}
-        />
-        <button type="button" onClick={handleLinkClick}>
-          Choose File
-        </button>
-      </label>
-    );
-  }, [
-    fileSelectorLabelText, 
-    handleFileUploadInputChange, 
-    handleLinkClick
-  ]);
-
-  const renderExampleFiles = useCallback(() => {
-    return !exampleFiles ? null : (
-      <label>
-        <strong>Example Alignments:</strong>
-        {exampleFiles.map((ef) => {
-          return (
-            <button
-              type="button"
-              className="button-link"
-              key={ef.fileURL}
-              onClick={(e) => {
-                e.preventDefault();
-                if (onFileLoadStart) {
-                  onFileLoadStart();
-                }
-                AlignmentLoader.loadAlignmentFromURL(
-                  ef.fileURL,
-                  removeDuplicateSeqs,
-                  alignmentLoaded,
-                  onAlignmenLoadError,
-                  ef.fileName
-                );
-              }}
-            >
-              {ef.labelText}
-            </button>
-          );
-        })}
-      </label>
-    );
-  }, [
-    onFileLoadStart, 
-    alignmentLoaded, 
-    exampleFiles,
+export const AlignmentExampleFile = (props: IExampleFileProps) => {
+  const {
+    labelText,
+    fileURL,
+    fileName,
+    onAlignmentLoaded,
+    onFileLoadStart,
     onAlignmenLoadError,
     removeDuplicateSeqs
-  ]);
-
-  const renderRemoveDuplicatesCheckbox = useCallback(() => {
-    return (
-      <label>
-        <strong>Remove Duplicate Sequences on Load:</strong>
-        <input
-          name="Remove Duplicates"
-          type="checkbox"
-          checked={removeDuplicateSeqs}
-          onChange={(e) => {
-            setRemoveDuplicateSeqs(e.target.checked);
-          }}
-        />
-      </label>
-    );
-  }, [removeDuplicateSeqs, setRemoveDuplicateSeqs]);
+  } = props;
 
   return (
-    <div className="av2-input-file-loader">
-      <div className="file-upload-input">{renderFileUpload()}</div>
-      <div className="example-files">{renderExampleFiles()}</div>
-      <div className="remove-duplicates">
-        {renderRemoveDuplicatesCheckbox()}
-      </div>
-    </div> 
-  );
+    <button
+      type="button"
+      className="button-link"
+      key={fileURL}
+      onClick={(e) => {
+        e.preventDefault();
+        if (onFileLoadStart) {
+          onFileLoadStart();
+        }
+        AlignmentLoader.loadAlignmentFromURL(
+          fileURL,
+          removeDuplicateSeqs,
+          onAlignmentLoaded,
+          onAlignmenLoadError,
+          fileName
+        );
+      }}
+    >
+      {labelText}
+    </button>
+  )
 }
 
 

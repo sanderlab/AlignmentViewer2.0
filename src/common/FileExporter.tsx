@@ -9,14 +9,21 @@ import { getPositionalAxisRuler } from "../components/PositionalAxisHook";
 import { Alignment } from "./Alignment";
 import {
   AlignmentTypes, 
-  IColorScheme, 
+  AminoAcidAlignmentTypeInstance, 
+  AminoAcidColorSchemes, 
+  AminoacidColorSchemeInstance,
+  NucleotideAlignmentTypeInstance,
+  NucleotideColorSchemeInstance, 
+  NucleotideColorSchemes, 
   PositionsToStyle, 
+  PositionsToStyleInstance, 
   ResidueColoring, 
+  ResidueColoringInstance, 
   resiClassPrefix 
 } from "./MolecularStyles";
 import { AminoAcid, Nucleotide } from "./Residues";
 import { startEndIdxToArray } from "./Utils";
-import { SequenceSorter } from "./AlignmentSorter";
+import { SequenceSorterInstance } from "./AlignmentSorter";
 
 const CLASSNAME_MSA_TEXT = "msa";
 const CLASSNAME_POSITIONAL_AXIS_TEXT = "posaxis";
@@ -63,11 +70,12 @@ export function downloadBarplotSVG(props: {
  * @param style 
  */
 export function downloadLogoSVG(props: {
-  svgId: string,
-  alignment: Alignment, 
-  alignmentType: AlignmentTypes,
-  colorScheme: IColorScheme,
-  positionsToStyle: PositionsToStyle,
+  svgId: string;
+  alignment: Alignment;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
+  positionsToStyle: PositionsToStyleInstance;
   positionalAxis?: {
     numPos: number;
     posHeight: number;
@@ -325,9 +333,10 @@ const getBarplotSvgString = (props: {
 const getLogoSvgString = (props: {
   svgId: string,
   alignment: Alignment, 
-  alignmentType: AlignmentTypes;
-  colorScheme: IColorScheme;
-  positionsToStyle: PositionsToStyle,
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  aaColorScheme?: AminoacidColorSchemeInstance;
+  ntColorScheme?: NucleotideColorSchemeInstance;
+  positionsToStyle: PositionsToStyleInstance,
   width?: number;
   height?: number;
   positionalAxis?: {
@@ -340,12 +349,16 @@ const getLogoSvgString = (props: {
   const {
     svgId,
     alignmentType,
-    colorScheme,
+    aaColorScheme = AminoAcidColorSchemes.list[0],
+    ntColorScheme = NucleotideColorSchemes.list[0],
     positionsToStyle,
     width,
     height,
     positionalAxis
   } = props;
+
+  const colorScheme = alignmentType === AlignmentTypes.AMINOACID
+    ? aaColorScheme : ntColorScheme;
   
   //const svgLogoElements = document.getElementsByClassName("av2-sequence-logo");
   const svgLogoElement = document.getElementById(svgId);
@@ -524,37 +537,39 @@ const getStylesheet = () => {
  * @returns 
  */
 const getFullViewportSvgString = (props: {
-  alignment: Alignment, 
-  sortBy: SequenceSorter,
-  alignmentType: AlignmentTypes, 
-  positionsToStyle: PositionsToStyle, 
-  residueColoring: ResidueColoring, 
-  colorScheme: IColorScheme,
+  alignment: Alignment;
+  sortBy: SequenceSorterInstance;
+  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
+  positionsToStyle: PositionsToStyleInstance;
+  residueColoring: ResidueColoringInstance;
+  aaColorScheme: AminoacidColorSchemeInstance;
+  ntColorScheme: NucleotideColorSchemeInstance;
 
-  logoSvgId?: string, // undefined means don't render
+  logoSvgId?: string; // undefined means don't render
   barplots?: {
     svgId: string;
     title: string;
-  }[], // undefined or empty means don't render
+  }[]; // undefined or empty means don't render
 
-  includePositionAxis?: boolean,
-  includeMetadata?: boolean,
-  includeConsensus?: boolean,
-  includeQuery?: boolean,
-  startSeqIdx?: number, 
-  endSeqIdx?: number,
-  logoHeight?: number,
-  barplotHeights?: number,
-  moleculeHeight?: number,
-  moleculeWidth?: number,
-  gapBetweenPlots?: number,
+  includePositionAxis?: boolean;
+  includeMetadata?: boolean;
+  includeConsensus?: boolean;
+  includeQuery?: boolean;
+  startSeqIdx?: number;
+  endSeqIdx?: number;
+  logoHeight?: number;
+  barplotHeights?: number;
+  moleculeHeight?: number;
+  moleculeWidth?: number;
+  gapBetweenPlots?: number;
 }) =>{
 
   const {
     alignment, 
     sortBy,
     alignmentType, 
-    colorScheme,
+    aaColorScheme = AminoAcidColorSchemes.list[0],
+    ntColorScheme = NucleotideColorSchemes.list[0],
     positionsToStyle, 
     residueColoring, 
     logoSvgId,
@@ -573,6 +588,9 @@ const getFullViewportSvgString = (props: {
 
     gapBetweenPlots = 5
   } = props;
+
+  const colorScheme = alignmentType === AlignmentTypes.AMINOACID
+    ? aaColorScheme : ntColorScheme;
 
   const startSeqIdx = startIdx;
   const endSeqIdx = endIdx !== undefined 
@@ -749,7 +767,8 @@ const getFullViewportSvgString = (props: {
           svgId: logoSvgId,
           alignment: alignment, 
           alignmentType: alignmentType,
-          colorScheme: colorScheme,
+          aaColorScheme: aaColorScheme,
+          ntColorScheme: ntColorScheme,
           positionsToStyle: positionsToStyle,
           height: logoHeight,
           width: alignment.getSequenceLength() * moleculeWidth

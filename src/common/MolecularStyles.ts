@@ -2,8 +2,8 @@
  * This file centralizes the location of javascript style definitions
  * for nucleotide and amino acid styles.
  */
+import { IListOfPropObjects, IPropObjectInstanceInList } from "./GlobalEnumObject";
 import styles from "./MolecularStyles.module.scss";
-//console.log("STYLES AS INPUT ::::: ", styles);
 
 /**
  * Defines a single color scheme interface which consists of
@@ -11,11 +11,10 @@ import styles from "./MolecularStyles.module.scss";
  * all residues (hex string format).
  *
  * @export
- * @interface IColorScheme
+ * @interface ColorSchemeInstance
  */
-export interface IColorScheme {
+export interface ColorSchemeInstance extends IPropObjectInstanceInList {
   commonName: string;
-  description: string;
   backgroundAlpha: number;
   defaultLetterColor: string;
   className: string;
@@ -29,10 +28,30 @@ export interface IColorScheme {
     [residueCode: string]: string;
   };
 }
-
-export const ALL_AMINOACID_COLORSCHEMES = assembleColorSchemes("aa");
-export const ALL_NUCLEOTIDE_COLORSCHEMES = assembleColorSchemes("nt");
-//console.log("COLOR SCHEMES:", ALL_AMINOACID_COLORSCHEMES);
+export interface NucleotideColorSchemeInstance extends ColorSchemeInstance {
+  forAlignmentType: "nucleotide";
+}
+export interface AminoacidColorSchemeInstance extends ColorSchemeInstance {
+  forAlignmentType: "aminoacid";
+}
+export interface PositionsToStyleInstance extends IPropObjectInstanceInList {
+  className: string;
+  shortClassname?: string;
+}
+export interface ResidueColoringInstance extends IPropObjectInstanceInList {
+  className: string;
+}
+//export interface AlignmentTypeInstance extends IPropObjectInstanceInList {
+//  className: string;
+//}
+export interface AminoAcidAlignmentTypeInstance extends IPropObjectInstanceInList {
+  key: "aminoacid-alignment";
+  className: string;
+}
+export interface NucleotideAlignmentTypeInstance extends IPropObjectInstanceInList {
+  key: "nucleotide-alignment";
+  className: string;
+}
 
 /**
  * Read in class names and colors for amino acid or nucleotide
@@ -41,8 +60,11 @@ export const ALL_NUCLEOTIDE_COLORSCHEMES = assembleColorSchemes("nt");
  * @param {("aa" | "nt")} moleculeType
  * @returns
  */
-function assembleColorSchemes(moleculeType: "aa" | "nt") {
-  return Object.keys(styles).reduce((acc, styleName) => {
+function assembleColorSchemes<
+  T extends AminoacidColorSchemeInstance | NucleotideColorSchemeInstance
+>(moleculeType: "aa" | "nt") {
+
+  const propList = Object.keys(styles).reduce((acc, styleName) => {
     if (styleName.indexOf(moleculeType + "StyClass_") !== -1) {
       //e.g., aaStyClass_Hydrophobicity
       const colorSchemeName = styleName.split(moleculeType + "StyClass_")[1];
@@ -73,9 +95,11 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
         .split(","); // "build" removes spaces, but local "run" does not
 
       const description = styles[moleculeType + "StyDesc_" + colorSchemeName];
-      acc.push({
-        commonName: colorSchemeName,
+      acc[colorSchemeName] = {
+        key: colorSchemeName,
         description: description,
+        commonName: colorSchemeName,
+        forAlignmentType: moleculeType === "aa" ? "aminoacid" : "nucleotide",
         className: styles[styleName],
         backgroundAlpha: parseFloat(
           styles[moleculeType + "StyBackgroundAlpha_" + colorSchemeName]
@@ -94,11 +118,23 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
         letterColorsDarkTheme: Object.fromEntries(
           colorOrder.map((_, i) => [colorOrder[i], letterColorsDarkTheme[i]])
         ),
-      });
+      };
     }
     return acc;
-  }, [] as IColorScheme[]);
+  }, {} as {
+    [colorSchemeName: string]: AminoacidColorSchemeInstance
+  } | {
+    [colorSchemeName: string]: NucleotideColorSchemeInstance
+  });
+  
+  return {
+    ...propList,
+    ...IListOfPropObjects<T>(Object.values(propList))
+  }
 }
+
+export const AminoAcidColorSchemes = assembleColorSchemes<AminoacidColorSchemeInstance>("aa");
+export const NucleotideColorSchemes = assembleColorSchemes<NucleotideColorSchemeInstance>("nt");
 
 /**
  * Top level alignment type descriptions. There are two supported
@@ -107,134 +143,105 @@ function assembleColorSchemes(moleculeType: "aa" | "nt") {
  * @export
  * @class AlignmentTypes
  */
-export class AlignmentTypes {
-  static readonly AMINOACID = new AlignmentTypes(
-    "aminoacid-alignment",
-    "Amino Acid Sequences",
-    styles.aaAlignTypeClass,
-    ALL_AMINOACID_COLORSCHEMES
-  );
-  static readonly NUCLEOTIDE = new AlignmentTypes(
-    "nucleotide-alignment",
-    "Nucleotide Sequences",
-    styles.ntAlignTypeClass,
-    ALL_NUCLEOTIDE_COLORSCHEMES
-  );
-
-  static list = [AlignmentTypes.AMINOACID, AlignmentTypes.NUCLEOTIDE];
-
-  static fromKey(key: string) {
-    return AlignmentTypes.list.find((at) => {
-      return at.key === key;
-    });
+export const AlignmentTypes = (() => {
+  const propList = {
+    AMINOACID: {
+      key: "aminoacid-alignment",
+      description: "Amino Acid Sequences",
+      className: styles.aaAlignTypeClass,
+      //allColorSchemes: ALL_AMINOACID_COLORSCHEMES
+    } satisfies AminoAcidAlignmentTypeInstance,
+    NUCLEOTIDE: {
+      key: "nucleotide-alignment",
+      description: "Nucleotide Sequences",
+      className: styles.ntAlignTypeClass,
+      //allColorSchemes: ALL_NUCLEOTIDE_COLORSCHEMES
+    } satisfies NucleotideAlignmentTypeInstance
   }
-
-  private constructor(
-    public readonly key: string,
-    public readonly description: string,
-    public readonly className: string,
-    public readonly allColorSchemes: IColorScheme[]
-  ) {}
-}
+  return {
+    ...propList,
+    ...IListOfPropObjects<NucleotideAlignmentTypeInstance | AminoAcidAlignmentTypeInstance>(Object.values(propList))
+  };
+})();
 
 /**
- * This class represents different position styling modes.
+ * This object represents different position styling modes.
  *
  * @export
  * @class PositionsToStyle
  */
-export class PositionsToStyle {
-  static readonly ALL = new PositionsToStyle(
-    "all",
-    "All",
-    styles.styPosAllClass
-  );
-  static readonly QUERY = new PositionsToStyle(
-    "query",
-    "Same as Query",
-    styles.styPosQueryClass,
-    styles.queryClass
-  );
-  static readonly QUERY_DIFF = new PositionsToStyle(
-    "query-diff",
-    "Different from Query",
-    styles.styPosQueryDiffClass
-  );
-  static readonly CONSENSUS = new PositionsToStyle(
-    "consensus",
-    "Same as Consensus",
-    styles.styPosConsensusClass,
-    styles.consensusClass
-  );
-  static readonly CONSENSUS_DIFF = new PositionsToStyle(
-    "consensus-diff",
-    "Different from Consensus",
-    styles.styPosConsensusDiffClass
-  );
-
-  //only for search screen
-  static readonly SEARCH_RESULTS_ONLY = new PositionsToStyle(
-    "search-results",
-    "Search Results",
-    //logoplot is the only visualization that uses the class, so style "all" aa/nt
-    //on the logoplot on the search screen.
-    styles.styPosAllClass 
-  );
-
-  static list = [ //don't include search as we are using it separately
-    PositionsToStyle.ALL,
-    PositionsToStyle.QUERY,
-    PositionsToStyle.QUERY_DIFF,
-    PositionsToStyle.CONSENSUS,
-    PositionsToStyle.CONSENSUS_DIFF,
-  ];
-
-  static fromKey(key: string) {
-    return PositionsToStyle.list.find((at) => {
-      return at.key === key;
-    });
+export const PositionsToStyle = (() => {
+  const propList = {
+    ALL: {
+      key: "all",
+      description: "All",
+      className: styles.styPosAllClass
+    } satisfies PositionsToStyleInstance,
+    QUERY: {
+      key: "query",
+      description: "Same as Query",
+      className: styles.styPosQueryClass,
+      shortClassname: styles.queryClass
+    } satisfies PositionsToStyleInstance,
+    QUERY_DIFF: {
+      key: "query-diff",
+      description: "Different from Query",
+      className: styles.styPosQueryDiffClass
+    } satisfies PositionsToStyleInstance,
+    CONSENSUS: {
+      key: "consensus",
+      description: "Same as Consensus",
+      className: styles.styPosConsensusClass,
+      shortClassname: styles.consensusClass
+    } satisfies PositionsToStyleInstance,
+    CONSENSUS_DIFF: {
+      key: "consensus-diff",
+      description: "Different from Consensus",
+      className: styles.styPosConsensusDiffClass
+    } satisfies PositionsToStyleInstance
   }
+  return {
+    ...propList,
 
-  // private to disallow creating other instances of this type
-  private constructor(
-    public readonly key: string,
-    public readonly description: string,
-    public readonly className: string,
-    public readonly shortClassname?: string
-  ) {}
-}
+    //special key that is only used for search results. Do not include in the
+    //"list" and "serialize"/"deserialize" functions provided by PropListObject
+    SEARCH_RESULTS_ONLY: {
+      key: "search-results",
+      description: "Search Results",
+      //logoplot is the only visualization that uses the class, so style "all" 
+      //aa/nt on the logoplot on the search screen.
+      className: styles.styPosAllClass 
+    } satisfies PositionsToStyleInstance,
 
-export class ResidueColoring {
-  static readonly LIGHT = new ResidueColoring(
-    "light",
-    "Light",
-    styles.lightHueClass
-  );
-  static readonly DARK = new ResidueColoring("dark", "Dark", styles.darkHueClass);
-  static readonly NO_BACKGROUND = new ResidueColoring(
-    "lettersonly",
-    "Letters Only",
-    styles.lettersOnlyHueClass
-  );
+    ...IListOfPropObjects<PositionsToStyleInstance>(Object.values(propList))
+  };
+})();
 
-  static list = [
-    ResidueColoring.DARK,
-    ResidueColoring.LIGHT,
-    ResidueColoring.NO_BACKGROUND,
-  ];
 
-  static fromKey(key: string) {
-    return ResidueColoring.list.find((at) => {
-      return at.key === key;
-    });
+export const ResidueColoring = (() => {
+  const propList = {
+    LIGHT: {
+      key: "light",
+      description: "Light",
+      className: styles.lightHueClass,
+    } satisfies ResidueColoringInstance,
+    DARK: {
+      key: "dark",
+      description: "Dark",
+      className: styles.darkHueClass
+    } satisfies ResidueColoringInstance,
+    NO_BACKGROUND: {
+      key: "lettersonly",
+      description: "Letters Only",
+      className: styles.lettersOnlyHueClass
+    } satisfies ResidueColoringInstance
   }
+  return {
+    ...propList,
+    ...IListOfPropObjects<ResidueColoringInstance>(Object.values(propList))
+  };
+})();
 
-  private constructor(
-    public readonly key: string,
-    public readonly description: string,
-    public readonly className: string
-  ) {}
-}
 
 /**
  * Object to describe the style of a set of sequences (MSA, logo, etc).
@@ -246,32 +253,32 @@ export class ResidueColoring {
  *                         defaults to all positions.
  *
  * @interface AlignmentStyle
- */
+ 
 export abstract class AlignmentStyle {
-  abstract readonly alignmentType: AlignmentTypes;
-  abstract readonly allColorSchemes: IColorScheme[];
-  abstract selectedColorScheme: IColorScheme;
+  abstract readonly alignmentType: typeof AlignmentTypes.AMINOACID;
+  abstract readonly allColorSchemes: AminoacidColorSchemeInstance[];
+  abstract selectedColorScheme: AminoacidColorSchemeInstance;
 
-  static fromAlignmentType(alignmentType: AlignmentTypes) {
+  static fromAlignmentType(alignmentType: typeof AlignmentTypes.AMINOACID) {
     if (alignmentType === AlignmentTypes.AMINOACID)
       return new AminoAcidAlignmentStyle();
     return new NucleotideAlignmentStyle();
   }
-}
+}*/
 
 /**
  * Object to describe an amino acid alignment style
  * @class AminoAcidAlignmentStyle
  * @implements {AlignmentStyle}
- */
+
 export class AminoAcidAlignmentStyle implements AlignmentStyle {
   readonly allColorSchemes = ALL_AMINOACID_COLORSCHEMES;
   readonly alignmentType = AlignmentTypes.AMINOACID;
 
   constructor(
-    public selectedColorScheme: IColorScheme = ALL_AMINOACID_COLORSCHEMES[0],
+    public selectedColorScheme: ColorSchemeInstance = ALL_AMINOACID_COLORSCHEMES[0],
   ) {}
-}
+} */
 
 /**
  * Object to describe an nucleotide alignment style
@@ -279,15 +286,15 @@ export class AminoAcidAlignmentStyle implements AlignmentStyle {
  * @export
  * @class NucleotideAlignmentStyle
  * @implements {AlignmentStyle}
- */
+ 
 export class NucleotideAlignmentStyle implements AlignmentStyle {
   readonly allColorSchemes = ALL_NUCLEOTIDE_COLORSCHEMES;
   readonly alignmentType = AlignmentTypes.NUCLEOTIDE;
 
   constructor(
-    public selectedColorScheme: IColorScheme = ALL_NUCLEOTIDE_COLORSCHEMES[0],
+    public selectedColorScheme: NucleotideColorSchemeInstance = ALL_NUCLEOTIDE_COLORSCHEMES[0],
   ) {}
-}
+}*/
 
 /**
  * Export globals
