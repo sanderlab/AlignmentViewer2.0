@@ -6,8 +6,8 @@
  * https://medium.com/@teh_builder/ref-objects-inside-useeffect-hooks-eb7c15198780
  */
 import "./ResizeSensor.scss";
-import React, { useRef, ReactNode, useCallback } from "react";
-import { ResizeSensor } from "css-element-queries";
+import React, { useRef, ReactNode, useEffect } from "react";
+import useSize from "@react-hook/size"
 
 export interface IBounds {
   width: number;
@@ -25,75 +25,41 @@ export interface IBounds {
 export interface IAlignmentMetadataProps {
   onSizeChanged(bounds: IBounds): void;
   children?: ReactNode;
+  logId: string;
 }
 
 export function ReactResizeSensor(props: IAlignmentMetadataProps) {
   //props
-  const { onSizeChanged, children } = props;
+  const { onSizeChanged, children, logId} = props;
 
-  //main ref
-  const hiddenMeasuringDivRef = useRef<HTMLDivElement>();
-  const resizeSensor = useRef<ResizeSensor>();
+  const target = useRef<HTMLDivElement>(null);
+  const [width, height] = useSize(target);
 
-  //ref for last sizing
-  const lastBounds = useRef<DOMRect>();
+  useEffect(()=>{
+    onSizeChanged({
+      width: width,
+      height: height,
+      getLiveLeft: ()=>{ 
+        const toreturn = target.current ? target.current.getBoundingClientRect().left : 0;
+        return toreturn;
+      },
+      getLiveRight: ()=>{ 
+        const toreturn = target.current
+          ? target.current.getBoundingClientRect().width + 
+            target.current!.getBoundingClientRect().left
+          : 0;
+        return toreturn;
+      },
+      getLiveTop: ()=>{ 
+        const toreturn = target.current ? target.current.getBoundingClientRect().top : 0;
+        return toreturn;
+      }
+    });
+  }, [onSizeChanged, width, height, logId]);
 
-  //callback executed whenever ref changes
-  const resizeSensorRefCallback = useCallback((node: HTMLDivElement) => {
-    if (resizeSensor.current) {
-      //cleanup
-      resizeSensor.current.detach();
-      resizeSensor.current = undefined;
-    }
-
-    if (node) {
-      // Check if a node is actually passed. Otherwise node would be null.
-      // You can now do what you need to, addEventListeners, measure, etc.
-      resizeSensor.current = new ResizeSensor(node, () => {
-        const rect = node.getBoundingClientRect() as DOMRect;
-        if (
-          !lastBounds.current ||
-          //lastBounds.current.left !== rect.left ||
-          //lastBounds.current.right !== rect.right ||
-          //lastBounds.current.top !== rect.top ||
-          lastBounds.current.width !== rect.width ||
-          lastBounds.current.height !== rect.height
-        ) {
-          lastBounds.current = rect;
-          onSizeChanged({
-            width: rect.width,
-            height: rect.height,
-            getLiveLeft: ()=>{ 
-              return hiddenMeasuringDivRef.current!.getBoundingClientRect().left;
-            },
-            getLiveRight: ()=>{ 
-              return hiddenMeasuringDivRef.current!.getBoundingClientRect().width + 
-                     hiddenMeasuringDivRef.current!.getBoundingClientRect().left;
-            },
-            getLiveTop: ()=>{ 
-              return hiddenMeasuringDivRef.current!.getBoundingClientRect().top;
-            }
-          });
-        }
-      });
-    }
-
-    // Save a reference to the node
-    hiddenMeasuringDivRef.current = node;
-  }, [onSizeChanged]);
-
-  /**
-   *
-   *
-   *
-   * Render
-   *
-   *
-   *
-   */
   return (
     <>
-      <div ref={resizeSensorRefCallback} className="resize-sensor-holder"></div>
+      <div ref={target} className="resize-sensor-holder"></div>
       {children}
     </>
   );

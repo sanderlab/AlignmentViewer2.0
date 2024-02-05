@@ -2,9 +2,13 @@ import "./AlignmentViewerLayout.scss"
 import React, { useCallback, useState } from "react";
 
 export interface IResizeGridProps{
-  resizeSeparatorGridAreaName: string;
+  resizeSeparatorGridAreaNames: string[];
+  keys: string[]; //if multiple are generated, the key of the one being resized will be passed to draggerMoved
   resizeDirection: "horizontal" | "vertical";
-  draggerMoved: (newProposedPageXorY: number) => void;
+  draggerMoved: (
+    newProposedPageXorY: number,
+    key: string
+  ) => void;
 }
 
 /**
@@ -15,21 +19,22 @@ export interface IResizeGridProps{
 export function useResizeGrid(props: IResizeGridProps) {
 
   const {
-    resizeSeparatorGridAreaName,
+    resizeSeparatorGridAreaNames,
     resizeDirection,
-    draggerMoved
+    draggerMoved,
+    keys
   } = props;
 
   //
   // state
   //
   const [resizeDragging, setResizeDragging] = useState<boolean>(false);
+  const [keyBeingResized, setKeyBeingResized] = useState<string>();
 
   //
   // css
   //
   const classes = [`${resizeDirection}-resizer`];
-  if (resizeDragging) classes.push("resizing");
 
   //
   // event callbacks
@@ -49,6 +54,7 @@ export function useResizeGrid(props: IResizeGridProps) {
     e.stopPropagation();
     e.preventDefault();
     setResizeDragging(false);
+    setKeyBeingResized(undefined);
   }, []);
 
   const resizeDragged = useCallback((
@@ -58,32 +64,43 @@ export function useResizeGrid(props: IResizeGridProps) {
     e.preventDefault();
     if (resizeDragging){
       draggerMoved(
-        resizeDirection==="horizontal" ? e.clientX : e.clientY
+        resizeDirection==="horizontal" ? e.clientX : e.clientY,
+        keyBeingResized!
       );
     }
   }, [
+    keyBeingResized,
     resizeDragging,
     resizeDirection,
     draggerMoved
   ]);
-  
+
   return {
     draggerFullScreenElement: 
       <div 
-        className="full-screen-resize-dragger"
-        style={{
-          display: !resizeDragging ? "none" : "block"
-        }}
+        key={resizeSeparatorGridAreaNames.join("")}
+        className={`full-screen-resize-dragger ${resizeDirection}`}
+        style={{ display: !resizeDragging ? "none" : "block" }}
         onMouseMove={resizeDragged}
         onMouseUp={endResizeDragging}
         onMouseOut={endResizeDragging}
         onMouseLeave={endResizeDragging}
       />,
-    resizeSeparator:
-      <div 
-        className={classes.join(" ")}
-        style={{gridArea: resizeSeparatorGridAreaName}}
-        onMouseDown={startResizeDragging}
-      />
+    resizeSeparators: resizeSeparatorGridAreaNames.reduce((acc, gridArea, idx) => {
+      const resizingClass = resizeDragging && keys[idx] === keyBeingResized
+        ? " resizing" : "";
+      acc[keys[idx]] = (
+        <div 
+          key={keys[idx]}
+          className={classes.join(" ")+resizingClass}
+          style={{gridArea: gridArea}}
+          onMouseDown={(e)=>{
+            setKeyBeingResized(keys[idx]);
+            startResizeDragging(e);
+          }}
+        />
+      )
+      return acc;
+    }, {} as {[key: string]: JSX.Element})
   };
 }

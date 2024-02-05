@@ -37,9 +37,11 @@ import {
 } from "./virtualization/VirtualizationTypes";
 import { 
   AlignmentViewerLayout, 
+  IAdjustableHeight, 
   IAdjustableWidth, 
+  IFixedHeight, 
   IFixedWidth, 
-  IMetadataAndContent 
+  IMetadataContentAndHeight
 } from "./layout/AlignmentViewerLayoutHook";
 import { ISearchMatchDetails, SequenceSearch } from "./search/SequenceSearchHook";
 import { useListenForSearchKeypresses } from "./search/SearchKeysListenerHook";
@@ -68,7 +70,7 @@ export type IAlignmentViewerProps = {
 
 export type IBarplotExposedProps = Pick<
   IPositionalBarplotProps,
-  "svgId" | "dataSeriesSet" | "tooltipPlacement" | "heightPx"
+  "svgId" | "dataSeriesSet" | "tooltipPlacement" //TODO remove height prop
 >;
 
 
@@ -92,8 +94,6 @@ const defaultProps = {
   showQuery: true as boolean,
   showRuler: true as boolean,
 
-  logoHeightPx: 100,
-
   metadataSizing: {
     type: "adjustable-width",
     startingWidth: 150,
@@ -107,6 +107,24 @@ const defaultProps = {
     minWidth: 75,
     maxWidth: 600
   } as IAdjustableWidth | IFixedWidth,
+
+  barplotSizing: {
+    //type: "fixed-height",
+    //height: 75
+    type: "adjustable-height", 
+    startingHeight: 60,
+    minHeight: 25, 
+    maxHeight: 200
+  } as IFixedHeight | IAdjustableHeight,
+
+  logoSizing: {
+    //type: "fixed-height",
+    //height: 150
+    type: "adjustable-height", 
+    startingHeight: 100,
+    minHeight: 50, 
+    maxHeight: 300
+  } as IFixedHeight | IAdjustableHeight,
 
   logoOptions: {
     logoType: LogoType.LETTERS
@@ -125,8 +143,7 @@ const defaultProps = {
         PreconfiguredPositionalBarplots.ShannonEntropy,
         PreconfiguredPositionalBarplots.Gaps,
       ],
-      tooltipPlacement: undefined,
-      heightPx: 75
+      tooltipPlacement: undefined
     },
   ] as IBarplotExposedProps[],
 };
@@ -148,7 +165,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     ntColorScheme,
     barplots,
     logoOptions,
-    logoHeightPx,
 
     disableSearch,
     disableSearchKeyboardShortcut,
@@ -157,6 +173,8 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     mainViewportVisibleChanged,
     metadataSizing,
     minimapSizing,
+    logoSizing,
+    barplotSizing,
     positionsToStyle,
     residueColoring,
     showAnnotations,
@@ -355,7 +373,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         dataSeriesSet={barplotProps.dataSeriesSet}
         positionWidth={residueWidth}
         horizontalVirtualization={xViewportResponderVirtualization}
-        heightPx={barplotProps.heightPx}
       ></PositionalBarplot>
     );
   }, [
@@ -434,7 +451,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   ]);
 
   //consensus
-  const renderedConsensusSeq: IMetadataAndContent | undefined = useMemo(()=>{
+  const renderedConsensusSeq: IMetadataContentAndHeight | undefined = useMemo(()=>{
     return !showConsensus ? undefined : {
       metadata: "Consensus",
       content: renderSingleSequence("consensus"),
@@ -447,7 +464,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   ]);
 
   //query
-  const renderedQuerySeq: IMetadataAndContent | undefined = useMemo(()=>{
+  const renderedQuerySeq: IMetadataContentAndHeight | undefined = useMemo(()=>{
     return !showQuery ? undefined : {
       metadata: "Query",
       content: renderSingleSequence("query"),
@@ -524,6 +541,8 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
         metadataSizing={metadataSizing}
         minimapSizing={minimapSizing}
+        logoSizing={logoSizing}
+        barplotSizing={barplotSizing}
         titleFontSize={annotationFontSize}
 
         alignmentDetails={{
@@ -594,15 +613,14 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
                 (series) => series.description
               ).join(" / "),
               content: renderBarplot(barplot),
-              heightPx: barplot.heightPx
+              contentKey: barplot.svgId
             }
           })
         }
 
         logoPlot={{
           metadata: "Logo",
-          content: renderedSequenceLogo,
-          heightPx: logoHeightPx
+          content: renderedSequenceLogo
         }}
 
         minimapPlot={renderedMinimap}

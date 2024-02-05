@@ -219,16 +219,14 @@ export function SequenceSearch(props: {
             `rgb(${highlightColor.red},${highlightColor.green},${highlightColor.blue})`
           )
         ],
-        tooltipPlacement: undefined,
-        heightPx: 50
+        tooltipPlacement: undefined
       },
       {
         svgId: `search-conservation`,
         dataSeriesSet: [
           PreconfiguredPositionalBarplots.Conservation
         ],
-        tooltipPlacement: undefined,
-        heightPx: 75
+        tooltipPlacement: undefined
       },
     ] as IBarplotExposedProps[];
   }, [

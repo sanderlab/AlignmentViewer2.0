@@ -7,8 +7,6 @@ import * as PIXI from "pixi.js";
 
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 import { generateUUIDv4 } from "../../common/Utils";
-import { VirtualVerticalScrollbar } from "./VirtualVerticalScrollbarHook";
-import { VirtualHorizontalScrollbar } from "./VirtualHorizontalScrollbarHook";
 import {
   IVirtualizeParams,
   IVirtualizedHorizontalContents, 
@@ -21,6 +19,7 @@ import {
   VirtualizationStrategy
 } from "./VirtualizationTypes";
 import { useReduxVirtualization } from "./VirtualizedMatrixReduxHook";
+import { VirtualScrollbar } from "./VirtualScrollbarHook";
 
 
 //
@@ -90,6 +89,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
 
   //misc
   const scrollbarWidthOrHeight = 12;
+  const scrollbarMinWidthOrHeight = 25;
 
   //ref
   const ref = useRef<HTMLDivElement>(null);
@@ -301,19 +301,22 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     return disableVerticalScrolling || !vertSetWorldOffsetPx
       ? undefined 
       : (
-          <VirtualVerticalScrollbar
+          <VirtualScrollbar
+            direction="vertical"
             visible={
               vertParams?.scrollbar===ScrollbarOptions.AlwaysOnWhenOverflowed || 
               (vertParams?.scrollbar===ScrollbarOptions.OnHoverWhenOverflowed && mouseHovering)
             }
-            width={scrollbarWidthOrHeight}
-            horizontalScrollbarHeight={
+            oppositeScrollbarFixedDimSize={
               !disableHorizontalScrolling ? scrollbarWidthOrHeight : 0
             }
-            worldHeight={vertVirtualizationAxis.worldRenderSizePx}
-            worldTopOffset={vertVirtualizationAxis.worldOffsetPx}
-            scrollbarMoved={(newWorldTop) => {
-              vertSetWorldOffsetPx(newWorldTop);
+            draggerFixedDimSize={scrollbarWidthOrHeight}
+            draggerVarDimMinSize={scrollbarMinWidthOrHeight}
+            
+            worldSize={vertVirtualizationAxis.worldRenderSizePx}
+            worldOffset={vertVirtualizationAxis.worldOffsetPx}
+            scrollbarMoved={(newWorldLeft) => {
+              vertSetWorldOffsetPx(newWorldLeft);
             }}
           />
         );
@@ -332,17 +335,20 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     return disableHorizontalScrolling || !horizSetWorldOffsetPx
       ? undefined 
       : (
-          <VirtualHorizontalScrollbar
+          <VirtualScrollbar
+            direction="horizontal"
             visible={
               horizParams?.scrollbar===ScrollbarOptions.AlwaysOnWhenOverflowed || 
               (horizParams?.scrollbar===ScrollbarOptions.OnHoverWhenOverflowed && mouseHovering)
             }
-            height={scrollbarWidthOrHeight}
-            verticalScrollbarWidth={
+            oppositeScrollbarFixedDimSize={
               !disableVerticalScrolling ? scrollbarWidthOrHeight : 0
             }
-            worldWidth={horizVirtualizationAxis.worldRenderSizePx}
-            worldLeftOffset={horizVirtualizationAxis.worldOffsetPx}
+            draggerFixedDimSize={scrollbarWidthOrHeight}
+            draggerVarDimMinSize={scrollbarMinWidthOrHeight}
+            
+            worldSize={horizVirtualizationAxis.worldRenderSizePx}
+            worldOffset={horizVirtualizationAxis.worldOffsetPx}
             scrollbarMoved={(newWorldLeft) => {
               horizSetWorldOffsetPx(newWorldLeft);
             }}
@@ -594,6 +600,11 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   //
   //
   //
+  /*const resizeSensor = useMemo(()=>{
+    return (
+      <ReactResizeSensor onSizeChanged={viewportSizeChanged}/>
+    )
+  }, [viewportSizeChanged]);*/
   return (
     <div className="virtualized-matrix-viewer"
       onMouseEnter={() => {
@@ -606,10 +617,9 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
       { /*horizontalSelectedRender*/ }
       { /*verticalSelectedRender*/ }
       {
-        <ReactResizeSensor onSizeChanged={(viewportSizeChanged)}>
-          {finalRenderedContent}
-        </ReactResizeSensor>
+        <ReactResizeSensor onSizeChanged={viewportSizeChanged} logId="virtualized-matrix"/>
       }
+      {finalRenderedContent}
     </div>
   );
 }

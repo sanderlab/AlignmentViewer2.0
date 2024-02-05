@@ -43,9 +43,6 @@ export interface IPositionalBarplotProps {
 
   //for the virtualization
   hoverTracker?: IVirtualizeParamBasics["hoverTracker"];
-
-  //height
-  heightPx: number;
 }
 
 export interface ISingleBarDetails {

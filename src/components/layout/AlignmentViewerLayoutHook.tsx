@@ -1,12 +1,19 @@
 import "./AlignmentViewerLayout.scss"
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResizeGrid } from "./ResizeGridHook";
 import { IBounds, ReactResizeSensor } from "../ResizeSensorHook";
 
 export interface IMetadataAndContent{
-  metadata: string | React.JSX.Element,
-  content: React.JSX.Element,
-  heightPx: number
+  metadata: string | React.JSX.Element;
+  content: React.JSX.Element;
+}
+
+export interface IMetadataContentAndHeight extends IMetadataAndContent{
+  heightPx: number;
+}
+
+export interface IMetadataContentAndKey extends IMetadataAndContent{
+  contentKey: string;
 }
 
 export interface IFixedWidth{
@@ -20,11 +27,22 @@ export interface IAdjustableWidth{
   maxWidth: number;
 }
 
+export interface IFixedHeight{
+  type: "fixed-height";
+  height: number;
+}
+export interface IAdjustableHeight{
+  type: "adjustable-height";
+  startingHeight: number;
+  minHeight: number;
+  maxHeight: number;
+}
+
 export type IAlignmentViewerLayoutProps = {
-  alignmentDetails: Pick<IMetadataAndContent, "metadata" | "content">,
-  consensus?: IMetadataAndContent,
-  query?: IMetadataAndContent,
-  positionalAxis?: IMetadataAndContent,
+  alignmentDetails: IMetadataAndContent,
+  consensus?: IMetadataContentAndHeight,
+  query?: IMetadataContentAndHeight,
+  positionalAxis?: IMetadataContentAndHeight,
   logoPlot?: IMetadataAndContent,
   minimapPlot?: React.JSX.Element,
 
@@ -40,13 +58,13 @@ export type IAlignmentViewerLayoutProps = {
 } & Partial<typeof defaultProps>;
 
 const defaultProps = {
-  barplots: [] as IMetadataAndContent[], //undefined or length === 0 means no barplots
+  barplots: [] as IMetadataContentAndKey[], //undefined or length === 0 means no barplots
 
   //misc
   showMetadata: true,
 
   //layout sizing
-  gapBetweenColumnsAndRowsPx: 6,
+  gapBetweenColumnsAndRowsPx: 4,
   gapViewportTopPx: 0,
   gapViewportBottomPx: 6,
   gapViewportLeftPx: 6,
@@ -67,6 +85,20 @@ const defaultProps = {
     minWidth: 100, 
     maxWidth: 300
   } as IFixedWidth | IAdjustableWidth,
+
+  barplotSizing: {
+    type: "adjustable-height", 
+    startingHeight: 60,
+    minHeight: 25, 
+    maxHeight: 200
+  } as IFixedHeight | IAdjustableHeight,
+
+  logoSizing: {
+    type: "adjustable-height", 
+    startingHeight: 100,
+    minHeight: 50, 
+    maxHeight: 300
+  } as IFixedHeight | IAdjustableHeight,
 }
 
 /**
@@ -99,6 +131,9 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     metadataSizing,
     minimapSizing,
 
+    barplotSizing,
+    logoSizing,
+
     resizeBarSizePx,
     gapBetweenColumnsAndRowsPx,
     gapViewportTopPx,
@@ -124,18 +159,35 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
       ? minimapSizing.width
       : minimapSizing.startingWidth;
 
+  const barplotStartingHeight = barplotSizing.type === "fixed-height" 
+    ? barplotSizing.height
+    : barplotSizing.startingHeight;
+
+  const logoStartingHeight = logoSizing.type === "fixed-height" 
+    ? logoSizing.height
+    : logoSizing.startingHeight;
+  
   //state and ref
-  const [
-    metadataWidth, setMetadataWidth
-  ] = useState<number>(metadataStartingWidth)
+  const [currentGridDimensions, setCurrentGridDimensions] = useState<IBounds>();
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  const [
-    minimapWidth, setMinimapWidth
-  ] = useState<number>(minimapStartingWidth);
+  const [metadataWidth, setMetadataWidth] = useState<number>(metadataStartingWidth);
+  const [minimapWidth, setMinimapWidth] = useState<number>(minimapStartingWidth);
+  const [logoHeight, setLogoHeight] = useState<number>(logoStartingHeight);
+  const [barplotHeights, setBarplotHeights] = useState(
+    barplots.reduce((acc, bp)=>{
+      acc[bp.contentKey] = barplotStartingHeight;
+      return acc;
+    }, {} as {[contentKey: string]: number})
+  );
 
-  const [
-    currentGridDimensions, setCurrentGridDimensions
-  ] = useState<IBounds>();
+  useEffect(()=>{
+    barplots.forEach(bp => {
+      if(!barplotHeights[bp.contentKey]){
+        barplotHeights[bp.contentKey] = barplotStartingHeight;
+      }
+    })
+  }, [barplots, barplotHeights, barplotStartingHeight]);
 
   //
   // calculate current sizing for dragging
@@ -172,7 +224,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
       : (//empty tag doesn't support key, so need to use fragment
         <React.Fragment key={key}>
           <div 
-            className={`${metadataClassname}`} 
+            className={metadataClassname} 
             style={{
               gridArea: metadataGridArea,
               fontSize: titleFontSize,
@@ -183,7 +235,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
               : metadataAndContent.metadata}
           </div>
           <div 
-            className={contentClassname} 
+            className={contentClassname}
             style={{
               gridArea: contentGridArea,
               display: forceHide ? "none" : undefined
@@ -196,6 +248,102 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     showMetadata,
     titleFontSize
   ]);
+
+  //
+  //BARPLOT Resizing
+  //
+
+  const barplotsResized = useCallback((newBarClientY: number, barplotKey: string)=>{
+    if(barplotSizing.type==="fixed-height" || !rootRef.current) return;
+    const barplotElems = rootRef.current.getElementsByClassName(`${barplotKey}`);
+    if(barplotElems.length !== 1){
+      console.error(`Internal error: unable to find class "${barplotKey}" during resize.`);
+      return;
+    }
+
+    const barplotBounds = barplotElems[0].getBoundingClientRect();
+
+    //relate metadata width to offset of resizer
+    const newProposedHeight = (
+      newBarClientY - 
+      (resizeBarSizePx/2) -             //center of resize element
+      gapBetweenColumnsAndRowsPx -
+      barplotBounds.y
+    );
+    const newFinalHeight = newProposedHeight > barplotSizing.maxHeight
+      ? barplotSizing.maxHeight
+      : newProposedHeight < barplotSizing.minHeight
+        ? barplotSizing.minHeight
+        : newProposedHeight;
+
+    setBarplotHeights({
+      ...barplotHeights,
+      [barplotKey]: newFinalHeight
+    });
+  }, [
+    barplotHeights, 
+    barplotSizing,
+    gapBetweenColumnsAndRowsPx,
+    resizeBarSizePx
+  ]);
+
+  const barplotAreaNames = useMemo(()=>{
+    return {
+      gridAreas: barplots.map((bp)=>{
+        return `barplot-${bp.contentKey}-resizer`;
+      }),
+      keys: barplots.map((bp)=>{
+        return bp.contentKey;
+      }),
+    }
+  }, [barplots]);
+
+  const barplotResizers = useResizeGrid({
+    resizeSeparatorGridAreaNames: barplotAreaNames.gridAreas,
+    resizeDirection: "vertical",
+    draggerMoved: barplotsResized,
+    keys: barplotAreaNames.keys
+  });
+
+  //
+  //LOGO Resizing
+  //
+  const logoResized = useCallback((newBarClientY: number)=>{
+    if(logoSizing.type==="fixed-height" || !rootRef.current) return;
+    const logoElems = rootRef.current.getElementsByClassName("logoplot");
+    if(logoElems.length !== 1){
+      console.error(`Internal error: unable to find class "logoplot" during resize.`);
+      return;
+    }
+    const logoBounds = logoElems[0].getBoundingClientRect();
+
+    //relate metadata width to offset of resizer
+    const newProposedHeight = (
+      newBarClientY - 
+      (resizeBarSizePx/2) -          //center of resize element
+      gapBetweenColumnsAndRowsPx -
+      logoBounds.y
+    );
+    setLogoHeight(
+      newProposedHeight > logoSizing.maxHeight
+        ? logoSizing.maxHeight
+        : newProposedHeight < logoSizing.minHeight
+          ? logoSizing.minHeight
+          : newProposedHeight
+    );
+  }, [
+    logoSizing,
+    gapBetweenColumnsAndRowsPx,
+    resizeBarSizePx
+  ]);
+
+  const logoResizer = useResizeGrid({
+    resizeSeparatorGridAreaNames: ["logo-resizer"],
+    keys: ["logo-resizer"],
+    resizeDirection: "vertical",
+    draggerMoved: logoResized,
+  });
+
 
   //
   //METADATA Resizing
@@ -228,7 +376,8 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   ]);
 
   const metadataResizer = useResizeGrid({
-    resizeSeparatorGridAreaName: "metadata-resizer",
+    resizeSeparatorGridAreaNames: ["metadata-resizer"],
+    keys: ["metadata-resizer"],
     resizeDirection: "horizontal",
     draggerMoved: metadataBarResized
   });
@@ -262,7 +411,8 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     gapViewportRightPx
   ]);
   const minimapResizer = useResizeGrid({
-    resizeSeparatorGridAreaName: "minimap-resizer",
+    resizeSeparatorGridAreaNames: ["minimap-resizer"],
+    keys: ["minimap-resizer"],
     resizeDirection: "horizontal",
     draggerMoved: minimapBarResized
   });
@@ -272,7 +422,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //
   const gridTemplateAreas = useMemo(()=>{
     const accountForMetadataAndMinimap = (
-      metadataColArea: string, contentColArea: string
+      metadataColArea: string, contentColArea: string, resizeableHeight?: boolean
     ) => {
       const metadataText = !showMetadata
         ? ""
@@ -286,19 +436,31 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           ? "minimap-resizer minimap"
           : "minimap";
 
-      return `"${metadataText} ${contentColArea} ${minimapText}"`
+      return (`"${metadataText} ${contentColArea} ${minimapText}"`) + 
+        (!resizeableHeight 
+          ? "" 
+          : `\n"${metadataText.replaceAll(
+                  metadataColArea, 
+                  metadataColArea+"-resizer"
+            )} ${contentColArea}-resizer ${minimapText}"`);
     };
 
     return [
-      ...barplots.map((bp, idx) => {
+      ...barplots.map((bp) => {
         return accountForMetadataAndMinimap(
-          `barplot-${idx}-metadata`, `barplot-${idx}`
+          `barplot-${bp.contentKey}-metadata`, 
+          `barplot-${bp.contentKey}`, 
+          barplotSizing.type==="adjustable-height"
         );
       }),
 
       ...!showLogoPlot 
         ? [] 
-        : [accountForMetadataAndMinimap("logo-metadata", "logo")],
+        : [accountForMetadataAndMinimap(
+            "logo-metadata", 
+            "logo", 
+            logoSizing.type==="adjustable-height"
+          )],
 
       ...!showConsensus 
         ? []
@@ -315,6 +477,8 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
       accountForMetadataAndMinimap("ids-and-annotations", "main-viewport"),
     ].join("\n");
   }, [
+    logoSizing.type,
+    barplotSizing.type,
     metadataSizing.type,
     minimapSizing.type,
     showMetadata, 
@@ -356,18 +520,13 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //
   return (
     <>
-      {
-        !showMetadata 
-          ? undefined 
-          : metadataResizer.draggerFullScreenElement
-      }
-      {
-        !showMinimap 
-          ? undefined 
-          : minimapResizer.draggerFullScreenElement
-      }
-      <ReactResizeSensor onSizeChanged={resizeSensor}>
-        <div className="alignment-viewer-2" style={{
+      { !showMetadata ? undefined : metadataResizer.draggerFullScreenElement }
+      { !showMinimap ? undefined : minimapResizer.draggerFullScreenElement}
+      { !showLogoPlot ? undefined : logoResizer.draggerFullScreenElement }
+      { barplotResizers.draggerFullScreenElement }
+
+      <ReactResizeSensor onSizeChanged={resizeSensor} logId="alignment-viewer-layout">
+        <div className="alignment-viewer-2" ref={rootRef} style={{
           top: `${gapViewportTopPx}px`,
           bottom: `${gapViewportBottomPx}px`,
           left: `${gapViewportLeftPx}px`,
@@ -375,8 +534,15 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           gap: `${gapBetweenColumnsAndRowsPx}px`,
           gridTemplateColumns: gridTemplateColumns,
           gridTemplateRows: `
-            ${barplots.map(bp => `${bp.heightPx}px`).join("\n")}
-            ${showLogoPlot && logoPlot ? `${logoPlot.heightPx}px` : ""} 
+            ${barplots.map((bp) => {
+              const toreturn = [`${barplotHeights[bp.contentKey]}px`];
+              if(barplotSizing.type === "adjustable-height"){
+                toreturn.push(`${resizeBarSizePx}px`);
+              }
+              return toreturn.join("\n");
+            }).join("\n")}
+            ${showLogoPlot && logoPlot ? `${logoHeight}px` : ""} 
+            ${showLogoPlot && logoPlot && logoSizing.type === "adjustable-height" ? `${resizeBarSizePx}px` : ""}
             ${showConsensus && consensus ? `${consensus.heightPx}px` : ""} 
             ${showQuery && query ? `${query.heightPx}px` : ""} 
             ${showPositionalAxis && positionalAxis ? `${positionalAxis.heightPx}px` : ""}
@@ -392,24 +558,42 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
           }
 
           { //barplots
-            barplots.map((bp, idx) => {
-              return renderWidget({
-                key: `bp${idx}`,
-                metadataAndContent: bp,
-                metadataGridArea: `barplot-${idx}-metadata`,
-                contentGridArea: `barplot-${idx}`,
-              });
+            barplots.map((bp) => {
+              const metadataGridArea = `barplot-${bp.contentKey}-metadata`;
+              const contentGridArea = `barplot-${bp.contentKey}`;
+              return (
+                <React.Fragment key={bp.contentKey}>
+                  {renderWidget({
+                    key: `bp-${bp.contentKey}`,
+                    metadataAndContent: bp,
+                    metadataGridArea: metadataGridArea,
+                    contentGridArea: contentGridArea,
+                    contentClassname: `content ${bp.contentKey}`
+                  })}
+                  {barplotSizing.type !== "adjustable-height"
+                    ? <></>
+                    : barplotResizers.resizeSeparators[bp.contentKey]//<div className="vertical-resizer" style={{gridArea: `${contentGridArea}-resizer`}}/>
+                  }
+                </React.Fragment>
+              );
             })
           }
 
           { //logo
-            renderWidget({
-              key: `logo`,
-              metadataAndContent: logoPlot,
-              metadataGridArea: "logo-metadata",
-              contentGridArea: "logo",
-              forceHide: !showLogoPlot
-            })
+            <>
+              {renderWidget({
+                key: `logo`,
+                metadataAndContent: logoPlot,
+                metadataGridArea: "logo-metadata",
+                contentGridArea: "logo",
+                forceHide: !showLogoPlot,
+                contentClassname: `content logoplot`
+              })}
+              {logoSizing.type !== "adjustable-height" || !showLogoPlot
+                ? <></>
+                : logoResizer.resizeSeparators["logo-resizer"]
+              }
+            </>
           }
 
           { //consensus
@@ -469,7 +653,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
             //minimap resizing
             !showMinimap || minimapSizing.type !== "adjustable-width"
               ? undefined
-              : minimapResizer.resizeSeparator
+              : minimapResizer.resizeSeparators["minimap-resizer"]
           }
 
           {
@@ -477,7 +661,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
             !showMetadata || metadataSizing.type !== "adjustable-width"
               ? undefined 
               : (
-                metadataResizer.resizeSeparator
+                metadataResizer.resizeSeparators["metadata-resizer"]
               )
           }
         </div>

@@ -467,7 +467,7 @@ export function MiniMap(props: IMiniMapProps) {
         { renderedMinimapHeaderFooter[0] }
 
         <div className="minimap-app-holder">
-          <ReactResizeSensor onSizeChanged={minimapHolderResized}>
+          <ReactResizeSensor onSizeChanged={minimapHolderResized} logId="minimap">
             { renderedMinimapCanvasHolder }
             { renderedMinimapCanvasInteraction }
             { renderedDragger }

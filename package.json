@@ -30,8 +30,8 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@react-hook/size": "2.1.2",
     "@reduxjs/toolkit": "2.0.1",
-    "css-element-queries": "1.2.3",
     "pixi.js": "7.3.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
