@@ -379,6 +379,7 @@ const getSearchResultsCountBarplot = (color: string) => {
   return {
     id: "search-results",
     name: "Search matches",
+    description: "Search matches",
     cssClass: "barplot-search-results",
     color: color,
     getBars: (
