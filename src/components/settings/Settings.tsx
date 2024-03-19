@@ -723,9 +723,9 @@ export default function useAV2Settings(props:{
   //return an object that includes the currently selected properties
   return {
     currentlySelectedProperties: state,
+    dropZoneElement: renderedFileDropZone,
     element: (
       <>
-        {renderedFileDropZone}
         <div className="settings-holder">
           <div 
             className={`outside-settings-box`}

@@ -160,6 +160,7 @@ export default function App(){
     //
     return (
       <>
+        {settings.dropZoneElement}
         <div style={{display: alignment && !showSettings ? "none" : undefined}}>
           {settings.element}
         </div>
