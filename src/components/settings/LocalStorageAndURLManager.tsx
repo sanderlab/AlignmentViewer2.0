@@ -46,7 +46,7 @@ export const globalSettingsUrlLocalStorageManager = (() =>{
     },
     getCurrentDeserializedValue: <T,> (propName: string, deserializer: (s: string)=>T) => {
       const val = getCurrentParams().get(propName);
-      return !val ? undefined : deserializer(val);
+      return val === null ? undefined : deserializer(val);
     },
     updateValue: (propName: string, value: string | undefined) => {
       const newParams = getCurrentParams();
