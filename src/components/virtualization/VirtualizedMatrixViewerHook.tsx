@@ -197,11 +197,12 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   const disableVerticalScrolling = 
     !vertVirtualizationAxis || vertParams?.scrollbar===ScrollbarOptions.NeverOn
       ? true
-      : vertVirtualizationAxis.containerSizePx > vertVirtualizationAxis.worldRenderSizePx;
+      : vertVirtualizationAxis.containerSizePx >= vertVirtualizationAxis.worldRenderSizePx;
   const disableHorizontalScrolling =
     !horizVirtualizationAxis || horizParams?.scrollbar===ScrollbarOptions.NeverOn
       ? true
-      : horizVirtualizationAxis.containerSizePx > horizVirtualizationAxis.worldRenderSizePx;
+      : horizVirtualizationAxis.containerSizePx >= horizVirtualizationAxis.worldRenderSizePx;
+  console.log('horizVirtualizationAxis:', horizVirtualizationAxis)
       
   const reduxInitialized = 
     (!vertParams || (vertParams && vertVirtualizationAxis)) &&
