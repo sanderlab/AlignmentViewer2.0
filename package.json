@@ -7,6 +7,7 @@
   "module": "dist/js/index.js",
   "types": "dist/js/index.d.ts",
   "contributors": [
+    "Yang Su",
     "Andrew Diamantoukos",
     "Chris Sander"
   ],
