@@ -303,6 +303,7 @@ export default function App(){
     residueColoring,
     logoSvgId,
     showSettings,
+    settings.dropZoneElement,
     settings.element,
     sortBy,
     state,
