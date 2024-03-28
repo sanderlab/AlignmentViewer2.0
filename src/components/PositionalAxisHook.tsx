@@ -6,6 +6,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { generateUUIDv4 } from "../common/Utils";
 import { IControllerRole, IResponderRole, IVirtualizeParamBasics, ScrollbarOptions, VirtualizationRole, VirtualizationStrategy } from "./virtualization/VirtualizationTypes";
 import { VirtualizedHorizontalViewer } from "./virtualization/VirtualizedMatrixViewerHook";
+import { MONO_FONT_FAMILY } from "../common/FontUtils";
 
 
 
@@ -67,7 +68,6 @@ export function PositionalAxis(props: {
         ? {
             virtualizationId: 
               `x_auto_generated_positionalaxis_virtualization_${alignmentUUID}_${containerId}`,
-            axisId: `x_auto_generated_positionalaxis_axis_${alignmentUUID}_${containerId}`,
             role: VirtualizationRole.Controller,
             cellCount: maxLength,
             cellSizePx: residueWidth,
@@ -116,7 +116,11 @@ export function PositionalAxis(props: {
 
   const renderedAxis = useMemo(()=>{
     return (
-      <div className="av2-positional-axis" style={{ fontSize: fontSize }}>
+      <div className="av2-positional-axis" 
+        style={{ 
+          fontSize: fontSize,
+          fontFamily: MONO_FONT_FAMILY
+        }}>
         {fullRuler}
       </div>
     );

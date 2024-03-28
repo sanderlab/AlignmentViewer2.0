@@ -155,45 +155,7 @@ export function startEndIdxToArray(startIdx: number, endIdx: number){
   );
 }
 
-/**
- * Get the font family, width and height of the fixed width font used for the
- * alignments
- * inspired by https://stackoverflow.com/questions/118241
- */
-const FONT_FAMILY =
-  'Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace';
-let HIDDEN_DIV: undefined | HTMLDivElement = undefined;
-const FONT_DETAILS_CACHE: Map<
-  number,
-  {
-    fontFamily: string;
-    fontSize: number;
-    width: number;
-    height: number;
-  }
-> = new Map();
-export function getAlignmentFontDetails(fontSize: number) {
-  if (!FONT_DETAILS_CACHE.has(fontSize)) {
-    if (!HIDDEN_DIV) {
-      HIDDEN_DIV = document.createElement("div");
-      document.body.appendChild(HIDDEN_DIV);
-      HIDDEN_DIV.style.position = "absolute";
-      HIDDEN_DIV.style.fontFamily = FONT_FAMILY;
-      HIDDEN_DIV.style.left = "-1000px";
-      HIDDEN_DIV.style.top = "-1000px";
-      HIDDEN_DIV.innerHTML = "X";
-    }
-    HIDDEN_DIV.style.fontSize = fontSize + "px";
-    const boundingRect = HIDDEN_DIV.getBoundingClientRect();
-    FONT_DETAILS_CACHE.set(fontSize, {
-      fontFamily: FONT_FAMILY,
-      fontSize: fontSize,
-      width: boundingRect.width,
-      height: boundingRect.height,
-    });
-  }
-  return FONT_DETAILS_CACHE.get(fontSize)!;
-}
+
 
 /**
  * CRAZY: safari puts an onwheel event onto the window. This disrupts

@@ -11,6 +11,7 @@ import {
   ResidueColoringInstance,
 } from "../../common/MolecularStyles";
 import { Alignment } from "../../common/Alignment";
+import { MONO_FONT_FAMILY } from "../../common/FontUtils";
 
 /**
  * Hook to render the alignment details text. Generates a div for each
@@ -172,6 +173,7 @@ export function MSALetters(props: {
         style={{
           top: verticalOffset,
           left: horizontalOffset,
+          fontFamily: MONO_FONT_FAMILY
         }}
       >
         <div
@@ -200,6 +202,7 @@ export function MSALetters(props: {
             ? -1 * horizontalWorldOffset
             : undefined,
           fontSize: fontSize, 
+          fontFamily: MONO_FONT_FAMILY,
           lineHeight: lineHeight + "px"
         }}>
         {sequencesInViewport.map((seqStr, idx) => {

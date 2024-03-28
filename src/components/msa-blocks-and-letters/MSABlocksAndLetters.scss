@@ -51,8 +51,6 @@
 
 .av2-letters.sequence-text-holder {
   position: absolute;
-  font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
-    monospace;
   white-space: nowrap;
 
   .letters-with-specific-color {
@@ -71,8 +69,6 @@
 }
 .hidden-residues-for-copy-paste {
   position: absolute;
-  font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro,
-    monospace;
   white-space: nowrap;
   
   overflow-x: hidden;

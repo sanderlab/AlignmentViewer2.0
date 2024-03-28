@@ -117,7 +117,6 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
         ? {
             virtualizationId: 
               `x_auto_generated_alignmentdetails_virtualization_${alignment.getUUID()}_${containerId}`,
-            axisId: `x_auto_generated_alignmentdetails_axis_${alignment.getUUID()}_${containerId}`,
             role: VirtualizationRole.Controller,
             cellCount: alignment.getSequenceLength(),
             cellSizePx: residueWidth,
@@ -137,7 +136,6 @@ export function MSABlocksAndLetters(props: MSABlocksAndLettersProps) {
         ? {
             virtualizationId: 
               `y_auto_generated_alignmentdetails_virtualization_${alignment.getUUID()}_${containerId}`,
-            axisId: `y_auto_generated_alignmentdetails_axis_${alignment.getUUID()}_${containerId}`,
             role: VirtualizationRole.Controller,
             cellCount: alignment.getSequenceCount(),
             cellSizePx: residueHeight

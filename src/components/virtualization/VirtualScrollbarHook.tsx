@@ -262,7 +262,6 @@ export function VirtualScrollbar(props: IVirtualScrollbarProps) {
               ? {height: draggerFixedDimSize}
               : {width: draggerFixedDimSize}
           ),
-          display: visible ? "block" : "none",
         }}
         onMouseDown={holderClicked}
       >
