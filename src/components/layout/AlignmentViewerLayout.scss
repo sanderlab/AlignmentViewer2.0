@@ -55,8 +55,8 @@
   .vertical-resizer{
     cursor: ns-resize;
   }
-  .horizontal-resizer:hover,
-  .vertical-resizer:hover{
+  .horizontal-resizer.hovered,
+  .vertical-resizer.hovered{
     background-color: #0099ff;
     border-left-color: #0099ff;
     border-right-color: #0099ff;

@@ -202,7 +202,6 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     !horizVirtualizationAxis || horizParams?.scrollbar===ScrollbarOptions.NeverOn
       ? true
       : horizVirtualizationAxis.containerSizePx >= horizVirtualizationAxis.worldRenderSizePx;
-  console.log('horizVirtualizationAxis:', horizVirtualizationAxis)
       
   const reduxInitialized = 
     (!vertParams || (vertParams && vertVirtualizationAxis)) &&
@@ -436,7 +435,62 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
   const renderedHoverContent = useMemo(()=>{
     if(!containerBounds) { return undefined; }
     const hoverTrackerSize = +styles.hoverTrackerSize; //needs to also be managed in css
+    
+    const showYRight = vertVirtualizationAxis?.hoveredEvent && (
+      vertParams?.hoverTracker === "start" || vertParams?.hoverTracker === "both"
+    );
+    const showYLeft = vertVirtualizationAxis?.hoveredEvent && (
+      vertParams?.hoverTracker === "end" || vertParams?.hoverTracker === "both"
+    );
+    const showXDown = horizVirtualizationAxis?.hoveredEvent && (
+      horizParams?.hoverTracker === "start" || horizParams?.hoverTracker === "both"
+    );
+    const showXUp = horizVirtualizationAxis?.hoveredEvent && (
+      horizParams?.hoverTracker === "end" || horizParams?.hoverTracker === "both"
+    );
+
     return (
+      <>
+        {!vertParams?.hoverTracker ? undefined : 
+          <React.Fragment key={'vert'}>
+            <div className="hover-tracker-y triangle-right" style={{
+              left: containerBounds.getLiveLeft() - hoverTrackerSize,
+              top: containerBounds.getLiveTop()
+                  + (vertVirtualizationAxis?.hoveredEvent ? vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx : 0)
+                  - (hoverTrackerSize/2), //half the height
+              display: showYRight ? "block" : "none"
+            }}/>
+            <div className="hover-tracker-y triangle-left" style={{
+              left: containerBounds.getLiveLeft() + containerBounds.width,
+              top: containerBounds.getLiveTop()
+                  + (vertVirtualizationAxis?.hoveredEvent ? vertVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx : 0)
+                  - (hoverTrackerSize/2), //half the height
+              display: showYLeft ? "block" : "none"
+            }}/>
+          </React.Fragment>
+        }
+        {!horizParams?.hoverTracker ? undefined : 
+          <React.Fragment key={'horiz'}>
+            <div className="hover-tracker-x triangle-down" style={{
+              top: containerBounds.getLiveTop() - hoverTrackerSize,
+              left: containerBounds.getLiveLeft()
+                    + (horizVirtualizationAxis?.hoveredEvent ? horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx : 0)
+                    - (hoverTrackerSize/2), // 1/2 the width
+              display: showXDown ? "block" : "none"
+            }}/>
+
+            <div className="hover-tracker-x triangle-up" style={{
+              top: containerBounds.getLiveTop() + containerBounds.height,
+              left: containerBounds.getLiveLeft()
+                    + (horizVirtualizationAxis?.hoveredEvent ? horizVirtualizationAxis.hoveredEvent.containerOffsetCellMiddlePx : 0)
+                    - (hoverTrackerSize/2), // 1/2 the width
+              display: showXUp ? "block" : "none"
+            }}/>
+          </React.Fragment>
+        }
+      </>
+    );
+    /*return (
       <>
         {!vertVirtualizationAxis?.hoveredEvent ? undefined : 
           <>
@@ -479,7 +533,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
           </>
         }
       </>
-    );
+    );*/
   }, [
     containerBounds,
     horizParams?.hoverTracker,
@@ -488,8 +542,12 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     vertVirtualizationAxis?.hoveredEvent,
   ]);
 
-  const bottomShadowValue = useMemo(()=>{
-
+  const [
+    leftShadowIndicator, 
+    topShadowIndicator, 
+    bottomShadowIndicator, 
+    rightShadowIndicator
+  ] = useMemo(()=>{
     const leftShadow = !horizVirtualizationAxis?.worldOffsetPx 
       ? undefined : "17px 0 16px -16px rgba(0, 0, 0, 0.4) inset";
     const topShadow = !vertVirtualizationAxis?.worldOffsetPx 
@@ -506,10 +564,7 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
         horizVirtualizationAxis.worldOffsetPx + horizVirtualizationAxis.containerSizePx
     ) ? undefined : "-17px 0 16px -16px rgba(0, 0, 0, 0.4) inset";
 
-    return [leftShadow, topShadow, bottomShadow, rightShadow].reduce((acc, s) => {
-      if(s) acc.push(s);
-      return acc;
-    }, [] as string[]).join(",");
+    return [leftShadow, topShadow, bottomShadow, rightShadow];
   }, [
     horizVirtualizationAxis?.worldOffsetPx,
     horizVirtualizationAxis?.worldRenderSizePx,
@@ -519,20 +574,33 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
     vertVirtualizationAxis?.containerSizePx,
   ]);
 
-
   const finalRenderedContent = useMemo(()=>{
     
     return (
       <>
-        <div className="av2-virtualized-matrix" ref={ref}>
-          <div 
-            className="scrolled-indicator"
-            style={{
-              boxShadow: bottomShadowValue
-            }}
-          ></div>
+        <div className="av2-virtualized-matrix" ref={ref} style={{
+          overflowX: horizParams?.overflowVisible ? "visible" : "clip",
+          overflowY: vertParams?.overflowVisible ? "visible" : "clip",
+        }}>
+          {!leftShadowIndicator ? undefined :
+           <div className="scrolled-indicator left" style={{ 
+            boxShadow: leftShadowIndicator, 
+            ...horizParams?.startScrolledIndicatorStyleAttr}}></div>}
+          {!rightShadowIndicator ? undefined :
+           <div className="scrolled-indicator right" style={{ 
+            boxShadow: rightShadowIndicator,
+            ...horizParams?.endScrolledIndicatorStyleAttr}}></div>}
+          {!topShadowIndicator ? undefined : 
+           <div className="scrolled-indicator top" style={{ 
+            boxShadow: topShadowIndicator,
+            ...vertParams?.startScrolledIndicatorStyleAttr}}></div>}
+          {!bottomShadowIndicator ? undefined :
+            <div className="scrolled-indicator bottom" style={{ 
+            boxShadow: bottomShadowIndicator,
+            ...vertParams?.endScrolledIndicatorStyleAttr}}></div>}
+          
           { !reduxInitialized || !ref //TODO: one area where we reinitialize stage
-              ? undefined 
+              ? (undefined) 
               : (
                 // simple way of enabling wheel scrolling and monitoring of
                 // mouse over events 
@@ -577,21 +645,33 @@ function GenericVirtualizedMatrixViewer(props: IVirtualizedMatrixOrRowOrColumn) 
       </>
     )
   }, [
-    bottomShadowValue,
-    reduxInitialized,
     contentFromParent, 
-    handleWheelFn, 
-    horizVirtualizationAxis?.worldOffsetPx,
-    horizVirtualizationAxis?.offsetForRenderingIdxsOnly,
-    vertVirtualizationAxis?.worldOffsetPx,
-    vertVirtualizationAxis?.offsetForRenderingIdxsOnly,
-    horizParams?.virtualizationStrategy,
-    vertParams?.virtualizationStrategy,
-    horizontalScrollbarRender, 
-    verticalScrollbarRender,
     handleMousemoveFn,
     handleMouseoutFn,
+    handleWheelFn, 
+    horizVirtualizationAxis?.offsetForRenderingIdxsOnly,
+    horizVirtualizationAxis?.worldOffsetPx,
+    horizParams?.overflowVisible,
+    horizParams?.virtualizationStrategy,
+    horizontalScrollbarRender, 
+    reduxInitialized,
     renderedHoverContent,
+    verticalScrollbarRender,
+    vertParams?.overflowVisible,
+    vertParams?.virtualizationStrategy,
+    vertVirtualizationAxis?.offsetForRenderingIdxsOnly,
+    vertVirtualizationAxis?.worldOffsetPx,
+
+
+    leftShadowIndicator, 
+    topShadowIndicator, 
+    bottomShadowIndicator, 
+    rightShadowIndicator,
+    horizParams?.startScrolledIndicatorStyleAttr,
+    horizParams?.endScrolledIndicatorStyleAttr,
+    vertParams?.startScrolledIndicatorStyleAttr,
+    vertParams?.endScrolledIndicatorStyleAttr,
+    
   ]);
 
   //

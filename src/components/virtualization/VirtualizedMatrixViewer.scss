@@ -7,8 +7,8 @@ $hoverTrackerSizeHalfPx: #{math.div($hoverTrackerSize, 2)}px;
 
 
 .av2-virtualized-matrix {
-  overflow-x: hidden;
-  overflow-y: hidden;
+  //overflow-x: hidden;
+  //overflow-y: hidden;
   position: absolute;
   inset: 0;
 
@@ -28,6 +28,7 @@ $hoverTrackerSizeHalfPx: #{math.div($hoverTrackerSize, 2)}px;
     .hover-tracker-x{
       position: fixed;
       z-index: 1000;
+      pointer-events: none;
     }
     
     .triangle-up{

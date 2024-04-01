@@ -1,5 +1,5 @@
 import "./AlignmentViewerLayout.scss"
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 export interface IResizeGridProps{
   resizeSeparatorGridAreaNames: string[];
@@ -9,6 +9,8 @@ export interface IResizeGridProps{
     newProposedPageXorY: number,
     key: string
   ) => void;
+  zIndex?: number;
+  resizerDoubleClicked?: (key: string) => void;
 }
 
 /**
@@ -22,7 +24,9 @@ export function useResizeGrid(props: IResizeGridProps) {
     resizeSeparatorGridAreaNames,
     resizeDirection,
     draggerMoved,
-    keys
+    keys,
+    zIndex,
+    resizerDoubleClicked
   } = props;
 
   //
@@ -30,6 +34,7 @@ export function useResizeGrid(props: IResizeGridProps) {
   //
   const [resizeDragging, setResizeDragging] = useState<boolean>(false);
   const [keyBeingResized, setKeyBeingResized] = useState<string>();
+  const [keyBeingHovered, setKeyBeingHovered] = useState<string>();
 
   //
   // css
@@ -43,7 +48,7 @@ export function useResizeGrid(props: IResizeGridProps) {
   const startResizeDragging = useCallback((
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   )=>{
-    e.stopPropagation();
+    //e.stopPropagation();
     e.preventDefault();
     setResizeDragging(true);
   }, []);
@@ -75,6 +80,8 @@ export function useResizeGrid(props: IResizeGridProps) {
     draggerMoved
   ]);
 
+  const resizeTimeout = useRef<NodeJS.Timeout>();
+
   return {
     draggerFullScreenElement: 
       <div 
@@ -89,14 +96,32 @@ export function useResizeGrid(props: IResizeGridProps) {
     resizeSeparators: resizeSeparatorGridAreaNames.reduce((acc, gridArea, idx) => {
       const resizingClass = resizeDragging && keys[idx] === keyBeingResized
         ? " resizing" : "";
+      const hoveredClass = keys[idx] === keyBeingHovered
+        ? " hovered" : "";
       acc[keys[idx]] = (
         <div 
           key={keys[idx]}
-          className={classes.join(" ")+resizingClass}
-          style={{gridArea: gridArea}}
+          className={classes.join(" ")+resizingClass+hoveredClass}
+          style={{gridArea: gridArea, zIndex: zIndex}}
           onMouseDown={(e)=>{
-            setKeyBeingResized(keys[idx]);
-            startResizeDragging(e);
+            clearTimeout(resizeTimeout.current);
+            resizeTimeout.current = setTimeout(()=>{
+              setKeyBeingResized(keys[idx]);
+              startResizeDragging(e);
+            }, 150)
+          }}
+          onMouseUp={()=>{
+            clearTimeout(resizeTimeout.current);
+          }}
+          onMouseOver={()=>{
+            setKeyBeingHovered(keys[idx]);
+          }}
+          onMouseOut={()=>{
+            setKeyBeingHovered(undefined);
+          }}
+          onDoubleClick={!resizerDoubleClicked ? undefined : ()=>{
+            clearTimeout(resizeTimeout.current);
+            resizerDoubleClicked(keys[idx]);
           }}
         />
       )

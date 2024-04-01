@@ -20,13 +20,13 @@ export enum VirtualizationStrategy {
 
 export enum ScrollbarOptions{
   //no scrollbar
-  NeverOn, 
+  NeverOn = "NeverOn", 
 
   //show the scrollbar at all times if overflowed (other component hovered)
-  AlwaysOnWhenOverflowed, 
+  AlwaysOnWhenOverflowed = "AlwaysOnWhenOverflowed", 
 
   //show the scrollbar when hovered over the virtualization
-  OnHoverWhenOverflowed
+  OnHoverWhenOverflowed = "AlwaysOnWOnHoverWhenOverflowedhenOverflowed", 
 }
 
 export enum VirtualizationRole{
@@ -92,6 +92,10 @@ export interface IVirtualizeParamBasics {
   scrollbar: ScrollbarOptions;
   hoverTracker: undefined | "start" | "end" | "both"; //start=left or top, end = right or bottom
   containerBoundsUpdated?: (bounds: IBounds)=>void;
+  overflowVisible?: boolean; // allow caller to deal with overflow themselves
+
+  startScrolledIndicatorStyleAttr?: React.CSSProperties;
+  endScrolledIndicatorStyleAttr?: React.CSSProperties;
 }
 export interface IResponderVirtualizeParams extends IVirtualizeParamBasics{
   //is the caller the owner of the axis? and should this virtualization

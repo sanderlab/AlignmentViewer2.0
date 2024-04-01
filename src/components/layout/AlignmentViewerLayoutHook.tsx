@@ -379,7 +379,8 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     resizeSeparatorGridAreaNames: ["metadata-resizer"],
     keys: ["metadata-resizer"],
     resizeDirection: "horizontal",
-    draggerMoved: metadataBarResized
+    draggerMoved: metadataBarResized,
+    zIndex: 1799
   });
 
   //

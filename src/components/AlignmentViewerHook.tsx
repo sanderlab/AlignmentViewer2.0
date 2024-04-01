@@ -8,7 +8,6 @@ import {
 } from "./SequenceLogoHook";
 
 import { MiniMap } from "./minimap/MiniMapHook";
-import { AlignmentTextualMetadata } from "./alignment-metadata/AlignmentTextualMetadataHook";
 import { Alignment } from "../common/Alignment";
 import { SequenceSorter, SequenceSorterInstance } from "../common/AlignmentSorter";
 import { reduxStore } from "../redux/ReduxStore";
@@ -23,7 +22,8 @@ import {
   PositionsToStyleInstance,
   ResidueColoringInstance
 } from "../common/MolecularStyles";
-import { generateUUIDv4, getAlignmentFontDetails } from "../common/Utils";
+import { generateUUIDv4 } from "../common/Utils";
+import { getAlignmentFontDetails } from "../common/FontUtils";
 import { 
   IPositionalBarplotProps,
   PositionalBarplot, 
@@ -47,6 +47,7 @@ import { ISearchMatchDetails, SequenceSearch } from "./search/SequenceSearchHook
 import { useListenForSearchKeypresses } from "./search/SearchKeysListenerHook";
 import { MSABlocksAndLetters } from "./msa-blocks-and-letters/MSABlocksAndLetters";
 import { getCachedCanvasGenerators } from "./msa-blocks-and-letters/MSABlockGenerator";
+import { AlignmentSpreadsheet } from "./alignment-metadata/AlignmentSpreadsheetHook";
 
 
 //
@@ -97,8 +98,8 @@ const defaultProps = {
   metadataSizing: {
     type: "adjustable-width",
     startingWidth: 150,
-    minWidth: 100,
-    maxWidth: 400
+    minWidth: 50,
+    maxWidth: 600
   } as IAdjustableWidth | IFixedWidth,
 
   minimapSizing: {
@@ -210,8 +211,13 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   const fontSize = zoomLevel;
   const annotationFontSize = zoomLevel + 3;
-  const residueWidth = getAlignmentFontDetails(fontSize).width;
-  const residueHeight = getAlignmentFontDetails(fontSize).height;
+  const monoFontSize = getAlignmentFontDetails(fontSize, true);
+  const defaultFontSize = getAlignmentFontDetails(fontSize, false);
+
+  const residueWidth = monoFontSize.width;
+  const residueHeight = monoFontSize.height > defaultFontSize.height
+    ? monoFontSize.height
+    : defaultFontSize.height;
   const singleLineHeight = residueHeight;
   
   
@@ -280,18 +286,27 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   // state
   //
   const [
-    mouseHoveringContent, 
-    setMouseHoveringContent
+    mouseHoveringHorizontalContent, 
+    setMouseHoveringHorizontalContent
+  ] = useState<boolean>(false);
+  const [
+    mouseHoveringVerticalContent, 
+    setMouseHoveringVerticalContent
   ] = useState<boolean>(false);
 
 
-  //events
-  const handleMouseHovering = useCallback(()=>{
-    setMouseHoveringContent(true); 
+  //hover events
+  const handleMouseHoveringHoriz = useCallback(()=>{
+    setMouseHoveringHorizontalContent(true); 
   }, []);
-
-  const handleMouseStoppedHovering = useCallback(()=>{
-    setMouseHoveringContent(false); 
+  const handleMouseStoppedHoveringHoriz = useCallback(()=>{
+    setMouseHoveringHorizontalContent(false); 
+  }, []);
+  const handleMouseHoveringVert = useCallback(()=>{
+    setMouseHoveringVerticalContent(true); 
+  }, []);
+  const handleMouseStoppedHoveringVert = useCallback(()=>{
+    setMouseHoveringVerticalContent(false); 
   }, []);
 
   //
@@ -317,37 +332,51 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   //
 
   //general event listeners
-  const attachEventListeners = useCallback((
-    content: React.JSX.Element, className?: string
-  )=>{
+  const attachEventHorizListeners = useCallback((props: {
+    content: React.JSX.Element, 
+    horizContent?: boolean,
+    vertContent?: boolean,
+    className?: string
+  })=>{
     return (
-      <div className={className}
-        onMouseEnter={handleMouseHovering}
-        onMouseLeave={handleMouseStoppedHovering}>
-        {content}
+      <div className={props.className}
+        onMouseEnter={()=>{
+          if(props.horizContent) handleMouseHoveringHoriz();
+          if(props.vertContent) handleMouseHoveringVert();
+        }}
+        onMouseLeave={()=>{
+          if(props.horizContent) handleMouseStoppedHoveringHoriz();
+          if(props.vertContent) handleMouseStoppedHoveringVert();
+        }}>
+        {props.content}
       </div>
     );
   }, [
-    handleMouseHovering,
-    handleMouseStoppedHovering
+    handleMouseHoveringHoriz,
+    handleMouseHoveringVert,
+    handleMouseStoppedHoveringHoriz,
+    handleMouseStoppedHoveringVert
   ]);
 
   //logos
   const renderedSequenceLogo = useMemo(() => {
-    return attachEventListeners(
-      <SequenceLogo
-        svgId={logoOptions.svgId}
-        alignment={alignment}
-        alignmentType={alignmentType}
-        aaColorScheme={aaColorScheme}
-        ntColorScheme={ntColorScheme}
-        positionsToStyle={positionsToStyle}
-        glyphWidth={residueWidth}
-        logoType={logoOptions.logoType}
-        tooltipPlacement={logoOptions.tooltipPlacement}
-        horizontalVirtualization={xViewportResponderVirtualization}
-      />
-    );
+    return attachEventHorizListeners({
+      horizContent: true,
+      content: (
+        <SequenceLogo
+          svgId={logoOptions.svgId}
+          alignment={alignment}
+          alignmentType={alignmentType}
+          aaColorScheme={aaColorScheme}
+          ntColorScheme={ntColorScheme}
+          positionsToStyle={positionsToStyle}
+          glyphWidth={residueWidth}
+          logoType={logoOptions.logoType}
+          tooltipPlacement={logoOptions.tooltipPlacement}
+          horizontalVirtualization={xViewportResponderVirtualization}
+        />
+      )
+    });
   }, [
     alignment,
     logoOptions,
@@ -357,27 +386,30 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     alignmentType,
     aaColorScheme,
     ntColorScheme,
-    attachEventListeners
+    attachEventHorizListeners
   ]);
 
   //barplots
   const renderBarplot = useCallback((
     barplotProps: IBarplotExposedProps
   ) => {
-    return attachEventListeners(
-      <PositionalBarplot
-        svgId={barplotProps.svgId}
-        alignment={alignment}
-        searchDetails={highlightPositionalMatches}
-        tooltipPlacement={barplotProps.tooltipPlacement}
-        dataSeriesSet={barplotProps.dataSeriesSet}
-        positionWidth={residueWidth}
-        horizontalVirtualization={xViewportResponderVirtualization}
-      ></PositionalBarplot>
-    );
+    return attachEventHorizListeners({
+      horizContent: true,
+      content: (
+        <PositionalBarplot
+          svgId={barplotProps.svgId}
+          alignment={alignment}
+          searchDetails={highlightPositionalMatches}
+          tooltipPlacement={barplotProps.tooltipPlacement}
+          dataSeriesSet={barplotProps.dataSeriesSet}
+          positionWidth={residueWidth}
+          horizontalVirtualization={xViewportResponderVirtualization}
+        ></PositionalBarplot>
+      )
+    });
   }, [
     alignment,
-    attachEventListeners,
+    attachEventHorizListeners,
     highlightPositionalMatches,
     residueWidth, 
     xViewportResponderVirtualization,
@@ -385,18 +417,21 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   //positionaxis
   const renderedPositionAxis = useMemo(()=>{
-    return attachEventListeners(
-      <PositionalAxis
-        alignmentUUID={alignment.getUUID()}
-        horizVirtualization={xViewportResponderVirtualization}
-        positions={[...Array(alignment.getSequenceLength()).keys()]}
-        fontSize={fontSize}
-        residueWidth={residueWidth}
-      />,
-      "position-box"
-    )
+    return attachEventHorizListeners({
+      horizContent: true,
+      className: "position-box",
+      content: (
+        <PositionalAxis
+          alignmentUUID={alignment.getUUID()}
+          horizVirtualization={xViewportResponderVirtualization}
+          positions={[...Array(alignment.getSequenceLength()).keys()]}
+          fontSize={fontSize}
+          residueWidth={residueWidth}
+        />
+      ),
+    })
   }, [
-    attachEventListeners, 
+    attachEventHorizListeners, 
     alignment,
     fontSize, 
     residueWidth,
@@ -407,34 +442,37 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   const renderSingleSequence = useCallback((
     sequenceType: "consensus" | "query"
   )=>{
-    return attachEventListeners(
-      <MSABlocksAndLetters
-        canvasGenerator={
-          sequenceType === "consensus" 
-            ? canvasGenerators.consensusApp
-            : canvasGenerators.queryApp
-        }
-        sequenceSet={sequenceType}
+    return attachEventHorizListeners({
+      horizContent: true,
+      content: (
+        <MSABlocksAndLetters
+          canvasGenerator={
+            sequenceType === "consensus" 
+              ? canvasGenerators.consensusApp
+              : canvasGenerators.queryApp
+          }
+          sequenceSet={sequenceType}
 
-        alignment={alignment}
-        sortBy={sortBy}
-        horizVirtualization={xViewportResponderVirtualization}
-        vertVirtualization={"None"}
-        highlightPositionalMatches={highlightPositionalMatches}
-        alignmentType={alignmentType}
-        aaColorScheme={aaColorScheme}
-        ntColorScheme={ntColorScheme}
-        positionsToStyle={positionsToStyle}
-        residueColoring={residueColoring}
-        fontSize={fontSize}
-        residueHeight={residueHeight}
-        residueWidth={residueWidth}
-        horizontalScrollbar={ScrollbarOptions.NeverOn}
-      />
-    );
+          alignment={alignment}
+          sortBy={sortBy}
+          horizVirtualization={xViewportResponderVirtualization}
+          vertVirtualization={"None"}
+          highlightPositionalMatches={highlightPositionalMatches}
+          alignmentType={alignmentType}
+          aaColorScheme={aaColorScheme}
+          ntColorScheme={ntColorScheme}
+          positionsToStyle={positionsToStyle}
+          residueColoring={residueColoring}
+          fontSize={fontSize}
+          residueHeight={residueHeight}
+          residueWidth={residueWidth}
+          horizontalScrollbar={ScrollbarOptions.NeverOn}
+        />
+      )
+    });
   }, [
     alignment,
-    attachEventListeners,
+    attachEventHorizListeners,
     canvasGenerators.consensusApp,
     canvasGenerators.queryApp,
     sortBy,
@@ -510,6 +548,47 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     setShowSearch(false);
   }, []);
 
+  //dummy data
+  const spreadsheetData = useMemo(()=>{
+    return {
+      "rownum": {
+        key: "rownum",
+        initialColumnName: "Row #",
+        initiallyPinned: false,
+        rawData: Array(alignment.getSequenceCount()).fill(0).map((val, idx)=>{
+          return idx+1;
+        }),
+      }, 
+      "id": {
+        key: "id",
+        initialColumnName: "Id",
+        initiallyPinned: false,
+        rawData: alignment.getSequences().map((seq)=>{
+          return seq.id;
+        }),
+      }, 
+      //"second-column": {
+      //  key: "second column",
+      //  initiallyPinned: false,
+      //  initialColumnName: "second column",
+      //  rawData: Array(alignment.getSequenceCount()).fill('second'),
+      //}, 
+      //"third-column": {
+      //  key: "third column",
+      //  initiallyPinned: false,
+      //  initialColumnName: "third column",
+      //  rawData: Array(alignment.getSequenceCount()).fill('blah'),
+      //},
+      //"4th-column": {
+      //  key: "4th column",
+      //  initiallyPinned: false,
+      //  initialColumnName: "4th column",
+      //  rawData: Array(alignment.getSequenceCount()).fill('the fourth column'),
+      //}
+    }
+  }, [alignment]);
+
+
   //
   // final render
   //
@@ -546,53 +625,61 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         titleFontSize={annotationFontSize}
 
         alignmentDetails={{
-          metadata: (
-            <AlignmentTextualMetadata
-              alignmentUUID={alignmentUUID}
-              vertVirtualization={yViewportResponderVirtualization}
-              genenameHorizVirtualization={"Automatic"} 
-              annotationHorizVirtualization={"Automatic"}
-              textForEachSeq={sequenceIds}
-              fontSize={fontSize}
-              tabFontSize={annotationFontSize}
-              letterHeight={residueHeight}
-              letterWidth={residueWidth}
-            />
-          ),
-          content: attachEventListeners(
-            <MSABlocksAndLetters
-              canvasGenerator={
-                canvasGenerators.primaryViewportApp
-              }
-              sequenceSet={"alignment"}
-              alignment={alignment}
-              sortBy={sortBy}
-              vertVirtualization={yViewportControllerVirtualization}
-              horizVirtualization={xViewportControllerVirtualization}
-              highlightPositionalMatches={highlightPositionalMatches}
-              alignmentType={alignmentType}
-              aaColorScheme={aaColorScheme}
-              ntColorScheme={ntColorScheme}
-              positionsToStyle={positionsToStyle}
-              residueColoring={residueColoring}
-              fontSize={fontSize}
-              residueHeight={residueHeight}
-              residueWidth={residueWidth}
-              verticalScrollbar={
-                ScrollbarOptions.OnHoverWhenOverflowed
-              }
-              horizontalScrollbar={
-                mouseHoveringContent
-                  ? ScrollbarOptions.AlwaysOnWhenOverflowed
-                  : ScrollbarOptions.OnHoverWhenOverflowed
-              }
-              matrixRendered={(props)=>{
-                if (mainViewportVisibleChanged){
-                  mainViewportVisibleChanged(props)
+          metadata: attachEventHorizListeners({
+            vertContent: true,
+            content: (
+              <AlignmentSpreadsheet
+                alignmentUUID={alignmentUUID}
+                rowHeight={residueHeight}
+                fontSize={fontSize}
+                verticalVirtualization={{
+                  virtualization: yViewportResponderVirtualization,
+                  scrollbar: ScrollbarOptions.NeverOn
+                }}
+                columns={spreadsheetData}
+              ></AlignmentSpreadsheet>
+            )
+          }),
+          content: attachEventHorizListeners({
+            horizContent: true,
+            vertContent: true,
+            content: (
+              <MSABlocksAndLetters
+                canvasGenerator={
+                  canvasGenerators.primaryViewportApp
                 }
-              }}
-            ></MSABlocksAndLetters>
-          )
+                sequenceSet={"alignment"}
+                alignment={alignment}
+                sortBy={sortBy}
+                vertVirtualization={yViewportControllerVirtualization}
+                horizVirtualization={xViewportControllerVirtualization}
+                highlightPositionalMatches={highlightPositionalMatches}
+                alignmentType={alignmentType}
+                aaColorScheme={aaColorScheme}
+                ntColorScheme={ntColorScheme}
+                positionsToStyle={positionsToStyle}
+                residueColoring={residueColoring}
+                fontSize={fontSize}
+                residueHeight={residueHeight}
+                residueWidth={residueWidth}
+                verticalScrollbar={
+                  mouseHoveringVerticalContent
+                    ? ScrollbarOptions.AlwaysOnWhenOverflowed
+                    : ScrollbarOptions.OnHoverWhenOverflowed
+                }
+                horizontalScrollbar={
+                  mouseHoveringHorizontalContent
+                    ? ScrollbarOptions.AlwaysOnWhenOverflowed
+                    : ScrollbarOptions.OnHoverWhenOverflowed
+                }
+                matrixRendered={(props)=>{
+                  if (mainViewportVisibleChanged){
+                    mainViewportVisibleChanged(props)
+                  }
+                }}
+              ></MSABlocksAndLetters>
+            )
+          })
         }}
 
         consensus={renderedConsensusSeq}
