@@ -1,14 +1,25 @@
 /** SequenceLogo.scss */
 
-.sequence-logo {
+.sequence-logo-holder::-webkit-scrollbar {
+  background: transparent; // make scrollbar transparent
+  height: 0;
+}
+
+.sequence-logo-holder {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: absolute;
+
   rect.interaction-placeholder {
     opacity: 0;
   }
 
   .sequence-logo-tooltip-container {
     margin: 0;
+    z-index: 1002;
 
     .logo-tooltip {
+      pointer-events: all;
       display: table;
       width: auto;
       line-height: 16px;
@@ -48,10 +59,6 @@
       }
       .name {
         width: 100px;
-      }
-      .frequency {
-      }
-      .count {
       }
     }
   }

@@ -1,0 +1,18 @@
+/** PositionalAxis.scss */
+
+.av2-positional-axis {
+  white-space: nowrap;
+
+  overflow-x: hidden;
+  overflow-y: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.av2-positional-axis::-webkit-scrollbar {
+  background: transparent;
+  height: 0;
+}  
+

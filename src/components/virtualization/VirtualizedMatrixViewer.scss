@@ -1,0 +1,74 @@
+/** VirtualizedMatrixViewer.scss */
+@use 'sass:math';
+
+$hoverTrackerSize: 5;
+$hoverTrackerSizePx: #{$hoverTrackerSize}px;
+$hoverTrackerSizeHalfPx: #{math.div($hoverTrackerSize, 2)}px;
+
+
+.av2-virtualized-matrix {
+  //overflow-x: hidden;
+  //overflow-y: hidden;
+  position: absolute;
+  inset: 0;
+
+  .scrolled-indicator{
+    position: absolute;
+    inset: 0;
+    z-index: 1001;
+    pointer-events: none;
+  }
+
+  .av2-wheel-scroller{
+    position: absolute;
+    inset: 0;
+    cursor: default;
+
+    .hover-tracker-y,
+    .hover-tracker-x{
+      position: fixed;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    
+    .triangle-up{
+      width: 0;
+      height: 0;
+      border-left: $hoverTrackerSizeHalfPx solid transparent;
+      border-right: $hoverTrackerSizeHalfPx solid transparent;
+      border-bottom: $hoverTrackerSizePx solid red;
+    }
+    .triangle-down{
+      width: 0;
+      height: 0;
+      border-left: $hoverTrackerSizeHalfPx solid transparent;
+      border-right: $hoverTrackerSizeHalfPx solid transparent;
+      border-top: $hoverTrackerSizePx solid red;
+    }
+    .triangle-left{
+      width: 0;
+      height: 0;
+      border-bottom: $hoverTrackerSizeHalfPx solid transparent;
+      border-top: $hoverTrackerSizeHalfPx solid transparent;
+      border-right: $hoverTrackerSizePx solid red;
+    }
+    .triangle-right{
+      width: 0;
+      height: 0;
+      border-bottom: $hoverTrackerSizeHalfPx solid transparent;
+      border-top: $hoverTrackerSizeHalfPx solid transparent;
+      border-left: $hoverTrackerSizePx solid red;
+    }
+  }
+
+  .av2-data {
+    position: absolute;
+    //pointer-events: none;
+    inset: 0;
+  }
+}
+
+
+:export{
+  hoverTrackerSize: $hoverTrackerSize;
+}

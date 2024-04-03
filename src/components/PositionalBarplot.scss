@@ -1,0 +1,50 @@
+/** PositionalBarplot.scss */
+
+.barplot::-webkit-scrollbar {
+  background: transparent; // make scrollbar transparent
+  height: 0;
+}
+
+.barplot {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  svg {
+    .position-container rect.interaction-placeholder {
+      fill-opacity: 0;
+      stroke: none;
+    }
+    .position-container rect.interaction-placeholder-full {
+      fill-opacity: 0;
+      stroke: none;
+    }
+  }
+
+  .barplot-tooltip-holder{
+    margin: 0;
+    z-index: 1002;
+  
+    .bar-position-textblock {
+      pointer-events: all;
+      h1 {
+        text-align: center;
+        padding-bottom: 4px;
+        margin: 0;
+        font-size: 14px;
+      }
+      .dataseries-line {
+        line-height: 16px;
+        font-size: 13px;
+      }
+      .legend-square {
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        margin-right: 6px;
+      }
+    }
+  }
+}

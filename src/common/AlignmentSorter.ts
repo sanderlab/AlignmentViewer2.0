@@ -1,18 +1,26 @@
 /**
  * This class conatins methods for sorting sequences
  */
+import { IListOfPropObjects, IPropObjectInstanceInList } from "./GlobalEnumObject";
 import { Alignment, ISequence } from "./Alignment";
 import { BLOSUM62 } from "./BLOSUM";
 
-export class SequenceSorter {
-  /*
-   *
-   *
-   * HELPER
-   *
-   *
-   */
-  private static hammingDistance(seq1: ISequence, seq2: ISequence) {
+
+export interface SequenceSorterInstance extends IPropObjectInstanceInList {
+  targetAlignmentType: "aminoacid" | "nucleotide" | "both";
+  sortFn: (
+    sequencesAsInput: ISequence[],
+    alignment: Alignment
+  ) => ISequence[];
+}
+
+export const SequenceSorter = (() => {
+  //
+  //
+  // HELPER
+  //
+  //
+  function hammingDistance(seq1: ISequence, seq2: ISequence) {
     const minLength =
       seq1.sequence.length < seq2.sequence.length
         ? seq1.sequence.length
@@ -28,7 +36,7 @@ export class SequenceSorter {
     return distance;
   }
 
-  private static blosumScore(seq1: ISequence, seq2: ISequence) {
+  function blosumScore(seq1: ISequence, seq2: ISequence) {
     const minLength =
       seq1.sequence.length < seq2.sequence.length
         ? seq1.sequence.length
@@ -49,138 +57,121 @@ export class SequenceSorter {
     return score;
   }
 
-  /*
-   *
-   *
-   * AVAILBLE SORT TYPES WITH FUNCTIONS
-   *
-   *
-   */
-  static readonly INPUT = new SequenceSorter(
-    "as-input",
-    "As input",
-    false,
-    "both",
-    (sequencesAsInput, alignment) => sequencesAsInput
-  );
+  
+  //
+  //
+  // AVAILBLE SORT TYPES WITH FUNCTIONS
+  //
+  //
+  const propList = {
 
-  static readonly HAMMING_DIST_QUERY = new SequenceSorter(
-    "hamming-dist-to-query",
-    "Hamming distance to query sequence",
-    true,
-    "both",
-    (sequences, alignment) => {
-      const querySeq = alignment.getQuerySequence();
-      return sequences
-        .map((s) => s)
-        .sort((seq1, seq2) => {
-          const dist1 = SequenceSorter.hammingDistance(querySeq, seq1);
-          const dist2 = SequenceSorter.hammingDistance(querySeq, seq2);
-          return dist1 - dist2;
-        });
-    }
-  );
+    INPUT: {
+      key: "as-input",
+      description: "As input",
+      targetAlignmentType: "both",
+      sortFn: (sequencesAsInput, alignment) => sequencesAsInput
+     } satisfies SequenceSorterInstance,
+    
+    HAMMING_DIST_QUERY: {
+      key: "hamming-dist-to-query",
+      description: "Hamming distance to query sequence",
+      targetAlignmentType: "both",
+      sortFn: (sequences, alignment) => {
+          const querySeq = alignment.getQuery();
+          return sequences
+            .map((s) => s) //copy list
+            .sort((seq1, seq2) => {
+              const dist1 = hammingDistance(querySeq, seq1);
+              const dist2 = hammingDistance(querySeq, seq2);
+              return dist1 - dist2;
+            });
+        }
+    } satisfies SequenceSorterInstance,
+    
+    HAMMING_DIST_CONSENSUS: {
+      key: "hamming-dist-to-consensus",
+      description: "Hamming distance to consensus sequence",
+      targetAlignmentType: "both",
+      sortFn: (sequences, alignment) => {
+        const consensusSeq = alignment.getConsensus();
+        return sequences
+          .map((s) => s)
+          .sort((seq1, seq2) => {
+            const dist1 = hammingDistance(consensusSeq, seq1);
+            const dist2 = hammingDistance(consensusSeq, seq2);
+            return dist1 - dist2;
+          });
+        }
+    } satisfies SequenceSorterInstance,
+    
+    BLOSUM62_SCORE_QUERY: {
+      key: "blosum-score-to-query",
+      description: "BLOSUM62 score to query sequence",
+      targetAlignmentType: "aminoacid",
+      sortFn: (sequences, alignment) => {
+        const querySeq = alignment.getQuery();
+        return sequences
+          .map((s) => s)
+          .sort((seq1, seq2) => {
+            const dist1 = blosumScore(querySeq, seq1);
+            const dist2 = blosumScore(querySeq, seq2);
+            return dist2 - dist1; //reverse from distance
+          });
+        }
+    } satisfies SequenceSorterInstance,
+    
+    BLOSUM62_SCORE_CONSENSUS: {
+      key: "blosum-score-to-consensus",
+      description: "BLOSUM62 score to consensus sequence",
+      targetAlignmentType: "aminoacid",
+      sortFn: (sequences, alignment) => {
+        const consensusSeq = alignment.getConsensus();
+        return sequences
+          .map((s) => s)
+          .sort((seq1, seq2) => {
+            const dist1 = blosumScore(consensusSeq, seq1);
+            const dist2 = blosumScore(consensusSeq, seq2);
+            return dist2 - dist1; //reverse from distance
+          });
+        }
+    } satisfies SequenceSorterInstance,
+  };
+  
+  // 
+  // 
+  // LIST OF ALL AVAILABLE OPTIONS
+  // 
+  // 
+  const propListObj = IListOfPropObjects(Object.values(propList));
 
-  static readonly HAMMING_DIST_CONSENSUS = new SequenceSorter(
-    "hamming-dist-to-consensus",
-    "Hamming distance to consensus sequence",
-    true,
-    "both",
-    (sequences, alignment) => {
-      const consensusSeq = alignment.getConsensus();
-      return sequences
-        .map((s) => s)
-        .sort((seq1, seq2) => {
-          const dist1 = SequenceSorter.hammingDistance(consensusSeq, seq1);
-          const dist2 = SequenceSorter.hammingDistance(consensusSeq, seq2);
-          return dist1 - dist2;
-        });
-    }
-  );
-
-  static readonly BLOSUM62_SCORE_CONSENSUS = new SequenceSorter(
-    "blosum-score-to-consensus",
-    "BLOSUM62 score to consensus sequence",
-    true,
-    "aminoacid",
-    (sequences, alignment) => {
-      const consensusSeq = alignment.getConsensus();
-      return sequences
-        .map((s) => s)
-        .sort((seq1, seq2) => {
-          const dist1 = SequenceSorter.blosumScore(consensusSeq, seq1);
-          const dist2 = SequenceSorter.blosumScore(consensusSeq, seq2);
-          return dist2 - dist1; //reverse from distance
-        });
-    }
-  );
-
-  static readonly BLOSUM62_SCORE_QUERY = new SequenceSorter(
-    "blosum-score-to-query",
-    "BLOSUM62 score to query sequence",
-    true,
-    "aminoacid",
-    (sequences, alignment) => {
-      const querySeq = alignment.getQuerySequence();
-      return sequences
-        .map((s) => s)
-        .sort((seq1, seq2) => {
-          const dist1 = SequenceSorter.blosumScore(querySeq, seq1);
-          const dist2 = SequenceSorter.blosumScore(querySeq, seq2);
-          return dist2 - dist1; //reverse from distance
-        });
-    }
-  );
-
-  /*
-   *
-   *
-   * LIST OF ALL AVAILABLE OPTIONS
-   *
-   *
-   */
-  private static list = [
-    SequenceSorter.INPUT,
-    SequenceSorter.HAMMING_DIST_QUERY,
-    SequenceSorter.HAMMING_DIST_CONSENSUS,
-    SequenceSorter.BLOSUM62_SCORE_QUERY,
-    SequenceSorter.BLOSUM62_SCORE_CONSENSUS,
-  ];
-
-  static aminoAcidSorters = SequenceSorter.list.reduce((acc, seqSort) => {
+  const aminoAcidSorters = propListObj.list.reduce((
+    acc, seqSort
+  ) => {
     if (
-      seqSort.targetAlignmentType === "aminoacid" ||
-      seqSort.targetAlignmentType === "both"
+      (seqSort as SequenceSorterInstance).targetAlignmentType === "aminoacid" ||
+      (seqSort as SequenceSorterInstance).targetAlignmentType === "both"
     ) {
-      acc.push(seqSort);
+      acc.push(seqSort as SequenceSorterInstance);
     }
     return acc;
-  }, [] as SequenceSorter[]);
+  }, [] as SequenceSorterInstance[]);
 
-  static nucleotideSorters = SequenceSorter.list.reduce((acc, seqSort) => {
+  const nucleotideSorters = propListObj.list.reduce((
+    acc, seqSort
+  ) => {
     if (
-      seqSort.targetAlignmentType === "nucleotide" ||
-      seqSort.targetAlignmentType === "both"
+      (seqSort as SequenceSorterInstance).targetAlignmentType === "nucleotide" ||
+      (seqSort as SequenceSorterInstance).targetAlignmentType === "both"
     ) {
-      acc.push(seqSort);
+      acc.push(seqSort as SequenceSorterInstance);
     }
     return acc;
-  }, [] as SequenceSorter[]);
+  }, [] as SequenceSorterInstance[]);
 
-  static fromKey(key: string) {
-    return SequenceSorter.list.find((at) => {
-      return at.key === key;
-    });
-  }
-
-  private constructor(
-    public readonly key: string,
-    public readonly description: string,
-    public readonly isQuerySequenceDependent: boolean,
-    public readonly targetAlignmentType: "aminoacid" | "nucleotide" | "both",
-    public readonly sortFn: (
-      sequencesAsInput: ISequence[],
-      alignment: Alignment
-    ) => ISequence[]
-  ) {}
-}
+  return {
+    ALL_AMINO_ACID_SORTERS: aminoAcidSorters,
+    ALL_NUCLEOTIDE_SORTERS: nucleotideSorters,
+    ...propList,
+    ...IListOfPropObjects<SequenceSorterInstance>(Object.values(propList))
+  };
+})();

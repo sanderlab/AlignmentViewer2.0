@@ -1,0 +1,142 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MiniMap Should render with default props. 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "store": Object {
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(observable): [Function],
+      },
+      "subscription": Subscription {
+        "handleChangeWrapper": [Function],
+        "listeners": Object {
+          "notify": [Function],
+        },
+        "onStateChange": [Function],
+        "parentSub": undefined,
+        "store": Object {
+          "dispatch": [Function],
+          "getState": [Function],
+          "replaceReducer": [Function],
+          "subscribe": [Function],
+          Symbol(observable): [Function],
+        },
+        "unsubscribe": null,
+      },
+    }
+  }
+>
+  <MiniMap
+    alignment={
+      Alignment {
+        "aceEditorMode": undefined,
+        "allUpperAlphaLettersInAlignmentSorted": Array [],
+        "consensus": Object {
+          "id": "consensus",
+          "sequence": "",
+        },
+        "globalAlphaLetterCounts": Object {},
+        "maxSequenceLength": NaN,
+        "name": "",
+        "positionalLetterCounts": Map {},
+        "predictedNT": true,
+        "querySequence": undefined,
+        "sequences": Map {
+          SequenceSorter {
+            "description": "As input",
+            "isQuerySequenceDependent": false,
+            "key": "as-input",
+            "sortFn": [Function],
+            "targetAlignmentType": "both",
+          } => Array [],
+        },
+        "uuid": "10000000-1000-4000-8000-100000000000",
+      }
+    }
+    alignmentStyle={
+      AminoAcidAlignmentStyle {
+        "alignmentType": AlignmentTypes {
+          "allColorSchemes": Array [
+            Object {
+              "backgroundAlpha": 0.25,
+              "backgroundColorsLightTheme": Object {
+                "": "",
+              },
+              "className": "mock-aa-class",
+              "colors": Object {
+                "": "",
+              },
+              "commonName": "Default",
+              "defaultLetterColor": "#ffffff",
+              "description": "mock-aa-style-desc",
+              "letterColorsDarkTheme": Object {
+                "": "",
+              },
+            },
+          ],
+          "className": undefined,
+          "description": "Amino Acid Sequences",
+          "key": "aminoacid-alignment",
+        },
+        "allColorSchemes": Array [
+          Object {
+            "backgroundAlpha": 0.25,
+            "backgroundColorsLightTheme": Object {
+              "": "",
+            },
+            "className": "mock-aa-class",
+            "colors": Object {
+              "": "",
+            },
+            "commonName": "Default",
+            "defaultLetterColor": "#ffffff",
+            "description": "mock-aa-style-desc",
+            "letterColorsDarkTheme": Object {
+              "": "",
+            },
+          },
+        ],
+        "colorScheme": Object {
+          "backgroundAlpha": 0.25,
+          "backgroundColorsLightTheme": Object {
+            "": "",
+          },
+          "className": "mock-aa-class",
+          "colors": Object {
+            "": "",
+          },
+          "commonName": "Default",
+          "defaultLetterColor": "#ffffff",
+          "description": "mock-aa-style-desc",
+          "letterColorsDarkTheme": Object {
+            "": "",
+          },
+        },
+        "positionsToStyle": PositionsToStyle {
+          "className": undefined,
+          "description": "All",
+          "key": "all",
+        },
+        "residueDetail": ResidueStyle {
+          "className": undefined,
+          "description": "Light",
+          "key": "light",
+        },
+      }
+    }
+    sortBy={
+      SequenceSorter {
+        "description": "As input",
+        "isQuerySequenceDependent": false,
+        "key": "as-input",
+        "sortFn": [Function],
+        "targetAlignmentType": "both",
+      }
+    }
+  />
+</ContextProvider>
+`;

@@ -1,8 +1,8 @@
 import { stringToColor } from "../Utils";
 
 const defaultColor = {
-  hex: "#000000",
-  rgb: { red: 0, green: 0, blue: 0 }
+  hexString: "#000000",
+  rgb: { red: 0, green: 0, blue: 0 },
 };
 
 describe("Utilities", () => {
@@ -12,8 +12,8 @@ describe("Utilities", () => {
     });
     it("Should convert hex shorthand with a hash.", () => {
       const expected = {
-        hex: "#ffffff",
-        rgb: { red: 255, green: 255, blue: 255 }
+        hexString: "#ffffff",
+        rgb: { red: 255, green: 255, blue: 255 },
       };
       expect(stringToColor("#fff")).toEqual(expected);
     });
@@ -22,15 +22,15 @@ describe("Utilities", () => {
     });
     it("Should convert hex with a hash.", () => {
       const expected = {
-        hex: "#ff00ff",
-        rgb: { red: 255, green: 0, blue: 255 }
+        hexString: "#ff00ff",
+        rgb: { red: 255, green: 0, blue: 255 },
       };
       expect(stringToColor("#ff00ff")).toEqual(expected);
     });
     it("Should convert color name.", () => {
       const expected = {
-        hex: "#008000",
-        rgb: { red: 0, green: 128, blue: 0 }
+        hexString: "#008000",
+        rgb: { red: 0, green: 128, blue: 0 },
       };
       expect(stringToColor("green")).toEqual(expected);
     });

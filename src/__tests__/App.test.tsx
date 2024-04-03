@@ -15,16 +15,22 @@ import { default as App } from "../App";
 // https://github.com/facebook/jest/issues/3094
 jest.mock("../MolecularStyles.module.scss", () => {
   return {
-    aaStyBGAlpha_Default: "",
-    aaStyClass_Default: "",
+    aaStyBackgroundAlpha_Default: 0.25,
+    aaStyDefaultLetterColor_Default: "#ffffff",
+    aaStyClass_Default: "mock-aa-class",
     aaStyColorOrder_Default: "",
     aaStyColors_Default: "",
-    aaStyDesc_Default: "",
-    ntStyBGAlpha_Default: "",
-    ntStyClass_Default: "",
+    aaStyBackgroundColorsLightTheme_Default: "",
+    aaStyLetterColorsDarkTheme_Default: "",
+    aaStyDesc_Default: "mock-aa-style-desc",
+    ntStyBackgroundAlpha_Default: 0.25,
+    ntStyDefaultLetterColor_Default: "#ffffff",
+    ntStyClass_Default: "mock-nt-class",
     ntStyColorOrder_Default: "",
     ntStyColors_Default: "",
-    ntStyDesc_Default: ""
+    ntStyBackgroundColorsLightTheme_Default: "",
+    ntStyLetterColorsDarkTheme_Default: "",
+    ntStyDesc_Default: "mock-nt-style-desc",
   };
 });
 
@@ -39,7 +45,7 @@ describe("App", () => {
   it("Should render within 2 minutes.", async () => {
     const wrapper = shallow(<App />);
     wrapper.update();
-    await new Promise(resolve => setImmediate(resolve));
+    await new Promise((resolve) => setImmediate(resolve));
     expect(wrapper).toMatchSnapshot();
   }, 120000);
 });

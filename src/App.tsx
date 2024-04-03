@@ -1,851 +1,404 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import "./App.scss";
-import { Alignment } from "./common/Alignment";
-import { SequenceSorter } from "./common/AlignmentSorter";
-import { getURLParameters } from "./common/Utils";
-import { AlignmentViewer, IBarplotExposedProps } from "./components/AlignmentViewerComponent";
-import {
-  AminoAcidAlignmentStyle,
-  NucleotideAlignmentStyle,
-  AlignmentStyle,
-  AlignmentTypes,
-  PositionsToStyle,
-  IColorScheme,
-  ResidueColoring,
-  ALL_AMINOACID_COLORSCHEMES,
-  ALL_NUCLEOTIDE_COLORSCHEMES,
-} from "./common/MolecularStyles";
-import { LOGO_TYPES } from "./components/SequenceLogoComponent";
-import { AlignmentFileLoaderComponent } from "./components/AlignmentFileLoaderComponent";
-import { ISequenceBarplotDataSeries, SequenceBarplotComponent } from "./components/SequenceBarplotComponent";
-import { AlignmentLoader, AlignmentLoadError } from "./common/AlignmentLoader";
+import { downloadFullViewportSVG } from "./common/FileExporter"
+import { 
+  AlignmentViewer, 
+  IBarplotExposedProps
+} from "./components/AlignmentViewerHook";
+import { shallowEqual } from "react-redux";
+import useAV2Settings from "./components/settings/Settings";
 
-interface AppProps {}
-interface AppState {
-  alignment?: Alignment;
-  style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle; //alignment type and color scheme
-  residueColoring: ResidueColoring;
-  positionsToStyle: PositionsToStyle;
-  sortBy: SequenceSorter;
-  logoPlotStyle: LOGO_TYPES;
-  zoomLevel: number;
-  showMiniMap: boolean;
-  showConservationBarplot: boolean;
-  showEntropyGapBarplot: boolean;
-  showKLDivergenceBarplot: boolean;
-  showAnnotations: boolean;
-  showSettings: boolean;
-  loading?: boolean;
-  loadError?: AlignmentLoadError;
-}
+export default function App(){
+  const triggerShowSearch = React.useRef<() => void | undefined>();
 
-
-//inspired by https://pierrehedkvist.com/posts/react-state-url
-class UrlLocalstorageInputManager<T>{
-  protected initialValue: T;
-  protected onChange: (newValue: T) => void;
-
-  static LOCAL_STORAGE_KEY = "UI_OPTIONS_CACHE";
-  static initializeAllInputs = () => {
-    const urlSearchParams = new URLSearchParams( window.location.search )
-    const finalParams = new URLSearchParams( 
-      localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY) ? 
-      localStorage.getItem(UrlLocalstorageInputManager.LOCAL_STORAGE_KEY)! : 
-      undefined
-    )
-
-    //overwrite or add url parameters to local storage parameters 
-    for (const [key, value] of urlSearchParams) {
-      finalParams.set(key, value);
+  //local state
+  const [state, setState] = useState({
+    showSettings: true,
+    mainViewportVisibleIdxs: undefined as undefined | {
+      seqIdxStart: number, seqIdxEnd: number,
+      posIdxStart: number, posIdxEnd: number
     }
-    UrlLocalstorageInputManager.writeParamsToUrlAndLocalstorage(finalParams);
-  }
+  });
 
-  static writeParamsToUrlAndLocalstorage = (params: URLSearchParams) => {
-    //write the complete parameter list to both the url and local storage
-    window.history.replaceState(null, "", "?"+params.toString());
-    params.delete("alignment-url")
-    localStorage.setItem(
-      UrlLocalstorageInputManager.LOCAL_STORAGE_KEY, 
-      params.toString()
-    );
-  }
+  const {
+    showSettings,
+  } = state;
 
-  constructor(
-    defaultValue: T,
-    paramName: string,
-    serialize: (state: T) => string,
-    deserialize: (state: string) => T
-  ) {
-    function loadValue(searchStr: string | null, db: "URL" | "Local Storage"){
-      const val = new URLSearchParams( searchStr ? searchStr : undefined ).get(paramName);
-      if (val){ return deserialize(val); }
-    }
-
-    const localstorageStr = localStorage.getItem(
-      UrlLocalstorageInputManager.LOCAL_STORAGE_KEY
-    );
-
-    //default initial value priority: url -> local storage -> default
-    this.initialValue = loadValue(window.location.search, "URL") !== undefined ? 
-                        loadValue(window.location.search, "URL")! :
-                        loadValue(localstorageStr, "Local Storage") !== undefined ?
-                        loadValue(localstorageStr, "Local Storage")! :
-                        defaultValue;
-
-    this.onChange = (newValue: T) => {
-      const searchParams = new URLSearchParams( window.location.search )
-      if (serialize(newValue) === serialize(defaultValue)){ 
-        searchParams.delete(paramName) 
-      }
-      else {
-        searchParams.set(paramName, serialize(newValue));
-      }
-      UrlLocalstorageInputManager.writeParamsToUrlAndLocalstorage(searchParams);
-    };
-  }
-}
-class UrlLocalstorageBooleanInputManager extends UrlLocalstorageInputManager<boolean>{
-  constructor(defaultValue: boolean, paramName: string){
-    super(
-      defaultValue, paramName, 
-      (b) => {return b ? 'true': 'false'},
-      (s) => {return s.toUpperCase() === 'TRUE' ? true: false}
-    );
-  }
-}
-class UrlLocalstorageNumberInputManager extends UrlLocalstorageInputManager<number>{
-  constructor(defaultValue: number, paramName: string){
-    super(
-      defaultValue, paramName, 
-      (n) => {return n.toString();},
-      (s) => {return !isNaN(+s) ? +s : defaultValue}
-    );
-  }
-}
-
-export default class App extends React.Component<AppProps, AppState> {
-  private url_cookie_inputs;
-  
-  constructor(props: AppProps) {
-    super(props);
-    this.state = {
-      style: new AminoAcidAlignmentStyle(),
-      residueColoring: ResidueColoring.LIGHT,
-      positionsToStyle: PositionsToStyle.ALL,
-      logoPlotStyle: LOGO_TYPES.LETTERS, //TODO - decide NT or AA based on alignment
-      zoomLevel: 12,
-      sortBy: SequenceSorter.INPUT,
-      showMiniMap: true,
-      showConservationBarplot: true,
-      showEntropyGapBarplot: true,
-      showKLDivergenceBarplot: false,
-      showAnnotations: true,
-      showSettings: true,
-    };
-
-    //write defaults for all UI parameters
-    UrlLocalstorageInputManager.initializeAllInputs()
-    this.url_cookie_inputs = {
-      ALIGNMENT_STYLE: new UrlLocalstorageInputManager<AlignmentStyle>(
-        new AminoAcidAlignmentStyle(), 'alignment-style',
-        (as: AlignmentStyle) => {return as.alignmentType.key + '.' + as.colorScheme.commonName},
-        (str: string) => {
-          const split = str.split('.');
-          const at = AlignmentTypes.fromKey(split[0]) ? 
-                     AlignmentTypes.fromKey(split[0]) :
-                     AlignmentTypes.AMINOACID;
-                     
-          var colorScheme = AlignmentTypes.AMINOACID ? 
-                            ALL_AMINOACID_COLORSCHEMES[0] : 
-                            ALL_NUCLEOTIDE_COLORSCHEMES[0];
-          if (split.length > 1){
-            const commonName = split[1];
-            colorScheme = at === AlignmentTypes.AMINOACID ? 
-              ALL_AMINOACID_COLORSCHEMES.reduce( (acc: IColorScheme | undefined, colorscheme) => {
-                if (colorscheme.commonName === commonName){  return colorscheme; }
-                return acc;
-              }, ALL_AMINOACID_COLORSCHEMES[0] )! :
-              ALL_NUCLEOTIDE_COLORSCHEMES.reduce( (acc: IColorScheme | undefined, colorscheme) => {
-                if (colorscheme.commonName === commonName){  return colorscheme; }
-                return acc;
-              }, ALL_NUCLEOTIDE_COLORSCHEMES[0] )!
-          }
-          return at === AlignmentTypes.AMINOACID ? 
-            new AminoAcidAlignmentStyle(colorScheme) : 
-            new NucleotideAlignmentStyle(colorScheme)
-        },
-      ),
-
-      POSITIONS_TO_STYLE: new UrlLocalstorageInputManager<PositionsToStyle>(
-        PositionsToStyle.ALL, 'positions-to-style', 
-        (pts: PositionsToStyle) => {return pts.key},
-        (key: string) => {
-          return PositionsToStyle.fromKey(key) ? PositionsToStyle.fromKey(key)! : PositionsToStyle.ALL;
-        },
-      ),
-
-      RESIDUE_COLORING: new UrlLocalstorageInputManager<ResidueColoring>(
-        ResidueColoring.LIGHT, 'residue-coloring', 
-        (rs: ResidueColoring) => {return rs.key},
-        (key: string) => {
-          return ResidueColoring.fromKey(key) ? ResidueColoring.fromKey(key)! : ResidueColoring.LIGHT;
-        },
-      ),
-
-      SORT_BY: new UrlLocalstorageInputManager<SequenceSorter>(
-        SequenceSorter.INPUT, 'sort-by',
-        (s: SequenceSorter) => {return s.key},
-        (key: string) => {
-          return SequenceSorter.fromKey(key) ? SequenceSorter.fromKey(key)! : SequenceSorter.INPUT;
-        },
-      ),
-
-      LOGO_STYLE: new UrlLocalstorageInputManager<LOGO_TYPES>(
-        LOGO_TYPES.LETTERS, 'logo-style',
-        (s: LOGO_TYPES) => {return s == LOGO_TYPES.LETTERS ? 'letters' : 'bars'},
-        (key: string) => {
-          return key === 'letters' ? LOGO_TYPES.LETTERS : LOGO_TYPES.BARS;
-        },
-      ),
-      
-      MINIMAP: new UrlLocalstorageBooleanInputManager(true, 'minimap'),
-      CONSERVATION_BARPLOT: new UrlLocalstorageBooleanInputManager(true, 'conservation-barplot'),
-      ENTROPY_BARPLOT: new UrlLocalstorageBooleanInputManager(true, 'entropy-barplot'),
-      KLDIVERGENCE_BARPLOT: new UrlLocalstorageBooleanInputManager(false, 'kl-divergence-barplot'),
-      ANNOTATIONS: new UrlLocalstorageBooleanInputManager(true, 'annotations'),
-
-      ZOOM_LEVEL: new UrlLocalstorageNumberInputManager(12, 'zoom-level'),
-    }
-
-    this.onAlignmentReceived = this.onAlignmentReceived.bind(this);
-    this.onAlignmentLoadError = this.onAlignmentLoadError.bind(this);
-  }
-
-  componentDidMount() {
-    const params = getURLParameters();
-
-    //is there an alignment in the URL?
-    const alignment_url_name = 'alignment-url'
-    if (params.has(alignment_url_name) && 
-        typeof params.get(alignment_url_name) === 'string') {
-      this.setState({
-        loading: true,
-      });
-
-      AlignmentLoader.loadAlignmentFromURL(
-        params.get(alignment_url_name) as string,
-        this.onAlignmentReceived,
-        this.onAlignmentLoadError
-      );
-    }
-
-    this.setState({
-      alignment: undefined,
-      style: this.url_cookie_inputs.ALIGNMENT_STYLE.initialValue,
-      positionsToStyle: this.url_cookie_inputs.POSITIONS_TO_STYLE.initialValue,
-      residueColoring: this.url_cookie_inputs.RESIDUE_COLORING.initialValue,
-      logoPlotStyle: this.url_cookie_inputs.LOGO_STYLE.initialValue,
-      sortBy: this.url_cookie_inputs.SORT_BY.initialValue,
-      
-      showMiniMap: this.url_cookie_inputs.MINIMAP.initialValue,
-      showConservationBarplot: this.url_cookie_inputs.CONSERVATION_BARPLOT.initialValue,
-      showEntropyGapBarplot: this.url_cookie_inputs.ENTROPY_BARPLOT.initialValue,
-      showKLDivergenceBarplot: this.url_cookie_inputs.KLDIVERGENCE_BARPLOT.initialValue,
-      showAnnotations: this.url_cookie_inputs.ANNOTATIONS.initialValue,
-      zoomLevel: this.url_cookie_inputs.ZOOM_LEVEL.initialValue,
-
-      showSettings: true,
+  const hideSettingsFn = useCallback(()=>{
+    setState({
+      ...state,
+      showSettings: false
     });
-  }
+  }, [
+    state
+  ]);
 
-  render() {
-    const {
-      alignment,
-      positionsToStyle,
-      residueColoring,
-      logoPlotStyle,
-      showAnnotations,
-      showConservationBarplot,
-      showEntropyGapBarplot,
-      showKLDivergenceBarplot,
-      showMiniMap,
-      sortBy,
-      style,
-      zoomLevel,
-    } = this.state;
+  const settings = useAV2Settings({
+    requestSettingsClose: hideSettingsFn,
+    useUrlAndLocalstorage: true
+  });
 
-    const barplots: IBarplotExposedProps[] = [];
-    if (showConservationBarplot) {
-      barplots.push({
-        dataSeriesSet: [SequenceBarplotComponent.CONSERVATION_BARPLOT],
-        height: "75px",
-      });
-    }
-    if (showEntropyGapBarplot) {
-      barplots.push({
-        dataSeriesSet: [
-          SequenceBarplotComponent.SHANNON_ENTROPY_BARPLOT,
-          SequenceBarplotComponent.GAPS_BARPLOT,
-        ],
-        height: "75px",
-      });
-    }
-    if (showKLDivergenceBarplot) {
-      barplots.push({
-        dataSeriesSet: [
-          SequenceBarplotComponent.KULLBAC_LEIBLER_DIVERGENCE_BARPLOT,
-        ],
-        height: "75px",
-      });
-    }
+  const {
+    alignment,
+    alignmentLoading,
+    ntColorScheme,
+    aaColorScheme,
+    alignmentType,
+    showLogo,
+    logoType,
+    positionsToStyle,
+    residueColoring,
+    showAnnotations,
+    showMinimap,
+    sortBy,
+    zoomLevel,
+    barplots
+  } = settings.currentlySelectedProperties;
 
-    const alignmentElement = !alignment ? (
-      <></>
+  //const colorScheme = alignmentType === AlignmentTypes.AMINOACID
+  //  ? aaColorScheme : ntColorScheme;
+
+  //
+  // settings box and main app rendering
+  //
+  const logoSvgId = alignment ? `logo-${alignment.getUUID()}` : "logoplot";
+
+  const barplotsProps: IBarplotExposedProps[] = useMemo(()=>{
+    return !alignment ? [] : barplots.map((bp)=>{
+      return {
+        svgId: `${bp.key}-barplot-${alignment?.getUUID()}`,
+        dataSeriesSet: [bp],
+        heightPx: 75
+      }
+    });
+  }, [
+    alignment,
+    barplots
+  ]);
+
+  const renderedAlignment = useMemo(()=>{
+    return !alignment 
+      ? undefined 
+      : (
+        <div className="app-content">
+          <AlignmentViewer
+            alignment={alignment}
+            alignmentType={alignmentType}
+            aaColorScheme={aaColorScheme}
+            ntColorScheme={ntColorScheme}
+            residueColoring={residueColoring}
+            positionsToStyle={positionsToStyle}
+            triggerShowSearch={triggerShowSearch}
+            mainViewportVisibleChanged={(newIdxs)=>{
+              if(!shallowEqual(state.mainViewportVisibleIdxs, newIdxs)){
+                setState({
+                  ...state,
+                  mainViewportVisibleIdxs: newIdxs
+                })
+              }
+            }}
+            zoomLevel={zoomLevel}
+            sortBy={sortBy}
+            disableSearch={false}
+            disableSearchKeyboardShortcut={false}
+            showQuery={true}
+            showConsensus={true}
+            showMinimap={showMinimap}
+            showAnnotations={showAnnotations}
+            showLogo={showLogo}
+            logoOptions={{
+              svgId: logoSvgId,
+              logoType: logoType
+            }}
+            barplots={barplotsProps}
+          ></AlignmentViewer>
+        </div>
+      )
+  }, [
+    alignment,
+    barplotsProps,
+    logoType,
+    positionsToStyle,
+    residueColoring,
+    logoSvgId,
+    showMinimap,
+    showAnnotations,
+    showLogo,
+    sortBy,
+    state,
+    aaColorScheme,
+    ntColorScheme,
+    alignmentType,
+    zoomLevel
+  ]);
+
+  //
+  // the full settings box
+  //
+  const renderedSettingsBox = useMemo(()=>{
+
+    const alignmentDescription = alignment ? (
+      <>
+        <h3><strong>Alignment:</strong> {alignment.getName()}</h3>
+        <h4>
+          {`${alignment.getSequenceCount()} sequences (rows) and ${alignment.getSequenceLength()} positions (columns)`}
+          {alignment.getNumberRemovedDuplicateSequences() > 0 ||
+           alignment.getNumberDuplicateSequencesInAlignment() > 0 ? (
+             <span className="duplicates-removed">
+               {alignment.getNumberRemovedDuplicateSequences() > 0
+                 ? `${"\u2605"} ${alignment.getNumberRemovedDuplicateSequences()} duplicate sequences removed`
+                 : `${"\u2605"} contains ${alignment.getNumberDuplicateSequencesInAlignment()} duplicate sequences`}
+             </span>
+           ) : null}
+        </h4>
+      </>
     ) : (
-      <div className="app-content">
-        <AlignmentViewer
-          alignment={alignment}
-          style={style}
-          positionsToStyle={positionsToStyle}
-          residueColoring={residueColoring}
-          zoomLevel={zoomLevel}
-          sortBy={sortBy}
-          showMinimap={showMiniMap}
-          showAnnotations={showAnnotations}
-          logoOptions={{
-            logoType: logoPlotStyle,
-            height: "80px",
-          }}
-          minimapOptions={{
-            startingWidth: 120,
-            verticalHeight: "div",
-            alignHorizontal: "right",
-            resizable: "horizontal",
-          }}
-          barplots={barplots}
-        ></AlignmentViewer>
-      </div>
+      <></>
     );
 
+    //
+    // settings
+    //
     return (
       <>
-        {this.renderSettingsBox(style)}
-        {alignmentElement}
+        {settings.dropZoneElement}
+        <div style={{display: alignment && !showSettings ? "none" : undefined}}>
+          {settings.element}
+        </div>
+
+        <div className="app-header">
+          <div className="settings-box">
+            <form>
+              <div className="settings-header">
+                <h2>{`AlignmentViewer 2.0`}</h2>
+
+                <div className="settings-alignment-description">
+                  {alignmentDescription}
+                </div>
+
+                <a
+                  className="github-link"
+                  href="https://github.com/sanderlab/AlignmentViewer2.0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Github Repository"
+                >
+                  <img
+                    alt="Alignment Viewer 2.0 GitHub Repo"
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/github-mark.svg`}
+                  /> 
+                </a>
+    
+                <button
+                  className={`download button-link${!alignment ? " hide" : ""}`}
+                  type="button"
+                  title="Download Full Viewport"
+                  onClick={()=>{
+                    if (alignment){
+                      downloadFullViewportSVG({
+                        alignment: alignment,
+                        sortBy: sortBy,
+                        alignmentType: alignmentType, 
+                        aaColorScheme: aaColorScheme,
+                        ntColorScheme: ntColorScheme,
+                        positionsToStyle: positionsToStyle, 
+                        residueColoring: residueColoring, 
+                        logoSvgId: logoSvgId,
+                        barplots: barplotsProps.map(bp => {
+                          return {
+                            svgId: bp.svgId, 
+                            title: bp.dataSeriesSet.map(ds=>ds.description).join("/")
+                          };
+                        }),
+                        includePositionAxis: true,
+                        includeMetadata: true,
+                        startSeqIdx: state.mainViewportVisibleIdxs?.seqIdxStart, 
+                        endSeqIdx: state.mainViewportVisibleIdxs?.seqIdxEnd,
+                      });
+
+                      //downloadLogoSVG({
+                      //  svgId: logoSvgId,
+                      //  alignment: alignment,
+                      //  alignmentType: style.alignmentType,
+                      //  colorScheme: style.selectedColorScheme,
+                      //  positionsToStyle: positionsToStyle,
+                      //  positionalAxis: {
+                      //    numPos: alignment.getSequenceLength(),
+                      //    posHeight: 10, posWidth: 7,
+                      //    spaceBtwBarplotAndPositionalAxis: 5
+                      //  }
+                      //})
+
+                      //downloadBarplotSVG({
+                      //  alignment: alignment,
+                      //  svgId: barplots[0].svgId,
+                      //  positionalAxis: {
+                      //    numPos: alignment.getSequenceLength(),
+                      //    posHeight: 10, posWidth: 7,
+                      //    spaceBtwBarplotAndPositionalAxis: 5
+                      //  }
+                      //})
+                    }
+                  }}
+                >
+                  <img
+                    alt="Download Alignment" 
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/download.svg`}
+                  />
+                </button>
+                
+                <button
+                  id="search-button"
+                  className="search-button button-link"
+                  type="button"
+                  title="Show Search"
+                  onClick={() => {
+                    if(triggerShowSearch.current) triggerShowSearch.current();
+                  }}
+                >
+                  <img
+                    alt="Show Search"
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/search.svg`}
+                  />
+                </button>
+
+                <button
+                  id="settings-toggle-button"
+                  className="button-link settings-toggle"
+                  type="button"
+                  style={{ paddingRight: 0 }}
+                  title={showSettings ? "Hide Settings" : "Show Settings"}
+                  onClick={()=>{
+                    setState({
+                      ...state,
+                      showSettings: !showSettings,
+                    });
+                  }}
+                >
+                  <img
+                    alt="Show Settings Box"
+                    width="16"
+                    height="16"
+                    src={`${process.env.PUBLIC_URL}/settings.svg`}
+                  />
+                </button>
+              </div> 
+            </form>
+          </div>
+        </div>
       </>
     );
-  }
+  }, [
+    alignment,
+    alignmentType,
+    barplotsProps,
+    aaColorScheme,
+    ntColorScheme,
+    positionsToStyle, 
+    residueColoring,
+    logoSvgId,
+    showSettings,
+    settings.dropZoneElement,
+    settings.element,
+    sortBy,
+    state,
+  ]);
+  
+  return (
+    <>
+      { renderedSettingsBox }
+      <div className={`fullscreen-loading-indicator ${alignmentLoading ? "" : "hidden"}`}>
+        <div className="loader" />
 
-  protected renderSettingsBox = (
-    style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
-  ) => {
-    const { alignment, loading, loadError, showSettings } = this.state;
-    const alignmentDescription = alignment ? (
-      <div>
-        <h3>{alignment.getName()}</h3>
-        <h4>{`${
-          alignment.getSequences().length
-        } sequences (rows) and ${alignment.getMaxSequenceLength()} positions (columns) `}</h4>
+        {
+          //spinners from https://github.com/n3r4zzurr0/svg-spinners
+        }
+        {
+          //<svg xmlns="http://www.w3.org/2000/svg" style={{margin: "auto", background: "#fff", display: "block"}} width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+          //  <g transform="translate(20 20)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#e15b64">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.4s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(50 20)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f47e60">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.3s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(80 20)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f8b26a">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.2s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(20 50)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f47e60">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.3s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(50 50)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f8b26a">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.2s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(80 50)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#abbd81">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.1s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(20 80)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#f8b26a">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.2s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(50 80)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#abbd81">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="-0.1s"></animateTransform>
+          //    </rect></g>
+          //  <g transform="translate(80 80)">
+          //    <rect x="-15" y="-15" width="30" height="30" fill="#849b87">
+          //      <animateTransform attributeName="transform" type="scale" repeatCount="indefinite" calcMode="spline" dur="1s" values="1;1;0.2;1;1" keyTimes="0;0.2;0.5;0.8;1" keySplines="0.5 0.5 0.5 0.5;0 0.1 0.9 1;0.1 0 1 0.9;0.5 0.5 0.5 0.5" begin="0s"></animateTransform>
+          //    </rect></g>
+          //  </svg>
+        }
+        {
+          //<div className="spinner1">
+          //<div className="circleHolder">
+          //  <div className="circle1 spinner_b2T7z"/>
+          //</div>
+          //<div className="circleHolder">
+          //  <div className="circle2 spinner_b2T7z spinner_YRVVz"/>
+          //</div>
+          //<div className="circleHolder">
+          //  <div className="circle3 spinner_b2T7z spinner_c9oYz"/>
+          //</div>
+          //</div>
+        }
+        {
+          //<svg width="96" height="96" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          //  <circle className="spinner_b2T7" cx="4" cy="12" r="3"/>
+          //  <circle className="spinner_b2T7 spinner_YRVV" cx="12" cy="12" r="3"/>
+          //  <circle className="spinner_b2T7 spinner_c9oY" cx="20" cy="12" r="3"/>
+          //</svg>
+        }
+        {
+          //<svg 
+          //  width="96" 
+          //  height="96" 
+          //  viewBox="0 0 24 24"
+          //  xmlns="http://www.w3.org/2000/svg">
+          //  <rect className="spinner_zWVm" x="1" y="1" width="7.33" height="7.33"/>
+          //  <rect className="spinner_gfyD" x="8.33" y="1" width="7.33" height="7.33"/>
+          //  <rect className="spinner_T5JJ" x="1" y="8.33" width="7.33" height="7.33"/>
+          //  <rect className="spinner_E3Wz" x="15.66" y="1" width="7.33" height="7.33"/>
+          //  <rect className="spinner_g2vs" x="8.33" y="8.33" width="7.33" height="7.33"/>
+          //  <rect className="spinner_ctYB" x="1" y="15.66" width="7.33" height="7.33"/>
+          //  <rect className="spinner_BDNj" x="15.66" y="8.33" width="7.33" height="7.33"/>
+          //  <rect className="spinner_rCw3" x="8.33" y="15.66" width="7.33" height="7.33"/>
+          //  <rect className="spinner_Rszm" x="15.66" y="15.66" width="7.33" height="7.33"/>
+          //</svg>
+        }
       </div>
-    ) : (
-      <></>
-    );
-
-    return (
-      <div className="app-header">
-        <div className="settings-box">
-          <form>
-            <div className="settings-header">
-              <h2>{`AlignmentViewer 2.0`}</h2>
-              <a
-                className="github-link"
-                href="https://github.com/sanderlab/AlignmentViewer2.0"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  alt="Alignment Viewer 2.0 GitHub Repo"
-                  width="16"
-                  height="16"
-                  src={`${process.env.PUBLIC_URL}/GitHub-Mark-32px.png`}
-                />
-              </a>
-
-              <button
-                className={`button-link${showSettings ? " hide" : ""}`}
-                type="button"
-                style={{ padding: 0, margin: 0, border: "none" }}
-                onClick={(e) => {
-                  this.setState({
-                    showSettings: true,
-                  });
-                }}
-              >
-                <img
-                  alt="Show Settings Box"
-                  width="16"
-                  height="16"
-                  src={`${process.env.PUBLIC_URL}/settings_32px.png`}
-                />
-              </button>
-              <button
-                className={`button-link${showSettings ? "" : " hide"}`}
-                type="button"
-                style={{ padding: 0, margin: 0, border: "none" }}
-                onClick={(e) => {
-                  this.setState({
-                    showSettings: false,
-                  });
-                }}
-              >
-                <img
-                  alt="Hide Settings Box"
-                  width="16px"
-                  height="16px"
-                  src={`${process.env.PUBLIC_URL}/hide_contract_icon_32px.png`}
-                />
-              </button>
-            </div>
-
-            <div className="settings-alignment-description">
-              {alignmentDescription}
-            </div>
-            <div
-              className="settings-parameters"
-              style={{
-                display: showSettings ? "block" : "none",
-              }}
-            >
-              {this.renderAlignmentTypeLabel(style)}
-              {this.renderColorScheme(style)}
-              {this.renderPositionStyling()}
-              {this.renderResidueColoring()}
-              {this.renderSequenceLogo()}
-              {this.renderSortControl()}
-              {this.renderZoomButtons()}
-              {this.renderMiniMapToggle()}
-              {this.renderConservationBarplotToggle()}
-              {this.renderEntropyGapBarplotToggle()}
-              {this.renderKLDivergenceBarplot()}
-              {this.renderAnnotationToggle()}
-              <br></br>
-              {this.renderFileUpload()}
-              {!loading ? null : <div className="loader" />}
-              {!loadError ? null : (
-                <div className={`load-error`}>
-                  <h3>
-                    <strong>{loadError.message}</strong>
-                  </h3>
-                  <ul>
-                    {loadError.errors.map((e) => {
-                      return (
-                        <li key={e.name}>
-                          <strong>{e.name}:</strong> {e.message}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  {!loadError.possibleResolution ? null : (
-                    <div>{loadError.possibleResolution}</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  };
-
-  protected renderSortControl = () => {
-    const { sortBy, style } = this.state;
-    const sorters =
-      style instanceof AminoAcidAlignmentStyle
-        ? SequenceSorter.aminoAcidSorters
-        : SequenceSorter.nucleotideSorters;
-
-    return (
-      <div>
-        <label>
-          <strong>Sort Order:</strong>
-          <select
-            value={sortBy.key}
-            onChange={(e) =>{
-              const sb = SequenceSorter.fromKey(e.target.value)!;
-              this.setState({
-                sortBy: sb,
-              })
-              this.url_cookie_inputs.SORT_BY.onChange(sb);
-            }}
-          >
-            {sorters.map((sso) => {
-              return (
-                <option value={sso.key} key={sso.key}>
-                  {sso.description}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-      </div>
-    );
-  };
-  protected renderAlignmentTypeLabel = (
-    style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
-  ) => {
-    return (
-      <div>
-        <label>
-          <strong>Alignment Type:</strong>
-          <select
-            value={style.alignmentType.key}
-            onChange={(e) => {
-                const newAlignmentStyle = AlignmentStyle.fromAlignmentType(
-                  AlignmentTypes.fromKey(e.target.value)!
-                )
-                this.setState({
-                  style: newAlignmentStyle,
-                });
-                this.url_cookie_inputs.ALIGNMENT_STYLE.onChange(newAlignmentStyle);
-              } 
-            }
-          >
-            {AlignmentTypes.list.map((alignmentType) => {
-              return (
-                <option value={alignmentType.key} key={alignmentType.key}>
-                  {alignmentType.description}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-      </div>
-    );
-  };
-  protected renderColorScheme = (
-    style: AminoAcidAlignmentStyle | NucleotideAlignmentStyle
-  ) => {
-    return (
-      <div>
-        <label>
-          <strong>Color Scheme:</strong>
-          <select
-            value={style.alignmentType.allColorSchemes.indexOf(
-              style.colorScheme
-            )}
-            onChange={(e) => {
-              const newStyle = {
-                ...style!, 
-                colorScheme: style.alignmentType.allColorSchemes[
-                  parseInt(e.target.value)
-                ],
-              }
-              this.setState({
-                style: newStyle,
-              });
-              this.url_cookie_inputs.ALIGNMENT_STYLE.onChange(newStyle);
-            }}
-          >
-            {style.alignmentType.allColorSchemes.map(
-              (colorScheme: IColorScheme, index: number) => {
-                return (
-                  <option key={index} value={index}>
-                    {colorScheme.description}
-                  </option>
-                );
-              }
-            )}
-          </select>
-        </label>
-      </div>
-    );
-  };
-  protected renderResidueColoring = () => {
-    const { residueColoring } = this.state;
-    return (
-      <div>
-        <label>
-          <strong>Residue Coloring:</strong>
-          <select
-            value={residueColoring.key}
-            onChange={(e) => {
-              const rc = ResidueColoring.fromKey(e.target.value)!
-              this.setState({
-                residueColoring: rc,
-              });
-              this.url_cookie_inputs.RESIDUE_COLORING.onChange(rc);
-            }}
-          >
-            {ResidueColoring.list.map((rd) => {
-              return (
-                <option key={rd.key} value={rd.key}>
-                  {rd.description}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-      </div>
-    );
-  };
-  protected renderPositionStyling = () => {
-    const { positionsToStyle } = this.state;
-    return (
-      <div>
-        <label>
-          <strong>Positions to Style:</strong>
-          <select
-            value={PositionsToStyle.list.indexOf(positionsToStyle)}
-            onChange={(e) => {
-              const pts = PositionsToStyle.list[parseInt(e.target.value)];
-              this.setState({
-                positionsToStyle: pts
-              });
-              this.url_cookie_inputs.POSITIONS_TO_STYLE.onChange(pts);
-            }}
-          >
-            {PositionsToStyle.list.map(
-              (pts: PositionsToStyle, index: number) => {
-                return (
-                  <option key={index} value={index}>
-                    {pts.description}
-                  </option>
-                );
-              }
-            )}
-          </select>
-        </label>
-      </div>
-    );
-  };
-  protected renderSequenceLogo = () => {
-    const { logoPlotStyle } = this.state;
-    return (
-      <div>
-        <label>
-          <strong>Sequence Logo Style:</strong>
-          <select
-            value={logoPlotStyle}
-            onChange={(e) => {
-              const ls = e.target.value as LOGO_TYPES
-              this.setState({
-                logoPlotStyle: ls,
-              });
-              this.url_cookie_inputs.LOGO_STYLE.onChange(ls);
-            }}
-          >
-            {Object.values(LOGO_TYPES).map((logoType) => {
-              return (
-                <option key={logoType} value={logoType}>
-                  {logoType}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-      </div>
-    );
-  };
-  protected renderZoomButtons = () => {
-    const { zoomLevel } = this.state;
-    return (
-      <div>
-        <label>
-          <strong>Zoom Level:</strong>
-          <div className="zoom-level">
-            <button
-              type="button"
-              disabled={zoomLevel < 7}
-              onClick={(e) => {
-                const zl = zoomLevel - 1;
-                this.setState({
-                  zoomLevel: zl,
-                });
-                this.url_cookie_inputs.ZOOM_LEVEL.onChange(zl);
-              }}
-            >
-              -
-            </button>
-            {zoomLevel}
-            <button
-              type="button"
-              disabled={zoomLevel > 15}
-              onClick={(e) => {
-                const zl = zoomLevel + 1;
-                this.setState({
-                  zoomLevel: zl,
-                });
-                this.url_cookie_inputs.ZOOM_LEVEL.onChange(zl);
-              }}
-            >
-              +
-            </button>
-          </div>
-        </label>
-      </div>
-    );
-  };
-
-  protected renderFileUpload = () => {
-    return (
-      <div>
-        <AlignmentFileLoaderComponent
-          fileSelectorLabelText={"Upload Alignment File:"}
-          exampleFiles={[
-            {
-              labelText: "β-lactamase",
-              fileURL:
-                process.env.PUBLIC_URL +
-                "/7fa1c5691376beab198788a726917d48_b0.4.a2m",
-              fileName: "7fa1c5691376beab198788a726917d48_b0.4.a2m",
-            },
-            {
-              labelText: "SARS-CoV-2 Spike",
-              fileURL: process.env.PUBLIC_URL + "/Spike_Full_f05_m05_t08.a2m",
-              fileName: "Spike_Full_f05_m05_t08.a2m",
-            },
-          ]}
-          onFileLoadStart={() => {
-            this.setState({
-              loading: true,
-            });
-          }}
-          onAlignmentLoaded={this.onAlignmentReceived}
-          onAlignmenLoadError={this.onAlignmentLoadError}
-        />
-      </div>
-    );
-  };
-
-  protected renderConservationBarplotToggle = () => {
-    return (
-      <div className="barplot-conservation-toggle">
-        <label>
-          <strong>Show Conservation Barplot:</strong>
-
-          <input
-            name="conservationBarplotToggle"
-            type="checkbox"
-            checked={this.state.showConservationBarplot}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showConservationBarplot: target.checked,
-              });
-              this.url_cookie_inputs.CONSERVATION_BARPLOT.onChange(target.checked);
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderEntropyGapBarplotToggle = () => {
-    return (
-      <div className="barplot-entroy-gap-toggle">
-        <label>
-          <strong>Show Entropy/Gap Barplot:</strong>
-
-          <input
-            name="entropyGapBarplotToggle"
-            type="checkbox"
-            checked={this.state.showEntropyGapBarplot}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showEntropyGapBarplot: target.checked,
-              });
-              this.url_cookie_inputs.ENTROPY_BARPLOT.onChange(target.checked);
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderKLDivergenceBarplot = () => {
-    return (
-      <div className="barplot-kldivergence-toggle">
-        <label>
-          <strong>Show KL Divergence Barplot:</strong>
-
-          <input
-            name="kldivergenceBarplotToggle"
-            type="checkbox"
-            checked={this.state.showKLDivergenceBarplot}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showKLDivergenceBarplot: target.checked,
-              });
-              this.url_cookie_inputs.KLDIVERGENCE_BARPLOT.onChange(target.checked);
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderMiniMapToggle = () => {
-    return (
-      <div className="minimap-toggle">
-        <label>
-          <strong>Show MiniMap:</strong>
-
-          <input
-            name="showMiniMap"
-            type="checkbox"
-            checked={this.state.showMiniMap}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showMiniMap: target.checked,
-              });
-              this.url_cookie_inputs.MINIMAP.onChange(target.checked);
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected renderAnnotationToggle = () => {
-    return (
-      <div className="annotation-toggle">
-        <label>
-          <strong>Show Annotations:</strong>
-
-          <input
-            name="showAnnotations"
-            type="checkbox"
-            checked={this.state.showAnnotations}
-            onChange={(e) => {
-              const target = e.target;
-              this.setState({
-                showAnnotations: target.checked,
-              });
-              this.url_cookie_inputs.ANNOTATIONS.onChange(target.checked);
-            }}
-          />
-        </label>
-      </div>
-    );
-  };
-
-  protected onAlignmentLoadError(error: AlignmentLoadError) {
-    this.setState({
-      loadError: error,
-      loading: false,
-    });
-  }
-
-  protected onAlignmentReceived(alignment: Alignment) {
-    this.setState({
-      alignment: alignment,
-      showSettings: false,
-      //style: alignment.getDefaultStyle(),
-      loading: false,
-      loadError: undefined,
-    });
-  }
-}
+      {/*renderedSettingsBox*/}
+      {renderedAlignment}
+    </>
+  );
+};

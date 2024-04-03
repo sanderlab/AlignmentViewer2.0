@@ -1,0 +1,151 @@
+/** SequenceSearch.scss */
+
+.background-behind-search-box{
+  position: fixed;
+  inset: 0;
+  background-color: white;
+  z-index: 10000;
+  
+  transition: opacity 200ms ease-in, visibility 200ms ease-in;
+  transition: opacity 200ms ease-out, visibility 200msms ease-out;
+  opacity: 0.75;
+  visibility: visible;
+}
+
+.search-box-grid{
+  position: absolute;
+  top: 0;
+  bottom: 50px;
+  left: 100px;
+  right: 100px;
+  z-index: 10001;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: 1fr;
+  grid-template-areas: "search-area";
+
+  .search-box-contents{
+    position: relative;
+    background-color: white;
+    grid-area: search-area;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+
+    display: grid;
+    grid-template-columns: 5px 9fr 5px;
+    grid-template-rows: 10px 20px 30px 20px 1fr 5px;
+    grid-template-areas: 
+      ". . ."
+      ". search-bar ."
+      ". search-options-bar ."
+      ". search-bar-results-separator ."
+      ". search-results ."
+      ". . ."
+    ;
+    font-size: 12px;
+
+    .search-options-bar{
+      grid-area: search-options-bar;
+      place-self: center;
+      display: grid;
+      grid-auto-flow: column;
+      grid-column-gap: 5px;
+      place-items: center;
+
+      select, input, label{
+        display: inline-block;
+        margin: 0;
+      }
+      
+      .stepper{
+        //border: solid 1px gray;
+        padding: 0 12px 0 0;
+        display: inline-grid;
+        grid-auto-flow: column;
+        place-items: center;
+
+        span{
+          line-height: 20px;
+          font-size: 15px;
+          padding: 0 8px;
+          font-weight: bolder;
+        }
+        button{
+          background-color: transparent;
+
+          display:inline-block;
+          width: 20px;
+          height: 20px;
+          line-height: 20px; // border is the extra 2 px
+          font-size:15px; 
+          font-weight: 900;
+
+          border: solid rgb(100, 100, 100) 1px;
+          color: rgb(100, 100, 100);
+
+          border-radius: 50%;
+          margin: 0;
+          padding: 0;
+        }
+        button:disabled,
+        button:disabled:hover{
+          opacity: 0.4;
+          background-color: white;
+        }
+        button:hover{
+          background-color: rgb(241, 241, 241);
+        }
+      }
+    }
+    
+    .search-bar{
+      grid-area: search-bar;
+      justify-self: stretch;
+      align-self: start;
+      display: grid;
+      grid-template-columns: 1fr 3fr 2fr;
+      grid-template-rows: 100%;
+      grid-template-areas: 
+        "search-input-label search-input matches";
+      
+
+      label{
+        grid-area: search-input-label;
+        align-self: center;
+        justify-self: end;
+      }
+      input{
+        grid-area: search-input;
+        width: 100%;
+      }
+      span{
+        grid-area: matches;
+        align-self: center;
+        justify-self: center;
+      }
+    }
+
+    .search-bar-results-separator{
+      grid-area: search-bar-results-separator;
+      margin-top: 10px;
+      border-top: solid 2px #c2c2c2;
+    }
+    .search-results{
+      grid-area: search-results;
+      overflow: scroll;
+      position: relative;
+    }
+    button.button-link.close{
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 0;
+      background: none !important;
+      border: none;
+      color: #069;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+}

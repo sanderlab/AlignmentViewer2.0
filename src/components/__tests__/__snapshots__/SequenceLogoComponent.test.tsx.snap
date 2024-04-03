@@ -2,7 +2,7 @@
 
 exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] = `
 <div
-  className="sequence-logo"
+  className="sequence-logo  mock-aa-class "
 >
   <svg
     preserveAspectRatio="none"
@@ -16,19 +16,18 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
     xmlns="http://www.w3.org/2000/svg"
   >
     <g
-      className="aceResidueParentClass"
       key="p_0"
       transform="translate(0,0)"
     >
       <rect
-        className="acePrefixE"
+        className="undefinedE"
         height="100"
         key="idxrect_0"
         transform="translate(0, 50) scale(0.6666666666666666,0.5)"
         width="100"
       />
       <rect
-        className="acePrefixC"
+        className="undefinedC"
         height="100"
         key="idxrect_1"
         transform="translate(0, 0) scale(0.6666666666666666,0.5)"
@@ -44,12 +43,11 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
       />
     </g>
     <g
-      className="aceResidueParentClass"
       key="p_1"
       transform="translate(1,0)"
     >
       <rect
-        className="acePrefixD"
+        className="undefinedD"
         height="100"
         key="idxrect_0"
         transform="translate(0, 0) scale(0.6666666666666666,1)"
@@ -65,19 +63,18 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
       />
     </g>
     <g
-      className="aceResidueParentClass"
       key="p_2"
       transform="translate(2,0)"
     >
       <rect
-        className="acePrefixE"
+        className="undefinedE"
         height="100"
         key="idxrect_0"
         transform="translate(0, 50) scale(0.6666666666666666,0.5)"
         width="100"
       />
       <rect
-        className="acePrefixC"
+        className="undefinedC"
         height="100"
         key="idxrect_1"
         transform="translate(0, 0) scale(0.6666666666666666,0.5)"
@@ -109,19 +106,94 @@ exports[`SequenceLogoComponent Should render when given a basic alignment. 1`] =
 
 exports[`SequenceLogoComponent Should render when given default props. 1`] = `
 <div
-  className="sequence-logo"
+  className="sequence-logo  mock-aa-class "
 >
   <svg
     preserveAspectRatio="none"
     style={
       Object {
         "height": "100px",
-        "width": 0,
+        "width": 9,
       }
     }
-    viewBox="0 0 0 100"
+    viewBox="0 0 3 100"
     xmlns="http://www.w3.org/2000/svg"
-  />
+  >
+    <g
+      key="p_0"
+      transform="translate(0,0)"
+    >
+      <rect
+        className="undefinedE"
+        height="100"
+        key="idxrect_0"
+        transform="translate(0, 50) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+      <rect
+        className="undefinedC"
+        height="100"
+        key="idxrect_1"
+        transform="translate(0, 0) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+      <rect
+        className="interaction-placeholder"
+        data-class="sequence-logo-tooltip-container"
+        data-for="getLogoTooltip"
+        data-tip={0}
+        height="100"
+        width="1"
+      />
+    </g>
+    <g
+      key="p_1"
+      transform="translate(1,0)"
+    >
+      <rect
+        className="undefinedD"
+        height="100"
+        key="idxrect_0"
+        transform="translate(0, 0) scale(0.6666666666666666,1)"
+        width="100"
+      />
+      <rect
+        className="interaction-placeholder"
+        data-class="sequence-logo-tooltip-container"
+        data-for="getLogoTooltip"
+        data-tip={1}
+        height="100"
+        width="1"
+      />
+    </g>
+    <g
+      key="p_2"
+      transform="translate(2,0)"
+    >
+      <rect
+        className="undefinedE"
+        height="100"
+        key="idxrect_0"
+        transform="translate(0, 50) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+      <rect
+        className="undefinedC"
+        height="100"
+        key="idxrect_1"
+        transform="translate(0, 0) scale(0.6666666666666666,0.5)"
+        width="100"
+      />
+      <rect
+        className="interaction-placeholder"
+        data-class="sequence-logo-tooltip-container"
+        data-for="getLogoTooltip"
+        data-tip={2}
+        height="100"
+        width="1"
+      />
+    </g>
+  </svg>
   <ReactTooltip
     border={true}
     clickable={false}

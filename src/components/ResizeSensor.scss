@@ -1,0 +1,14 @@
+/** ResizeSensor.scss */
+
+.resize-sensor-holder {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+  max-width: 100%;
+  visibility: hidden;
+}

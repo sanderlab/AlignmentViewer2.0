@@ -18,5 +18,20 @@
     "noEmit": true
   },
   "exclude": ["**/__tests__/**"],
-  "include": ["src/components", "src/common", "src/index.ts", "types"]
+  "include": [
+    "src/components/alignment-details",
+    "src/components/alignment-metadata",
+    "src/components/layout",
+    "src/components/minimap",
+    "src/components/search",
+    "src/components/settings",
+    "src/components/virtualization",
+    "src/components",
+    "src/common",
+    "src/redux",
+    "src/webworkers",
+    "src/App.tsx",
+    "src/index.ts",
+    "types"
+ ]
 }

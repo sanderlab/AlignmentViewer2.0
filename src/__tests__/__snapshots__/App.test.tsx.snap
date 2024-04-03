@@ -71,7 +71,7 @@ exports[`App Should render within 2 minutes. 1`] = `
           className="settings-alignment-description"
         />
         <div
-          className="settings-parameters"
+          className="settings-content"
           style={
             Object {
               "display": "block",
@@ -156,7 +156,9 @@ exports[`App Should render within 2 minutes. 1`] = `
                 <option
                   key="0"
                   value={0}
-                />
+                >
+                  mock-aa-style-desc
+                </option>
               </select>
             </label>
           </div>
@@ -283,15 +285,32 @@ exports[`App Should render within 2 minutes. 1`] = `
             </label>
           </div>
           <div
+            className="annotation-toggle"
+          >
+            <label>
+              <strong>
+                Show Annotations
+                :
+              </strong>
+              <input
+                checked={true}
+                name="annotation-toggle"
+                onChange={[Function]}
+                type="checkbox"
+              />
+            </label>
+          </div>
+          <div
             className="minimap-toggle"
           >
             <label>
               <strong>
-                Show MiniMap:
+                Show MiniMap
+                :
               </strong>
               <input
                 checked={true}
-                name="showMiniMap"
+                name="minimap-toggle"
                 onChange={[Function]}
                 type="checkbox"
               />
@@ -302,26 +321,28 @@ exports[`App Should render within 2 minutes. 1`] = `
           >
             <label>
               <strong>
-                Show conservation barplot:
+                Show Conservation Barplot
+                :
               </strong>
               <input
                 checked={true}
-                name="conservationBarplotToggle"
+                name="barplot-conservation-toggle"
                 onChange={[Function]}
                 type="checkbox"
               />
             </label>
           </div>
           <div
-            className="barplot-entroy-gap-toggle"
+            className="barplot-entropy-gaps-toggle"
           >
             <label>
               <strong>
-                Show entropy/gap barplot:
+                Show Entropy / Gaps Barplot
+                :
               </strong>
               <input
                 checked={true}
-                name="entropyGapBarplotToggle"
+                name="barplot-entropy-gaps-toggle"
                 onChange={[Function]}
                 type="checkbox"
               />
@@ -332,26 +353,12 @@ exports[`App Should render within 2 minutes. 1`] = `
           >
             <label>
               <strong>
-                Show KL Divergence barplot:
+                Show KL Divergence Barplot
+                :
               </strong>
               <input
                 checked={false}
-                name="kldivergenceBarplotToggle"
-                onChange={[Function]}
-                type="checkbox"
-              />
-            </label>
-          </div>
-          <div
-            className="annotation-toggle"
-          >
-            <label>
-              <strong>
-                Show Annotations:
-              </strong>
-              <input
-                checked={true}
-                name="showAnnotations"
+                name="barplot-kldivergence-toggle"
                 onChange={[Function]}
                 type="checkbox"
               />

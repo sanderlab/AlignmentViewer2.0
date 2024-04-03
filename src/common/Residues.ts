@@ -1,40 +1,47 @@
-import { GlyphFactory } from "./SequenceLogoGlyphs";
 import { stringToColor } from "./Utils";
 import {
-  ALL_AMINOACID_COLORSCHEMES,
-  ALL_NUCLEOTIDE_COLORSCHEMES,
+  AminoAcidColorSchemes,
+  AminoacidColorSchemeInstance,
+  NucleotideColorSchemeInstance,
+  NucleotideColorSchemes,
+  ResidueColoring,
+  ResidueColoringInstance,
 } from "./MolecularStyles";
 
-interface IResidueColor {
-  [colorScheme: string]: {
-    hexString: string;
-    rgb: {
-      red: number;
-      green: number;
-      blue: number;
-    };
-    backgroundAlpha: number;
+export interface ICombinedColor {
+  hexString: string;
+  rgb: {
+    red: number;
+    green: number;
+    blue: number;
   };
 }
+
+
+type IColoringToLetterAndBackgroundColor = Map<ResidueColoringInstance, {
+  letterColor: ICombinedColor;
+  backgroundColor: ICombinedColor;
+}>;
+type ISingleResidueColor = Map<
+  AminoacidColorSchemeInstance | NucleotideColorSchemeInstance, 
+  IColoringToLetterAndBackgroundColor
+>;
 
 interface IAminoAcid {
   singleLetterCode: string;
   threeLetterCode: string;
   fullName: string;
-  glyph: (props: { [key: string]: string }) => JSX.Element;
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 }
 
 interface INucleotide {
   singleLetterCode: string;
   fullName: string;
-  glyph: (props: { [key: string]: string }) => JSX.Element;
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 }
 
 export class AminoAcid implements IAminoAcid {
-  glyph: (props: { [key: string]: string }) => JSX.Element;
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 
   public static readonly canonicalAminoAcids: AminoAcid[] = [
     new AminoAcid("A", "ALA", "Alanine"),
@@ -79,9 +86,13 @@ export class AminoAcid implements IAminoAcid {
 
   public static readonly UNKNOWN = AminoAcid.bySingleLetterCode["X"];
 
+  static list(): IAminoAcid[] {
+    return AminoAcid.canonicalAminoAcids;
+  }
+
   static fromSingleLetterCode(singleLetterCode: string): IAminoAcid {
     if (singleLetterCode in this.bySingleLetterCode) {
-      return AminoAcid.bySingleLetterCode[singleLetterCode];
+      return this.bySingleLetterCode[singleLetterCode];
     }
     return AminoAcid.UNKNOWN;
   }
@@ -101,33 +112,55 @@ export class AminoAcid implements IAminoAcid {
     this.singleLetterCode = singleLetterCode;
     this.threeLetterCode = threeLetterCode;
     this.fullName = fullName;
-    this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
-    this.colors = ALL_AMINOACID_COLORSCHEMES.reduce((acc, cs) => {
-      const colorPair = Object.entries(cs.colors).find(([aa, color]) => {
-        if (aa === singleLetterCode) {
-          return true;
-        }
-        return false;
+    this.colors = AminoAcidColorSchemes.list.reduce((acc, cs) => {
+      const themesMap = new Map() as IColoringToLetterAndBackgroundColor;
+      //todo update sass to be more consistant with how we use this
+      //i.e., we should be able to loop ResidueColoring.list to
+      //set these, but presently the prop keys are different for
+      //each coloring type Light/Dark/NoBackground
+      //props: colors, backgroundColorsLightTheme, letterColorsDarkTheme
+      themesMap.set(ResidueColoring.LIGHT, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.backgroundColorsLightTheme[singleLetterCode]
+            ? cs.backgroundColorsLightTheme[singleLetterCode]
+            : "#ffffff"
+        ),
       });
 
-      let colorString = "#ffffff";
-      if (colorPair) {
-        colorString = colorPair[1];
-      }
-      const colorInfo = stringToColor(colorString);
-      acc[cs.commonName] = {
-        hexString: colorInfo.hex,
-        rgb: colorInfo.rgb,
-        backgroundAlpha: cs.backgroundAlpha,
-      };
+      themesMap.set(ResidueColoring.DARK, {
+        letterColor: stringToColor(
+          cs.letterColorsDarkTheme[singleLetterCode]
+            ? cs.letterColorsDarkTheme[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : "#ffffff"
+        ),
+      });
+
+      themesMap.set(ResidueColoring.NO_BACKGROUND, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor("#ffffff"),
+      });
+      acc.set(cs, themesMap);
       return acc;
-    }, {} as IResidueColor);
+    }, new Map() as ISingleResidueColor);
   }
 }
 
 export class Nucleotide implements INucleotide {
-  glyph: (props: { [key: string]: string }) => JSX.Element;
-  colors: IResidueColor;
+  colors: ISingleResidueColor;
 
   static allNucleotides: Nucleotide[] = [
     new Nucleotide("A", "Adenine"),
@@ -152,37 +185,60 @@ export class Nucleotide implements INucleotide {
 
   public static UNKNOWN = Nucleotide.bySingleLetterCode["X"];
 
+  static list(): INucleotide[] {
+    return Nucleotide.allNucleotides;
+  }
+
   static fromSingleLetterCode(singleLetterCode: string): Nucleotide {
-    singleLetterCode = singleLetterCode.toUpperCase();
-    if (this.bySingleLetterCode[singleLetterCode]) {
-      return Nucleotide.bySingleLetterCode[singleLetterCode];
+    if (singleLetterCode in this.bySingleLetterCode) {
+      return this.bySingleLetterCode[singleLetterCode];
     }
     return Nucleotide.UNKNOWN;
   }
-
-  constructor(public singleLetterCode: string, public fullName: string) {
+  
+  constructor(
+    public singleLetterCode: string, public fullName: string
+  ) {
     this.singleLetterCode = singleLetterCode;
     this.fullName = fullName;
-    this.glyph = GlyphFactory.glyphFromChar(singleLetterCode);
-    this.colors = ALL_NUCLEOTIDE_COLORSCHEMES.reduce((acc, cs) => {
-      const colorPair = Object.entries(cs.colors).find(([aa, color]) => {
-        if (aa === singleLetterCode) {
-          return true;
-        }
-        return false;
+    this.colors = NucleotideColorSchemes.list.reduce((acc, cs) => {
+      const themesMap = new Map() as IColoringToLetterAndBackgroundColor;
+      themesMap.set(ResidueColoring.LIGHT, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.backgroundColorsLightTheme[singleLetterCode]
+            ? cs.backgroundColorsLightTheme[singleLetterCode]
+            : "#ffffff"
+        ),
       });
 
-      let colorString = "#ffffff";
-      if (colorPair) {
-        colorString = colorPair[1];
-      }
-      const colorInfo = stringToColor(colorString);
-      acc[cs.commonName] = {
-        hexString: colorInfo.hex,
-        rgb: colorInfo.rgb,
-        backgroundAlpha: cs.backgroundAlpha,
-      };
+      themesMap.set(ResidueColoring.DARK, {
+        letterColor: stringToColor(
+          cs.letterColorsDarkTheme[singleLetterCode]
+            ? cs.letterColorsDarkTheme[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : "#ffffff"
+        ),
+      });
+
+      themesMap.set(ResidueColoring.NO_BACKGROUND, {
+        letterColor: stringToColor(
+          cs.colors[singleLetterCode]
+            ? cs.colors[singleLetterCode]
+            : cs.defaultLetterColor
+        ),
+        backgroundColor: stringToColor("#ffffff"),
+      });
+      acc.set(cs, themesMap);
       return acc;
-    }, {} as IResidueColor);
-  }
+    }, new Map() as ISingleResidueColor);
+  };
 }

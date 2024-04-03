@@ -69,6 +69,6 @@ describe("Alignment", () => {
       seq1,
       { id: "id-2", sequence: "CBA" },
     ]);
-    expect(alignment.getQuerySequence()).toEqual(seq1);
+    expect(alignment.getQuery()).toEqual(seq1);
   });
 });

@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
 /**
  * Convert any valid color string into a hex code and RGB
  * value using the built in browser converter.
@@ -9,18 +11,13 @@
  * @returns An object that contains the hex and rgb values for that string
  *          Default to black (#000000) if the string is not recognized.
  */
-export function stringToColor(
-  str: string
-): {
-  hex: string;
-  rgb: { red: number; green: number; blue: number };
-} {
+export function stringToColor(str: string) {
   const ctx = document.createElement("canvas").getContext("2d");
   ctx!.fillStyle = str;
   let hex = ctx!.fillStyle!;
 
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-  // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+  // https://stackoverflow.com/questions/5623838
   // (I think only necessary in testing, but might catch odd browser behavior)
   var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
   hex = hex.replace(shorthandRegex, function (m, r, g, b) {
@@ -29,7 +26,7 @@ export function stringToColor(
 
   var rgbaResult = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)!;
   return {
-    hex: hex,
+    hexString: hex,
     rgb: {
       red: parseInt(rgbaResult[1], 16),
       green: parseInt(rgbaResult[2], 16),
@@ -51,6 +48,39 @@ export function generateUUIDv4() {
         (15 >> (parseInt(c) / 4)))
     ).toString(16);
   });
+}
+
+/**
+ * Custom state function that enables a function call only
+ * after the state has been updated. Necessary when attempting
+ * to track the mouse movement in e.g., the minimap - otherwise 
+ * redux store is updated and new props are generated / passed 
+ * before the state registers.
+ * taken directly from https://stackoverflow.com/questions/54954091
+ * @param initialState 
+ * @returns 
+ */
+export function useStateCallback<T>(
+  initialState: T
+): [T, (state: T, cb?: (state: T) => void) => void] {
+  const [state, setState] = useState(initialState);
+  const cbRef = useRef<((state: T) => void) | undefined>(undefined); // init mutable ref container for callbacks
+
+  const setStateCallback = useCallback((state: T, cb?: (state: T) => void) => {
+    cbRef.current = cb; // store current, passed callback in ref
+    setState(state);
+  }, []); // keep object reference stable, exactly like `useState`
+
+  useEffect(() => {
+    // cb.current is `undefined` on initial render,
+    // so we only invoke callback on state *updates*
+    if (cbRef.current) {
+      cbRef.current(state);
+      cbRef.current = undefined; // reset callback after execution
+    }
+  }, [state]);
+
+  return [state, setStateCallback];
 }
 
 /**
@@ -121,8 +151,22 @@ export function getURLParameters() {
 /**
  * Get an Error that represents a parser problem
  */
-export function getParseError(parserName: string, errorMessage: string) {
+export function getParseError(parserName: string, errorMessage: string): Error {
   const toReturn = new Error(errorMessage);
   toReturn.name = parserName + " Parse Error";
   return toReturn;
+}
+
+/**
+ * Create an array of indicies from a start and end index (inclusive of start and end)
+ * see https://stackoverflow.com/questions/66858701/
+ * @param startIdx 
+ * @param endIdx 
+ * @returns 
+ */
+export function startEndIdxToArray(startIdx: number, endIdx: number){
+  return Array.from(
+    { length: endIdx - startIdx + 1 },
+    (_, i) => startIdx + i
+  );
 }

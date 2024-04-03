@@ -37,6 +37,7 @@ export class AlignmentLoader {
    */
   public static async loadAlignmentFromURL(
     url: string,
+    removeDuplicateSequences: boolean,
     callback: (a: Alignment) => void,
     errorCallback: (e: AlignmentLoadError) => void,
     alignmentName?: string
@@ -51,7 +52,7 @@ export class AlignmentLoader {
       console.error("Unable to load alignment by URL '" + url + "'", e);
       const err = new AlignmentLoadError(
         "Unable to fetch alignment in URL",
-        [{ name: "Browser-reported error message", message: e.message }],
+        [{ name: "Browser-reported error message", message: (e as Error).message }],
         "Possible causes: (1) The alignment is not sent using SSL or (2) the server that hosts " +
           "the alignment has not enabled CORS. To be assessible to Alignment Viewer 2, the " +
           "alignment must be served by HTTPS and the server must enable CORS."
@@ -61,9 +62,14 @@ export class AlignmentLoader {
     }
 
     try {
-      AlignmentLoader.loadAlignmentFromFile(f, callback, errorCallback);
+      AlignmentLoader.loadAlignmentFromFile(
+        f,
+        removeDuplicateSequences,
+        callback,
+        errorCallback
+      );
     } catch (e) {
-      errorCallback(e);
+      errorCallback(e as AlignmentLoadError);
     }
   }
 
@@ -76,6 +82,7 @@ export class AlignmentLoader {
    */
   public static async loadAlignmentFromFile(
     file: File,
+    removeDuplicateSequences: boolean,
     callback: (a: Alignment) => void,
     errorCallback: (e: AlignmentLoadError) => void
   ) {
@@ -85,11 +92,12 @@ export class AlignmentLoader {
         callback(
           AlignmentLoader.loadAlignmentFromText(
             file.name,
-            reader.result as string
+            reader.result as string,
+            removeDuplicateSequences
           )
         );
       } catch (e) {
-        errorCallback(e);
+        errorCallback(e as AlignmentLoadError);
       }
     };
     reader.readAsText(file);
@@ -101,17 +109,22 @@ export class AlignmentLoader {
    * @param text
    * @throws an AlignmentLoadError if the text cannot be parsed.
    */
-  public static loadAlignmentFromText(alignmentName: string, text: string) {
+  public static loadAlignmentFromText(
+    alignmentName: string,
+    text: string,
+    removeDuplicateSequences: boolean
+  ) {
     const err = new AlignmentLoadError("Alignment Format Error", []);
     for (let i = 0; i < AlignmentLoader.AlignmentFileTypes.length; i++) {
       try {
         const toreturn = AlignmentLoader.AlignmentFileTypes[i].fromFileContents(
           alignmentName,
-          text
+          text,
+          removeDuplicateSequences
         );
         return toreturn;
       } catch (e) {
-        err.errors.push(e);
+        err.errors.push(e as { name: string; message: string });
       }
     }
     throw err;

@@ -13,7 +13,8 @@ export class FastaAlignment extends Alignment {
    */
   static fromFileContents(
     fileName: string,
-    fileContents: string
+    fileContents: string,
+    removeDuplicateSequences?: boolean
   ): FastaAlignment {
     const trimmedFile = fileContents.trim();
     if (trimmedFile.length < 1 || trimmedFile[0] !== ">") {
@@ -33,9 +34,13 @@ export class FastaAlignment extends Alignment {
       }
     }
     try {
-      return new FastaAlignment(fileName, sequences);
+      return new FastaAlignment({
+        name: fileName, 
+        sequencesAsInput: sequences, 
+        removeDuplicateSequences: removeDuplicateSequences
+      });
     } catch (e) {
-      throw getParseError("Fasta", e.message);
+      throw getParseError("Fasta", (e as Error).message);
     }
   }
 }

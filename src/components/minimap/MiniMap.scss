@@ -1,0 +1,68 @@
+/** MiniMap.scss */
+
+.minimap{
+  z-index: 100;
+  position: absolute;
+  inset: 0;
+  
+  display: grid;
+  grid-template-rows: 10px auto 10px;
+  grid-template-areas: "header" "minimap" "footer";
+
+  .minimap-header{
+    grid-area: header;
+    font-size: 9px;
+    place-self: center;
+  }
+  .minimap-app-holder{
+    grid-area: minimap;
+    position: absolute;
+    inset: 0;
+    
+    .minimap-canvas-holder{
+      position: absolute;
+      inset: 0;
+
+      canvas{
+        image-rendering: optimizeSpeed;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: optimize-contrast;
+        image-rendering: pixelated;
+        -ms-interpolation-mode: nearest-neighbor;
+        position: absolute;
+        inset: 0;
+      }
+    }
+    .minimap-interaction{
+      position: absolute;
+      inset: 0;
+    }
+  }
+  .minimap-footer{
+    grid-area: footer;
+    font-size: 9px;
+    place-self: center;
+  }
+}
+
+.minimap-dragger{
+  position: absolute;
+  left: 0; 
+  right:0;
+  cursor: move; // fallback if grab cursor is unsupported
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.minimap-full-page-drag-detector{
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  background-color: white;
+  z-index: 2001;
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}

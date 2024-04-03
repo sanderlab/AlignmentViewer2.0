@@ -1,88 +1,246 @@
 /** App.scss */
+html, body {
+  //prevent safari from bouncing - updated 11/2023
+  height  : 100%;
+  overflow: hidden;
+  position: relative;
+  overscroll-behavior-x: none; //prevent safari from going back as well
+}
+
+body {
+  //stop the bouncy at the bottom of a scroll - since the webgl component
+  //is only showing a fraction of the alignment, this is irritating when
+  //trying to "fake scroll" through the alignment
+  //TODO: figure out if this can be done on the element (like msa viewer)
+  overscroll-behavior-y: none;
+
+  //stop the back button swipe, which happens often when going to the start of
+  //the alignment
+  overscroll-behavior-x: none;
+}
+
+//*{ //stop the back button swipe on safari spcifically. It must be working on some specific
+//  overscroll-behavior-x: none;
+//}
 
 #root {
   height: 100vh;
   display: flex;
   flex-direction: column;
 
+  .fullscreen-loading-indicator.hidden{
+    display: none;
+  }
+  
+  .fullscreen-loading-indicator{
+    position: fixed;
+    inset: 0;
+    background-color: white;
+    opacity: 0.8;
+    z-index: 1901;
+    display: grid;
+    place-items: center;
+    
+    .loader {
+      border: 3px solid #f3f3f3; /* Light grey */
+      border-top: 3px solid #3498db; /* Blue */
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 2s linear infinite;
+      position: relative;
+    }
+
+    .spinner1{
+      width: 24px;
+      height: 24px;
+      position: relative;
+      display: grid;
+      grid-auto-flow: column;
+      place-items: center;
+
+      .circleHolder{
+        height: 25px;
+        width: 25px;
+        display: grid;
+        place-items: center;
+
+        .circle1, .circle2, .circle3{
+          height: 25px;
+          width: 25px;
+          background-color: black;
+          border-radius: 50%;
+          display: inline-block;
+        }
+
+        //spinner #1
+        .spinner_b2T7z{
+          animation:spinner_xe7Qz 0.8s linear infinite;
+        }
+        .spinner_YRVVz{
+          animation-delay:-.65s;
+        }
+        .spinner_c9oYz{
+          animation-delay:-.5s;
+        }
+        @keyframes spinner_xe7Qz{
+          100%{
+            height: 25px;
+            width: 25px;
+          }
+          50%{
+            height: 0px;
+            width: 0px;
+          }
+        }
+      }
+    }
+
+    //spinner #1
+    .spinner_b2T7{
+      animation:spinner_xe7Q .8s linear infinite
+    }
+    .spinner_YRVV{
+      animation-delay:-.65s
+    }
+    .spinner_c9oY{
+      animation-delay:-.5s
+    }
+    @keyframes spinner_xe7Q{
+      93.75%,100%{r:3px}46.875%{r:.2px}
+    }
+
+    //spinner #2
+    .spinner_zWVm{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_PnZo 1.2s linear infinite
+    }
+    .spinner_gfyD{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_4j7o 1.2s linear infinite;animation-delay:.1s
+    }
+    .spinner_T5JJ{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_fLK4 1.2s linear infinite;animation-delay:.1s
+    }
+    .spinner_E3Wz{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_tDji 1.2s linear infinite;animation-delay:.2s
+    }
+    .spinner_g2vs{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_CMiT 1.2s linear infinite;animation-delay:.2s
+    }
+    .spinner_ctYB{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_cHKR 1.2s linear infinite;animation-delay:.2s
+    }
+    .spinner_BDNj{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_Re6e 1.2s linear infinite;animation-delay:.3s
+    }
+    .spinner_rCw3{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_EJmJ 1.2s linear infinite;animation-delay:.3s
+    }
+    .spinner_Rszm{
+      animation:spinner_5QiW 1.2s linear infinite,spinner_YJOP 1.2s linear infinite;animation-delay:.4s
+    }
+    @keyframes spinner_5QiW{
+      0%,50%{width:7.33px;height:7.33px}25%{width:1.33px;height:1.33px}
+    }
+    @keyframes spinner_PnZo{
+      0%,50%{x:1px;y:1px}25%{x:4px;y:4px}
+    }
+    @keyframes spinner_4j7o{
+      0%,50%{x:8.33px;y:1px}25%{x:11.33px;y:4px}
+    }
+    @keyframes spinner_fLK4{
+      0%,50%{x:1px;y:8.33px}25%{x:4px;y:11.33px}
+    }
+    @keyframes spinner_tDji{
+      0%,50%{x:15.66px;y:1px}25%{x:18.66px;y:4px}
+    }
+    @keyframes spinner_CMiT{
+      0%,50%{x:8.33px;y:8.33px}25%{x:11.33px;y:11.33px}
+    }
+    @keyframes spinner_cHKR{
+      0%,50%{x:1px;y:15.66px}25%{x:4px;y:18.66px}
+    }
+    @keyframes spinner_Re6e{
+      0%,50%{x:15.66px;y:8.33px}25%{x:18.66px;y:11.33px}
+    }
+    @keyframes spinner_EJmJ{
+      0%,50%{x:8.33px;y:15.66px}25%{x:11.33px;y:18.66px}
+    }
+    @keyframes spinner_YJOP{
+      0%,50%{x:15.66px;y:15.66px}25%{x:18.66px;y:18.66px}
+    }
+  }
+
   .app-header {
-    padding: 5px;
-    height: 120px;
+    padding: 0;
     position: relative;
 
     display: flex; // make us of Flexbox
     justify-content: center; // horizontally centers single line items
 
     .settings-box {
+      height: 30px;
+      width: 100%;
+      padding-top: 8px;
+      padding-bottom: 16px;
+      padding-left: 8px;
+      padding-right: 8px;
       font-size: 11px;
-      margin: auto;
-      width: 450px;
-      border: 2px solid black;
-      padding: 15px;
-      position: absolute;
-      z-index: 500;
       background-color: white;
-
-      h3,
-      h4 {
-        text-align: center;
-      }
-      h3 {
-        margin-bottom: 0;
-      }
-      h4 {
-        margin-top: 0;
-      }
 
       .settings-header {
         display: flex;
         flex-direction: row;
         align-items: center;
-        margin: 8px 0;
+        gap: 10px;
+        justify-content: space-between;
+        padding-bottom: 8px;
+        border-bottom: solid 1px #e6e6e6;
 
         h2 {
           margin: 0;
-          display: inline-block;
           order: 1;
-          flex-grow: 4;
+          flex-grow: 1;
           font-size: 2em;
         }
-        a.github-link {
+
+        .settings-alignment-description{
+          font-size: 10px;
           order: 2;
-          font-size: 0;
-          padding-right: 10px;
+          flex-grow: 50;
+          display: flex;
+          flex-direction: column;
+          h3 {
+            margin: 0;
+          }
+          h4 {
+            margin: 0;
+          }
         }
-        button {
+
+        a, button {
+          padding: 0px 2px;
+          order: 7;
+          font-size: 0;
+          margin: 0;
+          border: 0;
+        }
+        a.github-link {
           order: 3;
           font-size: 0;
-          padding: 0;
         }
-      }
-
-      .settings-parameters {
-        position: relative;
-        padding-top: 8px;
-
-        label strong {
-          width: 200px;
-          display: inline-block;
+        button.download {
+          order: 4;
         }
-        label select,
-        label .zoom-level {
-          width: 200px;
-          display: inline-block;
+        button.search-button {
+          order: 5;
         }
-
-        .examples button.button-link {
-          border: 1px solid transparent;
-        }
-
-        .load-error {
-          color: red;
+        button.settings-toggle{
+          order: 6;
         }
       }
     }
   }
+
   .app-content {
     position: relative;
     flex: 1;

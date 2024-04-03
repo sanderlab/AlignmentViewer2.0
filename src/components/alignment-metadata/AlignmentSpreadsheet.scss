@@ -1,0 +1,82 @@
+/** AlignmentSpreadsheet.scss */
+
+.av2-spreadsheet{
+  position: absolute;
+  inset:0;
+  display: grid;
+  grid-template-areas:
+    "pinned-table unpinned-table";
+  grid-template-rows: auto;
+  //overflow: clip;
+
+  //grid-template-columns: 100px 300px;
+  //grid-template-areas: "pinned-columns unpinned-columns";
+  //grid-template-rows: auto;
+  //overflow-x: hidden;
+  //overflow-y: hidden;
+  .horizontal-resizer{
+    background-color: #f2f2f2; 
+    margin: 0;
+    padding: 0;
+    cursor: ew-resize;
+    height: 100%;
+  }
+  
+  .pinned-table-holder{ 
+    grid-area: pinned-table;
+    z-index: 1;
+  }
+  .unpinned-table-holder{ 
+    grid-area: unpinned-table;
+  }
+ 
+  .pinned-table-holder,
+  .unpinned-table-holder{
+    position: relative;
+
+    .pinned-table.header{
+      border: solid 1px rgb(104, 104, 104);
+    }
+    .pinned-table.content{
+      border: solid 1px rgb(104, 104, 104);
+    }
+
+    .unpinned-table.header,
+    .pinned-table.header{
+      left: 0;
+      right: 0;
+      background-color: #f4f4f4;
+    }
+    .content-holder{
+      position: absolute;
+      inset: 0;
+      overflow-y: clip;
+    }
+
+    .unpinned-table,
+    .pinned-table{
+      position: absolute;
+      display: grid;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      background-color: white;
+
+      .table-column{
+        display: grid;
+        > * {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+      }
+
+      .column-header{
+        font-weight: bold;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    }
+  }
+
+}

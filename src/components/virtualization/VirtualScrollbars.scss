@@ -1,0 +1,55 @@
+.vertical-scrollbar-holder {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  //background-color: rgba(255, 255, 255, 0.5);
+
+  .vertical-scrollbar {
+    position: absolute;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .vertical-scrollbar:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  .vertical-scrollbar:active {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.vertical-scrollbar-fullpage-drag {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.horizontal-scrollbar-holder {
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  //background-color: rgba(150, 0, 0, 0.5);
+
+  .horizontal-scrollbar {
+    position: absolute;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .horizontal-scrollbar:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  .horizontal-scrollbar:active {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.horizontal-scrollbar-fullpage-drag {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
