@@ -63,12 +63,13 @@ interface ISettingsState {
 export default function useAV2Settings(props:{
   //caller needs to respond to this to hide the settings screen
   requestSettingsClose: ()=>void;
+  useUrlAndLocalstorage?: boolean;
 }){
 
   const {
     requestSettingsClose,
+    useUrlAndLocalstorage = false
   } = props;
-  const useUrlAndLocalstorage = true;
 
   const defaultGlobalSettings = useMemo(()=>{
     return {
@@ -114,7 +115,9 @@ export default function useAV2Settings(props:{
       let initCache = globalSettingsUrlLocalStorageManager.getCurrentDeserializedValue(
         propKey, deserialize
       );
-      if(initCache === undefined || !all.includes(initCache)){ //set default if not found or not valid
+      if(!useUrlAndLocalstorage || 
+         initCache === undefined || 
+         !all.includes(initCache)){ //set default if not found or not valid
         initCache = defaultVal;
       }
       return {
@@ -256,7 +259,7 @@ export default function useAV2Settings(props:{
       propKey, deserialize
     );
     let initialValues = defaultVals;
-    if(initCacheVals !== undefined){ //check that all are valid
+    if(useUrlAndLocalstorage && initCacheVals !== undefined){ //check that all are valid
       const allValid = initCacheVals.reduce((acc, cache)=>{
         if(!all.includes(cache)) acc = false;
         return acc;
@@ -282,6 +285,20 @@ export default function useAV2Settings(props:{
   }, [
     defaultGlobalSettings.barplots,
     useUrlAndLocalstorage,
+  ]);
+
+  useEffect(()=>{
+    const validPropKeys = Object.keys(properties).reduce((acc, key)=>{
+      acc.push(
+        properties[key as keyof typeof properties].propKey
+      );
+      return acc;
+    }, [barplots.propKey] as string[]);
+
+    globalSettingsUrlLocalStorageManager.setValidSavePropKeys(validPropKeys)
+  }, [
+    barplots, 
+    properties
   ]);
 
   //
@@ -416,13 +433,7 @@ export default function useAV2Settings(props:{
 
       //is there an alignment in the URL?
       const alignmentUrlName = "alignment-url";
-      const potentialUrl = globalSettingsUrlLocalStorageManager.getCurrentValue(
-        alignmentUrlName
-      );
-      //delete the parameter immeditally
-      globalSettingsUrlLocalStorageManager.updateValue(
-        alignmentUrlName, undefined
-      );
+      const potentialUrl = globalSettingsUrlLocalStorageManager.getAlignmentUrlParam();
 
       if (potentialUrl) {
         try {
@@ -433,6 +444,7 @@ export default function useAV2Settings(props:{
             );
           }
           startAlignmentLoading();
+          console.log(`Loading URL from "${potentialUrl}"`);
           AlignmentLoader.loadAlignmentFromURL(
             potentialUrl,
             state.removeDuplicateSequences,

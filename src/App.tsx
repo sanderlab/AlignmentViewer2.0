@@ -34,7 +34,8 @@ export default function App(){
   ]);
 
   const settings = useAV2Settings({
-    requestSettingsClose: hideSettingsFn
+    requestSettingsClose: hideSettingsFn,
+    useUrlAndLocalstorage: true
   });
 
   const {

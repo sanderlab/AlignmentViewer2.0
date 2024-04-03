@@ -6,21 +6,39 @@ import Select, { MultiValue } from 'react-select'
 
 export const globalSettingsUrlLocalStorageManager = (() =>{
   let initialized = false;
-  const LOCALSTORAGEKEY = "AV2_UI_SETTINGS_CACHE";
+  const LOCALSTORAGE_KEY = "AV2_UI_SETTINGS_CACHE";
+  const ALIGNMENT_URL_KEY = "alignment-url";
+  let VALID_SAVE_PROP_KEYS: string[] | undefined = undefined;
 
   const writeParamsToUrlAndLocalstorage = (params: URLSearchParams) => {
-    //write the complete parameter list to both the url and local storage
-    window.history.replaceState(null, "", `?${params.toString()}`);
-    //this is a special case only used one time. should maybe do this elsewhere?
-    //params.delete("alignment-url"); //TODO: caller must explicitly delete
-    localStorage.setItem( LOCALSTORAGEKEY, params.toString() );
+    if(VALID_SAVE_PROP_KEYS !== undefined){
+      const urlParams =  new URLSearchParams( window.location.search );
+      const localStorageParams = new URLSearchParams();
+      //merge the new parameters, but don't touch those that aren't valid
+      for(var i = 0; i < VALID_SAVE_PROP_KEYS.length; i++){
+        const key = VALID_SAVE_PROP_KEYS[i];
+        const newValue = params.get(key);
+        if(newValue !== null){
+          urlParams.set(key, newValue);
+          localStorageParams.set(key, newValue);
+        }
+        else{
+          urlParams.delete(key);
+        }
+      }
+
+      //write the complete parameter list to both the url and local storage
+      window.history.replaceState(null, "", `?${urlParams.toString()}`);
+      params.delete(ALIGNMENT_URL_KEY); //don't save to local storage
+      localStorage.setItem( LOCALSTORAGE_KEY, localStorageParams.toString() );
+    }
   }
 
   const getCurrentParams = (dontInitialize?: boolean) => {
     const urlSearchParams = new URLSearchParams( window.location.search )
     const localStorageParams = new URLSearchParams(
-      localStorage.getItem(LOCALSTORAGEKEY)
-        ? localStorage.getItem(LOCALSTORAGEKEY)!
+      localStorage.getItem(LOCALSTORAGE_KEY)
+        ? localStorage.getItem(LOCALSTORAGE_KEY)!
         : undefined
     );
     for (const [key, value] of urlSearchParams) { // URL trumps local storage
@@ -40,7 +58,14 @@ export const globalSettingsUrlLocalStorageManager = (() =>{
   const parametersOnLoad = getCurrentParams(true);
 
   return {
-    getParametersOnInitialLoad: parametersOnLoad, //just a frozen view of the initial params
+    setValidSavePropKeys: (keys: string[]) => {
+      //required before any writing occurs
+      VALID_SAVE_PROP_KEYS = keys;
+      writeParamsToUrlAndLocalstorage(getCurrentParams());
+    },
+    getAlignmentUrlParam: () => { //special case
+      return parametersOnLoad.get(ALIGNMENT_URL_KEY)
+    },
     getCurrentValue: (propName: string) => {
       return getCurrentParams().get(propName);
     },
@@ -75,7 +100,7 @@ export function useGlobalSettingsMiddleware<T>(props: {
   currentValue: T;
   defaultValue: T;
   serialize: (obj: T) => string | undefined;
-  useUrlAndLocalstorage?: boolean;
+  useUrlAndLocalstorage: boolean;
 }){
   const {
     propKey,
@@ -122,7 +147,7 @@ export function InputSelectSetting<
   serialize: (obj: U) => string | undefined;
   deserialize: (key: string) => U | undefined;
   onChange: (deserializedValue: U) => void;
-  useUrlAndLocalstorage?: boolean;
+  useUrlAndLocalstorage: boolean;
 }){
   useGlobalSettingsMiddleware<U>({
     propKey: props.propKey,
@@ -164,7 +189,7 @@ export function InputMultiSelectSetting<
   allPossibleValues: U[];
   serialize: (obj: U[]) => string | undefined;
   onChange: (deserializedValues: U[]) => void;
-  useUrlAndLocalstorage?: boolean;
+  useUrlAndLocalstorage: boolean;
 }){
   useGlobalSettingsMiddleware<U[]>({
     propKey: props.propKey,
@@ -219,7 +244,7 @@ export function InputBooleanSetting(props: {
   currentValue: boolean;
   defaultValue: boolean;
   onChange: (newVal: boolean) => void;
-  useUrlAndLocalstorage?: boolean;
+  useUrlAndLocalstorage: boolean;
 }){
   const booleanSerializer = useMemo(()=>{
     return (b: boolean) => {return b ? 'true': 'false'}
@@ -256,7 +281,7 @@ export function InputNumberSetting(props: {
   minValue: number;
   maxValue: number;
   onChange: (newVal: number) => void;
-  useUrlAndLocalstorage?: boolean;
+  useUrlAndLocalstorage: boolean;
 }){
   const {
     currentValue,
