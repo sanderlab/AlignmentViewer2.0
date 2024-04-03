@@ -1,10 +1,11 @@
 # Alignment Viewer 2.0
 
-Alignment Viewer 2.0 is a standalone multiple [multiple sequence alignment](https://en.wikipedia.org/wiki/Multiple_sequence_alignment) (MSA) viewer written in TypeScript. This project uses the React framework and was boostrapped with [Create React App](https://github.com/facebook/create-react-app).
+Alignment Viewer 2.0 is a standalone [multiple sequence alignment](https://en.wikipedia.org/wiki/Multiple_sequence_alignment) (MSA) viewer written in TypeScript with the React framework. The project is primarily aimed at performance with the goal of enabling visualization and analysis of very
+large alignemnts (up to hundreds of millions of residues).
 
-A demo is available on Github Pages: https://sanderlab.github.io/AlignmentViewer2.0/
+A main website / demo is available at: https://fast.alignmentviewer.org/
 
-The Alignment Viewer 2.0 component ffeatures:
+The Alignment Viewer 2.0 component features:
 
 - Display alignment details (i.e., down to individual residues) and/or the alignment in its entirety.
 - Support for DNA/RNA and protein sequences
@@ -14,6 +15,25 @@ The Alignment Viewer 2.0 component ffeatures:
 - Client side only - runs in the browser alone.
 - View can be customized, removing or adding only the pieces needed.
 - Support for interaction events (clicking on, mousing over the alignments, logos, etc)
+
+## Linking to Alignment Viewer 2.0
+
+In addition to embedding Alignment Viewer 2.0 directly on your own website (see below), it is also possible to pass alignments to the demo website.
+
+Links should take the form:
+
+`https://fast.alignmentviewer.org?alignment-url={CUSTOM_ALIGNMENT_URL}`
+
+1. The server hosting the custom alignment must be using HTTPS
+2. The `CUSTOM_ALIGNMENT_URL` must be propertly encoded ([wikipedia description](https://en.wikipedia.org/wiki/Query_string#URL_encoding))
+3. The alignment must be either in `fasta` or `stockholm` format.
+
+Example links:
+
+[https://fast.alignmentviewer.org?alignment-url=https%3A%2F%2Fwww.ebi.ac.uk%2Finterpro%2Fwwwapi%2F%2Fentry%2Fpfam%2FPF00571%2F%3Fannotation%3Dalignment%3Aseed](https://fast.alignmentviewer.org?alignment-url=https%3A%2F%2Fwww.ebi.ac.uk%2Finterpro%2Fwwwapi%2F%2Fentry%2Fpfam%2FPF00571%2F%3Fannotation%3Dalignment%3Aseed)
+
+[https://fast.alignmentviewer.org?alignment-url=https%3A%2F%2Ffast.alignmentviewer.org%2F7fa1c5691376beab198788a726917d48_b0.4.a2m](https://fast.alignmentviewer.org?alignment-url=https%3A%2F%2Ffast.alignmentviewer.org%2F7fa1c5691376beab198788a726917d48_b0.4.a2m)
+
 
 ## Embedding Alignment Viewer 2.0
 
@@ -27,7 +47,10 @@ Once installed, adding to your website is as simple as:
 
 ```JSX
 import * as React from 'react';
-import { AlignmentViewer, FastaAlignment } from "alignment-viewer-2";
+import { 
+  AlignmentViewer, 
+  FastaAlignment
+} from "alignment-viewer-2";
 
 const fastaFileText = ">target\n" +
                       "ATGCATGC\n" +
@@ -41,7 +64,7 @@ const alignmentObj = FastaAlignment.fromFileContents(
     "ALIGNMENT_NAME", fastaFileText
 );
 
-<AlignmentViewer alignment={ alignmentObj } style={ alignmentObj.getDefaultStyle() } />
+<AlignmentViewer alignment={ alignmentObj }/>
 ```
 
 ## Download code and gather dependencies
@@ -49,13 +72,12 @@ const alignmentObj = FastaAlignment.fromFileContents(
 ```sh
 git clone https://github.com/sanderlab/AlignmentViewer2.0.git
 cd AlignmentViewer2.0
-export NODE_OPTIONS=--openssl-legacy-provider
 yarn
 ```
 
 ## Run the Alignment Viewer 2.0 demo site locally
 ```sh
-yarn run
+yarn start
 ```
 
 ## Build and run Alignment Viewer 2.0 locally
@@ -66,7 +88,7 @@ python3 -m http.server
 ```
 
 
-## Running Unit Tests
+## Running Unit Tests - **BROKEN**
 ```sh
 yarn test
 ```
@@ -78,9 +100,9 @@ sequences of length ~250 amino acids ([link to beta-lactamase MSA](https://raw.g
 
 Our strategy for dealing with peformance issues boils down to two main approaches:
 
-1. **Don't load what isn't visible ([Ace Editor](https://ace.c9.io/))**: Inserting many elements into the HTML DOM at one time absolutely kills performance. For example, insertion of roughly 100,000 elements (think an alignment of 1000 sequences of length 100) can drastically decreease performance. In order to allow for larger alignments in the _Detailed MSA Viewer_, we only insert the portion of the MSA that is visible at any given time. Smart loading decreases the number of elements in the DOM significantly and drastically improves performance. To accomplish this, we make use of the [Ace Editor](https://ace.c9.io/) project, and use a custom mode / highlighter to parse and style multiple sequence alignments.
+1. **Don't load what isn't visible**: Inserting many elements into the HTML DOM at one time absolutely kills performance. Even insertion of a small alignment of e.g., 1000 sequences of length 300, would contain ~300,000 elements (amino acids), which is likely to have performance issues even on new machines. In order to allow for larger alignments, we only insert the portion of the MSA that is visible at any given time. We have done this by implementing a virtualized matrix together with virtual scrollbars and mouse listeners to allow users to browse the data. Any changes during browsing load only those elements that are visible. We also use the virtualization matrix for the spreadsheet code. As the virtualization also allows for syncing scroll offset, it is also reused for all of the barplots, logo, and positional axis, although these widgets are not actually virtualized for performance reasons (they are only shifted by the offset).
 
-2. **Use the graphics card ([WebGL](https://get.webgl.org/) with [PixiJS](https://www.pixijs.com/))**: In order to view the entire MSA in the same viewed windoow, we have also implemented the _MiniMap MSA Viewer_ using the [PixiJS](https://www.pixijs.com/) 2D WebGL framework. This viewer avoids having many DOM elements by representing the MSA as a series of tiled images (avoiding browser image size limits) which can be zoomed, scaled, interacted with, etc. using the [pixi-viewport](https://github.com/davidfig/pixi-viewport) project.
+2. **Use the graphics card ([WebGL](https://get.webgl.org/) with [PixiJS](https://www.pixijs.com/))**: In order to get a zoomed-out view of a large fraction of the MSA in the same viewed windoow, we have also implemented the _MiniMap MSA Viewer_ using the [PixiJS](https://www.pixijs.com/) 2D WebGL framework. This viewer avoids having many DOM elements by representing the MSA as a series of tiled images (avoiding browser image size limits).
 
 ## Other Web-based Multiple Sequence Alignment Viewers
 
@@ -98,7 +120,7 @@ Alignment Viewer 2.0 provides a bunch of different color schemes for both amino 
 
 ## About Us
 
-Alignment Viewer 2.0 was developed at the Dana-Farber Cancer Institute and Harvard Medical School by Andrew Diamantoukos, Chris Sander, and Nicholas Gauthier.
+Alignment Viewer 2.0 was developed at the Dana-Farber Cancer Institute and Harvard Medical School by Yang Su, Andrew Diamantoukos, Chris Sander, and Nicholas Gauthier.
 
 ## Contributing
 
