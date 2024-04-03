@@ -55,7 +55,7 @@ export class StockholmAlignment extends Alignment {
     name: string,
     sequencesAsInput: ISequence[],
     metadata: IStockholmAlignmentMetadata,
-    removeDuplicateSequences: boolean
+    removeDuplicateSequences?: boolean
   }) {
     super(props);
     this.metadata = props.metadata;
@@ -71,7 +71,7 @@ export class StockholmAlignment extends Alignment {
   static fromFileContents(
     fileName: string,
     fileContents: string,
-    removeDuplicateSequences: boolean
+    removeDuplicateSequences?: boolean
   ): StockholmAlignment {
     const trimmedAndSplit = fileContents.trim().split(/\r?\n/);
 

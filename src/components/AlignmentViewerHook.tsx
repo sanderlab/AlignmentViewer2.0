@@ -19,7 +19,9 @@ import {
   NucleotideAlignmentTypeInstance,
   NucleotideColorSchemeInstance,
   NucleotideColorSchemes,
+  PositionsToStyle,
   PositionsToStyleInstance,
+  ResidueColoring,
   ResidueColoringInstance
 } from "../common/MolecularStyles";
 import { generateUUIDv4 } from "../common/Utils";
@@ -55,9 +57,7 @@ import { AlignmentSpreadsheet } from "./alignment-metadata/AlignmentSpreadsheetH
 //
 export type IAlignmentViewerProps = {
   alignment: Alignment;
-  alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
-  positionsToStyle: PositionsToStyleInstance;
-  residueColoring: ResidueColoringInstance;
+  alignmentType?: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
   highlightPositionalMatches?: ISearchMatchDetails;
   triggerShowSearch?: React.MutableRefObject<(() => void) | undefined>;
   mainViewportVisibleChanged?: (props: {
@@ -79,6 +79,9 @@ export type IBarplotExposedProps = Pick<
 // DEFAULT PROPS
 //
 const defaultProps = {
+  positionsToStyle: PositionsToStyle.ALL as PositionsToStyleInstance,
+  residueColoring: ResidueColoring.LIGHT as ResidueColoringInstance,
+
   disableSearch: false,
   disableSearchKeyboardShortcut: false,
   canvasGenerators: getCachedCanvasGenerators("primary"),
@@ -161,7 +164,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     highlightPositionalMatches,
 
     alignment,
-    alignmentType,
     aaColorScheme,
     ntColorScheme,
     barplots,
@@ -189,6 +191,10 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     ...defaultProps,
     ...props
   };
+  
+  const {
+    alignmentType = alignment.getPredictedType()
+  } = props;
 
   //error check color scheme and sort are congruant with passed alignment type
   //if not, reset.

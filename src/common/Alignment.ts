@@ -176,14 +176,14 @@ export class Alignment {
   public constructor(props: {
     name: string,
     sequencesAsInput: ISequence[],
-    removeDuplicateSequences: boolean,
+    removeDuplicateSequences?: boolean,
     supressParseTime?: boolean,
     overrideQuery?: ISequence
   }) {
     const {
       name,
       sequencesAsInput,
-      removeDuplicateSequences,
+      removeDuplicateSequences = false,
       supressParseTime,
       overrideQuery
     } = props;

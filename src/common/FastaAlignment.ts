@@ -14,7 +14,7 @@ export class FastaAlignment extends Alignment {
   static fromFileContents(
     fileName: string,
     fileContents: string,
-    removeDuplicateSequences: boolean
+    removeDuplicateSequences?: boolean
   ): FastaAlignment {
     const trimmedFile = fileContents.trim();
     if (trimmedFile.length < 1 || trimmedFile[0] !== ">") {
