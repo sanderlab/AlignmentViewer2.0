@@ -95,8 +95,6 @@ yarn test
 
 ## Performance Strategy
 
-### **UPDATE May 27, 2020**: we are working on a new version of the detailed alignment view that uses WebGL rather than the Ace Editor. Ace was never designed for exactly our use case and has been the code that uses the most memory, takes much of the processing time, and suffers the most lag and stuttering on large alignments. In rough tests, switching from Ace to WebGL dramatically increases performance - the memory footprint decreases by a factor of 10 and the size of the alignments we can smoothly display increases 10-100X (a few million sequences of length 500 is possible). We are in the process of adding in the same features as before, and expect to release the new version soon. Note that the change should be transparant for end users and developers, so feel free to use the current version as is.
-
 The Alignment Viewer 2.0 component was designed from the ground up to be highly performant in order to allow for viewing and analysis of very large MSAs - we actively test on an alignment based on [beta-lactamase](https://en.wikipedia.org/wiki/Beta-lactamase) that contains ~23,000
 sequences of length ~250 amino acids ([link to beta-lactamase MSA](https://raw.githubusercontent.com/sanderlab/AlignmentViewer2.0/master/public/7fa1c5691376beab198788a726917d48_b0.4.a2m)).
 
