@@ -585,7 +585,7 @@ $ntProps: (
 //get the equivalant hex color of an alpha-transformed hex.
 //see: https://makandracards.com/makandra/42500-sass-how-to-convert-an-rgba-color-to-its-rgb-look-alike
 @function getNonTransparantAlphaEquivalant($color, $alpha) {
-  @return mix($color, #fff, $alpha * 100);
+  @return mix($color, #fff, $alpha * 100%);
 }
 
 //same as getNonTransparantAlphaEquivalant but in bulk (takes a list rather
