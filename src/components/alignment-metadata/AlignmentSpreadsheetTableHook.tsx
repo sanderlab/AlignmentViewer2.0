@@ -60,10 +60,10 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     horizScrollbar = ScrollbarOptions.OnHoverWhenOverflowed
   } = props;
 
-  const HEADER_HEIGHT = 20;
+  const HEADER_HEIGHT = (rowHeight > 20) ? rowHeight : 20;
 
   const headerRef = useRef<HTMLDivElement>(null);
-  const containerId = useState<string>(generateUUIDv4()); //unique id for virtualization
+  const containerId = useMemo(generateUUIDv4, []); //unique id for virtualization
 
   //generate horizontal virtualizations.
   const horizControllerVirtParams = useMemo(()=>{
@@ -90,7 +90,8 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     alignmentUUID,
     containerId,
     fullActualWidth,
-    horizScrollbar
+    horizScrollbar,
+    HEADER_HEIGHT,
   ]);
 
   const vertVirtParams = useMemo(()=>{
@@ -105,7 +106,6 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     vertVirtualization,
     vertScrollbar
   ]);
-
 
   // Remove any non-alphanumeric characters in column keys so that they work as CSS strings
   const normalizedColumnKeys = useMemo(()=>{
@@ -186,9 +186,13 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
             const contentDivs = columnKeys.map((colKey, colIdx) => {
               const data = columns[colKey].rawData;
               const gridAreaKey = normalizedColumnKeys[colIdx];
+              let className = "table-column"
+              if (columns[colKey].key === "rownum") {
+                className += " rownum"
+              }
               return (
                 <React.Fragment key={colIdx}>
-                  <div className="table-column" style={{
+                  <div className={className} style={{
                     gridArea: gridAreaKey,
                     gridAutoRows: `${rowHeight}px`,
                   }}>

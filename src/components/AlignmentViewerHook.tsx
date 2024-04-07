@@ -560,7 +560,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     const toreturn: IAlignmentSpreadsheetProps["columns"] = {
       "rownum": {
         key: "rownum",
-        initialColumnName: "Row #",
+        initialColumnName: "",
         initiallyPinned: true,
         rawData: Array(alignment.getSequenceCount()).fill(0).map((val, idx)=>{
           return idx+1;

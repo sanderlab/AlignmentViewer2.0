@@ -81,7 +81,7 @@ export function AlignmentSpreadsheet(
     horizScrollbars = DEFAULTS.horizScrollbars,
   } = props;
 
-  const leftRightMarginInTableCells = 2;
+  const leftRightMarginInTableCells = Math.ceil(rowHeight / 3);
   const resizeBarWidthPx = 1;
   const borderWidthPx = 1;
 
@@ -95,7 +95,7 @@ export function AlignmentSpreadsheet(
   //state
   //
   const [currentGridDimensions, setCurrentGridDimensions] = useState<IBounds>();
-  const containerId = useState<string>(generateUUIDv4()); //unique id for virtualization
+  const containerId = useMemo(generateUUIDv4, []); //unique id for virtualization
   const [hovered, setHovered] = useState(false); //unique id for virtualization
   const [columnNames, setColumnNames] = useState<{[colKey: string]: string}>({});
   const [columnWidths, setColumnWidths] = useState<{[colKey: string]: number}>({});
@@ -130,7 +130,7 @@ export function AlignmentSpreadsheet(
   //
   // data and dom loading
   //
-  const getColumnWidthFromData = useCallback((column: ISpreadsheetColumn)=>{
+  const getColumnWidthFromData = useCallback((column: ISpreadsheetColumn, roughly = false)=>{
     const fudgeFactorAddedWidth = 5;
     const headerName = columnNames[column.key] 
       ? columnNames[column.key] 
@@ -143,9 +143,22 @@ export function AlignmentSpreadsheet(
     }) + (leftRightMarginInTableCells*2) + fudgeFactorAddedWidth;
     if(headerWidth >= maxColumnWidth) return maxColumnWidth; //header too big shortcut
 
+    let stringsToMeasure = column.rawData as string[];
+    if (roughly) {
+      let longest = "", len = 0;
+      for (const item of column.rawData.slice(0, 100)) {
+        const stringItem = `${item}`
+        if (stringItem.length > len) {
+          longest = stringItem;
+          len = stringItem.length;
+        }
+      }
+      stringsToMeasure = [longest]
+    }
+
     const maxDataWidth = getMaxStringCanvasWidth({
       fontSize: fontSize, 
-      stringsToMeasure: column.rawData as string[],
+      stringsToMeasure,
       maxWidthAllowed: maxColumnWidth,
     }) + (leftRightMarginInTableCells*2) + fudgeFactorAddedWidth;
 
@@ -209,8 +222,8 @@ export function AlignmentSpreadsheet(
       return Object.keys(columns).reduce((acc, colKey)=>{
         let width = prevColumnWidths[colKey];
         if(!width){
-          width = colKey === "rownum"
-            ? getColumnWidthFromData(columns[colKey])
+          width = ((colKey === "rownum") || true)
+            ? getColumnWidthFromData(columns[colKey], true)
             : startingColumnWidth;
         }
         acc[colKey] = width;
