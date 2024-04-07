@@ -174,7 +174,7 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
                     className="column-header"
                     style={{
                       gridArea: gridAreaKey,
-                      margin: `0 ${leftRightMarginInTableCells}px`,
+                      padding: `0 ${leftRightMarginInTableCells}px`,
                     }}>
                     {columns[colKey].initialColumnName}
                   </div>
@@ -191,11 +191,10 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
                   <div className="table-column" style={{
                     gridArea: gridAreaKey,
                     gridAutoRows: `${rowHeight}px`,
-                    margin: `0 ${leftRightMarginInTableCells}px`,
                   }}>
                     { 
                       rows.map((rowIdx)=>{ 
-                        return <div key={rowIdx}>{data[rowIdx]}</div> 
+                        return <div key={rowIdx} style={{padding: `0 ${leftRightMarginInTableCells}px`}}>{data[rowIdx]}</div> 
                       }) 
                     }
                   </div>

@@ -15,13 +15,24 @@
   //overflow-x: hidden;
   //overflow-y: hidden;
   .horizontal-resizer{
-    background-color: #f2f2f2; 
+    background-color: #d0d0d0; 
     margin: 0;
     padding: 0;
     cursor: ew-resize;
     height: 100%;
   }
   
+  .horizontal-resizer.hovered, 
+  .horizontal-resizer.resizing {
+    background-color: #0099ff;
+    border-left-color: #0099ff;
+    border-right-color: #0099ff;
+    width: 4px;
+    opacity: 1;
+    margin-left: -2px;
+    z-index: 1;
+  }
+
   .pinned-table-holder{ 
     grid-area: pinned-table;
     z-index: 1;
@@ -45,7 +56,12 @@
     .pinned-table.header{
       left: 0;
       right: 0;
-      background-color: #f4f4f4;
+
+      > *.column-header {
+        background-color: #e5e5e5;
+        border-top: 1px solid #e0e0e0;
+        border-bottom: 1px solid #e0e0e0;
+      }
     }
     .content-holder{
       position: absolute;
@@ -67,6 +83,11 @@
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
+          border-bottom: 1px solid #e0e0e0;
+        }
+
+        > *:nth-child(even) {
+          background-color: #f4f4f4;
         }
       }
 

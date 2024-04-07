@@ -82,7 +82,7 @@ export function AlignmentSpreadsheet(
   } = props;
 
   const leftRightMarginInTableCells = 2;
-  const resizeBarWidthPx = 4;
+  const resizeBarWidthPx = 1;
   const borderWidthPx = 1;
 
   const {
