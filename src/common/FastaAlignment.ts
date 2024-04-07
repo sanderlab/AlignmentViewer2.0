@@ -1,5 +1,6 @@
 import { Alignment, ISequence } from "./Alignment";
 import { getParseError } from "./Utils";
+import { parseSequenceAnnotations } from './Annotations'
 
 /**
  * FastaAlignment
@@ -26,11 +27,14 @@ export class FastaAlignment extends Alignment {
     for (var i = 0; i < fastaSplitCaret.length; i++) {
       const seqArr = fastaSplitCaret[i].split(/\r?\n/);
       if (seqArr.length > 1) {
-        var seqObj = {
-          id: seqArr[0],
-          sequence: seqArr.slice(1).join(""),
-        };
-        sequences.push(seqObj);
+        const idDesc = seqArr[0].match(/^\s*(?<id>\S+)(?:\s+(?<description>.+\S+)\s*)?$/)?.groups;
+        const sequence = seqArr.slice(1).join("");
+        if (idDesc) {
+          sequences.push({
+            sequence,
+            annotations: parseSequenceAnnotations(idDesc.id, sequence, idDesc.description),
+          });
+        }
       }
     }
     try {

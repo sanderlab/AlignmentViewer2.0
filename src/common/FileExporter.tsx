@@ -7,6 +7,7 @@ import { flushSync } from 'react-dom';
 
 import { getPositionalAxisRuler } from "../components/PositionalAxisHook";
 import { Alignment } from "./Alignment";
+import { DEFAULT_ANNOTATION_FIELDS } from "./Annotations";
 import {
   AlignmentTypes, 
   AminoAcidAlignmentTypeInstance, 
@@ -604,7 +605,7 @@ const getFullViewportSvgString = (props: {
     seqIdx => seqs[seqIdx]
   );
   const maxGenenameCharCount = exportedSeqs.reduce((acc, seq) => {
-    return acc > seq.id.length ? acc : seq.id.length;
+    return acc > seq.annotations[DEFAULT_ANNOTATION_FIELDS.ID].length ? acc : seq.annotations[DEFAULT_ANNOTATION_FIELDS.ID].length;
   }, -1);
   const genenameWidth = maxGenenameCharCount * moleculeWidth;
 
@@ -808,7 +809,7 @@ const getFullViewportSvgString = (props: {
       //to make it exact and we could do so here, but I think having the sequence ids as
       //full strings is more useful.
       `<g transform="translate(${offsets.metadata_and_titles.x}, ${offsets.msa.y + (seqIdx * moleculeHeight)})">`,
-        `<text class="geneid">${seq.id}</text>`,
+        `<text class="geneid">${seq.annotations[DEFAULT_ANNOTATION_FIELDS.ID]}</text>`,
       `</g>`
     ].join("")
   });

@@ -1,5 +1,6 @@
 import { Alignment, ISequence } from "./Alignment";
 import { getParseError } from "./Utils";
+import { DEFAULT_ANNOTATION_FIELDS, parseSequenceAnnotations } from "./Annotations";
 
 export interface IStockholmAlignmentMetadata {
   //GF: Data relating to the multiple sequence alignment as a whole, such as authors or
@@ -103,11 +104,18 @@ export class StockholmAlignment extends Alignment {
       .slice(1, trimmedAndSplit.length - 1)
       .forEach((line, idx) => {
         line = line.trim();
-        if (!line.startsWith("#")) {
+        if (line && !line.startsWith("#")) {
           //sequence line
           const split = line.match(/^(\S+)\s(.*)/)!.slice(1);
-          sequences.push({ id: split[0].trim(), sequence: split[1].trim() });
-        } else {
+          const id = split[0].trim()
+          sequences.push({
+            annotations: {
+              [DEFAULT_ANNOTATION_FIELDS.ID]: id,
+              [DEFAULT_ANNOTATION_FIELDS.ACTUAL_ID]: id,
+            }, 
+            sequence: split[1].trim() 
+          });
+        } else if (line.startsWith("#")) {
           //metadata line
           if (
             line.length < 8 ||
@@ -165,6 +173,19 @@ export class StockholmAlignment extends Alignment {
           }
         }
       });
+
+    for (const seq of sequences) {
+      const id = seq.annotations[DEFAULT_ANNOTATION_FIELDS.ID];
+      if (metadata.GS[id]) {
+        const description = metadata.GS[id]["DE"]?.join("");
+        Object.assign(seq.annotations, parseSequenceAnnotations(id, seq.sequence, description)); 
+        for (const key of Object.keys(metadata.GS[id])) {
+          if (key !== "DE") {
+            seq.annotations[key] = metadata.GS[id][key].join(" ");
+          }
+        }
+      }
+    }
 
     try {
       return new StockholmAlignment({
