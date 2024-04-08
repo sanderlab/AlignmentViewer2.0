@@ -140,8 +140,8 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
   ]);
 
   const resizerDoubleClicked = useCallback((key: string) => {
-    columnWidthUpdateRequested(key)
-  }, [ columnWidthUpdateRequested ]);
+    columnWidthUpdateRequested(columnKeys[normalizedColumnKeys.indexOf(key)])
+  }, [ columnWidthUpdateRequested, columnKeys, normalizedColumnKeys ]);
 
   const gridAreaResizerNames = useMemo(()=>{
     return normalizedColumnKeys.map((colKey, idx)=>{
