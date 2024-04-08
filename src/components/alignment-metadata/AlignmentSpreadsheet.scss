@@ -47,9 +47,12 @@
 
     .pinned-table.header{
       border: solid 1px rgb(104, 104, 104);
+      box-sizing: border-box;
     }
     .pinned-table.content{
       border: solid 1px rgb(104, 104, 104);
+      border-top: none;
+      box-sizing: border-box;
     }
 
     .unpinned-table.header,

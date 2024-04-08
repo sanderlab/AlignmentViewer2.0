@@ -346,8 +346,8 @@ export function AlignmentSpreadsheet(
   )=>{
     const maxWidth = pinned ? maxPinnedTableWidth : maxUnpinnedTableWidth;
     const actualWidth = colWidths.reduce((acc, colWidthPx)=>{
-      return acc + colWidthPx + resizeBarWidthPx + (borderWidthPx);
-    }, 0);
+      return acc + colWidthPx + resizeBarWidthPx;
+    }, 0) + (pinned ? (borderWidthPx) * 2 : 0);
     return [
       actualWidth,
       actualWidth < maxWidth
