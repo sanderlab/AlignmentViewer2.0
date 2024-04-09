@@ -16,6 +16,7 @@ import {
   ResidueColoringInstance
 } from "../../common/MolecularStyles";
 import { Alignment, ISequence } from "../../common/Alignment";
+import { type TAnnotations } from "../../common/Annotations";
 import { AlignmentViewer, IBarplotExposedProps } from "../AlignmentViewerHook";
 import { IAdjustableWidth } from "../layout/AlignmentViewerLayoutHook";
 import { ISingleBarDetails, PreconfiguredPositionalBarplots } from "../PositionalBarplotHook";
@@ -39,7 +40,7 @@ export function SequenceSearch(props: {
   closePressed: ()=>void;
   mainAlignmentQuerySequence: ISequence;
   sortedSequences: string[];
-  sortedSequenceIds: string[];
+  sortedSequenceAnnotations: TAnnotations[];
 
   alignmentType: AminoAcidAlignmentTypeInstance | NucleotideAlignmentTypeInstance;
   aaColorScheme?: AminoacidColorSchemeInstance;
@@ -52,7 +53,7 @@ export function SequenceSearch(props: {
     closePressed,
     mainAlignmentQuerySequence,
     sortedSequences,
-    sortedSequenceIds,
+    sortedSequenceAnnotations,
 
     alignmentType,
     aaColorScheme = AminoAcidColorSchemes.list[0],
@@ -163,7 +164,7 @@ export function SequenceSearch(props: {
         const uniquePositionIdxs: number[] = Object.values(positionIdxHM);
         if (uniquePositionIdxs.length > 0){
           sequenceMatches.push({
-            id: sortedSequenceIds[i],
+            annotations: sortedSequenceAnnotations[i],
             sequence: sortedSequences[i]
           });
           matchDetails.posidxsMatchedPerSequence[sortedSequences[i]] = uniquePositionIdxs;
@@ -193,7 +194,7 @@ export function SequenceSearch(props: {
     highlightColor,
     lowercaseOrderedSequences,
     mainAlignmentQuerySequence,
-    sortedSequenceIds,
+    sortedSequenceAnnotations,
     sortedSequences,
   ]);
 
@@ -205,7 +206,7 @@ export function SequenceSearch(props: {
     colorScheme,
     handleSearchChange,
     sortedSequences,
-    sortedSequenceIds,
+    sortedSequenceAnnotations,
     positionsToStyle,
     residueColoring
   ]);

@@ -9,6 +9,7 @@ import {
 
 import { MiniMap } from "./minimap/MiniMapHook";
 import { Alignment } from "../common/Alignment";
+import { DEFAULT_ANNOTATION_FIELDS } from "../common/Annotations";
 import { SequenceSorter, SequenceSorterInstance } from "../common/AlignmentSorter";
 import { reduxStore } from "../redux/ReduxStore";
 import {
@@ -49,7 +50,7 @@ import { ISearchMatchDetails, SequenceSearch } from "./search/SequenceSearchHook
 import { useListenForSearchKeypresses } from "./search/SearchKeysListenerHook";
 import { MSABlocksAndLetters } from "./msa-blocks-and-letters/MSABlocksAndLetters";
 import { getCachedCanvasGenerators } from "./msa-blocks-and-letters/MSABlockGenerator";
-import { AlignmentSpreadsheet } from "./alignment-metadata/AlignmentSpreadsheetHook";
+import { AlignmentSpreadsheet, IAlignmentSpreadsheetProps } from "./alignment-metadata/AlignmentSpreadsheetHook";
 
 
 //
@@ -325,11 +326,11 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     .map((iseq) => iseq.sequence)
   }, [alignment, sortBy]);
 
-  const sequenceIds = useMemo(()=>{
+  const sequenceAnnotations = useMemo(()=>{
     return alignment.getSequences(
       sortBy ? sortBy : defaultProps.sortBy
     )
-    .map((iseq) => iseq.id)
+    .map((iseq) => iseq.annotations)
   }, [alignment, sortBy]);
   
 
@@ -556,43 +557,32 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
 
   //dummy data
   const spreadsheetData = useMemo(()=>{
-    return {
+    const toreturn: IAlignmentSpreadsheetProps["columns"] = {
       "rownum": {
         key: "rownum",
-        initialColumnName: "Row #",
-        initiallyPinned: false,
+        initialColumnName: "",
+        initiallyPinned: true,
         rawData: Array(alignment.getSequenceCount()).fill(0).map((val, idx)=>{
           return idx+1;
         }),
       }, 
-      "id": {
-        key: "id",
-        initialColumnName: "Id",
-        initiallyPinned: false,
-        rawData: alignment.getSequences().map((seq)=>{
-          return seq.id;
-        }),
-      }, 
-      //"second-column": {
-      //  key: "second column",
-      //  initiallyPinned: false,
-      //  initialColumnName: "second column",
-      //  rawData: Array(alignment.getSequenceCount()).fill('second'),
-      //}, 
-      //"third-column": {
-      //  key: "third column",
-      //  initiallyPinned: false,
-      //  initialColumnName: "third column",
-      //  rawData: Array(alignment.getSequenceCount()).fill('blah'),
-      //},
-      //"4th-column": {
-      //  key: "4th column",
-      //  initiallyPinned: false,
-      //  initialColumnName: "4th column",
-      //  rawData: Array(alignment.getSequenceCount()).fill('the fourth column'),
-      //}
     }
-  }, [alignment]);
+
+    const annotationFields = alignment.getAnnotationFields();
+    const sequences = alignment.getSequences(sortBy);
+    for (const key of Object.keys(annotationFields)) {
+      toreturn[key] = {
+        key,
+        initialColumnName: annotationFields[key].name,
+        initiallyPinned: (key === DEFAULT_ANNOTATION_FIELDS.ID),
+        rawData: Array(alignment.getSequenceCount()).fill(0).map((val, idx)=>{
+          return sequences[idx].annotations[key] ?? "";
+        }),
+      };
+    }
+
+    return toreturn;
+  }, [alignment, sortBy]);
 
 
   //
@@ -607,7 +597,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
             closePressed={closeSearch}
             mainAlignmentQuerySequence={alignment.getQuery()}
             sortedSequences={sequences}
-            sortedSequenceIds={sequenceIds}
+            sortedSequenceAnnotations={sequenceAnnotations}
             alignmentType={alignmentType}
             aaColorScheme={aaColorScheme}
             ntColorScheme={ntColorScheme}

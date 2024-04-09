@@ -71,18 +71,16 @@ export function AlignmentSpreadsheet(
 ) {
   //props
   const {
-    alignmentUUID,
     rowHeight,
     fontSize,
-    columns,
     columnWidthParams = DEFAULTS.defaultColumnWidth,
     maxPinnedTableWidth = DEFAULTS.maxPinnedTableWidth,
     maxUnpinnedTableWidth = DEFAULTS.maxUnpinnedTableWidth,
     horizScrollbars = DEFAULTS.horizScrollbars,
   } = props;
 
-  const leftRightMarginInTableCells = 2;
-  const resizeBarWidthPx = 4;
+  const leftRightMarginInTableCells = Math.ceil(rowHeight / 3);
+  const resizeBarWidthPx = 1;
   const borderWidthPx = 1;
 
   const {
@@ -95,22 +93,15 @@ export function AlignmentSpreadsheet(
   //state
   //
   const [currentGridDimensions, setCurrentGridDimensions] = useState<IBounds>();
-  const containerId = useState<string>(generateUUIDv4()); //unique id for virtualization
+  const containerId = useMemo(generateUUIDv4, []); //unique id for virtualization
   const [hovered, setHovered] = useState(false); //unique id for virtualization
+
+  const [alignmentUUID, setAlignmentUUID] = useState("");
+  const [columns, setColumns] = useState<{[key: string]: ISpreadsheetColumn}>({});
   const [columnNames, setColumnNames] = useState<{[colKey: string]: string}>({});
   const [columnWidths, setColumnWidths] = useState<{[colKey: string]: number}>({});
-  const [pinnedColumnKeys, setPinnedColumnKeys] = useState<string[]>(
-    Object.keys(columns).reduce((acc, colKey)=>{
-      if(columns[colKey].initiallyPinned) acc.push(colKey);
-      return acc;
-    }, [] as string[])
-  );
-  const [unpinnedColumnKeys, setUnpinnedColumnKeys] = useState<string[]>(
-    Object.keys(columns).reduce((acc, colKey)=>{
-      if(!columns[colKey].initiallyPinned) acc.push(colKey);
-      return acc;
-    }, [] as string[])
-  );
+  const [pinnedColumnKeys, setPinnedColumnKeys] = useState<string[]>([]);
+  const [unpinnedColumnKeys, setUnpinnedColumnKeys] = useState<string[]>([]);
 
   //
   // callbacks
@@ -130,7 +121,7 @@ export function AlignmentSpreadsheet(
   //
   // data and dom loading
   //
-  const getColumnWidthFromData = useCallback((column: ISpreadsheetColumn)=>{
+  const getColumnWidthFromData = useCallback((column: ISpreadsheetColumn, roughly = false)=>{
     const fudgeFactorAddedWidth = 5;
     const headerName = columnNames[column.key] 
       ? columnNames[column.key] 
@@ -143,9 +134,22 @@ export function AlignmentSpreadsheet(
     }) + (leftRightMarginInTableCells*2) + fudgeFactorAddedWidth;
     if(headerWidth >= maxColumnWidth) return maxColumnWidth; //header too big shortcut
 
+    let stringsToMeasure = column.rawData as string[];
+    if (roughly) {
+      let longest = "", len = 0;
+      for (const item of column.rawData.slice(0, 100)) {
+        const stringItem = `${item}`
+        if (stringItem.length > len) {
+          longest = stringItem;
+          len = stringItem.length;
+        }
+      }
+      stringsToMeasure = [longest]
+    }
+
     const maxDataWidth = getMaxStringCanvasWidth({
       fontSize: fontSize, 
-      stringsToMeasure: column.rawData as string[],
+      stringsToMeasure,
       maxWidthAllowed: maxColumnWidth,
     }) + (leftRightMarginInTableCells*2) + fudgeFactorAddedWidth;
 
@@ -163,65 +167,83 @@ export function AlignmentSpreadsheet(
     fontSize,
   ]);
 
+  if (props.columns !== columns) {
+    if (props.alignmentUUID !== alignmentUUID) { // new alignment loaded
+      setAlignmentUUID(props.alignmentUUID);
 
-  //adjust column width and adjust pined columns if data changes
-  useEffect(()=>{
-    setColumnNames((prevColumnNames: {[colKey: string]: string})=>{
-      return Object.keys(columns).reduce((acc, colKey)=>{
-        acc[colKey] = prevColumnNames[colKey] 
-          ? prevColumnNames[colKey] 
-          : columns[colKey].initialColumnName;
-        return acc;
-      }, {} as {[colKey: string]: string})
-    });
+      setColumnNames(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          acc[colKey] = props.columns[colKey].initialColumnName;
+          return acc;
+        }, {} as {[colKey: string]: string})
+      );
 
-    //setPinnedColumnKeys((prevPinnedColKeys: string[])=>{
-    //  return Object.keys(columns).reduce((acc, colKey)=>{
-    //    if(prevPinnedColKeys.includes(colKey) || columns){
-//
-    //    }
-    //    acc[colKey] = prevPinnedColKeys.includes(colKey)
-    //      ? prevColumnNames[colKey] 
-    //      : columns[colKey].initialColumnName;
-    //    return acc;
-    //  }, [] as string[])
-    //});
-  }, [columns]);
-
-  //adjust column width if data changes
-  useEffect(()=>{
-    if(Object.keys(columns).length < 1){ return; }
-
-    //START of subsampling code if data are too big.
-    //const oneCol = columns[Object.keys(columns)[0]]
-    //const numSequences = oneCol.rawData.length;
-    //const NUM_RANDOM_WIDTH_CHECK = numSequences < 1000 
-    //  ? numSequences 
-    //  : 1000;
-    //const randomIndicies: number[] = [];
-    //for(var i = 0; i < NUM_RANDOM_WIDTH_CHECK; i++){
-    //  randomIndicies.push(
-    //    Math.floor(Math.random() * numSequences)
-    //  );
-    //}
-
-    setColumnWidths((prevColumnWidths: {[colKey: string]: number})=>{
-      return Object.keys(columns).reduce((acc, colKey)=>{
-        let width = prevColumnWidths[colKey];
-        if(!width){
-          width = colKey === "rownum"
-            ? getColumnWidthFromData(columns[colKey])
+      setColumnWidths(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          acc[colKey] = ((colKey === "rownum") || true)
+            ? getColumnWidthFromData(props.columns[colKey], true)
             : startingColumnWidth;
-        }
-        acc[colKey] = width;
-        return acc;
-      }, {} as {[colKey: string]: number})
-    });
-  }, [
-    columns,
-    startingColumnWidth,
-    getColumnWidthFromData
-  ]);
+          return acc;
+        }, {} as {[colKey: string]: number})
+      );
+  
+      setPinnedColumnKeys(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          if (props.columns[colKey].initiallyPinned) acc.push(colKey);
+          return acc;
+        }, [] as string[])
+      );
+
+      setUnpinnedColumnKeys(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          if (!props.columns[colKey].initiallyPinned) acc.push(colKey);
+          return acc;
+        }, [] as string[])
+      );
+    } else { // same alignment, new annotation columns added
+      setColumnNames(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          acc[colKey] = columnNames[colKey] 
+            ? columnNames[colKey] 
+            : props.columns[colKey].initialColumnName;
+          return acc;
+        }, {} as {[colKey: string]: string})
+      );
+
+      setColumnWidths(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          let width = columnWidths[colKey];
+          if(!width){
+            width = ((colKey === "rownum") || true)
+              ? getColumnWidthFromData(props.columns[colKey], true)
+              : startingColumnWidth;
+          }
+          acc[colKey] = width;
+          return acc;
+        }, {} as {[colKey: string]: number})
+      );
+  
+      setPinnedColumnKeys(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          if (!(colKey in columns) && (props.columns[colKey].initiallyPinned)) {
+            acc.push(colKey);
+          }
+          return acc;
+        }, [] as string[])
+      );
+
+      setUnpinnedColumnKeys(
+        Object.keys(props.columns).reduce((acc, colKey)=>{
+          if (!(colKey in columns) && (!props.columns[colKey].initiallyPinned)) {
+            acc.push(colKey);
+          }
+          return acc;
+        }, [] as string[])
+      );
+    }
+
+    setColumns(props.columns);
+  }
 
   //
   //load vertical virtualizations - either from props or auto generate. or don't virtualize
@@ -324,8 +346,8 @@ export function AlignmentSpreadsheet(
   )=>{
     const maxWidth = pinned ? maxPinnedTableWidth : maxUnpinnedTableWidth;
     const actualWidth = colWidths.reduce((acc, colWidthPx)=>{
-      return acc + colWidthPx + resizeBarWidthPx + (borderWidthPx);
-    }, 0);
+      return acc + colWidthPx + resizeBarWidthPx;
+    }, 0) + (pinned ? (borderWidthPx) * 2 : 0);
     return [
       actualWidth,
       actualWidth < maxWidth

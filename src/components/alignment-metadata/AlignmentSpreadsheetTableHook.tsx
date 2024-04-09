@@ -60,10 +60,10 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     horizScrollbar = ScrollbarOptions.OnHoverWhenOverflowed
   } = props;
 
-  const HEADER_HEIGHT = 20;
+  const HEADER_HEIGHT = (rowHeight > 20) ? rowHeight : 20;
 
   const headerRef = useRef<HTMLDivElement>(null);
-  const containerId = useState<string>(generateUUIDv4()); //unique id for virtualization
+  const containerId = useMemo(generateUUIDv4, []); //unique id for virtualization
 
   //generate horizontal virtualizations.
   const horizControllerVirtParams = useMemo(()=>{
@@ -90,7 +90,8 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     alignmentUUID,
     containerId,
     fullActualWidth,
-    horizScrollbar
+    horizScrollbar,
+    HEADER_HEIGHT,
   ]);
 
   const vertVirtParams = useMemo(()=>{
@@ -106,10 +107,15 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     vertScrollbar
   ]);
 
-
+  // Remove any non-alphanumeric characters in column keys so that they work as CSS strings
+  const normalizedColumnKeys = useMemo(()=>{
+    return columnKeys.map((colKey)=>{
+      return colKey.replaceAll(/\W/g, "");
+    });
+  }, [columnKeys]);
+  
   const draggerMoved = useCallback((newX: number, key: string)=>{
-
-    const idx = columnKeys.indexOf(key);
+    const idx = normalizedColumnKeys.indexOf(key);
     const headerElems = headerRef.current?.getElementsByClassName("column-header");
     if(!headerElems || headerElems.length < idx){
       console.error(
@@ -125,26 +131,27 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
       boundingBox.x              //actual offset of grid
     );
 
-    columnWidthUpdateRequested(key, newProposedWidth);
+    columnWidthUpdateRequested(columnKeys[idx], newProposedWidth);
   }, [
     resizeBarSizePx,
     columnKeys,
+    normalizedColumnKeys,
     columnWidthUpdateRequested
   ]);
 
   const resizerDoubleClicked = useCallback((key: string) => {
-    columnWidthUpdateRequested(key)
-  }, [ columnWidthUpdateRequested ]);
+    columnWidthUpdateRequested(columnKeys[normalizedColumnKeys.indexOf(key)])
+  }, [ columnWidthUpdateRequested, columnKeys, normalizedColumnKeys ]);
 
   const gridAreaResizerNames = useMemo(()=>{
-    return columnKeys.map((colKey)=>{
-      return `${colKey}-resizer`
+    return normalizedColumnKeys.map((colKey, idx)=>{
+      return `${colKey}-resizer`;
     });
-  }, [columnKeys]);
+  }, [normalizedColumnKeys]);
 
   const colResizers = useResizeGrid({
     resizeSeparatorGridAreaNames: gridAreaResizerNames,
-    keys: columnKeys,
+    keys: normalizedColumnKeys,
     resizeDirection: "horizontal",
     draggerMoved: draggerMoved,
     resizerDoubleClicked: resizerDoubleClicked
@@ -160,41 +167,54 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
             );
 
             const headerDivs = columnKeys.map((colKey, idx) => {
+              const gridAreaKey = normalizedColumnKeys[idx];
               return (
                 <React.Fragment key={idx}>
                   <div 
                     className="column-header"
                     style={{
-                      gridArea: colKey,
-                      margin: `0 ${leftRightMarginInTableCells}px`,
+                      gridArea: gridAreaKey,
+                      padding: `0 ${leftRightMarginInTableCells}px`,
                     }}>
                     {columns[colKey].initialColumnName}
                   </div>
-                  {colResizers.resizeSeparators[colKey]}
+                  {colResizers.resizeSeparators[gridAreaKey]}
                 </React.Fragment>
               )
             });
 
             const contentDivs = columnKeys.map((colKey, colIdx) => {
               const data = columns[colKey].rawData;
+              const gridAreaKey = normalizedColumnKeys[colIdx];
+              let className = "table-column"
+              if (columns[colKey].key === "rownum") {
+                className += " rownum"
+              }
               return (
                 <React.Fragment key={colIdx}>
-                  <div className="table-column" style={{
-                    gridArea: colKey,
+                  <div className={className} style={{
+                    gridArea: gridAreaKey,
                     gridAutoRows: `${rowHeight}px`,
-                    margin: `0 ${leftRightMarginInTableCells}px`,
                   }}>
                     { 
                       rows.map((rowIdx)=>{ 
-                        return <div key={rowIdx}>{data[rowIdx]}</div> 
+                        return <div key={rowIdx} style={{padding: `0 ${leftRightMarginInTableCells}px`}}>{data[rowIdx]}</div> 
                       }) 
                     }
                   </div>
                   
-                  {colResizers.resizeSeparators[colKey]}
+                  {colResizers.resizeSeparators[gridAreaKey]}
                 </React.Fragment>
               )
             });
+
+            const gridTemplateColumns = columnWidths.map((width)=>{
+              return `${width}px ${resizeBarSizePx}px`
+            }).join(" ");
+
+            const gridTemplateAreas = '"' + normalizedColumnKeys.map((key)=>{
+              return `${key} ${key}-resizer`
+            }).join(" ") + '"';
 
             return (
               <>
@@ -203,23 +223,15 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
                   top: `-${HEADER_HEIGHT}px`,
                   height: `${HEADER_HEIGHT}px`,
                   lineHeight: `${HEADER_HEIGHT}px`,
-                  gridTemplateColumns: `${columnWidths.map((width)=>{
-                    return `${width}px ${resizeBarSizePx}px`
-                  }).join(" ")}`,
-                  gridTemplateAreas: `"${columnKeys.map((key)=>{
-                    return `${key} ${key}-resizer`
-                  }).join(" ")}"`
+                  gridTemplateColumns,
+                  gridTemplateAreas,
                 }}>  {headerDivs} </div>
 
                 <div className="content-holder">
                   <div className={`${className} content`} style={{
                     top: `${params.renderShiftTopPx}px`, 
-                    gridTemplateColumns: `${columnWidths.map((width)=>{
-                      return `${width}px ${resizeBarSizePx}px`
-                    }).join(" ")}`,
-                    gridTemplateAreas: `"${columnKeys.map((key)=>{
-                      return `${key} ${key}-resizer`
-                    }).join(" ")}"`
+                    gridTemplateColumns,
+                    gridTemplateAreas,
                   }}> {contentDivs} </div>
                 </div>
               </>
