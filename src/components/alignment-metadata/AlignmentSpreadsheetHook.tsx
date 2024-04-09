@@ -133,7 +133,6 @@ export function AlignmentSpreadsheet(
       maxWidthAllowed: maxColumnWidth,
     }) + (leftRightMarginInTableCells*2) + fudgeFactorAddedWidth;
     if(headerWidth >= maxColumnWidth) return maxColumnWidth; //header too big shortcut
-
     let stringsToMeasure = column.rawData as string[];
     if (roughly) {
       let longest = "", len = 0;
@@ -166,7 +165,7 @@ export function AlignmentSpreadsheet(
     maxColumnWidth,
     fontSize,
   ]);
-
+  
   if (props.columns !== columns) {
     if (props.alignmentUUID !== alignmentUUID) { // new alignment loaded
       setAlignmentUUID(props.alignmentUUID);

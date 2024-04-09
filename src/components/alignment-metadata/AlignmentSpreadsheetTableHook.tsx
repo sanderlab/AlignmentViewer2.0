@@ -61,7 +61,6 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
   } = props;
 
   const HEADER_HEIGHT = (rowHeight > 20) ? rowHeight : 20;
-
   const headerRef = useRef<HTMLDivElement>(null);
   const containerId = useMemo(generateUUIDv4, []); //unique id for virtualization
 

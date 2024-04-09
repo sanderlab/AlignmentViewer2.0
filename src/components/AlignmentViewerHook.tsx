@@ -565,7 +565,7 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         rawData: Array(alignment.getSequenceCount()).fill(0).map((val, idx)=>{
           return idx+1;
         }),
-      }, 
+      },
     }
 
     const annotationFields = alignment.getAnnotationFields();
