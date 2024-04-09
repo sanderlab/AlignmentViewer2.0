@@ -84,14 +84,16 @@
         display: grid;
         align-items: stretch;
         > * {
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
           border-bottom: 0.5px solid #e0e0e0;
           border-bottom: 0.5px solid #e0e0e0;
           box-sizing: border-box;
           display: grid;
           align-items: center;
+          > * {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
         }
       }
 

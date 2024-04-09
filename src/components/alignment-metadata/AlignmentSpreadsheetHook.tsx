@@ -2,7 +2,7 @@
  * Base hook for a spreadsheet to show annotations.
  */
 import "./AlignmentSpreadsheet.scss";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import { 
   generateUUIDv4
@@ -42,6 +42,7 @@ export interface IAlignmentSpreadsheetProps {
   rowHeight: number;
   fontSize: number;
   //reorderable: boolean;
+  //minWidthPxUpdateRequest: (minSizePx: number) => boolean;
 
   columns: {[key: string]: ISpreadsheetColumn};
   maxPinnedTableWidth?: number;
@@ -407,10 +408,11 @@ export function AlignmentSpreadsheet(
   ]);
 
   const pinnedGridTemplateColumns = pinnedTableActualWidth > 0
+    //? `${pinnedTableActualWidth}px`
     ? `minmax(100px, ${pinnedTableActualWidth}px)`
     : "";
   const unpinnedGridTemplateColumns = unpinnedTableActualWidth > 0
-    ? ` minmax(100px, ${unpinnedTableActualWidth}px)`
+    ? `minmax(100px, ${unpinnedTableActualWidth}px)`
     : " 0px";
   const gridTemplateAreas = `"${pinnedTableActualWidth > 0 ? "pinned-table " : "" }unpinned-table"`;
 

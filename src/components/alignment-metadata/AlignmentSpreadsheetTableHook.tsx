@@ -202,7 +202,7 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
                         return (
                           <div key={rowIdx} 
                             style={{padding: `0 ${leftRightMarginInTableCells}px`}}>
-                              {data[rowIdx]}
+                              <span>{data[rowIdx]}</span>
                           </div> )
                       }) 
                     }
