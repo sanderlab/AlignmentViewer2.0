@@ -59,6 +59,7 @@
     .pinned-table.header{
       left: 0;
       right: 0;
+      align-items: center;
       > *.column-header {
         background-color: #e5e5e5;
         border-top: 1px solid #e0e0e0;
@@ -81,11 +82,16 @@
 
       .table-column{
         display: grid;
+        align-items: stretch;
         > * {
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
-          border-bottom: 1px solid #e0e0e0;
+          border-bottom: 0.5px solid #e0e0e0;
+          border-bottom: 0.5px solid #e0e0e0;
+          box-sizing: border-box;
+          display: grid;
+          align-items: center;
         }
       }
 
@@ -96,8 +102,8 @@
       }
 
       .table-column.rownum {
-        font-size: small;
         text-align: right;
+        //font-size: .9em;
         color: #707070;
         background-color: #e5e5e5;
       }

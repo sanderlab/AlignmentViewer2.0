@@ -175,7 +175,9 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
                       gridArea: gridAreaKey,
                       padding: `0 ${leftRightMarginInTableCells}px`,
                     }}>
-                    {columns[colKey].initialColumnName}
+                    {columns[colKey].initialColumnName
+                      ? columns[colKey].initialColumnName
+                      : "\u00A0"}
                   </div>
                   {colResizers.resizeSeparators[gridAreaKey]}
                 </React.Fragment>
@@ -197,7 +199,11 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
                   }}>
                     { 
                       rows.map((rowIdx)=>{ 
-                        return <div key={rowIdx} style={{padding: `0 ${leftRightMarginInTableCells}px`}}>{data[rowIdx]}</div> 
+                        return (
+                          <div key={rowIdx} 
+                            style={{padding: `0 ${leftRightMarginInTableCells}px`}}>
+                              {data[rowIdx]}
+                          </div> )
                       }) 
                     }
                   </div>
