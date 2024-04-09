@@ -13,10 +13,11 @@ import {
   PositionsToStyleInstance,
   ResidueColoringInstance,
 } from "./MolecularStyles";
+import { DEFAULT_ANNOTATION_FIELDS, formatFieldName, type TAnnotations } from "./Annotations";
 
 export interface ISequence {
-  id: string;
   sequence: string;
+  annotations: TAnnotations;
 }
 
 //private functions
@@ -133,6 +134,7 @@ export class Alignment {
   private allUpperAlphaLettersInAlignmentSorted: UpperCaseLetters[];
   private consensus: ISequence;
   private allRepresentedCharacters: string[];
+  private annotationFields: Record<string, {key: string, name: string}>;
 
   /**
    * Normalize all values in an object that contains all counts such that
@@ -230,7 +232,13 @@ export class Alignment {
       ? overrideQuery
       : finalInputSequences[0]
         ? {...finalInputSequences[0]}    //copy of the first sequence
-        : { id: "query", sequence: "" }; //empty alignment
+        : {
+          sequence: "", 
+          annotations: {
+            [DEFAULT_ANNOTATION_FIELDS.ID]:"query",
+            [DEFAULT_ANNOTATION_FIELDS.ACTUAL_ID]:"query",
+          }
+        }; //empty alignment
     this.predictedNT = true;
 
 
@@ -342,7 +350,10 @@ export class Alignment {
 
     //extract consensus
     this.consensus = {
-      id: "consensus",
+      annotations: {
+        [DEFAULT_ANNOTATION_FIELDS.ID]: "consensus",
+        [DEFAULT_ANNOTATION_FIELDS.ACTUAL_ID]: "consensus",
+      },
       sequence: Array.from(this.positionalLetterCounts)
         .map(([positionIdx, letterCounts]) => {
           //all zero entries removed from this.positionalLetterCounts above
@@ -378,6 +389,18 @@ export class Alignment {
         .join(""),
     };
 
+    this.annotationFields = {};
+    for (const seq of finalInputSequences) {
+      for (const field of Object.keys(seq.annotations)) {
+        if (!(field in this.annotationFields)) {
+          this.annotationFields[field] = {
+            key: field,
+            name: formatFieldName(field),
+          };
+        }
+      }
+    }
+    
     if(!supressParseTime){
       console.log(
         "done parsing alignment. took " +
@@ -582,6 +605,14 @@ export class Alignment {
       );
     }
     return this.sortedSequencesCache.get(sortBy)!;
+  }
+
+  /**
+   * Get all annotation fields in all sequences
+   * @returns all annotation fields
+   */
+  getAnnotationFields() {
+    return this.annotationFields;
   }
 
   /**
