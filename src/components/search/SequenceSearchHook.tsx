@@ -18,7 +18,6 @@ import {
 import { Alignment, ISequence } from "../../common/Alignment";
 import { type TAnnotations } from "../../common/Annotations";
 import { AlignmentViewer, IBarplotExposedProps } from "../AlignmentViewerHook";
-import { IAdjustableWidth } from "../layout/AlignmentViewerLayoutHook";
 import { ISingleBarDetails, PreconfiguredPositionalBarplots } from "../PositionalBarplotHook";
 import { getCachedCanvasGenerators } from "../msa-blocks-and-letters/MSABlockGenerator";
 
@@ -234,15 +233,6 @@ export function SequenceSearch(props: {
     highlightColor
   ]);
 
-  const metadataSizingCache = useMemo(()=>{
-    return {
-      type: "adjustable-width",
-      startingWidth: 100,
-      minWidth: 75,
-      maxWidth: 300,
-    } as IAdjustableWidth
-  }, []);
-
   //
   // render
   //
@@ -348,7 +338,8 @@ export function SequenceSearch(props: {
                   showConsensus={true}
                   showAnnotations={true}
                   showMinimap={true}
-                  metadataSizing={metadataSizingCache}/>
+                  //metadataSizing={metadataSizingCache}
+                  />
               }
             </div>
           </div>

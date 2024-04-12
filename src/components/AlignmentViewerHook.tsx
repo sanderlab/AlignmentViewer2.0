@@ -99,13 +99,6 @@ const defaultProps = {
   showQuery: true as boolean,
   showRuler: true as boolean,
 
-  metadataSizing: {
-    type: "adjustable-width",
-    startingWidth: 150,
-    minWidth: 50,
-    maxWidth: 600
-  } as IAdjustableWidth | IFixedWidth,
-
   minimapSizing: {
     type: "adjustable-width",
     startingWidth: 100,
@@ -175,7 +168,6 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
     triggerShowSearch,
 
     mainViewportVisibleChanged,
-    metadataSizing,
     minimapSizing,
     logoSizing,
     barplotSizing,
@@ -196,6 +188,18 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
   const {
     alignmentType = alignment.getPredictedType()
   } = props;
+
+  const [metadataAvailableWidth, setMetadataAvailableWidth] = useState<number>(0);
+  const [metadataMinWidth, setMetadataMinWidth] = useState<number>(0);
+  const [metadataActualWidth, setMetadataActualWidth] = useState<number>(0);
+
+  const metadataWidthRequirementsUpdated = useCallback((
+    minVisibleWidthPx: number,
+    actualVisibleWidthPx: number
+  )=>{
+    setMetadataMinWidth(minVisibleWidthPx);
+    setMetadataActualWidth(actualVisibleWidthPx);
+  }, []);
 
   //error check color scheme and sort are congruant with passed alignment type
   //if not, reset.
@@ -614,7 +618,11 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
         showConsensus={showConsensus}
         showMinimap={showMinimap}
 
-        metadataSizing={metadataSizing}
+        //metadataSizing={metadataSizing}
+        metadataMinWidth={metadataMinWidth} //updated from spreadsheet
+        metadataActualWidth={metadataActualWidth} //updated from spreadsheet
+        metadataAvailableWidthUpdated={setMetadataAvailableWidth}
+
         minimapSizing={minimapSizing}
         logoSizing={logoSizing}
         barplotSizing={barplotSizing}
@@ -633,6 +641,8 @@ export function AlignmentViewer(props: IAlignmentViewerProps) {
                   scrollbar: ScrollbarOptions.NeverOn
                 }}
                 columns={spreadsheetData}
+                maxPossibleVisibleWidth={metadataAvailableWidth} //updated from layout
+                widthRequirementsUpdated={metadataWidthRequirementsUpdated}
               ></AlignmentSpreadsheet>
             )
           }),

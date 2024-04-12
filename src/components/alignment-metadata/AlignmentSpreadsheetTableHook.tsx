@@ -1,7 +1,7 @@
 /**
  * Base hook for pure webgl alignment details.
  */
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 
 import { 
   VirtualizedMatrixViewer 
@@ -13,7 +13,6 @@ import {
 import {
   IControllerRole,
   IResponderRole,
-  IVirtualizeParams,
   IVirtualizedMatrixContent, 
   ScrollbarOptions, 
   VirtualizationRole, 
@@ -38,6 +37,8 @@ export interface IAlignmentSpreadsheetTableProps {
   leftRightMarginInTableCells: number;
   resizeBarSizePx: number;
 
+  columnSizeChanging: (resizing: boolean) => void;
+
   showHeader?: boolean;
 }
 
@@ -48,6 +49,7 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     className,
     columns,
     columnKeys,
+    columnSizeChanging,
     columnWidths,
     columnWidthUpdateRequested,
     fullActualWidth,
@@ -153,7 +155,8 @@ export function AlignmentSpreadsheetTable(props: IAlignmentSpreadsheetTableProps
     keys: normalizedColumnKeys,
     resizeDirection: "horizontal",
     draggerMoved: draggerMoved,
-    resizerDoubleClicked: resizerDoubleClicked
+    resizerDoubleClicked: resizerDoubleClicked,
+    resizing: columnSizeChanging
   });
 
   return (

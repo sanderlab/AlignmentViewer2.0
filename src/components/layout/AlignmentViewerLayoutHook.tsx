@@ -46,6 +46,10 @@ export type IAlignmentViewerLayoutProps = {
   logoPlot?: IMetadataAndContent,
   minimapPlot?: React.JSX.Element,
 
+  metadataMinWidth: number,
+  metadataActualWidth: number,
+  metadataAvailableWidthUpdated: (newAvailableWidthPx: number)=>void,
+
   showConsensus: boolean,
   showQuery: boolean,
   showPositionalAxis: boolean,
@@ -72,12 +76,12 @@ const defaultProps = {
 
   //element sizing
   resizeBarSizePx: 4, //width of resize bar (or height if we implement later)
-  metadataSizing: {
-    type: "adjustable-width", 
-    startingWidth: 150,
-    minWidth: 100, 
-    maxWidth: 400
-  } as IFixedWidth | IAdjustableWidth,
+  //metadataSizing: {
+  //  type: "adjustable-width", 
+  //  startingWidth: 150,
+  //  minWidth: 100, 
+  //  maxWidth: 400
+  //} as IFixedWidth | IAdjustableWidth,
 
   minimapSizing: {
     type: "adjustable-width", 
@@ -128,7 +132,9 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     showMetadata,
 
     //layout sizing
-    metadataSizing,
+    metadataActualWidth,
+    metadataMinWidth,
+    metadataAvailableWidthUpdated,
     minimapSizing,
 
     barplotSizing,
@@ -146,12 +152,6 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     ...defaultProps,
     ...props
   };
-
-  const metadataStartingWidth = !showMetadata 
-    ? 100 //won't be shown though so doesn't matter what is here
-    : metadataSizing.type === "fixed-width"
-      ? metadataSizing.width
-      : metadataSizing.startingWidth;
 
   const minimapStartingWidth = !showMinimap 
     ? 100 //won't be shown though so doesn't matter what is here
@@ -171,7 +171,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   const [currentGridDimensions, setCurrentGridDimensions] = useState<IBounds>();
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const [metadataWidth, setMetadataWidth] = useState<number>(metadataStartingWidth);
+  const [metadataWidth, setMetadataWidth] = useState<number>(0);
   const [minimapWidth, setMinimapWidth] = useState<number>(minimapStartingWidth);
   const [logoHeight, setLogoHeight] = useState<number>(logoStartingHeight);
   const [barplotHeights, setBarplotHeights] = useState(
@@ -180,6 +180,14 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
       return acc;
     }, {} as {[contentKey: string]: number})
   );
+
+  useEffect(()=>{
+    //console.log('use effect: metadataActualWidth' + metadataActualWidth);
+    //if(metadataWidth < metadataActualWidth)
+    setMetadataWidth(metadataActualWidth);
+  }, [
+    metadataActualWidth
+  ]);
 
   useEffect(()=>{
     barplots.forEach(bp => {
@@ -194,7 +202,14 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //
   const resizeSensor = useCallback((bounds: IBounds)=>{
     setCurrentGridDimensions(bounds);
-  }, []);
+    metadataAvailableWidthUpdated(
+      bounds.width - gapBetweenColumnsAndRowsPx - resizeBarSizePx
+    );
+  }, [
+    metadataAvailableWidthUpdated,
+    gapBetweenColumnsAndRowsPx,
+    resizeBarSizePx
+  ]);
 
   //
   //render a single row worth of info - metadata and content, or for the
@@ -349,7 +364,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   //METADATA Resizing
   //
   const metadataBarResized = useCallback((newBarClientX: number)=>{
-    if(metadataSizing.type==="fixed-width" || !currentGridDimensions) return; //shouldn't happen
+    if(!currentGridDimensions) return; //shouldn't happen
 
     //relate metadata width to offset of resizer
     const newProposedWidth = (
@@ -361,15 +376,13 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     );
 
     setMetadataWidth(
-      newProposedWidth > metadataSizing.maxWidth
-        ? metadataSizing.maxWidth
-        : newProposedWidth < metadataSizing.minWidth
-          ? metadataSizing.minWidth
-          : newProposedWidth
+      newProposedWidth > metadataMinWidth
+        ? newProposedWidth
+        : metadataMinWidth
     );
   }, [
     currentGridDimensions,
-    metadataSizing,
+    metadataMinWidth,
     resizeBarSizePx,
     gapBetweenColumnsAndRowsPx,
     gapViewportLeftPx
@@ -427,9 +440,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
     ) => {
       const metadataText = !showMetadata
         ? ""
-        : metadataSizing.type==="adjustable-width"
-          ? `${metadataColArea} metadata-resizer`
-          : metadataColArea;
+        : `${metadataColArea} metadata-resizer`;
 
       const minimapText = !showMinimap
         ? ""
@@ -480,7 +491,6 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   }, [
     logoSizing.type,
     barplotSizing.type,
-    metadataSizing.type,
     minimapSizing.type,
     showMetadata, 
     showMinimap,
@@ -494,9 +504,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
   const gridTemplateColumns = useMemo(()=>{
     const metadataText = !showMetadata
       ? ""
-      : metadataSizing.type==="adjustable-width"
-        ? `${metadataWidth}px ${resizeBarSizePx}px`
-        : `${metadataWidth}px`; //fixed
+      : `${metadataWidth}px ${resizeBarSizePx}px`; //fixed
 
     const minimapText = !showMinimap
       ? ""
@@ -508,7 +516,6 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
 
   }, [
     resizeBarSizePx,
-    metadataSizing.type,
     minimapSizing.type,
     showMetadata, 
     showMinimap,
@@ -659,7 +666,7 @@ export function AlignmentViewerLayout(props: IAlignmentViewerLayoutProps) {
 
           {
             // metadata 
-            !showMetadata || metadataSizing.type !== "adjustable-width"
+            !showMetadata
               ? undefined 
               : (
                 metadataResizer.resizeSeparators["metadata-resizer"]

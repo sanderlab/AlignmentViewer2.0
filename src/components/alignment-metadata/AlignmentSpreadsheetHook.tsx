@@ -2,7 +2,7 @@
  * Base hook for a spreadsheet to show annotations.
  */
 import "./AlignmentSpreadsheet.scss";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 
 import { 
   generateUUIDv4
@@ -37,33 +37,31 @@ export interface ISpreadsheetColumn{
   //sorter: {type: "Automatic"};
 }
 
-export interface IAlignmentSpreadsheetProps {
+export type IAlignmentSpreadsheetProps = {
   alignmentUUID: string;
   rowHeight: number;
   fontSize: number;
   //reorderable: boolean;
-  //minWidthPxUpdateRequest: (minSizePx: number) => boolean;
+  maxPossibleVisibleWidth: number;
+  widthRequirementsUpdated: (
+    minVisibleWidthPx: number,
+    actualVisibleWidthPx: number
+  ) => void;
 
   columns: {[key: string]: ISpreadsheetColumn};
-  maxPinnedTableWidth?: number;
-  maxUnpinnedTableWidth?: number;
-  columnWidthParams?: IAdjustableWidth;
   verticalVirtualization?: {
     virtualization: IControllerRole | IResponderRole;
     scrollbar?: ScrollbarOptions;
   }
-  horizScrollbars?: ScrollbarOptions
-}
+} & Partial<Readonly<typeof defaultProps>>;
 
-const DEFAULTS = {
-  defaultColumnWidth: {
+const defaultProps = {
+  columnWidthParams: {
     type: "adjustable-width",
     startingWidth: 75,
     minWidth: 30,
     maxWidth: 400
   } as IAdjustableWidth,
-  maxPinnedTableWidth: 700,
-  maxUnpinnedTableWidth: 700,
   horizScrollbars: ScrollbarOptions.OnHoverWhenOverflowed
 }
 
@@ -74,11 +72,14 @@ export function AlignmentSpreadsheet(
   const {
     rowHeight,
     fontSize,
-    columnWidthParams = DEFAULTS.defaultColumnWidth,
-    maxPinnedTableWidth = DEFAULTS.maxPinnedTableWidth,
-    maxUnpinnedTableWidth = DEFAULTS.maxUnpinnedTableWidth,
-    horizScrollbars = DEFAULTS.horizScrollbars,
-  } = props;
+    maxPossibleVisibleWidth,
+    widthRequirementsUpdated,
+    columnWidthParams,
+    horizScrollbars,
+  } = {
+    ...defaultProps,
+    ...props,
+  };
 
   const leftRightMarginInTableCells = Math.ceil(rowHeight / 3);
   const resizeBarWidthPx = 1;
@@ -100,9 +101,22 @@ export function AlignmentSpreadsheet(
   const [alignmentUUID, setAlignmentUUID] = useState("");
   const [columns, setColumns] = useState<{[key: string]: ISpreadsheetColumn}>({});
   const [columnNames, setColumnNames] = useState<{[colKey: string]: string}>({});
-  const [columnWidths, setColumnWidths] = useState<{[colKey: string]: number}>({});
-  const [pinnedColumnKeys, setPinnedColumnKeys] = useState<string[]>([]);
-  const [unpinnedColumnKeys, setUnpinnedColumnKeys] = useState<string[]>([]);
+  const [columnResizing, setColumnResizing] = useState<boolean>(false);
+
+  const [desiredPinnedColumnKeys, setDesiredPinnedColumnKeys] = useState<string[]>([]);
+  const [desiredUnpinnedColumnKeys, setDesiredUnpinnedColumnKeys] = useState<string[]>([]);
+  const [desiredColumnWidths, setDesiredColumnWidths] = useState<{[colKey: string]: number}>({});
+  const actualColumnWidths = useRef(desiredColumnWidths);
+
+  const columnResizeChangeFn = useCallback((columnResizing: boolean)=>{
+    if(columnResizing){
+      setDesiredColumnWidths({...actualColumnWidths.current});
+    }
+    setColumnResizing(columnResizing);
+  }, [
+    setDesiredColumnWidths,
+    setColumnResizing
+  ]);
 
   //
   // callbacks
@@ -117,7 +131,107 @@ export function AlignmentSpreadsheet(
   const resizeSensor = useCallback((bounds: IBounds)=>{
     setCurrentGridDimensions(bounds);
   }, []);
-  
+
+  //deal with column width changes.
+  const minUnpinnedSpace = desiredUnpinnedColumnKeys.length > 0 ? 100 : 0;
+  const [
+    actualPinnedColumnKeys,
+    actualUnpinnedColumnKeys
+  ] = useMemo(()=>{
+    if(!currentGridDimensions) return [
+      [] as string[], 
+      [] as string[]
+    ];
+    
+    let actualPinnedColumnKeys: string[] = [...desiredPinnedColumnKeys];
+    let actualUnpinnedColumnKeys: string[] = [...desiredUnpinnedColumnKeys];
+    let minPinnedWidthPx = columnWidthParams.minWidth * desiredPinnedColumnKeys.length;
+    let minVisibleWidthPx = minPinnedWidthPx + minUnpinnedSpace;
+    
+    const maxPinnedWidth = maxPossibleVisibleWidth - minUnpinnedSpace;
+    const desiredPinnedWidth = Object.keys(desiredColumnWidths).reduce((acc, colKey: string)=>{
+      if(desiredPinnedColumnKeys.includes(colKey)){
+        acc +=  desiredColumnWidths[colKey];
+      }
+      return acc;
+    }, 0);
+
+    if(columnResizing){ //is a column being resized
+      if(
+        currentGridDimensions.width < desiredPinnedWidth + minUnpinnedSpace &&
+        desiredPinnedWidth <= maxPinnedWidth
+      ){
+        //tell the layout to  
+        widthRequirementsUpdated(
+          minVisibleWidthPx, 
+          desiredPinnedWidth + minUnpinnedSpace
+        );
+      }
+    }
+    else{
+      //popping logic
+      if(currentGridDimensions.width < minVisibleWidthPx){
+        const numToKeep = (currentGridDimensions.width-minUnpinnedSpace) / columnWidthParams.minWidth;
+        const numToRemove = Math.ceil(desiredPinnedColumnKeys.length - numToKeep);
+        const poppedKeys = actualPinnedColumnKeys.slice(
+          actualPinnedColumnKeys.length-numToRemove, 
+          actualPinnedColumnKeys.length
+        );
+        actualUnpinnedColumnKeys = [...poppedKeys, ...actualUnpinnedColumnKeys];
+        actualPinnedColumnKeys = actualPinnedColumnKeys.slice(
+          0, actualPinnedColumnKeys.length-numToRemove
+        );
+
+        //recalculate the spacing requirements
+        minPinnedWidthPx = columnWidthParams.minWidth * actualPinnedColumnKeys.length;
+        minVisibleWidthPx = minPinnedWidthPx + minUnpinnedSpace;
+      }
+    }
+
+    const needToShrink = currentGridDimensions.width < (desiredPinnedWidth + minUnpinnedSpace);
+    const amountToRemove = (desiredPinnedWidth + minUnpinnedSpace) - currentGridDimensions.width;
+    const maxWidthThatCanBeRemoved = desiredPinnedWidth - minPinnedWidthPx;
+    actualColumnWidths.current = Object.keys(desiredColumnWidths).reduce((acc, colKey)=>{
+      if(desiredPinnedColumnKeys.includes(colKey) && needToShrink){
+        //shrink to meet requirements
+        //e.g., 
+        //    min width = 100px and need to remove 200px
+        //    col1 = 150px and col2 = 270px and col3 = 100px and col4 = 600px
+        //    max space that can be removed from each column = 
+        //      col1 = 50px and col2 = 170px and col3 = 0px and col4 = 500px
+        //    max space that can be removed from all = sum of the above = 720px (maxWidthThatCanBeRemoved)
+        //    proportionally: 200px / 720px * amount possible to remove:
+        //      col1 = 150 - 50 * 200 / 720 = 
+        //      col2 = 270 - 170 * 200 / 720 = 
+        //      col3 = 100 - 0 * 200 / 720 = 
+        //      col4 = 600 - 500 * 200 / 720 = 
+        const desiredColWidth = desiredColumnWidths[colKey];
+        const amountToRemoveFromCol = 
+          (desiredColWidth - columnWidthParams.minWidth) * 
+          (amountToRemove / maxWidthThatCanBeRemoved);
+        const proposedSize = desiredColWidth - amountToRemoveFromCol;
+
+        acc[colKey] = proposedSize > columnWidthParams.minWidth
+          ? proposedSize : columnWidthParams.minWidth;
+      }
+      return acc;
+    }, {...desiredColumnWidths});
+
+    return [
+      actualPinnedColumnKeys,
+      actualUnpinnedColumnKeys
+    ];
+  }, [
+    columnResizing,
+    columnWidthParams.minWidth,
+    desiredColumnWidths,
+    currentGridDimensions,
+    maxPossibleVisibleWidth,
+    minUnpinnedSpace,
+    desiredPinnedColumnKeys,
+    desiredUnpinnedColumnKeys,
+    widthRequirementsUpdated,
+  ]);
 
   //
   // data and dom loading
@@ -167,6 +281,10 @@ export function AlignmentSpreadsheet(
     fontSize,
   ]);
   
+
+  //
+  //initialize - new alignment or additional columns added
+  //
   if (props.columns !== columns) {
     if (props.alignmentUUID !== alignmentUUID) { // new alignment loaded
       setAlignmentUUID(props.alignmentUUID);
@@ -178,7 +296,7 @@ export function AlignmentSpreadsheet(
         }, {} as {[colKey: string]: string})
       );
 
-      setColumnWidths(
+      setDesiredColumnWidths(
         Object.keys(props.columns).reduce((acc, colKey)=>{
           acc[colKey] = ((colKey === "rownum") || true)
             ? getColumnWidthFromData(props.columns[colKey], true)
@@ -187,14 +305,14 @@ export function AlignmentSpreadsheet(
         }, {} as {[colKey: string]: number})
       );
   
-      setPinnedColumnKeys(
+      setDesiredPinnedColumnKeys(
         Object.keys(props.columns).reduce((acc, colKey)=>{
           if (props.columns[colKey].initiallyPinned) acc.push(colKey);
           return acc;
         }, [] as string[])
       );
 
-      setUnpinnedColumnKeys(
+      setDesiredUnpinnedColumnKeys(
         Object.keys(props.columns).reduce((acc, colKey)=>{
           if (!props.columns[colKey].initiallyPinned) acc.push(colKey);
           return acc;
@@ -210,9 +328,9 @@ export function AlignmentSpreadsheet(
         }, {} as {[colKey: string]: string})
       );
 
-      setColumnWidths(
+      setDesiredColumnWidths(
         Object.keys(props.columns).reduce((acc, colKey)=>{
-          let width = columnWidths[colKey];
+          let width = desiredColumnWidths[colKey];
           if(!width){
             width = ((colKey === "rownum") || true)
               ? getColumnWidthFromData(props.columns[colKey], true)
@@ -223,7 +341,7 @@ export function AlignmentSpreadsheet(
         }, {} as {[colKey: string]: number})
       );
   
-      setPinnedColumnKeys(
+      setDesiredPinnedColumnKeys(
         Object.keys(props.columns).reduce((acc, colKey)=>{
           if (!(colKey in columns) && (props.columns[colKey].initiallyPinned)) {
             acc.push(colKey);
@@ -232,7 +350,7 @@ export function AlignmentSpreadsheet(
         }, [] as string[])
       );
 
-      setUnpinnedColumnKeys(
+      setDesiredUnpinnedColumnKeys(
         Object.keys(props.columns).reduce((acc, colKey)=>{
           if (!(colKey in columns) && (!props.columns[colKey].initiallyPinned)) {
             acc.push(colKey);
@@ -316,26 +434,16 @@ export function AlignmentSpreadsheet(
   //
   const getOrderedWidths = useCallback((
     colKeys: string[],
-    columnWidths: { [colKey: string]: number; }
   ) => {
     return colKeys.reduce((acc, key) => {
-      const colWidth = columnWidths[key];
+      const colWidth = actualColumnWidths.current[key]!;
       acc.push(colWidth);
       return acc;
     }, [] as number[]);
   }, []);
+  const pinnedColumnWidths = getOrderedWidths(actualPinnedColumnKeys);
+  const unpinnedColumnWidths = getOrderedWidths(actualUnpinnedColumnKeys);
 
-  const [pinnedColumnWidths, unpinnedColumnWidths] = useMemo(()=>{
-    return [
-      getOrderedWidths(pinnedColumnKeys, columnWidths),
-      getOrderedWidths(unpinnedColumnKeys, columnWidths)
-    ];
-  }, [
-    getOrderedWidths,
-    pinnedColumnKeys,
-    unpinnedColumnKeys,
-    columnWidths
-  ]);
 
   //
   //resizing pinned vs unpinned tables
@@ -344,35 +452,20 @@ export function AlignmentSpreadsheet(
     pinned: boolean,
     colWidths: number[],
   )=>{
-    const maxWidth = pinned ? maxPinnedTableWidth : maxUnpinnedTableWidth;
     const actualWidth = colWidths.reduce((acc, colWidthPx)=>{
-      return acc + colWidthPx + resizeBarWidthPx;
-    }, 0) + (pinned ? (borderWidthPx) * 2 : 0);
-    return [
-      actualWidth,
-      actualWidth < maxWidth
-        ? actualWidth
-        : maxWidth
-    ]
-  }, [
-    maxPinnedTableWidth,
-    maxUnpinnedTableWidth
-  ]);
+      return acc + colWidthPx + resizeBarWidthPx; //TODO this needs to be stolen from colWidth.
+    }, 0) + (colWidths.length > 0 && pinned ? (borderWidthPx) * 2 : 0);
+    return actualWidth
+  }, []);
 
-  const [
-    pinnedTableActualWidth,
-    pinnedTableVisibleWidth
-  ] = useMemo(()=>{
+  const pinnedTableActualWidth  = useMemo(()=>{
     return calculateActualAndVisibleTableWidths(true, pinnedColumnWidths);
   }, [ 
     calculateActualAndVisibleTableWidths,
     pinnedColumnWidths 
   ]);
 
-  const [
-    unpinnedTableActualWidth,
-    unpinnedTableVisibleWidth
-  ] = useMemo(()=>{
+  const unpinnedTableActualWidth = useMemo(()=>{
     return calculateActualAndVisibleTableWidths(false, unpinnedColumnWidths);
   }, [ 
     calculateActualAndVisibleTableWidths,
@@ -387,14 +480,14 @@ export function AlignmentSpreadsheet(
         ? newProposedWidth
         : minColumnWidth;
 
-      setColumnWidths({
-        ...columnWidths,
+      setDesiredColumnWidths({
+        ...desiredColumnWidths,
         [colKeyToUpdate]: newWidth
       });
     }
     else{ //the column should be resized to the max of the data
-      setColumnWidths({
-        ...columnWidths,
+      setDesiredColumnWidths({
+        ...desiredColumnWidths,
         [colKeyToUpdate]: getColumnWidthFromData(
           columns[colKeyToUpdate]
         )
@@ -402,17 +495,16 @@ export function AlignmentSpreadsheet(
     }
   }, [
     columns,
-    columnWidths,
+    desiredColumnWidths,
     minColumnWidth,
     getColumnWidthFromData
   ]);
-
+  
   const pinnedGridTemplateColumns = pinnedTableActualWidth > 0
-    //? `${pinnedTableActualWidth}px`
-    ? `minmax(100px, ${pinnedTableActualWidth}px)`
+    ? `${pinnedTableActualWidth}px`
     : "";
   const unpinnedGridTemplateColumns = unpinnedTableActualWidth > 0
-    ? `minmax(100px, ${unpinnedTableActualWidth}px)`
+    ? `minmax(${minUnpinnedSpace}px, ${unpinnedTableActualWidth}px)`
     : " 0px";
   const gridTemplateAreas = `"${pinnedTableActualWidth > 0 ? "pinned-table " : "" }unpinned-table"`;
 
@@ -438,7 +530,8 @@ export function AlignmentSpreadsheet(
                 <AlignmentSpreadsheetTable 
                   alignmentUUID={alignmentUUID}
                   columns={columns}
-                  columnKeys={pinnedColumnKeys}
+                  columnSizeChanging={columnResizeChangeFn}
+                  columnKeys={actualPinnedColumnKeys}
                   columnWidths={pinnedColumnWidths}
                   fullActualWidth={pinnedTableActualWidth}
                   rowHeight={rowHeight}
@@ -460,7 +553,8 @@ export function AlignmentSpreadsheet(
               <AlignmentSpreadsheetTable 
                 alignmentUUID={alignmentUUID}
                 columns={columns}
-                columnKeys={unpinnedColumnKeys}
+                columnSizeChanging={columnResizeChangeFn}
+                columnKeys={actualUnpinnedColumnKeys}
                 columnWidths={unpinnedColumnWidths}
                 fullActualWidth={unpinnedTableActualWidth}
                 rowHeight={rowHeight}

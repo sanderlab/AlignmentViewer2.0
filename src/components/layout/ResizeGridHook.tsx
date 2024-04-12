@@ -11,6 +11,7 @@ export interface IResizeGridProps{
   ) => void;
   zIndex?: number;
   resizerDoubleClicked?: (key: string) => void;
+  resizing?: (isResizing: boolean) => void;
 }
 
 /**
@@ -23,6 +24,7 @@ export function useResizeGrid(props: IResizeGridProps) {
   const {
     resizeSeparatorGridAreaNames,
     resizeDirection,
+    resizing,
     draggerMoved,
     keys,
     zIndex,
@@ -51,7 +53,8 @@ export function useResizeGrid(props: IResizeGridProps) {
     //e.stopPropagation();
     e.preventDefault();
     setResizeDragging(true);
-  }, []);
+    resizing?.(true);
+  }, [resizing]);
 
   const endResizeDragging = useCallback((
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -59,8 +62,9 @@ export function useResizeGrid(props: IResizeGridProps) {
     e.stopPropagation();
     e.preventDefault();
     setResizeDragging(false);
+    resizing?.(false);
     setKeyBeingResized(undefined);
-  }, []);
+  }, [resizing]);
 
   const resizeDragged = useCallback((
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -108,7 +112,7 @@ export function useResizeGrid(props: IResizeGridProps) {
             resizeTimeout.current = setTimeout(()=>{
               setKeyBeingResized(keys[idx]);
               startResizeDragging(e);
-            }, 150)
+            }, resizerDoubleClicked ? 150 : 0)
           }}
           onMouseUp={()=>{
             clearTimeout(resizeTimeout.current);
