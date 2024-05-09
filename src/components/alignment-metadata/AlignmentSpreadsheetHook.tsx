@@ -200,7 +200,7 @@ export function AlignmentSpreadsheet(
           return acc;
         }, [] as string[])
       );
-    } else { // same alignment, new annotation columns added
+    } else { // same alignment, new annotation columns added or removed or sorted
       setColumnNames(
         Object.keys(props.columns).reduce((acc, colKey)=>{
           acc[colKey] = columnNames[colKey] 
@@ -222,10 +222,16 @@ export function AlignmentSpreadsheet(
           return acc;
         }, {} as {[colKey: string]: number})
       );
-  
+
       setPinnedColumnKeys(
         Object.keys(props.columns).reduce((acc, colKey)=>{
-          if (!(colKey in columns) && (props.columns[colKey].initiallyPinned)) {
+          if(
+            pinnedColumnKeys.includes(colKey) || //option 1: col exists in pinned cols already
+            ( //option 2: col is brand new and should be initiallyPinned
+              !(colKey in columns) && 
+              (props.columns[colKey].initiallyPinned)
+            )
+          ){
             acc.push(colKey);
           }
           return acc;
@@ -234,7 +240,13 @@ export function AlignmentSpreadsheet(
 
       setUnpinnedColumnKeys(
         Object.keys(props.columns).reduce((acc, colKey)=>{
-          if (!(colKey in columns) && (!props.columns[colKey].initiallyPinned)) {
+          if(
+            unpinnedColumnKeys.includes(colKey) || //option 1: col exists in unpinned cols already
+            ( //option 2: col is brand new and should NOT be initiallyPinned
+              !(colKey in columns) && 
+              !(props.columns[colKey].initiallyPinned)
+            )
+          ){
             acc.push(colKey);
           }
           return acc;
