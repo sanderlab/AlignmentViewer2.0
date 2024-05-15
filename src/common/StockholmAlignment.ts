@@ -176,9 +176,9 @@ export class StockholmAlignment extends Alignment {
 
     for (const seq of sequences) {
       const id = seq.annotations[DEFAULT_ANNOTATION_FIELDS.ID];
+      const description = metadata.GS[id]?.["DE"]?.join("") ?? "";
+      Object.assign(seq.annotations, parseSequenceAnnotations(id, seq.sequence, description)); 
       if (metadata.GS[id]) {
-        const description = metadata.GS[id]["DE"]?.join("");
-        Object.assign(seq.annotations, parseSequenceAnnotations(id, seq.sequence, description)); 
         for (const key of Object.keys(metadata.GS[id])) {
           if (key !== "DE") {
             seq.annotations[key] = metadata.GS[id][key].join(" ");
@@ -186,7 +186,7 @@ export class StockholmAlignment extends Alignment {
         }
       }
     }
-
+  
     try {
       return new StockholmAlignment({
         name: fileName,
